@@ -20,8 +20,10 @@ class FExpr:
   # we don't have to pass the argument explicitly. We also want to make sure
   # that we're using the correct environment though... Do we have to use some
   # sort of global? :(
+  # TJH: going to just assume it's a global for now, so we don't have to
+  # pass it through
   @abstractmethod
-  def eval(self, env):
+  def eval(self):
     return NotImplemented
 
   @abstractmethod
@@ -126,7 +128,7 @@ class Facet(FExpr):
     self.thn = fexpr_cast(thn)
     self.els = fexpr_cast(els)
 
-  def eval(self, env):
+  def eval(self):
     raise NotImplementedError
 
 class IntFacet(Facet, IntExpr):
@@ -139,7 +141,7 @@ class Constant(FExpr):
   def __init__(self, v):
     self.v = v
 
-  def eval(self, env):
+  def eval(self):
     return v
 
   def vars(self):
@@ -148,13 +150,13 @@ class Constant(FExpr):
 class IntVal(IntExpr, Constant):
   def __init__(self, v):
     self.v = v
-  def eval(self, env):
+  def eval(self):
     return self.v
 
 class BoolVal(BoolExpr, Constant):
   def __init__(self, v):
     self.v = v
-  def eval(self, env):
+  def eval(self):
     return self.v
 
 '''
@@ -179,77 +181,77 @@ class UnaryExpr(FExpr):
 Operators.
 '''
 class Add(BinaryExpr, IntExpr):
-    def eval(self, env):
-        return self.left.eval(env) + self.right.eval(env)
+    def eval(self):
+        return self.left.eval() + self.right.eval()
 
 class Sub(BinaryExpr, IntExpr):
-    def eval(self, env):
-        return self.left.eval(env) - self.right.eval(env)
+    def eval(self):
+        return self.left.eval() - self.right.eval()
 
 class Mult(BinaryExpr, IntExpr):
-  def eval(self, env):
-    return self.left.eval(env) * self.right.eval(env)
+  def eval(self):
+    return self.left.eval() * self.right.eval()
 
 class Div(BinaryExpr, IntExpr):
-  def eval(self, env):
-    return self.left.eval(env) / self.right.eval(env)
+  def eval(self):
+    return self.left.eval() / self.right.eval()
 
 class Mod(BinaryExpr, IntExpr):
-  def eval(self, env):
-    return self.left.eval(env) % self.right.eval(env)
+  def eval(self):
+    return self.left.eval() % self.right.eval()
 
 # Not sure if bitwise operations are supported by Z3?
 class BitAnd(BinaryExpr, IntExpr):
-  def eval(self, env):
-    return self.left.eval(env) & self.right.eval(env)
+  def eval(self):
+    return self.left.eval() & self.right.eval()
 
 class BitOr(BinaryExpr, IntExpr):
-  def eval(self, env):
-    return self.left.eval(env) | self.right.eval(env)
+  def eval(self):
+    return self.left.eval() | self.right.eval()
 
 class LShift(BinaryExpr, IntExpr):
-  def eval(self, env):
-    return self.left.eval(env) << self.right.eval(env)
+  def eval(self):
+    return self.left.eval() << self.right.eval()
 
 class RShift(BinaryExpr, IntExpr):
-  def eval(self, env):
-    return self.left.eval(env) >> self.right.eval(env)
+  def eval(self):
+    return self.left.eval() >> self.right.eval()
 
 # Boolean operations
 
 class And(BinaryExpr, BoolExpr):
-  def eval(self, env):
-    return self.left.eval(env) and self.right.eval(env)
+  def eval(self):
+    return self.left.eval() and self.right.eval()
 
 class Or(BinaryExpr, BoolExpr):
-  def eval(env):
-    return self.left.eval(env) or self.right.eval(env)
+  def eval():
+    return self.left.eval() or self.right.eval()
 
 class Not(UnaryExpr, BoolExpr):
-  def eval(self, env):
-    return not self.sub.eval(env)
+  def eval(self):
+    return not self.sub.eval()
 
 # Comparison operations
 
 class Eq(BinaryExpr, BoolExpr):
-  def eval(self, env):
-    return self.left.eval(env) == self.right.eval(env)
+  def eval(self):
+    return self.left.eval() == self.right.eval()
 
 class Lt(BinaryExpr, BoolExpr):
-  def eval(self, env):
-    return self.left.eval(env) < self.right.eval(env)
+  def eval(self):
+    return self.left.eval() < self.right.eval()
 
 class LtE(BinaryExpr, BoolExpr):
-  def eval(self, env):
-    return self.left.eval(env) >= self.right.eval(env)
+  def eval(self):
+    return self.left.eval() <= self.right.eval()
 
 class Gt(BinaryExpr, BoolExpr):
-  def eval(self, env):
-    return self.left.eval(env) > self.right.eval(env)
+  def eval(self):
+    return self.left.eval() > self.right.eval()
 
 class GtE(BinaryExpr, BoolExpr):
-  def eval(self, env):
-    return self.left.eval(env) >= self.right.eval(env)
+  def eval(self):
+    return self.left.eval() >= self.right.eval()
 
 def fexpr_cast(a):
     if isinstance(a, FExpr):
