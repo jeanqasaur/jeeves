@@ -100,8 +100,7 @@ class IntExpr(FExpr):
   def __eq__(l, r):
     return Eq(l, fexpr_cast(r))
 
-  def __ne__(l, r):
-    return Not(Eq(l, fexpr_cast(r)))
+  def __ne__(l, r): return Not(Eq(l, fexpr_cast(r)))
 
   def __lt__(l, r):
     return Lt(l, fexpr_cast(r))
@@ -253,6 +252,26 @@ class GtE(BinaryExpr, BoolExpr):
   def eval(self):
     return self.left.eval() >= self.right.eval()
 
+# If-then-else
+
+class Ite(FExpr):
+    def __init_(self, cond, thn, els):
+        self.cond = cond
+        self.thn = thn
+        self.els = els
+    
+    def vars(self):
+        return self.cond.vars().union(self.thn.vars()).union(self.els.vars())
+
+    def eval(self):
+        return self.thn.eval() if self.cond.eval() else self.els.eval()
+
+class IteBool(Ite, BoolExpr):
+    pass
+class IteBool(Ite, IntExpr):
+    pass
+
+# helper method
 def fexpr_cast(a):
     if isinstance(a, FExpr):
         return a
