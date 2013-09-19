@@ -255,29 +255,29 @@ class GtE(BinaryExpr, BoolExpr):
 # If-then-else
 
 class Ite(FExpr):
-    def __init_(self, cond, thn, els):
-        self.cond = cond
-        self.thn = thn
-        self.els = els
+  def __init_(self, cond, thn, els):
+    self.cond = cond
+    self.thn = thn
+    self.els = els
     
-    def vars(self):
-        return self.cond.vars().union(self.thn.vars()).union(self.els.vars())
+  def vars(self):
+    return self.cond.vars().union(self.thn.vars()).union(self.els.vars())
 
-    def eval(self):
-        return self.thn.eval() if self.cond.eval() else self.els.eval()
+  def eval(self):
+    return self.thn.eval() if self.cond.eval() else self.els.eval()
 
 class IteBool(Ite, BoolExpr):
-    pass
+  pass
 class IteBool(Ite, IntExpr):
-    pass
+  pass
 
 # helper method
 def fexpr_cast(a):
-    if isinstance(a, FExpr):
-        return a
-    elif isinstance(a, int):
-        return IntVal(a)
-    elif isinstance(a, bool):
-        return BoolVal(a)
-    else:
-        raise TypeError("Bad type for FExpr cast")
+  if isinstance(a, FExpr):
+    return a
+  elif isinstance(a, int):
+    return IntVal(a)
+  elif isinstance(a, bool):
+    return BoolVal(a)
+  else:
+    raise TypeError("Bad type for FExpr cast")
