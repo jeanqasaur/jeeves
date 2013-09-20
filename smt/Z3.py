@@ -13,7 +13,8 @@ class Z3(Solver):
   #  z3.delete()
 
   # Defining variables.
-  def declareInt(self, name): return z3.Int(name)
+  def getIntVar(self, name): return z3.Int(name)
+  def getBoolVar(self, name): return z3.Bool(name)
 
   def check(self):
     r = self.solver.check()
