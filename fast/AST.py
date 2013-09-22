@@ -6,6 +6,14 @@ in types explicitly. We might be able to have a much cleaner implementation than
 the Scala one!
 '''
 from abc import ABCMeta, abstractmethod
+import operator
+import JeevesGlobal
+
+class Label:
+  def __init__(name=None):
+    self.name = name
+
+#TODO the type stuff
 
 '''
 Abstract class for sensitive expressions.
@@ -26,17 +34,11 @@ class FExpr:
   def eval(self):
     return NotImplemented
 
-  @abstractmethod
-  def __eq__(self, other):
-    return NotImplemented
-
-'''
-Sensitive Boolean expressions.
-NOTE(JY): I'm making the change Formula-> BoolExpr so that everything matches
-better.
-'''
-class BoolExpr(FExpr):
-  __metaclass__ = ABCMeta
+  '''
+  Sensitive Boolean expressions.
+  NOTE(JY): I'm making the change Formula-> BoolExpr so that everything matches
+  better.
+  '''
 
   def __eq__(l, r):
     return Eq(l, fexpr_cast(r))
@@ -63,12 +65,9 @@ class BoolExpr(FExpr):
   #def iff(self, other): self == other
   #def facet(self, thn, els): Facet(self, thn, els)
 
-'''
-Integer expressions.
-'''
-class IntExpr(FExpr):
-  __metaclass__ = ABCMeta
-
+  '''
+  Integer expressions.
+  '''
   def __add__(l, r):
     return Add(l, fexpr_cast(r))
   def __radd__(r, l):
@@ -128,35 +127,21 @@ class Facet(FExpr):
     self.els = fexpr_cast(els)
 
   def eval(self):
-    raise NotImplementedError
-
-class IntFacet(Facet, IntExpr):
-    pass
-
-class BoolFacet(Facet, BoolExpr):
-    pass
+    if JeevesGlobal.jeevesLib.pathenv.hasPosVar(self.cond):
+      return self.thn.eval()
+    elif JeevesGlobal.jeevesLib.pathenv.hasNegVar(self.cond):
+      return self.els.eval()
+    
 
 class Constant(FExpr):
   def __init__(self, v):
     self.v = v
 
   def eval(self):
-    return v
+    return self.v
 
   def vars(self):
     return set()
-
-class IntVal(IntExpr, Constant):
-  def __init__(self, v):
-    self.v = v
-  def eval(self):
-    return self.v
-
-class BoolVal(BoolExpr, Constant):
-  def __init__(self, v):
-    self.v = v
-  def eval(self):
-    return self.v
 
 '''
 Binary expressions.
@@ -179,76 +164,93 @@ class UnaryExpr(FExpr):
 '''
 Operators.
 '''
-class Add(BinaryExpr, IntExpr):
-    def eval(self):
-        return self.left.eval() + self.right.eval()
+class Add(BinaryExpr):
+  opr = operator.add
+  def eval(self):
+    return self.left.eval() + self.right.eval()
 
-class Sub(BinaryExpr, IntExpr):
-    def eval(self):
-        return self.left.eval() - self.right.eval()
+class Sub(BinaryExpr):
+  opr = operator.sub
+  def eval(self):
+    return self.left.eval() - self.right.eval()
 
-class Mult(BinaryExpr, IntExpr):
+class Mult(BinaryExpr):
+  opr = operator.mul
   def eval(self):
     return self.left.eval() * self.right.eval()
 
-class Div(BinaryExpr, IntExpr):
+class Div(BinaryExpr):
+  opr = operator.div
   def eval(self):
     return self.left.eval() / self.right.eval()
 
-class Mod(BinaryExpr, IntExpr):
+class Mod(BinaryExpr):
+  opr = operator.mod
   def eval(self):
     return self.left.eval() % self.right.eval()
 
 # Not sure if bitwise operations are supported by Z3?
-class BitAnd(BinaryExpr, IntExpr):
+class BitAnd(BinaryExpr):
+  opr = operator.and_
   def eval(self):
     return self.left.eval() & self.right.eval()
 
-class BitOr(BinaryExpr, IntExpr):
+class BitOr(BinaryExpr):
+  opr = operator.or_
   def eval(self):
     return self.left.eval() | self.right.eval()
 
-class LShift(BinaryExpr, IntExpr):
+class LShift(BinaryExpr):
+  opr = operator.ilshift
   def eval(self):
     return self.left.eval() << self.right.eval()
 
-class RShift(BinaryExpr, IntExpr):
+class RShift(BinaryExpr):
+  opr = operator.irshift
   def eval(self):
     return self.left.eval() >> self.right.eval()
 
 # Boolean operations
 
-class And(BinaryExpr, BoolExpr):
+class And(BinaryExpr):
+  opr = operator.and_
   def eval(self):
     return self.left.eval() and self.right.eval()
 
-class Or(BinaryExpr, BoolExpr):
+class Or(BinaryExpr):
+  opr = operator.or_
   def eval():
     return self.left.eval() or self.right.eval()
 
-class Not(UnaryExpr, BoolExpr):
+class Not(UnaryExpr):
+  opr = operator.not_
   def eval(self):
     return not self.sub.eval()
 
 # Comparison operations
 
-class Eq(BinaryExpr, BoolExpr):
+class Eq(BinaryExpr):
+  opr = operator.eq
   def eval(self):
     return self.left.eval() == self.right.eval()
 
-class Lt(BinaryExpr, BoolExpr):
+class Lt(BinaryExpr):
+  opr = operator.lt
   def eval(self):
     return self.left.eval() < self.right.eval()
 
-class LtE(BinaryExpr, BoolExpr):
+class LtE(BinaryExpr):
+  opr = operator.le
   def eval(self):
     return self.left.eval() <= self.right.eval()
 
-class Gt(BinaryExpr, BoolExpr):
+class Gt(BinaryExpr):
+  opr = operator.gt
   def eval(self):
     return self.left.eval() > self.right.eval()
 
-class GtE(BinaryExpr, BoolExpr):
+class GtE(BinaryExpr):
+  opr = operator.ge
   def eval(self):
     return self.left.eval() >= self.right.eval()
 
@@ -266,18 +268,9 @@ class Ite(FExpr):
   def eval(self):
     return self.thn.eval() if self.cond.eval() else self.els.eval()
 
-class IteBool(Ite, BoolExpr):
-  pass
-class IteBool(Ite, IntExpr):
-  pass
-
 # helper method
 def fexpr_cast(a):
   if isinstance(a, FExpr):
     return a
-  elif isinstance(a, int):
-    return IntVal(a)
-  elif isinstance(a, bool):
-    return BoolVal(a)
   else:
-    raise TypeError("Bad type for FExpr cast")
+    return Constant(a)
