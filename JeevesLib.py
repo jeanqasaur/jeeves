@@ -35,11 +35,11 @@ class JeevesLib:
     #    environment.
 
     # NOTE(JY): This should never be unsat...
-    print "undefined"
+    return NotImplemented
 
   def mkSensitive(self, varLabel, vHigh, vLow):
-    print "undefined"
+    return NotImplemented
 
   # TODO: Push a context, try setting things to high 
   def concretize(self, ctxt, v):
-    print "undefined"
+    return NotImplemented
