@@ -109,6 +109,66 @@ class TestAST(unittest.TestCase):
         self.assertEqual(b.right.v, 40)
         self.assertEqual(b.eval(), False)
 
+        b = a == 20
+        self.assertEqual(b.left.v, 20)
+        self.assertEqual(b.right.v, 20)
+        self.assertEqual(b.eval(), True)
+
+        b = a != 20
+        self.assertEqual(b.sub.left.v, 20)
+        self.assertEqual(b.sub.right.v, 20)
+        self.assertEqual(b.eval(), False)
+
+        b = a > 20
+        self.assertEqual(b.left.v, 20)
+        self.assertEqual(b.right.v, 20)
+        self.assertEqual(b.eval(), False)
+
+        b = a >= 20
+        self.assertEqual(b.left.v, 20)
+        self.assertEqual(b.right.v, 20)
+        self.assertEqual(b.eval(), True)
+
+        b = a < 20
+        self.assertEqual(b.left.v, 20)
+        self.assertEqual(b.right.v, 20)
+        self.assertEqual(b.eval(), False)
+
+        b = a <= 20
+        self.assertEqual(b.left.v, 20)
+        self.assertEqual(b.right.v, 20)
+        self.assertEqual(b.eval(), True)
+ 
+        b = 20 == a
+        self.assertEqual(b.left.v, 20)
+        self.assertEqual(b.right.v, 20)
+        self.assertEqual(b.eval(), True)
+
+        b = 20 != a
+        self.assertEqual(b.sub.left.v, 20)
+        self.assertEqual(b.sub.right.v, 20)
+        self.assertEqual(b.eval(), False)
+
+        b = 20 > a
+        self.assertEqual(b.left.v, 20)
+        self.assertEqual(b.right.v, 20)
+        self.assertEqual(b.eval(), False)
+
+        b = 20 >= a
+        self.assertEqual(b.left.v, 20)
+        self.assertEqual(b.right.v, 20)
+        self.assertEqual(b.eval(), True)
+
+        b = 20 < a
+        self.assertEqual(b.left.v, 20)
+        self.assertEqual(b.right.v, 20)
+        self.assertEqual(b.eval(), False)
+
+        b = 20 <= a
+        self.assertEqual(b.left.v, 20)
+        self.assertEqual(b.right.v, 20)
+        self.assertEqual(b.eval(), True)
+
     def testPartialEval(self):
         jl = JeevesLib.JeevesLib()
         JeevesGlobal.set_jeeves_state(jl)
