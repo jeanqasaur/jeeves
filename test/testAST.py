@@ -113,7 +113,7 @@ class TestAST(unittest.TestCase):
         jl = JeevesLib.JeevesLib()
         JeevesGlobal.set_jeeves_state(jl)
 
-        l = jl.mkLabel("l")
+        l = Var("l")
 
         a = Facet(l, Constant(1), Constant(2))
         ap = partialEval(a)
@@ -142,8 +142,8 @@ class TestAST(unittest.TestCase):
         with NegativeVariable(l):
             self.assertEqual(ap.eval(), 1010)
 
-        l1 = jl.mkLabel("l1")
-        l2 = jl.mkLabel("l2")
+        l1 = Var("l1")
+        l2 = Var("l2")
         a = Add(
             Facet(l1, Constant(1), Constant(10)),
             Facet(l2, Constant(100), Constant(1000))

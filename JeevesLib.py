@@ -2,6 +2,7 @@
 This will define the code for the Jeeves library.
 '''
 from env.VarEnv import VarEnv
+from env.PolicyEnv import PolicyEnv
 from env.PathVars import PathVars
 from smt.Z3 import Z3
 
@@ -12,6 +13,7 @@ class JeevesLib:
     self.solver = Z3()
     self.varenv = VarEnv()
     self.pathenv = PathVars()
+    self.policyenv = PolicyEnv()
     self.labelCount = 0
 
   # NOTE(JY): We have to take care of the scoping somehow to make sure that

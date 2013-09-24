@@ -1,4 +1,5 @@
 import JeevesGlobal
+import fast.AST
 
 # TODO: Define your path variable environment, as well as manipulations, here.
 class PathVars:
@@ -18,6 +19,10 @@ class PathVars:
 
   def hasNegVar(self, var):
     return (str(var), False) in self.conditions
+
+  def getPathFormula(self):
+    if not self.conditions:
+      return reduce(fast.AST.And, self.conditions, fast.AST.Constant(True))
 
 class PositiveVariable:
   def __init__(self, var):

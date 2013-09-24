@@ -14,10 +14,6 @@ def partialEval(f):
   elif isinstance(f, UnaryExpr):
     sub = partialEval(f.sub)
     return facetApply(sub, f.opr)
-  elif isinstance(f, Ite):
-    return facetIteJoin(partialEval(f.cond),
-                        partialEval(f.left),
-                        partialEval(f.right))
   elif isinstance(f, Constant):
     return f
   elif isinstance(f, Facet):
@@ -48,10 +44,3 @@ def facetJoin(f0, f1, opr):
     return Facet(f1.cond, thn, els)
   else:
     return Constant(opr(f0.v, f1.v))
-
-def facetIteJoin(f0, ftrue, ffalse):
-  if isinstance(f0, Facet):
-    return Facet(f0.cond, facetIteJoin(f0.thn, ftrue, ffalse),
-                          facetIteJoin(f0.thn, ftrue, ffalse))
-  else:
-    return ftrue if f0.v else ffalse

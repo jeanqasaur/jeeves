@@ -113,6 +113,33 @@ class FExpr:
   def __ge__(l, r):
     return GtE(l, fexpr_cast(r))
 
+class CannotEvalException(Exception):
+  pass
+
+class Var(FExpr):
+  counter = 0
+
+  def __init__(self, name=None):
+    if name:
+      self.name = "v%d_%s" % (Var.counter, name)
+    else:
+      self.name = "v%d" % Var.counter
+    Var.counter += 1
+
+  def eval(self):
+    if JeevesGlobal.jeevesLib.pathenv.hasPosVar(self):
+      return True
+    elif JeevesGlobal.jeevesLib.pathenv.hasNegVar(self):
+      return False
+    else:
+      raise CannotEvalException("Variable %s is not in path environment" % self)
+
+  def __str__(self):
+    return self.name
+
+  def vars(self):
+    return {self}
+
 '''
 Facets.
 NOTE(JY): I think we don't have to have specialized facets anymore because we
@@ -131,6 +158,9 @@ class Facet(FExpr):
       return self.thn.eval()
     elif JeevesGlobal.jeevesLib.pathenv.hasNegVar(self.cond):
       return self.els.eval()
+
+  def vars(self):
+    return self.cond.vars().union(self.thn.vars()).union(self.els.vars())
     
 
 class Constant(FExpr):
@@ -253,20 +283,6 @@ class GtE(BinaryExpr):
   opr = operator.ge
   def eval(self):
     return self.left.eval() >= self.right.eval()
-
-# If-then-else
-
-class Ite(FExpr):
-  def __init_(self, cond, thn, els):
-    self.cond = cond
-    self.thn = thn
-    self.els = els
-    
-  def vars(self):
-    return self.cond.vars().union(self.thn.vars()).union(self.els.vars())
-
-  def eval(self):
-    return self.thn.eval() if self.cond.eval() else self.els.eval()
 
 # helper method
 def fexpr_cast(a):
