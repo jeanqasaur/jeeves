@@ -274,7 +274,7 @@ class And(BinaryExpr):
 class Or(BinaryExpr):
   opr = operator.or_
   ret_type = bool
-  def eval():
+  def eval(self):
     return self.left.eval() or self.right.eval()
 
 class Not(UnaryExpr):

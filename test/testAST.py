@@ -46,6 +46,28 @@ class TestAST(unittest.TestCase):
 
         self.assertEqual(r.eval(), 40000 % (1000 / (3 * (2 - (1 + 20)))))
 
+    def testBooleans(self):
+        for a in (True, False):
+            r = Not(Constant(a))
+            self.assertEqual(r.sub.v, a)
+            self.assertEqual(r.eval(), not a)
+
+            for b in (True, False):
+                r = Or(Constant(a), Constant(b))
+                self.assertEqual(r.left.v, a)
+                self.assertEqual(r.right.v, b)
+                self.assertEquals(r.eval(), a or b)
+
+                r = And(Constant(a), Constant(b))
+                self.assertEqual(r.left.v, a)
+                self.assertEqual(r.right.v, b)
+                self.assertEquals(r.eval(), a and b)
+
+                r = Implies(Constant(a), Constant(b))
+                self.assertEqual(r.left.v, a)
+                self.assertEqual(r.right.v, b)
+                self.assertEquals(r.eval(), (not a) or b)
+
     def testComparisons(self):
         a = Constant(20)
         
