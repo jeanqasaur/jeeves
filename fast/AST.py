@@ -124,6 +124,7 @@ class Var(FExpr):
       self.name = "v%d_%s" % (Var.counter, name)
     else:
       self.name = "v%d" % Var.counter
+    self.type = bool
     Var.counter += 1
 
   def eval(self):
@@ -153,6 +154,22 @@ class Facet(FExpr):
     self.thn = fexpr_cast(thn)
     self.els = fexpr_cast(els)
 
+    # Note (TJH): idiomatic python does lots of automatic casts to bools,
+    # especially to check if an integer is nonzero, for instance. We might
+    # want to consider casting
+    if self.cond.type != bool:
+        raise TypeError("Condition on Facet should be a bool but is type %s."
+                            % self.cond.type.__name__)
+
+    # Note (TJH): Ordinary Python would of course allow these types to be
+    # distinct, but that sounds pretty annoying to support on our end.
+    if self.thn.type != self.els.type:
+        raise TypeError("Condition on both sides of a Facet must have the "
+                        "same type, they are %s and %s."
+                        % (self.thn.type.__name__, self.els.type.__name__))
+
+    self.type = self.thn.type
+
   def eval(self):
     if JeevesGlobal.jeevesLib.pathenv.hasPosVar(self.cond):
       return self.thn.eval()
@@ -162,10 +179,10 @@ class Facet(FExpr):
   def vars(self):
     return self.cond.vars().union(self.thn.vars()).union(self.els.vars())
     
-
 class Constant(FExpr):
   def __init__(self, v):
     self.v = v
+    self.type = type(v)
 
   def eval(self):
     return self.v
@@ -180,6 +197,7 @@ class BinaryExpr(FExpr):
   def __init__(self, left, right):
     self.left = left
     self.right = right
+    self.type = self.ret_type
 
   def vars(self):
     return self.left.vars().union(self.right.vars())
@@ -196,47 +214,56 @@ Operators.
 '''
 class Add(BinaryExpr):
   opr = operator.add
+  ret_type = int
   def eval(self):
     return self.left.eval() + self.right.eval()
 
 class Sub(BinaryExpr):
   opr = operator.sub
+  ret_type = int
   def eval(self):
     return self.left.eval() - self.right.eval()
 
 class Mult(BinaryExpr):
   opr = operator.mul
+  ret_type = int
   def eval(self):
     return self.left.eval() * self.right.eval()
 
 class Div(BinaryExpr):
   opr = operator.div
+  ret_type = int
   def eval(self):
     return self.left.eval() / self.right.eval()
 
 class Mod(BinaryExpr):
   opr = operator.mod
+  ret_type = int
   def eval(self):
     return self.left.eval() % self.right.eval()
 
 # Not sure if bitwise operations are supported by Z3?
 class BitAnd(BinaryExpr):
   opr = operator.and_
+  ret_type = int
   def eval(self):
     return self.left.eval() & self.right.eval()
 
 class BitOr(BinaryExpr):
   opr = operator.or_
+  ret_type = int
   def eval(self):
     return self.left.eval() | self.right.eval()
 
 class LShift(BinaryExpr):
   opr = operator.ilshift
+  ret_type = int
   def eval(self):
     return self.left.eval() << self.right.eval()
 
 class RShift(BinaryExpr):
   opr = operator.irshift
+  ret_type = int
   def eval(self):
     return self.left.eval() >> self.right.eval()
 
@@ -244,16 +271,19 @@ class RShift(BinaryExpr):
 
 class And(BinaryExpr):
   opr = operator.and_
+  ret_type = bool
   def eval(self):
     return self.left.eval() and self.right.eval()
 
 class Or(BinaryExpr):
   opr = operator.or_
+  ret_type = bool
   def eval():
     return self.left.eval() or self.right.eval()
 
 class Not(UnaryExpr):
   opr = operator.not_
+  ret_type = bool
   def eval(self):
     return not self.sub.eval()
 
@@ -261,26 +291,31 @@ class Not(UnaryExpr):
 
 class Eq(BinaryExpr):
   opr = operator.eq
+  ret_type = bool
   def eval(self):
     return self.left.eval() == self.right.eval()
 
 class Lt(BinaryExpr):
   opr = operator.lt
+  ret_type = bool
   def eval(self):
     return self.left.eval() < self.right.eval()
 
 class LtE(BinaryExpr):
   opr = operator.le
+  ret_type = bool
   def eval(self):
     return self.left.eval() <= self.right.eval()
 
 class Gt(BinaryExpr):
   opr = operator.gt
+  ret_type = bool
   def eval(self):
     return self.left.eval() > self.right.eval()
 
 class GtE(BinaryExpr):
   opr = operator.ge
+  ret_type = bool
   def eval(self):
     return self.left.eval() >= self.right.eval()
 
