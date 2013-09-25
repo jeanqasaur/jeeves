@@ -9,10 +9,6 @@ from abc import ABCMeta, abstractmethod
 import operator
 import JeevesGlobal
 
-class Label:
-  def __init__(name=None):
-    self.name = name
-
 #TODO the type stuff
 
 '''
@@ -286,6 +282,13 @@ class Not(UnaryExpr):
   ret_type = bool
   def eval(self):
     return not self.sub.eval()
+
+# Doesn't correspond to a Python operator but is useful
+class Implies(BinaryExpr):
+  opr = lambda x, y : (not x) or y
+  ret_type = bool
+  def eval(self):
+    return (not self.left.eval()) or self.right.eval()
 
 # Comparison operations
 
