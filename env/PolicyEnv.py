@@ -1,5 +1,6 @@
 import JeevesGlobal
 import fast.AST
+import smt.SMT
 
 class PolicyEnv:
   def __init__(self):
@@ -36,6 +37,8 @@ class PolicyEnv:
     for (label, label_deps) in dependencies.iteritems():
       for label_dep in label_deps:
         constraints.append(fast.AST.Implies(label, label_dep))
+
+    env = smt.SMT.solve(constraints, labels[-1])
 
     #TODO pass constraints to solver
     #TODO test this
