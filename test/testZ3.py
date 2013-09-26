@@ -79,5 +79,108 @@ class TestZ3(unittest.TestCase):
     self.assertFalse(self.s.isSatisfiable())
     self.s.pop()
 
+    self.s.push()
+    self.s.boolExprAssert(t - 1 == 1009)
+    self.assertTrue(self.s.isSatisfiable())
+    self.s.pop()
+
+    self.s.push()
+    self.s.boolExprAssert(t - 1 == 1008)
+    self.assertFalse(self.s.isSatisfiable())
+    self.s.pop()
+
+    self.s.push()
+    self.s.boolExprAssert(t * 2 == 2002)
+    self.assertTrue(self.s.isSatisfiable())
+    self.s.pop()
+
+    self.s.push()
+    self.s.boolExprAssert(t * 2 == 2004)
+    self.assertFalse(self.s.isSatisfiable())
+    self.s.pop()
+
+  def test_ast_bools(self):
+    b1 = AST.Var()
+    b2 = AST.Var()
+    b3 = AST.Var()
+    b4 = AST.Var()
+
+    self.s.push()
+    self.s.boolExprAssert(AST.And(b1, b2))
+    self.assertTrue(self.s.isSatisfiable())
+    self.s.pop()
+
+    self.s.push()
+    self.s.boolExprAssert(AST.And(b1, b2))
+    self.s.boolExprAssert(AST.Not(b1))
+    self.assertFalse(self.s.isSatisfiable())
+    self.s.pop()
+
+    self.s.push()
+    self.s.boolExprAssert(AST.Or(b1, b2))
+    self.assertTrue(self.s.isSatisfiable())
+    self.s.pop()
+
+    self.s.push()
+    self.s.boolExprAssert(AST.Or(b1, b2))
+    self.s.boolExprAssert(AST.Not(b1))
+    self.assertTrue(self.s.isSatisfiable())
+    self.s.pop()
+
+    self.s.push()
+    self.s.boolExprAssert(AST.Or(b1, b2))
+    self.s.boolExprAssert(AST.Not(b1))
+    self.s.boolExprAssert(AST.Not(b2))
+    self.assertFalse(self.s.isSatisfiable())
+    self.s.pop()
+
+    self.s.push()
+    self.s.boolExprAssert(AST.Or(b1, b2))
+    self.s.boolExprAssert(AST.And(AST.Not(b1),AST.Not(b2)))
+    self.assertFalse(self.s.isSatisfiable())
+    self.s.pop()
+
+    self.s.push()
+    self.s.boolExprAssert(AST.And(AST.Or(b1, b2),AST.And(AST.Not(b1),AST.Not(b2))))
+    self.assertFalse(self.s.isSatisfiable())
+    self.s.pop()
+
+    self.s.push()
+    self.s.boolExprAssert(AST.Implies(b1, b2))
+    self.assertTrue(self.s.isSatisfiable())
+    self.s.pop()
+
+    self.s.push()
+    self.s.boolExprAssert(AST.Implies(b1, b2))
+    self.s.boolExprAssert(b1)
+    self.s.boolExprAssert(b2)
+    self.assertTrue(self.s.isSatisfiable())
+    self.s.pop()
+
+    self.s.push()
+    self.s.boolExprAssert(AST.Implies(b1, b2))
+    self.s.boolExprAssert(b1)
+    self.s.boolExprAssert(AST.Not(b2))
+    self.assertFalse(self.s.isSatisfiable())
+    self.s.pop()
+
+    self.s.push()
+    self.s.boolExprAssert(AST.Implies(b1, b2))
+    self.s.boolExprAssert(AST.Not(b1))
+    self.s.boolExprAssert(b2)
+    self.assertTrue(self.s.isSatisfiable())
+    self.s.pop()
+
+    self.s.push()
+    self.s.boolExprAssert(AST.Implies(b1, b2))
+    self.s.boolExprAssert(AST.Not(b1))
+    self.s.boolExprAssert(AST.Not(b2))
+    self.assertTrue(self.s.isSatisfiable())
+    self.s.pop()
+
+
+
+
+
 if __name__ == '__main__':
     unittest.main()
