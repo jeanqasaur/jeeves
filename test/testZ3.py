@@ -178,9 +178,54 @@ class TestZ3(unittest.TestCase):
     self.assertTrue(self.s.isSatisfiable())
     self.s.pop()
 
+  def test_ast_comparisons(self):
+    b1 = AST.Var()
+    b2 = AST.Var()
 
+    self.s.push()
+    self.s.boolExprAssert(AST.Facet(b1, 0, 1) != AST.Facet(b1, 1, 2) - 1)
+    self.assertFalse(self.s.isSatisfiable())
+    self.s.pop()
 
+    self.s.push()
+    self.s.boolExprAssert(AST.Facet(b1, 0, 1) < AST.Facet(b2, 3, 4))
+    self.assertTrue(self.s.isSatisfiable())
+    self.s.pop()
 
+    self.s.push()
+    self.s.boolExprAssert(AST.Facet(b1, 0, 1) <= AST.Facet(b2, 3, 4))
+    self.assertTrue(self.s.isSatisfiable())
+    self.s.pop()
+
+    self.s.push()
+    self.s.boolExprAssert(AST.Facet(b1, 0, 1) < AST.Facet(b2, -1, 0))
+    self.assertFalse(self.s.isSatisfiable())
+    self.s.pop()
+
+    self.s.push()
+    self.s.boolExprAssert(AST.Facet(b1, 0, 1) <= AST.Facet(b2, -1,0))
+    self.assertTrue(self.s.isSatisfiable())
+    self.s.pop()
+
+    self.s.push()
+    self.s.boolExprAssert(AST.Facet(b1, 3, 4) > AST.Facet(b2, 0, 1))
+    self.assertTrue(self.s.isSatisfiable())
+    self.s.pop()
+
+    self.s.push()
+    self.s.boolExprAssert(AST.Facet(b1, 3, 4) >= AST.Facet(b2, 0, 1))
+    self.assertTrue(self.s.isSatisfiable())
+    self.s.pop()
+
+    self.s.push()
+    self.s.boolExprAssert(AST.Facet(b1, -1, 0) > AST.Facet(b2, 0, 1))
+    self.assertFalse(self.s.isSatisfiable())
+    self.s.pop()
+
+    self.s.push()
+    self.s.boolExprAssert(AST.Facet(b1, -1, 0) >= AST.Facet(b2, 0, 1))
+    self.assertTrue(self.s.isSatisfiable())
+    self.s.pop()
 
 if __name__ == '__main__':
     unittest.main()
