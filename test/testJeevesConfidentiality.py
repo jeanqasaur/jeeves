@@ -39,6 +39,30 @@ class TestJeevesConfidentiality(unittest.TestCase):
     xConcrete = JeevesGlobal.jeevesLib.concretize(3, x)
     self.assertFalse(xConcrete)
 
+  def test_restrict_with_sensitivevalue(self):
+    x = JeevesGlobal.jeevesLib.mkLabel('x')
+    JeevesGlobal.jeevesLib.restrict(x, lambda y: y == 2)
+    value = JeevesGlobal.jeevesLib.mkSensitive(x, 42, 41)
+
+    valueConcrete = JeevesGlobal.jeevesLib.concretize(2, value)
+    self.assertEquals(valueConcrete, 42)
+
+    valueConcrete = JeevesGlobal.jeevesLib.concretize(1, value)
+    self.assertEquals(valueConcrete, 41)
+
+  def test_restrict_with_cyclic(self):
+    jl = JeevesGlobal.jeevesLib
+
+    # use the value itself as the context
+    x = jl.mkLabel('x')
+    jl.restrict(x, lambda ctxt : ctxt == 42)
+
+    value = jl.mkSensitive(x, 42, 20)
+    self.assertEquals(jl.concretize(value, value), 42)
+
+    value = jl.mkSensitive(x, 41, 20)
+    self.assertEquals(jl.concretize(value, value), 20)
+
   def test_jif_with_ints(self):
     return NotImplemented
 

@@ -1,7 +1,6 @@
 import JeevesGlobal
 import fast.AST
 import smt.SMT
-from env.PathVars import Variables
 from collections import defaultdict
 
 class PolicyEnv:
@@ -44,6 +43,5 @@ class PolicyEnv:
 
     env = smt.SMT.solve(constraints, self.labels[::-1], f.vars())
 
-    with Variables(env):
-      return f.eval()
+    return f.eval(env)
     #TODO test this

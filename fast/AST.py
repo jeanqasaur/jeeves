@@ -28,7 +28,7 @@ class FExpr:
   # TJH: going to just assume it's a global for now, so we don't have to
   # pass it through
   @abstractmethod
-  def eval(self):
+  def eval(self, env):
     return NotImplemented
 
   @abstractmethod
@@ -137,12 +137,10 @@ class Var(FExpr):
     self.type = bool
     Var.counter += 1
 
-  def eval(self):
-    if JeevesGlobal.jeevesLib.pathenv.hasPosVar(self):
-      return True
-    elif JeevesGlobal.jeevesLib.pathenv.hasNegVar(self):
-      return False
-    else:
+  def eval(self, env):
+    try:
+      return env[self]
+    except IndexError:
       raise CannotEvalException("Variable %s is not in path environment" % self)
 
   def __str__(self):
@@ -189,11 +187,8 @@ class Facet(FExpr):
 
     self.type = self.thn.type
 
-  def eval(self):
-    if JeevesGlobal.jeevesLib.pathenv.hasPosVar(self.cond):
-      return self.thn.eval()
-    elif JeevesGlobal.jeevesLib.pathenv.hasNegVar(self.cond):
-      return self.els.eval()
+  def eval(self, env):
+    return self.thn.eval(env) if self.cond.eval(env) else self.els.eval(env)
 
   def vars(self):
     return self.cond.vars().union(self.thn.vars()).union(self.els.vars())
@@ -209,7 +204,7 @@ class Constant(FExpr):
     self.v = v
     self.type = type(v)
 
-  def eval(self):
+  def eval(self, env):
     return self.v
 
   def vars(self):
@@ -255,40 +250,40 @@ Operators.
 class Add(BinaryExpr):
   opr = operator.add
   ret_type = int
-  def eval(self):
-    return self.left.eval() + self.right.eval()
+  def eval(self, env):
+    return self.left.eval(env) + self.right.eval(env)
   def z3Node(self):
     return self.left.z3Node() + self.right.z3Node()
 
 class Sub(BinaryExpr):
   opr = operator.sub
   ret_type = int
-  def eval(self):
-    return self.left.eval() - self.right.eval()
+  def eval(self, env):
+    return self.left.eval(env) - self.right.eval(env)
   def z3Node(self):
     return self.left.z3Node() - self.right.z3Node()
 
 class Mult(BinaryExpr):
   opr = operator.mul
   ret_type = int
-  def eval(self):
-    return self.left.eval() * self.right.eval()
+  def eval(self, env):
+    return self.left.eval(env) * self.right.eval(env)
   def z3Node(self):
     return self.left.z3Node() * self.right.z3Node()
 
 class Div(BinaryExpr):
   opr = operator.div
   ret_type = int
-  def eval(self):
-    return self.left.eval() / self.right.eval()
+  def eval(self, env):
+    return self.left.eval(env) / self.right.eval(env)
   def z3Node(self):
     return NotImplemented
 
 class Mod(BinaryExpr):
   opr = operator.mod
   ret_type = int
-  def eval(self):
-    return self.left.eval() % self.right.eval()
+  def eval(self, env):
+    return self.left.eval(env) % self.right.eval(env)
   def z3Node(self):
     return NotImplemented
 
@@ -296,32 +291,32 @@ class Mod(BinaryExpr):
 class BitAnd(BinaryExpr):
   opr = operator.and_
   ret_type = int
-  def eval(self):
-    return self.left.eval() & self.right.eval()
+  def eval(self, env):
+    return self.left.eval(env) & self.right.eval(env)
   def z3Node(self):
     return NotImplemented
 
 class BitOr(BinaryExpr):
   opr = operator.or_
   ret_type = int
-  def eval(self):
-    return self.left.eval() | self.right.eval()
+  def eval(self, env):
+    return self.left.eval(env) | self.right.eval(env)
   def z3Node(self):
     return NotImplemented
 
 class LShift(BinaryExpr):
   opr = operator.ilshift
   ret_type = int
-  def eval(self):
-    return self.left.eval() << self.right.eval()
+  def eval(self, env):
+    return self.left.eval(env) << self.right.eval(env)
   def z3Node(self):
     return NotImplemented
 
 class RShift(BinaryExpr):
   opr = operator.irshift
   ret_type = int
-  def eval(self):
-    return self.left.eval() >> self.right.eval()
+  def eval(self, env):
+    return self.left.eval(env) >> self.right.eval(env)
   def z3Node(self):
     return NotImplemented
 
@@ -330,24 +325,24 @@ class RShift(BinaryExpr):
 class And(BinaryExpr):
   opr = operator.and_
   ret_type = bool
-  def eval(self):
-    return self.left.eval() and self.right.eval()
+  def eval(self, env):
+    return self.left.eval(env) and self.right.eval(env)
   def z3Node(self):
     return z3.And(self.left.z3Node(), self.right.z3Node())
 
 class Or(BinaryExpr):
   opr = operator.or_
   ret_type = bool
-  def eval(self):
-    return self.left.eval() or self.right.eval()
+  def eval(self, env):
+    return self.left.eval(env) or self.right.eval(env)
   def z3Node(self):
     return z3.Or(self.left.z3Node(), self.right.z3Node())
 
 class Not(UnaryExpr):
   opr = operator.not_
   ret_type = bool
-  def eval(self):
-    return not self.sub.eval()
+  def eval(self, env):
+    return not self.sub.eval(env)
   def z3Node(self):
     return z3.Not(self.sub.z3Node())
 
@@ -355,8 +350,8 @@ class Not(UnaryExpr):
 class Implies(BinaryExpr):
   opr = lambda x, y : (not x) or y
   ret_type = bool
-  def eval(self):
-    return (not self.left.eval()) or self.right.eval()
+  def eval(self, env):
+    return (not self.left.eval(env)) or self.right.eval(env)
   def z3Node(self):
     return z3.Implies(self.left.z3Node(), self.right.z3Node())
 
@@ -365,41 +360,40 @@ class Implies(BinaryExpr):
 class Eq(BinaryExpr):
   opr = operator.eq
   ret_type = bool
-  def eval(self):
-    return self.left.eval() == self.right.eval()
+  def eval(self, env):
+    return self.left.eval(env) == self.right.eval(env)
   def z3Node(self):
-    print self.prettyPrint()
     return self.left.z3Node() == self.right.z3Node()
 
 class Lt(BinaryExpr):
   opr = operator.lt
   ret_type = bool
-  def eval(self):
-    return self.left.eval() < self.right.eval()
+  def eval(self, env):
+    return self.left.eval(env) < self.right.eval(env)
   def z3Node(self):
     return self.left.z3Node() < self.right.z3Node()
 
 class LtE(BinaryExpr):
   opr = operator.le
   ret_type = bool
-  def eval(self):
-    return self.left.eval() <= self.right.eval()
+  def eval(self, env):
+    return self.left.eval(env) <= self.right.eval(env)
   def z3Node(self):
     return self.left.z3Node() <= self.right.z3Node()
 
 class Gt(BinaryExpr):
   opr = operator.gt
   ret_type = bool
-  def eval(self):
-    return self.left.eval() > self.right.eval()
+  def eval(self, env):
+    return self.left.eval(env) > self.right.eval(env)
   def z3Node(self):
     return self.left.z3Node() > self.right.z3Node()
 
 class GtE(BinaryExpr):
   opr = operator.ge
   ret_type = bool
-  def eval(self):
-    return self.left.eval() >= self.right.eval()
+  def eval(self, env):
+    return self.left.eval(env) >= self.right.eval(env)
   def z3Node(self):
     return self.left.z3Node() >= self.right.z3Node()
 

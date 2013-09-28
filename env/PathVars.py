@@ -26,16 +26,6 @@ class PathVars:
     if not self.conditions:
       return reduce(fast.AST.And, self.conditions, fast.AST.Constant(True))
 
-class Variables:
-  def __init__(self, v):
-    self.v = v
-  def __enter__(self):
-    for var, val in self.v.iteritems():
-      JeevesGlobal.jeevesLib.pathenv.push(var, val)
-  def __exit__(self, type, value, traceback):
-    for i in xrange(len(self.v)):
-      JeevesGlobal.jeevesLib.pathenv.pop()
-
 class PositiveVariable:
   def __init__(self, var):
     self.var = var
