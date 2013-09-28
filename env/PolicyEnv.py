@@ -1,14 +1,18 @@
 import JeevesGlobal
 import fast.AST
 import smt.SMT
+from env.PathVars import Variables
+from collections import defaultdict
 
 class PolicyEnv:
   def __init__(self):
     self.labels = []
     self.policies = {}
 
-  def addLabel(self, label):
+  def mkLabel(self, name=""):
+    label = fast.AST.Var(name)
     self.labels.append(label)
+    return label
 
   # policy is a function from context to bool which returns true
   # if the label is allowed to be HIGH
@@ -16,21 +20,21 @@ class PolicyEnv:
     pcFormula = JeevesGlobal.jeevesLib.pathenv.getPathFormula()
     self.policies[label] = (lambda ctxt :
       fast.AST.Implies(
-        fast.AST.fexpr_cast(pcFormula),
-        policy(ctxt),
+        pcFormula,
+        fast.AST.fexpr_cast(policy(ctxt)),
       )
     )
 
   # Takes a context and an expression
-  def concretizeExp(ctxt, f):
+  def concretizeExp(self, ctxt, f):
     dependencies = defaultdict(set)
     constraints = []
     # First, find all all the dependencies between labels
     # and add Not(predicate) ==> label == LOW conditions
     for (label, policy) in self.policies.iteritems():
-      predicate = policy(f) #predicate should be True if label can be HIGH
+      predicate = policy(ctxt) #predicate should be True if label can be HIGH
       predicate_vars = predicate.vars()
-      dependencies |= predicate_vars
+      dependencies[label] |= predicate_vars
       constraints.append(fast.AST.Implies(label, predicate))
 
     # If a depends on b, then we want (b == Low ==> a == Low)
@@ -38,7 +42,8 @@ class PolicyEnv:
       for label_dep in label_deps:
         constraints.append(fast.AST.Implies(label, label_dep))
 
-    env = smt.SMT.solve(constraints, labels[-1])
+    env = smt.SMT.solve(constraints, self.labels[::-1], f.vars())
 
-    #TODO pass constraints to solver
+    with Variables(env):
+      return f.eval()
     #TODO test this

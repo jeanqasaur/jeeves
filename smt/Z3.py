@@ -31,7 +31,10 @@ class Z3:
     else:
       raise ValueError("got neither sat nor unsat from solver")
 
-  def eval(self, t): self.solver.eval(t)
+  def evaluate(self, t):
+    s = self.solver.model().eval(t.z3Node())
+    assert z3.is_true(s) or z3.is_false(s)
+    return z3.is_true(s)
 
   def solverAssert(self, constraint):
     return self.solver.add(constraint)

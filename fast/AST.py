@@ -35,6 +35,15 @@ class FExpr:
   def z3Node(self):
     return NotImplemented
 
+  @abstractmethod
+  def getChildren(self):
+    return NotImplemented
+
+  def prettyPrint(self, indent=""):
+    return "%s%s\n%s" % (indent, type(self).__name__,
+      "\n".join(child.prettyPrint(indent + "  ")
+                for child in self.getChildren()))
+
   '''
   Sensitive Boolean expressions.
   NOTE(JY): I'm making the change Formula-> BoolExpr so that everything matches
@@ -145,6 +154,12 @@ class Var(FExpr):
   def z3Node(self):
     return z3.Bool(self.name)
 
+  def getChildren(self):
+    return []
+
+  def prettyPrint(self, indent=""):
+    return indent + self.name
+
 '''
 Facets.
 NOTE(JY): I think we don't have to have specialized facets anymore because we
@@ -185,6 +200,9 @@ class Facet(FExpr):
 
   def z3Node(self):
     return z3.If(self.cond.z3Node(), self.thn.z3Node(), self.els.z3Node())
+
+  def getChildren(self):
+    return [self.cond, self.thn, self.els]
     
 class Constant(FExpr):
   def __init__(self, v):
@@ -200,6 +218,12 @@ class Constant(FExpr):
   def z3Node(self):
     return self.v
 
+  def getChildren(self):
+    return []
+
+  def prettyPrint(self, indent):
+    return indent + repr(self.v)
+
 '''
 Binary expressions.
 '''
@@ -212,12 +236,18 @@ class BinaryExpr(FExpr):
   def vars(self):
     return self.left.vars().union(self.right.vars())
 
+  def getChildren(self):
+    return [self.left, self.right]
+
 class UnaryExpr(FExpr):
   def __init__(self, sub):
     self.sub = sub
 
   def vars(self):
     return self.sub.vars()
+
+  def getChildren(self):
+    return [self.sub]
 
 '''
 Operators.
@@ -338,6 +368,7 @@ class Eq(BinaryExpr):
   def eval(self):
     return self.left.eval() == self.right.eval()
   def z3Node(self):
+    print self.prettyPrint()
     return self.left.z3Node() == self.right.z3Node()
 
 class Lt(BinaryExpr):

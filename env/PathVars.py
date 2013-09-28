@@ -7,6 +7,8 @@ class PathVars:
     self.conditions = []
 
   def push(self, var, value):
+    assert type(var) == fast.AST.Var
+    assert type(value) == bool
     if (str(var), not value) in self.conditions:
       raise Exception("Path condition for '%s' already set to '%s'" % (var, not value))
     self.conditions.append((str(var), value))
@@ -23,6 +25,16 @@ class PathVars:
   def getPathFormula(self):
     if not self.conditions:
       return reduce(fast.AST.And, self.conditions, fast.AST.Constant(True))
+
+class Variables:
+  def __init__(self, v):
+    self.v = v
+  def __enter__(self):
+    for var, val in self.v.iteritems():
+      JeevesGlobal.jeevesLib.pathenv.push(var, val)
+  def __exit__(self, type, value, traceback):
+    for i in xrange(len(self.v)):
+      JeevesGlobal.jeevesLib.pathenv.pop()
 
 class PositiveVariable:
   def __init__(self, var):

@@ -21,18 +21,23 @@ class TestJeevesConfidentiality(unittest.TestCase):
     JeevesGlobal.jeevesLib.restrict(x, lambda _: True)
     xConcrete = JeevesGlobal.jeevesLib.concretize(None, x)
     # make sure that concretizing x allows everyone to see
-    return NotImplemented
+    self.assertTrue(xConcrete)
 
   def test_restrict_all_restrictive(self):
     x = JeevesGlobal.jeevesLib.mkLabel('x')
     JeevesGlobal.jeevesLib.restrict(x, lambda _: False)
     xConcrete = JeevesGlobal.jeevesLib.concretize(None, x)
-    return NotImplemented
+    self.assertFalse(xConcrete)
 
   def test_restrict_with_context(self):
     x = JeevesGlobal.jeevesLib.mkLabel('x')
     JeevesGlobal.jeevesLib.restrict(x, lambda y: y == 2)
-    return NotImplemented
+
+    xConcrete = JeevesGlobal.jeevesLib.concretize(2, x)
+    self.assertTrue(xConcrete)
+
+    xConcrete = JeevesGlobal.jeevesLib.concretize(3, x)
+    self.assertFalse(xConcrete)
 
   def test_jif_with_ints(self):
     return NotImplemented

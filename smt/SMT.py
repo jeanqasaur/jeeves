@@ -2,6 +2,7 @@
 Translate expressions to SMT import format.
 '''
 from Z3 import Z3
+import JeevesGlobal
 
 class UnsatisfiableException(Exception):
     pass
@@ -9,7 +10,7 @@ class UnsatisfiableException(Exception):
 # NOTE(JY): Think about if the solver needs to know about everything for
 # negative constraints. I don't think so because enough things should be
 # concrete that this doesn't matter.
-def solve(constraints, defaults, env):
+def solve(constraints, defaults, desiredVars):
   # NOTE(JY): This is just a sketch of what should go on...
   # Implement defaults by adding values to the model and 
 
@@ -26,11 +27,12 @@ def solve(constraints, defaults, env):
   #return NotImplemented
 
   solver = Z3()
+  result = {}
 
   for constraint in constraints:
     if constraint.type != bool:
       raise ValueError("constraints must be bools")
-    solver.addAssertion(constraint)
+    solver.boolExprAssert(constraint)
 
   if not solver.check():
     raise UnsatisfiableException("Constraints not satisfiable")
@@ -39,19 +41,15 @@ def solve(constraints, defaults, env):
     solver.push()
     if default.type != bool:
       raise ValueError("defaults must be bools")
-    solver.addAssertion(default)
-    if not solver.check():
+    solver.boolExprAssert(default)
+    if not solver.isSatisfiable():
       solver.pop()
 
   assert solver.check()
 
-  allVars = set()
-  for constraint in constraints:
-    allVars |= constraint.vars()
+  result = {}
+  for var in desiredVars:
+    result[var] = solver.evaluate(var)
+    assert (result[var] is True) or (result[var] is False)
 
-  env = dict(env)
-  for var in allVars:
-    if var not in env:
-      env[var] = solver.getVar(var)
-
-  return env
+  return result
