@@ -26,6 +26,7 @@ class PolicyEnv:
 
   # Takes a context and an expression
   def concretizeExp(self, ctxt, f):
+    f = fast.AST.fexpr_cast(f)
     dependencies = defaultdict(set)
     constraints = []
     # First, find all all the dependencies between labels

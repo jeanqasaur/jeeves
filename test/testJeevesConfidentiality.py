@@ -64,7 +64,46 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEquals(jl.concretize(value, value), 20)
 
   def test_jif_with_ints(self):
-    return NotImplemented
+    jl = JeevesGlobal.jeevesLib
+
+    x = jl.mkLabel('x')
+    jl.restrict(x, lambda ctxt : ctxt == 42)
+
+    a = jl.jif(x, lambda:13, lambda:17 )
+    self.assertEquals(jl.concretize(42, a), 13)
+    self.assertEquals(jl.concretize(-2, a), 17)
+
+    b = jl.jif(True, lambda:13, lambda:17)
+    self.assertEquals(jl.concretize(42, b), 13)
+    self.assertEquals(jl.concretize(-2, b), 13)
+
+    c = jl.jif(False, lambda:13, lambda:17)
+    self.assertEquals(jl.concretize(42, c), 17)
+    self.assertEquals(jl.concretize(-2, c), 17)
+
+    conditional = jl.mkSensitive(x, True, False)
+    d = jl.jif(conditional, lambda:13, lambda:17)
+    self.assertEquals(jl.concretize(42, d), 13)
+    self.assertEquals(jl.concretize(-2, d), 17)
+
+    conditional = jl.mkSensitive(x, False, True)
+    d = jl.jif(conditional, lambda:13, lambda:17)
+    self.assertEquals(jl.concretize(42, d), 17)
+    self.assertEquals(jl.concretize(-2, d), 13)
+
+    y = jl.mkLabel('y')
+    z = jl.mkLabel('z')
+    jl.restrict(y, lambda (a,_) : a)
+    jl.restrict(z, lambda (_,a) : a)
+    faceted_int = jl.mkSensitive(y, 10, 0)
+    conditional = faceted_int > 5
+    i1 = jl.mkSensitive(z, 101, 102)
+    i2 = jl.mkSensitive(z, 103, 104)
+    f = jl.jif(conditional, lambda:i1, lambda:i2)
+    self.assertEquals(jl.concretize((True, True), f),101)
+    self.assertEquals(jl.concretize((True, False), f), 102)
+    self.assertEquals(jl.concretize((False, True), f), 103)
+    self.assertEquals(jl.concretize((False, False), f), 104)
 
   def test_jif_with_objects(self):
     return NotImplemented

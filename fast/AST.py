@@ -216,7 +216,7 @@ class Constant(FExpr):
   def getChildren(self):
     return []
 
-  def prettyPrint(self, indent):
+  def prettyPrint(self, indent=""):
     return indent + repr(self.v)
 
 '''

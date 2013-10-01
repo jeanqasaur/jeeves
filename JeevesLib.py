@@ -3,9 +3,10 @@ This will define the code for the Jeeves library.
 '''
 from env.VarEnv import VarEnv
 from env.PolicyEnv import PolicyEnv
-from env.PathVars import PathVars
+from env.PathVars import PathVars, PositiveVariable, NegativeVariable
 from smt.Z3 import Z3
-from fast.AST import Facet, fexpr_cast
+from fast.AST import Facet, fexpr_cast, Constant, Var
+from eval.Eval import partialEval
 
 # NOTE(JY): I was thinking we can keep around a copy of JeevesLib globally or
 # something like that and it will store all of our environments...
@@ -40,3 +41,44 @@ class JeevesLib:
   # TODO: Push a context, try setting things to high 
   def concretize(self, ctxt, v):
     return self.policyenv.concretizeExp(ctxt, v)
+
+  def jif(self, cond, thn_fn, els_fn):
+    condTrans = partialEval(fexpr_cast(cond))
+    if condTrans.type != bool:
+      raise TypeError("jif must take a boolean as a condition")
+    return self.jif2(condTrans, thn_fn, els_fn)
+
+  def jif2(self, cond, thn_fn, els_fn):
+    if isinstance(cond, Constant):
+      return thn_fn() if cond.v else els_fn()
+
+    #elif isinstance(cond, Var):
+    #  with PositiveVariable(cond):
+    #    thn = thn_fn()
+    #  with NegativeVariable(cond):
+    #    els = els_fn()
+    #  return Facet(cond, fexpr_cast(thn), fexpr_cast(els))
+
+    elif isinstance(cond, Facet):
+      if not isinstance(cond.cond, Var):
+        raise TypeError("facet conditional is of type %s"
+                        % cond.cond.__class__.__name__)
+      hasP = self.pathenv.hasPosVar(cond.cond)
+      hasN = self.pathenv.hasNegVar(cond.cond)
+
+      if not hasN:
+        with PositiveVariable(cond.cond):
+          thn = self.jif2(cond.thn, thn_fn, els_fn)
+      if not hasP:
+        with NegativeVariable(cond.cond):
+          els = self.jif2(cond.els, thn_fn, els_fn)
+
+      if hasP:
+        return thn
+      elif hasN:
+        return els
+      else:
+        return Facet(cond.cond, thn, els)
+
+    else:
+      raise TypeError("jif condition must be a constant or a var")
