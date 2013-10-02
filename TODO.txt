@@ -1,2 +1,11 @@
-* Set up unit testing.
-* Make directories from Scala.
+Travis:
+* Assignment.
+* Functions.
+* Faceted objects.
+  - Field access.
+  - Q(JY): We shouldn't have to do anything special with equality...
+* Source transformation macro.
+* Protected references with write policies.
+
+Jean:
+* Port examples.
