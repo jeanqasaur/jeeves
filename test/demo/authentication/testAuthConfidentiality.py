@@ -23,5 +23,10 @@ class TestAuthConfidentiality(unittest.TestCase):
         self.bobUser.getPwd(), self.aliceUser)
     assertEquals(bobPwdToAlice, "")
 
+  def testSensitiveUserPassword(self):
+    # Make a sensitive user that is either Alice or Bob. Make sure it shows the
+    # the right password based on the access level of the user.
+    pass
+
 if __name__ == '__main__':
     unittest.main()
