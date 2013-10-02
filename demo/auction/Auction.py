@@ -1,9 +1,8 @@
 '''
 Authentication demo example for Jeeves with confidentiality policies.
 '''
-
+from macropy.case_classes import macros, case
 import JeevesGlobal
-from fast.AST import And
 
 class User:
   def __init__(self, userId, name, pwd):
