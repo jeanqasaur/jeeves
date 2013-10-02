@@ -15,4 +15,4 @@ class User:
     #         , And(oc.name == self.name, oc.getPwd() == self.getPwd())))
     self.pwd = JeevesGlobal.jeevesLib.mkSensitive(self.pwdLabel, pwd, "")
 
-  def getPwd(self): return self.pwd
+  def getPwd(): return self.pwd
