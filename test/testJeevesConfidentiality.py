@@ -4,7 +4,7 @@ This tests code after the macro transformation.
 Before the transformation, there would be calls to mkLabel and restrict but
 the jifs should be gone. It would also 
 '''
-import macropy.activate
+#import macropy.activate
 from smt.Z3 import *
 import unittest
 import JeevesGlobal
@@ -13,7 +13,7 @@ import JeevesLib
 class TestJeevesConfidentiality(unittest.TestCase):
   def setUp(self):
     self.s = Z3()
-    # rest the Jeeves state
+    # reset the Jeeves state
     JeevesGlobal.set_jeeves_state(JeevesLib.JeevesLib())
 
   def test_restrict_all_permissive(self):
