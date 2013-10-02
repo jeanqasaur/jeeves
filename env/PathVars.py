@@ -23,9 +23,8 @@ class PathVars:
     return (var, False) in self.conditions
 
   def getPathFormula(self):
-    if not self.conditions:
-      c2 = [(var if val else fast.AST.Not(var)) for (var, val) in self.conditions]
-      return reduce(fast.AST.And, c2, fast.AST.Constant(True))
+    c2 = [(var if val else fast.AST.Not(var)) for (var, val) in self.conditions]
+    return reduce(fast.AST.And, c2, fast.AST.Constant(True))
 
   def getEnv(self):
     return dict(self.conditions)

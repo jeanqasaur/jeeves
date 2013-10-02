@@ -109,12 +109,37 @@ class TestJeevesConfidentiality(unittest.TestCase):
     return NotImplemented
 
   def test_restrict_under_conditional(self):
-    return NotImplemented
+    jl = JeevesGlobal.jeevesLib
+
+    x = jl.mkLabel('x')
+    def yes_restrict():
+        jl.restrict(x, lambda ctxt : ctxt == 1)
+    def no_restrict():
+        pass
+
+    value = jl.mkSensitive(x, 42, 0)
+    jl.jif(value == 42, yes_restrict, no_restrict)
+    self.assertEquals(jl.concretize(0, value), 0)
+    self.assertEquals(jl.concretize(1, value), 42)
+
+    y = jl.mkLabel('y')
+    def yes_restrict():
+        jl.restrict(y, lambda ctxt : ctxt == 1)
+    def no_restrict():
+        pass
+
+    value = jl.mkSensitive(y, 43, 0)
+    jl.jif(value == 42, yes_restrict, no_restrict)
+    self.assertEquals(jl.concretize(0, value), 43)
+    self.assertEquals(jl.concretize(1, value), 43)
 
   def test_nested_conditionals_no_shared_path(self):
     return NotImplemented
 
   def test_nested_conditionals_shared_path(self):
+    return NotImplemented
+
+  def test_jif_with_assign(self):
     return NotImplemented
 
   def function_facets(self):
