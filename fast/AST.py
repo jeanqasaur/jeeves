@@ -7,7 +7,6 @@ the Scala one!
 '''
 from abc import ABCMeta, abstractmethod
 import operator
-import JeevesGlobal
 import z3
 
 #TODO the type stuff

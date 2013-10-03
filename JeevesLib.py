@@ -7,6 +7,7 @@ from env.PathVars import PathVars, PositiveVariable, NegativeVariable
 from smt.Z3 import Z3
 from fast.AST import Facet, fexpr_cast, Constant, Var, Not, FExpr
 from eval.Eval import partialEval
+import JeevesGlobal
 
 # NOTE(JY): I was thinking we can keep around a copy of JeevesLib globally or
 # something like that and it will store all of our environments...
@@ -106,3 +107,17 @@ class JeevesLib:
       return Not(f)
     else:
       return not f
+
+class Reassign:
+  def __init__(self, value):
+    self.value = fexpr_cast(value)
+
+  def __radd__(self, original):
+    result = self.value
+    original = fexpr_cast(original)
+    for (var, val) in JeevesGlobal.jeevesLib.pathenv.conditions:
+      if val:
+        result = Facet(var, result, original)
+      else:
+        result = Facet(var, original, result)
+    return result

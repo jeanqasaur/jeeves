@@ -9,6 +9,8 @@ from smt.Z3 import *
 import unittest
 import JeevesGlobal
 import JeevesLib
+from env.PathVars import PositiveVariable, NegativeVariable
+from JeevesLib import Reassign
 
 class TestJeevesConfidentiality(unittest.TestCase):
   def setUp(self):
@@ -194,7 +196,60 @@ class TestJeevesConfidentiality(unittest.TestCase):
     return NotImplemented
 
   def test_jif_with_assign(self):
-    return NotImplemented
+    jl = JeevesGlobal.jeevesLib
+
+    y = jl.mkLabel('y')
+    jl.restrict(y, lambda ctxt : ctxt == 42)
+
+    value0 = jl.mkSensitive(y, 0, 1)
+    value2 = jl.mkSensitive(y, 2, 3)
+
+    value = value0
+    value += Reassign(value2)
+    self.assertEquals(jl.concretize(42, value), 2)
+    self.assertEquals(jl.concretize(10, value), 3)
+
+    value = 100
+    value += Reassign(value2)
+    self.assertEquals(jl.concretize(42, value), 2)
+    self.assertEquals(jl.concretize(10, value), 3)
+
+    value = value0
+    value += Reassign(200)
+    self.assertEquals(jl.concretize(42, value), 200)
+    self.assertEquals(jl.concretize(10, value), 200)
+
+    value = 100
+    value += Reassign(200)
+    self.assertEquals(jl.concretize(42, value), 200)
+    self.assertEquals(jl.concretize(10, value), 200)
+
+  def test_jif_with_assign_with_pathvars(self):
+    jl = JeevesGlobal.jeevesLib
+
+    x = jl.mkLabel('x')
+    y = jl.mkLabel('y')
+    jl.restrict(x, lambda (a,_) : a)
+    jl.restrict(y, lambda (_,b) : b)
+
+    value0 = jl.mkSensitive(y, 0, 1)
+    value2 = jl.mkSensitive(y, 2, 3)
+
+    value = value0
+    with PositiveVariable(x):
+      value += Reassign(value2)
+    self.assertEquals(jl.concretize((True, True), value), 2)
+    self.assertEquals(jl.concretize((True, False), value), 3)
+    self.assertEquals(jl.concretize((False, True), value), 0)
+    self.assertEquals(jl.concretize((False, False), value), 1)
+
+    value = value0
+    with NegativeVariable(x):
+      value += Reassign(value2)
+    self.assertEquals(jl.concretize((False, True), value), 2)
+    self.assertEquals(jl.concretize((False, False), value), 3)
+    self.assertEquals(jl.concretize((True, True), value), 0)
+    self.assertEquals(jl.concretize((True, False), value), 1)
 
   def function_facets(self):
     return NotImplemented
