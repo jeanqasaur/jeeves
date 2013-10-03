@@ -5,7 +5,7 @@ from env.VarEnv import VarEnv
 from env.PolicyEnv import PolicyEnv
 from env.PathVars import PathVars, PositiveVariable, NegativeVariable
 from smt.Z3 import Z3
-from fast.AST import Facet, fexpr_cast, Constant, Var
+from fast.AST import Facet, fexpr_cast, Constant, Var, Not, FExpr
 from eval.Eval import partialEval
 
 # NOTE(JY): I was thinking we can keep around a copy of JeevesLib globally or
@@ -82,3 +82,27 @@ class JeevesLib:
 
     else:
       raise TypeError("jif condition must be a constant or a var")
+
+  # NOTE(tjhance):
+  # supports short-circuiting
+  # without short-circuiting jif is unnecessary
+  # are there performance issues?
+  def jand(self, l, r): # inputs are functions
+    left = l()
+    if not isinstance(left, FExpr):
+      return left and r()
+    return self.jif(left, r, lambda:left)
+
+  def jor(self, l, r): # inputs are functions
+    left = l()
+    if not isinstance(left, FExpr):
+      return left or r()
+    return self.jif(left, lambda:left, r)
+
+  # this one is more straightforward
+  # just takes an expression
+  def jnot(self, f):
+    if isinstance(f, FExpr):
+      return Not(f)
+    else:
+      return not f

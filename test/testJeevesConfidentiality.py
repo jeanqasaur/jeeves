@@ -133,6 +133,60 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEquals(jl.concretize(0, value), 43)
     self.assertEquals(jl.concretize(1, value), 43)
 
+  def test_jbool_functions_constants(self):
+    jl = JeevesGlobal.jeevesLib
+
+    self.assertEquals(jl.jand(lambda:True, lambda:True), True)
+    self.assertEquals(jl.jand(lambda:True, lambda:False), False)
+    self.assertEquals(jl.jand(lambda:False, lambda:True), False)
+    self.assertEquals(jl.jand(lambda:False, lambda:False), False)
+
+    self.assertEquals(jl.jor(lambda:True, lambda:True), True)
+    self.assertEquals(jl.jor(lambda:True, lambda:False), True)
+    self.assertEquals(jl.jor(lambda:False, lambda:True), True)
+    self.assertEquals(jl.jor(lambda:False, lambda:False), False)
+
+    self.assertEquals(jl.jnot(True), False)
+    self.assertEquals(jl.jnot(False), True)
+
+  def test_jbool_functions_fexprs(self):
+    jl = JeevesGlobal.jeevesLib
+
+    x = jl.mkLabel('x')
+    jl.restrict(x, lambda (a,_) : a == 42)
+
+    for lh in (True, False):
+      for ll in (True, False):
+        for rh in (True, False):
+          for rl in (True, False):
+            l = jl.mkSensitive(x, lh, ll)
+            r = jl.mkSensitive(x, rh, rl)
+            self.assertEquals(jl.concretize((42,0), jl.jand(lambda:l, lambda:r)), lh and rh)
+            self.assertEquals(jl.concretize((10,0), jl.jand(lambda:l, lambda:r)), ll and rl)
+            self.assertEquals(jl.concretize((42,0), jl.jor(lambda:l, lambda:r)), lh or rh)
+            self.assertEquals(jl.concretize((10,0), jl.jor(lambda:l, lambda:r)), ll or rl)
+            self.assertEquals(jl.concretize((42,0), jl.jnot(l)), not lh)
+            self.assertEquals(jl.concretize((10,0), jl.jnot(l)), not ll)
+
+    y = jl.mkLabel('y')
+    jl.restrict(y, lambda (_,b) : b == 42)
+
+    for lh in (True, False):
+      for ll in (True, False):
+        for rh in (True, False):
+          for rl in (True, False):
+            l = jl.mkSensitive(x, lh, ll)
+            r = jl.mkSensitive(y, rh, rl)
+            self.assertEquals(jl.concretize((42,0), jl.jand(lambda:l, lambda:r)), lh and rl)
+            self.assertEquals(jl.concretize((10,0), jl.jand(lambda:l, lambda:r)), ll and rl)
+            self.assertEquals(jl.concretize((42,42), jl.jand(lambda:l, lambda:r)), lh and rh)
+            self.assertEquals(jl.concretize((10,42), jl.jand(lambda:l, lambda:r)), ll and rh)
+
+            self.assertEquals(jl.concretize((42,0), jl.jor(lambda:l, lambda:r)), lh or rl)
+            self.assertEquals(jl.concretize((10,0), jl.jor(lambda:l, lambda:r)), ll or rl)
+            self.assertEquals(jl.concretize((42,42), jl.jor(lambda:l, lambda:r)), lh or rh)
+            self.assertEquals(jl.concretize((10,42), jl.jor(lambda:l, lambda:r)), ll or rh)
+
   def test_nested_conditionals_no_shared_path(self):
     return NotImplemented
 
