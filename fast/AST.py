@@ -8,6 +8,7 @@ the Scala one!
 from abc import ABCMeta, abstractmethod
 import operator
 import z3
+import JeevesGlobal
 
 #TODO the type stuff
 
@@ -197,6 +198,10 @@ class Facet(FExpr):
 
   def getChildren(self):
     return [self.cond, self.thn, self.els]
+
+  def __call__(self, *args, **kw):
+    return JeevesGlobal.jeevesLib.jif(self.cond,
+        lambda:self.thn(args, kw), lambda:self.els(args, kw))
     
 class Constant(FExpr):
   def __init__(self, v):
@@ -217,6 +222,9 @@ class Constant(FExpr):
 
   def prettyPrint(self, indent=""):
     return indent + repr(self.v)
+
+  def __call__(self, *args, **kw):
+    self.v(*args, **kw)
 
 '''
 Binary expressions.
@@ -395,6 +403,13 @@ class GtE(BinaryExpr):
     return self.left.eval(env) >= self.right.eval(env)
   def z3Node(self):
     return self.left.z3Node() >= self.right.z3Node()
+
+class Unassigned(FExpr):
+  def eval(self, env):
+    raise ValueError("Hey br0, you can't evaluate an expression that involves "
+      "an unassigned value.")
+  def z3Node(self):
+    pass #TODO ?? what goes here
 
 # helper method
 def fexpr_cast(a):
