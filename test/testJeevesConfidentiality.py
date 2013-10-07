@@ -251,7 +251,7 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEquals(jl.concretize((True, True), value), 0)
     self.assertEquals(jl.concretize((True, False), value), 1)
 
-  def function_facets(self):
+  def test_function_facets(self):
     def add1(a):
         return a+1
     def add2(a):
@@ -265,7 +265,7 @@ class TestJeevesConfidentiality(unittest.TestCase):
     fun = jl.mkSensitive(x, add1, add2)
     value = fun(15)
     self.assertEquals(jl.concretize(42, value), 16)
-    self.assertEquals(jl.concretize(42, value), 17)
+    self.assertEquals(jl.concretize(41, value), 17)
 
 if __name__ == '__main__':
     unittest.main()

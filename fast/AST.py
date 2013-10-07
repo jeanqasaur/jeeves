@@ -202,6 +202,12 @@ class Facet(FExpr):
   def __call__(self, *args, **kw):
     return JeevesGlobal.jeevesLib.jif(self.cond,
         lambda:self.thn(args, kw), lambda:self.els(args, kw))
+
+  # called whenever an attribute that does not exist is accessed
+  def __getattr__(self, attribute):
+    return Facet(self.cond,
+      getattr(self.thn, attribute),
+      getattr(self.els, attribute))
     
 class Constant(FExpr):
   def __init__(self, v):
@@ -223,8 +229,8 @@ class Constant(FExpr):
   def prettyPrint(self, indent=""):
     return indent + repr(self.v)
 
-  def __call__(self, *args, **kw):
-    self.v(*args, **kw)
+  def __call__(self, args, kw):
+    return self.v(*args, **kw)
 
 '''
 Binary expressions.
@@ -417,3 +423,18 @@ def fexpr_cast(a):
     return a
   else:
     return Constant(a)
+
+def FObject(Fexpr):
+  def __init__(self, v):
+    self.v = v
+    self.type = type(v)
+
+  def eval(self, env):
+    return self.v
+
+  def z3Node(self):
+    return id(self.v)
+
+  # called whenever an attribute that does not exist is accessed
+  def __getattr__(self, attribute):
+    return getattr(self.v, attribute)
