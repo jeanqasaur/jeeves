@@ -50,12 +50,26 @@ def jeeves(tree, **kw):
       return q[ JeevesLib.jif(ast[tree.test], lambda : ast[tree.body], lambda : ast[tree.orelse]) ]
 
     # a = b
-    # a += Reassign(b)
+    # a += Reassign(b, Reassign.Replace)
     if isinstance(tree, Assign):
       # TODO handle multiple assignments case later
       assert len(tree.targets) == 1
       return copy_location(
         AugAssign(tree.targets[0], Add(), q[ JeevesLib.Reassign(ast[tree.value]) ]),
+        tree
+       )
+
+    # a += b
+    # a += Reassign(b, Reassign.Add)
+    if isinstance(tree, AugAssign):
+      if isinstance(tree.op, And):
+        op = q[lambda x,y : x+y]
+      elif isinstance(tree.op, Sub):
+        op = q[lambda x,y : x-y]
+      else:
+        assert False # TODO other operators
+      return copy_location(
+        AugAssign(tree.targets[0], Add(), q[ JeevesLib.Reassign(ast[tree.value], ast[op]) ]),
         tree
        )
 

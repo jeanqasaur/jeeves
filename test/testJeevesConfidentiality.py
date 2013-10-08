@@ -251,6 +251,14 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEquals(jl.concretize((True, True), value), 0)
     self.assertEquals(jl.concretize((True, False), value), 1)
 
+    value = value0
+    with PositiveVariable(x):
+      value += Reassign(value2, lambda x,y : x + y)
+    self.assertEquals(jl.concretize((True, True), value), 2)
+    self.assertEquals(jl.concretize((True, False), value), 3)
+    self.assertEquals(jl.concretize((False, True), value), 3)
+    self.assertEquals(jl.concretize((False, False), value), 4)
+
   def test_function_facets(self):
     def add1(a):
         return a+1

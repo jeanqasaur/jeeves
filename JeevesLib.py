@@ -108,13 +108,17 @@ class JeevesLib:
     else:
       return not f
 
+def Replace(x, y):
+  return y
+
 class Reassign:
-  def __init__(self, value):
+  def __init__(self, value, op=Replace):
     self.value = fexpr_cast(value)
+    self.op = op
 
   def __radd__(self, original):
-    result = self.value
     original = fexpr_cast(original)
+    result = self.op(original, self.value)
     for (var, val) in JeevesGlobal.jeevesLib.pathenv.conditions:
       if val:
         result = Facet(var, result, original)
