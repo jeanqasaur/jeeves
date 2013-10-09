@@ -261,17 +261,12 @@ class TestJeevesConfidentiality(unittest.TestCase):
     def add2(a):
         return a+2
 
-    print 'hey'
     jl = JeevesGlobal.jeevesLib
 
-    print 'moo'
     x = jl.mkLabel('x')
-    print 'moo2'
     jl.restrict(x, lambda ctxt : ctxt == 42)
 
-    print 'fuh'
     fun = jl.mkSensitive(x, add1, add2)
-    print 'lemon'
     value = fun(15)
     self.assertEquals(jl.concretize(42, value), 16)
     self.assertEquals(jl.concretize(41, value), 17)
