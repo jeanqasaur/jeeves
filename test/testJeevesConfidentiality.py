@@ -10,7 +10,11 @@ import unittest
 import JeevesGlobal
 import JeevesLib
 from env.PathVars import PositiveVariable, NegativeVariable
-from JeevesLib import Reassign
+
+class TestClass:
+  def __init__(self, a, b):
+    self.a = a
+    self.b = b
 
 class TestJeevesConfidentiality(unittest.TestCase):
   def setUp(self):
@@ -205,22 +209,22 @@ class TestJeevesConfidentiality(unittest.TestCase):
     value2 = jl.mkSensitive(y, 2, 3)
 
     value = value0
-    value += Reassign(value2)
+    value = jl.jassign(value, value2)
     self.assertEquals(jl.concretize(42, value), 2)
     self.assertEquals(jl.concretize(10, value), 3)
 
     value = 100
-    value += Reassign(value2)
+    value = jl.jassign(value, value2)
     self.assertEquals(jl.concretize(42, value), 2)
     self.assertEquals(jl.concretize(10, value), 3)
 
     value = value0
-    value += Reassign(200)
+    value = jl.jassign(value, 200)
     self.assertEquals(jl.concretize(42, value), 200)
     self.assertEquals(jl.concretize(10, value), 200)
 
     value = 100
-    value += Reassign(200)
+    value = jl.jassign(value, 200)
     self.assertEquals(jl.concretize(42, value), 200)
     self.assertEquals(jl.concretize(10, value), 200)
 
@@ -237,7 +241,7 @@ class TestJeevesConfidentiality(unittest.TestCase):
 
     value = value0
     with PositiveVariable(x):
-      value += Reassign(value2)
+      value = jl.jassign(value, value2)
     self.assertEquals(jl.concretize((True, True), value), 2)
     self.assertEquals(jl.concretize((True, False), value), 3)
     self.assertEquals(jl.concretize((False, True), value), 0)
@@ -245,19 +249,11 @@ class TestJeevesConfidentiality(unittest.TestCase):
 
     value = value0
     with NegativeVariable(x):
-      value += Reassign(value2)
+      value = jl.jassign(value, value2)
     self.assertEquals(jl.concretize((False, True), value), 2)
     self.assertEquals(jl.concretize((False, False), value), 3)
     self.assertEquals(jl.concretize((True, True), value), 0)
     self.assertEquals(jl.concretize((True, False), value), 1)
-
-    value = value0
-    with PositiveVariable(x):
-      value += Reassign(value2, lambda x,y : x + y)
-    self.assertEquals(jl.concretize((True, True), value), 2)
-    self.assertEquals(jl.concretize((True, False), value), 3)
-    self.assertEquals(jl.concretize((False, True), value), 3)
-    self.assertEquals(jl.concretize((False, False), value), 4)
 
   def test_function_facets(self):
     def add1(a):
@@ -265,15 +261,47 @@ class TestJeevesConfidentiality(unittest.TestCase):
     def add2(a):
         return a+2
 
+    print 'hey'
     jl = JeevesGlobal.jeevesLib
 
+    print 'moo'
     x = jl.mkLabel('x')
+    print 'moo2'
     jl.restrict(x, lambda ctxt : ctxt == 42)
 
+    print 'fuh'
     fun = jl.mkSensitive(x, add1, add2)
+    print 'lemon'
     value = fun(15)
     self.assertEquals(jl.concretize(42, value), 16)
     self.assertEquals(jl.concretize(41, value), 17)
+
+  def test_objects_faceted(self):
+    jl = JeevesGlobal.jeevesLib
+
+    x = jl.mkLabel('x')
+    jl.restrict(x, lambda ctxt : ctxt)
+
+    y = jl.mkSensitive(x,
+      TestClass(1, 2),
+      TestClass(3, 4))
+
+    self.assertEquals(jl.concretize(True, y.a), 1)
+    self.assertEquals(jl.concretize(True, y.b), 2)
+    self.assertEquals(jl.concretize(False, y.a), 3)
+    self.assertEquals(jl.concretize(False, y.b), 4)
+
+  def test_objects_mutate(self):
+    return NotImplemented
+
+  def test_objects_z3(self):
+    return NotImplemented
+
+  def test_objects_methodcall(self):
+    return NotImplemented
+
+  def test_objects_operators(self):
+    return NotImplemented
 
 if __name__ == '__main__':
     unittest.main()

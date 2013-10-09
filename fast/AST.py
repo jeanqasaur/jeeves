@@ -201,7 +201,7 @@ class Facet(FExpr):
 
   def __call__(self, *args, **kw):
     return JeevesGlobal.jeevesLib.jif(self.cond,
-        lambda:self.thn(args, kw), lambda:self.els(args, kw))
+        lambda:self.thn(*args, **kw), lambda:self.els(*args, **kw))
 
   # called whenever an attribute that does not exist is accessed
   def __getattr__(self, attribute):
@@ -229,7 +229,7 @@ class Constant(FExpr):
   def prettyPrint(self, indent=""):
     return indent + repr(self.v)
 
-  def __call__(self, args, kw):
+  def __call__(self, *args, **kw):
     return self.v(*args, **kw)
 
 '''
@@ -417,14 +417,20 @@ class Unassigned(FExpr):
   def z3Node(self):
     pass #TODO ?? what goes here
 
+# TODO(TJH): figure out the correct implementation of this
+def is_obj(o):
+  return hasattr(o, '__dict__')
+
 # helper method
 def fexpr_cast(a):
   if isinstance(a, FExpr):
     return a
+  elif is_obj(a):
+    return FObject(a)
   else:
     return Constant(a)
 
-def FObject(Fexpr):
+class FObject(FExpr):
   def __init__(self, v):
     self.v = v
     self.type = type(v)
@@ -434,6 +440,12 @@ def FObject(Fexpr):
 
   def z3Node(self):
     return id(self.v)
+
+  def getChildren(self):
+    return None
+
+  def __call__(self, *args, **kw):
+    return self.v.__call__(*args, **kw)
 
   # called whenever an attribute that does not exist is accessed
   def __getattr__(self, attribute):
