@@ -18,6 +18,7 @@ Abstract class for sensitive expressions.
 class FExpr:
   __metaclass__ = ABCMeta
   
+  @abstractmethod
   def vars(self):
     return NotImplemented
 
@@ -469,17 +470,21 @@ class FObject(FExpr):
   def eval(self, env):
     return self.v
 
+  def vars(self):
+    return set()
+
   def z3Node(self):
-    return id(self.v)
+    raise NotImplementedError
 
   def getChildren(self):
-    return None
+    return []
 
   def __call__(self, *args, **kw):
     return self.v.__call__(*args, **kw)
 
   # called whenever an attribute that does not exist is accessed
   def __getattr__(self, attribute):
+    print 'getting attr', attribute
     return getattr(self.v, attribute)
 
   def __setattr__(self, attribute, val):

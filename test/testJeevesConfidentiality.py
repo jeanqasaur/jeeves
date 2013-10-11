@@ -352,19 +352,67 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEquals(jl.concretize(False, y.b), 1100)
 
   def test_objects_eq_is(self):
-    class TestClassEq:
-      def __init__(self, a, b):
+    class TestClass:
+      def __init__(self, a):
         self.a = a
-        self.b = b
+    class TestClassEq:
+      def __init__(self, a):
+        self.a = a
       def __eq__(self, other):
-        return self.a == other.a and self.b == other.b
+        print 'hello'
+        return self.a == other.a
 
-    return NotImplemented
+    jl = JeevesGlobal.jeevesLib
+    x = jl.mkLabel('x')
+    jl.restrict(x, lambda ctxt : ctxt)
+
+    a = TestClass(1)
+    b = TestClass(1)
+    c = TestClass(2)
+
+    v1 = jl.mkSensitive(x, a, c)
+    v2 = jl.mkSensitive(x, b, c)
+    v3 = jl.mkSensitive(x, c, a)
+    self.assertEquals(jl.concretize(True, v1 == v1), True)
+    self.assertEquals(jl.concretize(True, v2 == v2), True)
+    self.assertEquals(jl.concretize(True, v3 == v3), True)
+    self.assertEquals(jl.concretize(True, v1 == v2), False)
+    self.assertEquals(jl.concretize(True, v2 == v3), False)
+    self.assertEquals(jl.concretize(True, v3 == v1), False)
+
+    a = TestClassEq(1)
+    b = TestClassEq(1)
+    c = TestClassEq(2)
+
+    v1 = jl.mkSensitive(x, a, c)
+    v2 = jl.mkSensitive(x, b, c)
+    v3 = jl.mkSensitive(x, c, a)
+    self.assertEquals(jl.concretize(True, v1 == v1), True)
+    self.assertEquals(jl.concretize(True, v2 == v2), True)
+    self.assertEquals(jl.concretize(True, v3 == v3), True)
+    self.assertEquals(jl.concretize(True, v1 == v2), True)
+    self.assertEquals(jl.concretize(True, v2 == v3), False)
+    self.assertEquals(jl.concretize(True, v3 == v1), False)
+
+    # this test passes but for the wrong reasons
+    self.assertEquals(True, False)
 
   def test_objects_operators(self):
     return NotImplemented
 
   def test_objects_delattr(self):
+    return NotImplemented
+
+  def test_objects_callable(self):
+    return NotImplemented
+
+  def test_functions_operators(self):
+    return NotImplemented
+
+  def test_accessing_special_attributes(self):
+    return NotImplemented
+
+  def test_attribute_names(self):
     return NotImplemented
 
 if __name__ == '__main__':
