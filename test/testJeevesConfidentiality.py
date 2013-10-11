@@ -11,27 +11,6 @@ import JeevesGlobal
 import JeevesLib
 from env.PathVars import PositiveVariable, NegativeVariable
 
-class TestClass:
-  def __init__(self, a, b):
-    self.a = a
-    self.b = b
-
-class TestClassMethod:
-  def __init__(self, a, b):
-    self.a = a
-    self.b = b
-  def add_a_to_b(self):
-    self.b = JeevesGlobal.jeevesLib.jassign(self.b, self.a + self.b)
-  def return_sum(self):
-    return self.a + self.b
-
-class TestClassEq:
-  def __init__(self, a, b):
-    self.a = a
-    self.b = b
-  def __eq__(self, other):
-    return self.a == other.a and self.b == other.b
-
 class TestJeevesConfidentiality(unittest.TestCase):
   def setUp(self):
     self.s = Z3()
@@ -288,6 +267,11 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEquals(jl.concretize(41, value), 17)
 
   def test_objects_faceted(self):
+    class TestClass:
+      def __init__(self, a, b):
+        self.a = a
+        self.b = b
+
     jl = JeevesGlobal.jeevesLib
 
     x = jl.mkLabel('x')
@@ -303,6 +287,11 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEquals(jl.concretize(False, y.b), 4)
 
   def test_objects_mutate(self):
+    class TestClass:
+      def __init__(self, a, b):
+        self.a = a
+        self.b = b
+
     jl = JeevesGlobal.jeevesLib
 
     x = jl.mkLabel('x')
@@ -327,6 +316,15 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEquals(jl.concretize(False, t.a), 3)
 
   def test_objects_methodcall(self):
+    class TestClassMethod:
+      def __init__(self, a, b):
+        self.a = a
+        self.b = b
+      def add_a_to_b(self):
+        self.b = JeevesGlobal.jeevesLib.jassign(self.b, self.a + self.b)
+      def return_sum(self):
+        return self.a + self.b
+
     jl = JeevesGlobal.jeevesLib
 
     x = jl.mkLabel('x')
@@ -354,6 +352,13 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEquals(jl.concretize(False, y.b), 1100)
 
   def test_objects_eq_is(self):
+    class TestClassEq:
+      def __init__(self, a, b):
+        self.a = a
+        self.b = b
+      def __eq__(self, other):
+        return self.a == other.a and self.b == other.b
+
     return NotImplemented
 
   def test_objects_operators(self):
