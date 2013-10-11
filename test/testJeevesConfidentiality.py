@@ -16,6 +16,22 @@ class TestClass:
     self.a = a
     self.b = b
 
+class TestClassMethod:
+  def __init__(self, a, b):
+    self.a = a
+    self.b = b
+  def add_a_to_b(self):
+    self.b = JeevesGlobal.jeevesLib.jassign(self.b, self.a + self.b)
+  def return_sum(self):
+    return self.a + self.b
+
+class TestClassEq:
+  def __init__(self, a, b):
+    self.a = a
+    self.b = b
+  def __eq__(self, other):
+    return self.a == other.a and self.b == other.b
+
 class TestJeevesConfidentiality(unittest.TestCase):
   def setUp(self):
     self.s = Z3()
@@ -311,6 +327,33 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEquals(jl.concretize(False, t.a), 3)
 
   def test_objects_methodcall(self):
+    jl = JeevesGlobal.jeevesLib
+
+    x = jl.mkLabel('x')
+    jl.restrict(x, lambda ctxt : ctxt)
+
+    s = TestClassMethod(1, 10)
+    t = TestClassMethod(100, 1000)
+    y = jl.mkSensitive(x, s, t)
+
+    self.assertEquals(jl.concretize(True, y.return_sum()), 11)
+    self.assertEquals(jl.concretize(False, y.return_sum()), 1100)
+
+    y.add_a_to_b()
+    self.assertEquals(jl.concretize(True, s.a), 1)
+    self.assertEquals(jl.concretize(True, s.b), 11)
+    self.assertEquals(jl.concretize(True, t.a), 100)
+    self.assertEquals(jl.concretize(True, t.b), 1000)
+    self.assertEquals(jl.concretize(True, y.a), 1)
+    self.assertEquals(jl.concretize(True, y.b), 11)
+    self.assertEquals(jl.concretize(False, s.a), 1)
+    self.assertEquals(jl.concretize(False, s.b), 10)
+    self.assertEquals(jl.concretize(False, t.a), 100)
+    self.assertEquals(jl.concretize(False, t.b), 1100)
+    self.assertEquals(jl.concretize(False, y.a), 100)
+    self.assertEquals(jl.concretize(False, y.b), 1100)
+
+  def test_objects_eq_is(self):
     return NotImplemented
 
   def test_objects_operators(self):

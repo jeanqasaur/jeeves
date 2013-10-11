@@ -464,7 +464,7 @@ def fexpr_cast(a):
 class FObject(FExpr):
   def __init__(self, v):
     self.__dict__['v'] = v
-    self.type = type(v)
+    self.__dict__['type'] = type(v)
 
   def eval(self, env):
     return self.v
