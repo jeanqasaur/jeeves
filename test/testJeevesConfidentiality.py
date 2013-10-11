@@ -287,10 +287,24 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEquals(jl.concretize(False, y.b), 4)
 
   def test_objects_mutate(self):
-    return NotImplemented
+    jl = JeevesGlobal.jeevesLib
 
-  def test_objects_z3(self):
-    return NotImplemented
+    x = jl.mkLabel('x')
+    jl.restrict(x, lambda ctxt : ctxt)
+
+    y = jl.mkSensitive(x,
+      TestClass(1, 2),
+      TestClass(3, 4))
+
+    def mut():
+      y.a = jassign(y.a, y.a + 100)
+    def nonmut():
+      pass
+
+    jl.jif(y.a == 1, mut, nonmut)
+
+    self.assertEquals(jl.concretize(True, y.a), 101)
+    self.assertEquals(jl.concretize(False, y.a), 3)
 
   def test_objects_methodcall(self):
     return NotImplemented

@@ -450,3 +450,9 @@ class FObject(FExpr):
   # called whenever an attribute that does not exist is accessed
   def __getattr__(self, attribute):
     return getattr(self.v, attribute)
+
+  def __setattr__(self, attribute, val):
+    if attribute in self.__dict__:
+      self.__dict__[attribute] = val
+    else:
+      setattr(self.v, attribute, val)
