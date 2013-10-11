@@ -303,8 +303,6 @@ class TestJeevesConfidentiality(unittest.TestCase):
 
     jl.jif(y.a == 1, mut, nonmut)
 
-    print "s", s.a.prettyPrint()
-    print "t", t.a.prettyPrint()
     self.assertEquals(jl.concretize(True, y.a), 101)
     self.assertEquals(jl.concretize(True, s.a), 101)
     self.assertEquals(jl.concretize(True, t.a), 3)
