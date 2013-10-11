@@ -158,6 +158,26 @@ class Var(FExpr):
   def prettyPrint(self, indent=""):
     return indent + self.name
 
+# helper methods for faceted __setattr__
+def get_objs_in_faceted_obj(f, d):
+  if isinstance(f, Facet):
+    get_objs_in_faceted_obj(f.thn, d)
+    get_objs_in_faceted_obj(f.els, d)
+  elif isinstance(f, FObject):
+    d[id(f.v)] = f.v
+  else:
+    raise TypeError("death is upon us")
+
+def replace_obj_attributes(f, obj, oldvalue, newvalue):
+  if isinstance(f, Facet):
+    return Facet(f.cond,
+      replace_obj_attributes(f.thn, obj, oldvalue, newvalue),
+      replace_obj_attributes(f.els, obj, oldvalue, newvalue))
+  elif f.v is obj:
+    return newvalue
+  else:
+    return oldvalue
+
 '''
 Facets.
 NOTE(JY): I think we don't have to have specialized facets anymore because we
@@ -167,9 +187,9 @@ the type of the facet...
 '''
 class Facet(FExpr):
   def __init__(self, cond, thn, els):
-    self.cond = cond
-    self.thn = fexpr_cast(thn)
-    self.els = fexpr_cast(els)
+    self.__dict__['cond'] = cond
+    self.__dict__['thn'] = fexpr_cast(thn)
+    self.__dict__['els'] = fexpr_cast(els)
 
     # Note (TJH): idiomatic python does lots of automatic casts to bools,
     # especially to check if an integer is nonzero, for instance. We might
@@ -185,7 +205,7 @@ class Facet(FExpr):
                         "same type, they are %s and %s."
                         % (self.thn.type.__name__, self.els.type.__name__))
 
-    self.type = self.thn.type
+    self.__dict__['type'] = self.thn.type
 
   def eval(self, env):
     return self.thn.eval(env) if self.cond.eval(env) else self.els.eval(env)
@@ -208,6 +228,17 @@ class Facet(FExpr):
     return Facet(self.cond,
       getattr(self.thn, attribute),
       getattr(self.els, attribute))
+
+  def __setattr__(self, attribute, value):
+    if attribute in self.__dict__:
+      self.__dict__[attribute] = value
+    else:
+      value = fexpr_cast(value)
+      objs = {}
+      get_objs_in_faceted_obj(self, objs)
+      for _, obj in objs.iteritems():
+        t = replace_obj_attributes(self, obj, getattr(obj, attribute), value)
+        setattr(obj, attribute, t)
     
 class Constant(FExpr):
   def __init__(self, v):
@@ -432,7 +463,7 @@ def fexpr_cast(a):
 
 class FObject(FExpr):
   def __init__(self, v):
-    self.v = v
+    self.__dict__['v'] = v
     self.type = type(v)
 
   def eval(self, env):

@@ -292,24 +292,33 @@ class TestJeevesConfidentiality(unittest.TestCase):
     x = jl.mkLabel('x')
     jl.restrict(x, lambda ctxt : ctxt)
 
-    y = jl.mkSensitive(x,
-      TestClass(1, 2),
-      TestClass(3, 4))
+    s = TestClass(1, None)
+    t = TestClass(3, None)
+    y = jl.mkSensitive(x, s, t)
 
     def mut():
-      y.a = jassign(y.a, y.a + 100)
+      y.a = jl.jassign(y.a, y.a + 100)
     def nonmut():
       pass
 
     jl.jif(y.a == 1, mut, nonmut)
 
+    print "s", s.a.prettyPrint()
+    print "t", t.a.prettyPrint()
     self.assertEquals(jl.concretize(True, y.a), 101)
+    self.assertEquals(jl.concretize(True, s.a), 101)
+    self.assertEquals(jl.concretize(True, t.a), 3)
     self.assertEquals(jl.concretize(False, y.a), 3)
+    self.assertEquals(jl.concretize(False, s.a), 1)
+    self.assertEquals(jl.concretize(False, t.a), 3)
 
   def test_objects_methodcall(self):
     return NotImplemented
 
   def test_objects_operators(self):
+    return NotImplemented
+
+  def test_objects_delattr(self):
     return NotImplemented
 
 if __name__ == '__main__':
