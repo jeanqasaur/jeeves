@@ -37,15 +37,14 @@ class TestAuction(unittest.TestCase):
           AuctionContext(self.bobUser, 10, []), aliceBid.value))
 
   def testSealedAuction(self):
+    # Function that returns true if the context contains a bid from the given
+    # user.
     def hasBidFromUser(ctxt, u):
-      # TODO: Be able to support something along the lines of
-      #   ctxt.
-      # where things can be faceted values.
-      return NotImplemented
+      JeevesGlobal.jeevesLib.jhasElt(ctxt.bids, lambda b: b.owner == u)
     allUsers = [self.aliceUser, self.bobUser, self.claireUser]
-    policy = lambda oc: NotImplemented
-    # need to wait for jand for this...
-    # lambda oc: reduce(lambda acc, c) => hasBidFromUser(occ, c) && acc
+    policy = lambda oc: reduce(lambda acc, c: JeevesGlobal.jeevesLib.jand(
+                    lambda: hasBidFromUser(oc, c), lambda: acc)
+                  , allUsers)
 
     aliceBid = Bid(3, self.aliceUser, policy)
     bobBid = Bid(4, self.bobUser, policy)

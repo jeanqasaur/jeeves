@@ -116,3 +116,15 @@ class JeevesLib:
       else:
         res = Facet(var, old, res)
     return res
+
+  def jhasElt(self, lst, f):
+    acc = False
+    # Short circuits.
+    for elt in lst:
+      isElt = f(elt) # TODO: This should eventually be japply of f to elt.
+      if isinstance(isElt, FExpr):
+        acc = self.jor(lambda: isElt, lambda: acc)
+      else:
+        if isElt:
+          return True
+    return acc 

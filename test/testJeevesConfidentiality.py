@@ -513,5 +513,35 @@ class TestJeevesConfidentiality(unittest.TestCase):
   def test_attribute_names(self):
     return NotImplemented
 
+  def test_jhasElt(self):
+    jl = JeevesGlobal.jeevesLib
+
+    a = jl.mkLabel ()
+    jl.restrict(a, lambda x: x)
+    xS = jl.mkSensitive(a, 42, 1)
+
+    b = jl.mkLabel ()
+    jl.restrict(b, lambda x: x)
+    yS = jl.mkSensitive(b, 43, 3)
+
+    lst = [xS, 2, yS]
+    self.assertEquals(jl.concretize(True, jl.jhasElt(lst, lambda x: x == 42))
+        , True)
+    self.assertEquals(jl.concretize(False, jl.jhasElt(lst, lambda x: x == 42))
+        , False)
+    self.assertEquals(jl.concretize(True, jl.jhasElt(lst, lambda x: x == 1))
+        , False)
+    self.assertEquals(jl.concretize(False, jl.jhasElt(lst, lambda x: x == 1))
+        , True)
+    self.assertEquals(jl.concretize(True, jl.jhasElt(lst, lambda x: x == 43))
+        , True)
+    self.assertEquals(jl.concretize(False, jl.jhasElt(lst, lambda x: x == 43))
+        , False)
+    self.assertEquals(jl.concretize(True, jl.jhasElt(lst, lambda x: x == 3))
+        , False)
+    self.assertEquals(jl.concretize(False, jl.jhasElt(lst, lambda x: x == 3))
+        , True)
+
+
 if __name__ == '__main__':
     unittest.main()

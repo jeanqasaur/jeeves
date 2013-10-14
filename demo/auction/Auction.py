@@ -19,6 +19,8 @@ class Bid:
     lab = JeevesGlobal.jeevesLib.mkLabel ()
     # TODO: Add policy that the output channel has to be either the owner or
     # satisfy the policy on it (policy(oc)).
-    JeevesGlobal.jeevesLib.restrict(lab, lambda oc: True)
+    JeevesGlobal.jeevesLib.restrict(lab
+        , lambda oc: JeevesGlobal.jeevesLib.jor(
+            lambda: oc.user == owner, lambda: policy(oc)))
     self.value = JeevesGlobal.jeevesLib.mkSensitive(lab, value, -1)
     self.owner = owner
