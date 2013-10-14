@@ -5,54 +5,53 @@ Before the transformation, there would be calls to mkLabel and restrict but
 the jifs should be gone. It would also 
 '''
 #import macropy.activate
+import JeevesLib
 from smt.Z3 import *
 import unittest
-import JeevesGlobal
-import JeevesLib
 from env.PathVars import PositiveVariable, NegativeVariable
 
 class TestJeevesConfidentiality(unittest.TestCase):
   def setUp(self):
     self.s = Z3()
     # reset the Jeeves state
-    JeevesGlobal.set_jeeves_state(JeevesLib.JeevesLib())
+    JeevesLib.init()
 
   def test_restrict_all_permissive(self):
-    x = JeevesGlobal.jeevesLib.mkLabel('x')
-    JeevesGlobal.jeevesLib.restrict(x, lambda _: True)
-    xConcrete = JeevesGlobal.jeevesLib.concretize(None, x)
+    x = JeevesLib.mkLabel('x')
+    JeevesLib.restrict(x, lambda _: True)
+    xConcrete = JeevesLib.concretize(None, x)
     # make sure that concretizing x allows everyone to see
     self.assertTrue(xConcrete)
 
   def test_restrict_all_restrictive(self):
-    x = JeevesGlobal.jeevesLib.mkLabel('x')
-    JeevesGlobal.jeevesLib.restrict(x, lambda _: False)
-    xConcrete = JeevesGlobal.jeevesLib.concretize(None, x)
+    x = JeevesLib.mkLabel('x')
+    JeevesLib.restrict(x, lambda _: False)
+    xConcrete = JeevesLib.concretize(None, x)
     self.assertFalse(xConcrete)
 
   def test_restrict_with_context(self):
-    x = JeevesGlobal.jeevesLib.mkLabel('x')
-    JeevesGlobal.jeevesLib.restrict(x, lambda y: y == 2)
+    x = JeevesLib.mkLabel('x')
+    JeevesLib.restrict(x, lambda y: y == 2)
 
-    xConcrete = JeevesGlobal.jeevesLib.concretize(2, x)
+    xConcrete = JeevesLib.concretize(2, x)
     self.assertTrue(xConcrete)
 
-    xConcrete = JeevesGlobal.jeevesLib.concretize(3, x)
+    xConcrete = JeevesLib.concretize(3, x)
     self.assertFalse(xConcrete)
 
   def test_restrict_with_sensitivevalue(self):
-    x = JeevesGlobal.jeevesLib.mkLabel('x')
-    JeevesGlobal.jeevesLib.restrict(x, lambda y: y == 2)
-    value = JeevesGlobal.jeevesLib.mkSensitive(x, 42, 41)
+    x = JeevesLib.mkLabel('x')
+    JeevesLib.restrict(x, lambda y: y == 2)
+    value = JeevesLib.mkSensitive(x, 42, 41)
 
-    valueConcrete = JeevesGlobal.jeevesLib.concretize(2, value)
+    valueConcrete = JeevesLib.concretize(2, value)
     self.assertEquals(valueConcrete, 42)
 
-    valueConcrete = JeevesGlobal.jeevesLib.concretize(1, value)
+    valueConcrete = JeevesLib.concretize(1, value)
     self.assertEquals(valueConcrete, 41)
 
   def test_restrict_with_cyclic(self):
-    jl = JeevesGlobal.jeevesLib
+    jl = JeevesLib
 
     # use the value itself as the context
     x = jl.mkLabel('x')
@@ -65,7 +64,7 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEquals(jl.concretize(value, value), 20)
 
   def test_jif_with_ints(self):
-    jl = JeevesGlobal.jeevesLib
+    jl = JeevesLib
 
     x = jl.mkLabel('x')
     jl.restrict(x, lambda ctxt : ctxt == 42)
@@ -110,7 +109,7 @@ class TestJeevesConfidentiality(unittest.TestCase):
     return NotImplemented
 
   def test_restrict_under_conditional(self):
-    jl = JeevesGlobal.jeevesLib
+    jl = JeevesLib
 
     x = jl.mkLabel('x')
     def yes_restrict():
@@ -135,7 +134,7 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEquals(jl.concretize(1, value), 43)
 
   def test_jbool_functions_constants(self):
-    jl = JeevesGlobal.jeevesLib
+    jl = JeevesLib
 
     self.assertEquals(jl.jand(lambda:True, lambda:True), True)
     self.assertEquals(jl.jand(lambda:True, lambda:False), False)
@@ -151,7 +150,7 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEquals(jl.jnot(False), True)
 
   def test_jbool_functions_fexprs(self):
-    jl = JeevesGlobal.jeevesLib
+    jl = JeevesLib
 
     x = jl.mkLabel('x')
     jl.restrict(x, lambda (a,_) : a == 42)
@@ -195,7 +194,7 @@ class TestJeevesConfidentiality(unittest.TestCase):
     return NotImplemented
 
   def test_jif_with_assign(self):
-    jl = JeevesGlobal.jeevesLib
+    jl = JeevesLib
 
     y = jl.mkLabel('y')
     jl.restrict(y, lambda ctxt : ctxt == 42)
@@ -224,7 +223,7 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEquals(jl.concretize(10, value), 200)
 
   def test_jif_with_assign_with_pathvars(self):
-    jl = JeevesGlobal.jeevesLib
+    jl = JeevesLib
 
     x = jl.mkLabel('x')
     y = jl.mkLabel('y')
@@ -256,7 +255,7 @@ class TestJeevesConfidentiality(unittest.TestCase):
     def add2(a):
         return a+2
 
-    jl = JeevesGlobal.jeevesLib
+    jl = JeevesLib
 
     x = jl.mkLabel('x')
     jl.restrict(x, lambda ctxt : ctxt == 42)
@@ -272,7 +271,7 @@ class TestJeevesConfidentiality(unittest.TestCase):
         self.a = a
         self.b = b
 
-    jl = JeevesGlobal.jeevesLib
+    jl = JeevesLib
 
     x = jl.mkLabel('x')
     jl.restrict(x, lambda ctxt : ctxt)
@@ -292,7 +291,7 @@ class TestJeevesConfidentiality(unittest.TestCase):
         self.a = a
         self.b = b
 
-    jl = JeevesGlobal.jeevesLib
+    jl = JeevesLib
 
     x = jl.mkLabel('x')
     jl.restrict(x, lambda ctxt : ctxt)
@@ -321,11 +320,11 @@ class TestJeevesConfidentiality(unittest.TestCase):
         self.a = a
         self.b = b
       def add_a_to_b(self):
-        self.b = JeevesGlobal.jeevesLib.jassign(self.b, self.a + self.b)
+        self.b = JeevesLib.jassign(self.b, self.a + self.b)
       def return_sum(self):
         return self.a + self.b
 
-    jl = JeevesGlobal.jeevesLib
+    jl = JeevesLib
 
     x = jl.mkLabel('x')
     jl.restrict(x, lambda ctxt : ctxt)
@@ -371,7 +370,7 @@ class TestJeevesConfidentiality(unittest.TestCase):
       def __ge__(self, other):
         return self.a >= other.a
 
-    jl = JeevesGlobal.jeevesLib
+    jl = JeevesLib
     x = jl.mkLabel('x')
     jl.restrict(x, lambda ctxt : ctxt)
 
@@ -514,7 +513,7 @@ class TestJeevesConfidentiality(unittest.TestCase):
     return NotImplemented
 
   def test_jhasElt(self):
-    jl = JeevesGlobal.jeevesLib
+    jl = JeevesLib
 
     a = jl.mkLabel ()
     jl.restrict(a, lambda x: x)

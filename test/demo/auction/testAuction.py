@@ -1,9 +1,8 @@
 import macropy.activate
+import JeevesLib
 from smt.Z3 import *
 import unittest
 from demo.auction.Auction import AuctionContext, Bid, User
-import JeevesGlobal
-import JeevesLib
 
 class TestAuction(unittest.TestCase):
   def setUp(self):

@@ -1,4 +1,5 @@
-import JeevesGlobal
+import JeevesLib
+
 import fast.AST
 import smt.SMT
 from collections import defaultdict
@@ -16,7 +17,7 @@ class PolicyEnv:
   # policy is a function from context to bool which returns true
   # if the label is allowed to be HIGH
   def restrict(self, label, policy):
-    pcFormula = JeevesGlobal.jeevesLib.pathenv.getPathFormula()
+    pcFormula = JeevesLib.jeevesState.pathenv.getPathFormula()
     self.policies[label] = (lambda ctxt :
       fast.AST.Implies(
         pcFormula,
@@ -45,4 +46,3 @@ class PolicyEnv:
     env = smt.SMT.solve(constraints, self.labels[::-1], f.vars())
 
     return f.eval(env)
-    #TODO test this

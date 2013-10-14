@@ -1,4 +1,4 @@
-import JeevesGlobal
+import JeevesLib
 import fast.AST
 
 # TODO: Define your path variable environment, as well as manipulations, here.
@@ -33,14 +33,14 @@ class PositiveVariable:
   def __init__(self, var):
     self.var = var
   def __enter__(self):
-    JeevesGlobal.jeevesLib.pathenv.push(self.var, True)
+    JeevesLib.jeevesState.pathenv.push(self.var, True)
   def __exit__(self, type, value, traceback):
-    JeevesGlobal.jeevesLib.pathenv.pop()
+    JeevesLib.jeevesState.pathenv.pop()
 
 class NegativeVariable:
   def __init__(self, var):
     self.var = var
   def __enter__(self):
-    JeevesGlobal.jeevesLib.pathenv.push(self.var, False)
+    JeevesLib.jeevesState.pathenv.push(self.var, False)
   def __exit__(self, type, value, traceback):
-    JeevesGlobal.jeevesLib.pathenv.pop()
+    JeevesLib.jeevesState.pathenv.pop()

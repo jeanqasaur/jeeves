@@ -1,10 +1,10 @@
 import unittest
 import macropy.activate
 
+import JeevesLib
 from fast.AST import *
 from eval.Eval import partialEval
 from env.PathVars import PositiveVariable, NegativeVariable
-import JeevesLib, JeevesGlobal
 
 def isPureFacetTree(f):
     if isinstance(f, Constant):
@@ -192,8 +192,7 @@ class TestAST(unittest.TestCase):
         self.assertEqual(b.eval({}), True)
 
     def testPartialEval(self):
-        jl = JeevesLib.JeevesLib()
-        JeevesGlobal.set_jeeves_state(jl)
+        JeevesLib.init()
 
         l = Var("l")
 

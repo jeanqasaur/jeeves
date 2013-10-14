@@ -8,7 +8,7 @@ the Scala one!
 from abc import ABCMeta, abstractmethod
 import operator
 import z3
-import JeevesGlobal
+import JeevesLib
 
 #TODO the type stuff
 
@@ -215,7 +215,7 @@ class Facet(FExpr):
     return [self.cond, self.thn, self.els]
 
   def __call__(self, *args, **kw):
-    return JeevesGlobal.jeevesLib.jif(self.cond,
+    return JeevesLib.jif(self.cond,
         lambda:self.thn(*args, **kw), lambda:self.els(*args, **kw))
 
   # called whenever an attribute that does not exist is accessed
@@ -238,42 +238,42 @@ class Facet(FExpr):
   def __eq__(self, other):
     other = fexpr_cast(other)
     if self.type == object or other.type == object:
-      return JeevesGlobal.jeevesLib.jif(self.cond, lambda : self.thn == other,
+      return JeevesLib.jif(self.cond, lambda : self.thn == other,
                                                    lambda : self.els == other)
     else:
       return Eq(self, other)
   def __ne__(self, other):
     other = fexpr_cast(other)
     if self.type == object or other.type == object:
-      return JeevesGlobal.jeevesLib.jif(self.cond, lambda : self.thn != other,
+      return JeevesLib.jif(self.cond, lambda : self.thn != other,
                                                    lambda : self.els != other)
     else:
       return Not(Eq(self, other))
   def __lt__(self, other):
     other = fexpr_cast(other)
     if self.type == object or other.type == object:
-      return JeevesGlobal.jeevesLib.jif(self.cond, lambda : self.thn < other,
+      return JeevesLib.jif(self.cond, lambda : self.thn < other,
                                                    lambda : self.els < other)
     else:
       return Lt(self, other)
   def __gt__(self, other):
     other = fexpr_cast(other)
     if self.type == object or other.type == object:
-      return JeevesGlobal.jeevesLib.jif(self.cond, lambda : self.thn > other,
+      return JeevesLib.jif(self.cond, lambda : self.thn > other,
                                                    lambda : self.els > other)
     else:
       return Gt(self, other)
   def __le__(self, other):
     other = fexpr_cast(other)
     if self.type == object or other.type == object:
-      return JeevesGlobal.jeevesLib.jif(self.cond, lambda : self.thn <= other,
+      return JeevesLib.jif(self.cond, lambda : self.thn <= other,
                                                    lambda : self.els <= other)
     else:
       return LtE(self, other)
   def __ge__(self, other):
     other = fexpr_cast(other)
     if self.type == object or other.type == object:
-      return JeevesGlobal.jeevesLib.jif(self.cond, lambda : self.thn >= other,
+      return JeevesLib.jif(self.cond, lambda : self.thn >= other,
                                                    lambda : self.els >= other)
     else:
       return GtE(self, other)

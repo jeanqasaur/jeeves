@@ -2,7 +2,6 @@
 Translate expressions to SMT import format.
 '''
 from Z3 import Z3
-import JeevesGlobal
 
 class UnsatisfiableException(Exception):
     pass
