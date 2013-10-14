@@ -15,12 +15,12 @@ class TestAuthConfidentiality(unittest.TestCase):
 
   def testUserCanSeeOwnPassword(self):  
     alicePwdToAlice = JeevesGlobal.jeevesLib.concretize(
-        self.aliceUser.getPwd(), self.aliceUser)
+        self.aliceUser, self.aliceUser.getPwd())
     self.assertEqual(alicePwdToAlice, self.alicePwd)
 
   def testUserCannotSeeOtherPassword(self):
     bobPwdToAlice = JeevesGlobal.jeevesLib.concretize(
-        self.bobUser.getPwd(), self.aliceUser)
+        self.aliceUser, self.bobUser.getPwd())
     self.assertEqual(bobPwdToAlice, "")
 
   def testLogin(self):
