@@ -360,14 +360,29 @@ class TestJeevesConfidentiality(unittest.TestCase):
         self.a = a
       def __eq__(self, other):
         return self.a == other.a
+      def __ne__(self, other):
+        return self.a != other.a
+      def __lt__(self, other):
+        return self.a < other.a
+      def __gt__(self, other):
+        return self.a > other.a
+      def __le__(self, other):
+        return self.a <= other.a
+      def __ge__(self, other):
+        return self.a >= other.a
 
     jl = JeevesGlobal.jeevesLib
     x = jl.mkLabel('x')
     jl.restrict(x, lambda ctxt : ctxt)
 
-    a = TestClass(1)
-    b = TestClass(1)
+    a = TestClass(3)
+    b = TestClass(3)
     c = TestClass(2)
+
+    # Ensure that a < b and b < c (will probably be true anyway,
+    # just making sure)
+    a, b, c = sorted((a, b, c))
+    a.a, b.a, c.a = 3, 3, 2
 
     v1 = jl.mkSensitive(x, a, c)
     v2 = jl.mkSensitive(x, b, c)
@@ -379,8 +394,50 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEquals(jl.concretize(True, v2 == v3), False)
     self.assertEquals(jl.concretize(True, v3 == v1), False)
 
-    a = TestClassEq(1)
-    b = TestClassEq(1)
+    self.assertEquals(jl.concretize(True, v1 != v1), False)
+    self.assertEquals(jl.concretize(True, v2 != v2), False)
+    self.assertEquals(jl.concretize(True, v3 != v3), False)
+    self.assertEquals(jl.concretize(True, v1 != v2), True)
+    self.assertEquals(jl.concretize(True, v2 != v3), True)
+    self.assertEquals(jl.concretize(True, v3 != v1), True)
+
+    self.assertEquals(jl.concretize(True, v1 < v1), False)
+    self.assertEquals(jl.concretize(True, v2 < v2), False)
+    self.assertEquals(jl.concretize(True, v3 < v3), False)
+    self.assertEquals(jl.concretize(True, v1 < v2), True)
+    self.assertEquals(jl.concretize(True, v2 < v3), True)
+    self.assertEquals(jl.concretize(True, v3 < v1), False)
+
+    self.assertEquals(jl.concretize(True, v1 > v1), False)
+    self.assertEquals(jl.concretize(True, v2 > v2), False)
+    self.assertEquals(jl.concretize(True, v3 > v3), False)
+    self.assertEquals(jl.concretize(True, v1 > v2), False)
+    self.assertEquals(jl.concretize(True, v2 > v3), False)
+    self.assertEquals(jl.concretize(True, v3 > v1), True)
+
+    self.assertEquals(jl.concretize(True, v1 <= v1), True)
+    self.assertEquals(jl.concretize(True, v2 <= v2), True)
+    self.assertEquals(jl.concretize(True, v3 <= v3), True)
+    self.assertEquals(jl.concretize(True, v1 <= v2), True)
+    self.assertEquals(jl.concretize(True, v2 <= v3), True)
+    self.assertEquals(jl.concretize(True, v3 <= v1), False)
+
+    self.assertEquals(jl.concretize(True, v1 >= v1), True)
+    self.assertEquals(jl.concretize(True, v2 >= v2), True)
+    self.assertEquals(jl.concretize(True, v3 >= v3), True)
+    self.assertEquals(jl.concretize(True, v1 >= v2), False)
+    self.assertEquals(jl.concretize(True, v2 >= v3), False)
+    self.assertEquals(jl.concretize(True, v3 >= v1), True)
+
+    self.assertEquals(jl.concretize(False, v2 == v3), False)
+    self.assertEquals(jl.concretize(False, v2 != v3), True)
+    self.assertEquals(jl.concretize(False, v2 < v3), False)
+    self.assertEquals(jl.concretize(False, v2 > v3), True)
+    self.assertEquals(jl.concretize(False, v2 <= v3), False)
+    self.assertEquals(jl.concretize(False, v2 >= v3), True)
+
+    a = TestClassEq(3)
+    b = TestClassEq(3)
     c = TestClassEq(2)
 
     v1 = jl.mkSensitive(x, a, c)
@@ -392,6 +449,48 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEquals(jl.concretize(True, v1 == v2), True)
     self.assertEquals(jl.concretize(True, v2 == v3), False)
     self.assertEquals(jl.concretize(True, v3 == v1), False)
+
+    self.assertEquals(jl.concretize(True, v1 != v1), False)
+    self.assertEquals(jl.concretize(True, v2 != v2), False)
+    self.assertEquals(jl.concretize(True, v3 != v3), False)
+    self.assertEquals(jl.concretize(True, v1 != v2), False)
+    self.assertEquals(jl.concretize(True, v2 != v3), True)
+    self.assertEquals(jl.concretize(True, v3 != v1), True)
+
+    self.assertEquals(jl.concretize(True, v1 < v1), False)
+    self.assertEquals(jl.concretize(True, v2 < v2), False)
+    self.assertEquals(jl.concretize(True, v3 < v3), False)
+    self.assertEquals(jl.concretize(True, v1 < v2), False)
+    self.assertEquals(jl.concretize(True, v2 < v3), False)
+    self.assertEquals(jl.concretize(True, v3 < v1), True)
+
+    self.assertEquals(jl.concretize(True, v1 > v1), False)
+    self.assertEquals(jl.concretize(True, v2 > v2), False)
+    self.assertEquals(jl.concretize(True, v3 > v3), False)
+    self.assertEquals(jl.concretize(True, v1 > v2), False)
+    self.assertEquals(jl.concretize(True, v2 > v3), True)
+    self.assertEquals(jl.concretize(True, v3 > v1), False)
+
+    self.assertEquals(jl.concretize(True, v1 <= v1), True)
+    self.assertEquals(jl.concretize(True, v2 <= v2), True)
+    self.assertEquals(jl.concretize(True, v3 <= v3), True)
+    self.assertEquals(jl.concretize(True, v1 <= v2), True)
+    self.assertEquals(jl.concretize(True, v2 <= v3), False)
+    self.assertEquals(jl.concretize(True, v3 <= v1), True)
+
+    self.assertEquals(jl.concretize(True, v1 >= v1), True)
+    self.assertEquals(jl.concretize(True, v2 >= v2), True)
+    self.assertEquals(jl.concretize(True, v3 >= v3), True)
+    self.assertEquals(jl.concretize(True, v1 >= v2), True)
+    self.assertEquals(jl.concretize(True, v2 >= v3), True)
+    self.assertEquals(jl.concretize(True, v3 >= v1), False)
+
+    self.assertEquals(jl.concretize(False, v2 == v3), False)
+    self.assertEquals(jl.concretize(False, v2 != v3), True)
+    self.assertEquals(jl.concretize(False, v2 < v3), True)
+    self.assertEquals(jl.concretize(False, v2 > v3), False)
+    self.assertEquals(jl.concretize(False, v2 <= v3), True)
+    self.assertEquals(jl.concretize(False, v2 >= v3), False)
 
   def test_objects_operators(self):
     return NotImplemented

@@ -241,6 +241,12 @@ class Facet(FExpr):
       return Facet(self.cond, self.thn == other, self.els == other)
     else:
       return Eq(self, other)
+  def __ne__(self, other):
+    other = fexpr_cast(other)
+    if self.type == object or other.type == object:
+      return Facet(self.cond, self.thn != other, self.els != other)
+    else:
+      return Not(Eq(self, other))
     
 class Constant(FExpr):
   def __init__(self, v):
@@ -283,6 +289,7 @@ class BinaryExpr(FExpr):
 class UnaryExpr(FExpr):
   def __init__(self, sub):
     self.sub = sub
+    self.type = self.ret_type
 
   def vars(self):
     return self.sub.vars()
@@ -500,13 +507,42 @@ class FObject(FExpr):
       return Eq(self, other)
     return f(other)
 
-"""
-  def __ne__(l, r):
-  def __lt__(l, r):
-  def __gt__(l, r):
-  def __le__(l, r):
-  def __ge__(l, r):
+  def __ne__(self, other):
+    try:
+      f = getattr(self.v, '__ne__')
+    except AttributeError:
+      return Not(Eq(self, other))
+    return f(other)
 
+  def __lt__(self, other):
+    try:
+      f = getattr(self.v, '__lt__')
+    except AttributeError:
+      return Lt(self, other)
+    return f(other)
+
+  def __gt__(self, other):
+    try:
+      f = getattr(self.v, '__gt__')
+    except AttributeError:
+      return Gt(self, other)
+    return f(other)
+
+  def __le__(self, other):
+    try:
+      f = getattr(self.v, '__le__')
+    except AttributeError:
+      return LtE(self, other)
+    return f(other)
+
+  def __ge__(self, other):
+    try:
+      f = getattr(self.v, '__ge__')
+    except AttributeError:
+      return GtE(self, other)
+    return f(other)
+
+"""
   def __and__(l, r):
   def __rand__(r, l):
   def __or__(l, r):
