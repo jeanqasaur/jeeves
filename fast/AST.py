@@ -238,15 +238,45 @@ class Facet(FExpr):
   def __eq__(self, other):
     other = fexpr_cast(other)
     if self.type == object or other.type == object:
-      return Facet(self.cond, self.thn == other, self.els == other)
+      return JeevesGlobal.jeevesLib.jif(self.cond, lambda : self.thn == other,
+                                                   lambda : self.els == other)
     else:
       return Eq(self, other)
   def __ne__(self, other):
     other = fexpr_cast(other)
     if self.type == object or other.type == object:
-      return Facet(self.cond, self.thn != other, self.els != other)
+      return JeevesGlobal.jeevesLib.jif(self.cond, lambda : self.thn != other,
+                                                   lambda : self.els != other)
     else:
       return Not(Eq(self, other))
+  def __lt__(self, other):
+    other = fexpr_cast(other)
+    if self.type == object or other.type == object:
+      return JeevesGlobal.jeevesLib.jif(self.cond, lambda : self.thn < other,
+                                                   lambda : self.els < other)
+    else:
+      return Lt(self, other)
+  def __gt__(self, other):
+    other = fexpr_cast(other)
+    if self.type == object or other.type == object:
+      return JeevesGlobal.jeevesLib.jif(self.cond, lambda : self.thn > other,
+                                                   lambda : self.els > other)
+    else:
+      return Gt(self, other)
+  def __le__(self, other):
+    other = fexpr_cast(other)
+    if self.type == object or other.type == object:
+      return JeevesGlobal.jeevesLib.jif(self.cond, lambda : self.thn <= other,
+                                                   lambda : self.els <= other)
+    else:
+      return LtE(self, other)
+  def __ge__(self, other):
+    other = fexpr_cast(other)
+    if self.type == object or other.type == object:
+      return JeevesGlobal.jeevesLib.jif(self.cond, lambda : self.thn >= other,
+                                                   lambda : self.els >= other)
+    else:
+      return GtE(self, other)
     
 class Constant(FExpr):
   def __init__(self, v):
