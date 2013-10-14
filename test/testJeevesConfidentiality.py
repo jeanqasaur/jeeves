@@ -8,7 +8,7 @@ the jifs should be gone. It would also
 import JeevesLib
 from smt.Z3 import *
 import unittest
-from env.PathVars import PositiveVariable, NegativeVariable
+from JeevesLib import PositiveVariable, NegativeVariable
 
 class TestJeevesConfidentiality(unittest.TestCase):
   def setUp(self):

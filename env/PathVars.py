@@ -28,19 +28,3 @@ class PathVars:
 
   def getEnv(self):
     return dict(self.conditions)
-
-class PositiveVariable:
-  def __init__(self, var):
-    self.var = var
-  def __enter__(self):
-    JeevesLib.jeevesState.pathenv.push(self.var, True)
-  def __exit__(self, type, value, traceback):
-    JeevesLib.jeevesState.pathenv.pop()
-
-class NegativeVariable:
-  def __init__(self, var):
-    self.var = var
-  def __enter__(self):
-    JeevesLib.jeevesState.pathenv.push(self.var, False)
-  def __exit__(self, type, value, traceback):
-    JeevesLib.jeevesState.pathenv.pop()

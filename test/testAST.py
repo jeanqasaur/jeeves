@@ -4,7 +4,7 @@ import macropy.activate
 import JeevesLib
 from fast.AST import *
 from eval.Eval import partialEval
-from env.PathVars import PositiveVariable, NegativeVariable
+from JeevesLib import PositiveVariable, NegativeVariable
 
 def isPureFacetTree(f):
     if isinstance(f, Constant):
