@@ -40,7 +40,7 @@ class TestAuction(unittest.TestCase):
     # Function that returns true if the context contains a bid from the given
     # user.
     def hasBidFromUser(ctxt, u):
-      JeevesGlobal.jeevesLib.jhasElt(ctxt.bids, lambda b: b.owner == u)
+      return JeevesGlobal.jeevesLib.jhasElt(ctxt.bids, lambda b: b.owner == u)
     allUsers = [self.aliceUser, self.bobUser, self.claireUser]
     policy = lambda oc: reduce(lambda acc, c: JeevesGlobal.jeevesLib.jand(
                     lambda: hasBidFromUser(oc, c), lambda: acc)
