@@ -106,12 +106,6 @@ class FExpr:
 
   # TODO bitwise operations? do we care?
 
-  # do not need right-hand versions of the comparison operators
-  def __eq__(l, r):
-    return Eq(l, fexpr_cast(r))
-
-  def __ne__(l, r): return Not(Eq(l, fexpr_cast(r)))
-
   def __lt__(l, r):
     return Lt(l, fexpr_cast(r))
 
@@ -240,6 +234,13 @@ class Facet(FExpr):
       for _, obj in objs.iteritems():
         t = replace_obj_attributes(self, obj, getattr(obj, attribute), value)
         setattr(obj, attribute, t)
+
+  def __eq__(self, other):
+    other = fexpr_cast(other)
+    if self.type == object or other.type == object:
+      return Facet(self.cond, self.thn == other, self.els == other)
+    else:
+      return Eq(self, other)
     
 class Constant(FExpr):
   def __init__(self, v):
@@ -465,7 +466,7 @@ def fexpr_cast(a):
 class FObject(FExpr):
   def __init__(self, v):
     self.__dict__['v'] = v
-    self.__dict__['type'] = type(v)
+    self.__dict__['type'] = object
 
   def eval(self, env):
     return self.v
@@ -474,7 +475,7 @@ class FObject(FExpr):
     return set()
 
   def z3Node(self):
-    raise NotImplementedError
+    return id(self)
 
   def getChildren(self):
     return []
@@ -484,7 +485,6 @@ class FObject(FExpr):
 
   # called whenever an attribute that does not exist is accessed
   def __getattr__(self, attribute):
-    print 'getting attr', attribute
     return getattr(self.v, attribute)
 
   def __setattr__(self, attribute, val):
@@ -492,3 +492,33 @@ class FObject(FExpr):
       self.__dict__[attribute] = val
     else:
       setattr(self.v, attribute, val)
+
+  def __eq__(self, other): 
+    try:
+      f = getattr(self.v, '__eq__')
+    except AttributeError:
+      return Eq(self, other)
+    return f(other)
+
+"""
+  def __ne__(l, r):
+  def __lt__(l, r):
+  def __gt__(l, r):
+  def __le__(l, r):
+  def __ge__(l, r):
+
+  def __and__(l, r):
+  def __rand__(r, l):
+  def __or__(l, r):
+  def __ror__(r, l):
+  def __add__(l, r):
+  def __radd__(r, l):
+  def __sub__(l, r):
+  def __rsub__(r, l):
+  def __mul__(l, r):
+  def __rmul__(r, l):
+  def __div__(l, r):
+  def __rdiv__(r, l):
+  def __mod__(l, r):
+  def __rmod__(r, l):
+"""
