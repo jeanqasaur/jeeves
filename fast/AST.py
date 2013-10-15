@@ -200,12 +200,15 @@ class Facet(FExpr):
 
     # Note (TJH): Ordinary Python would of course allow these types to be
     # distinct, but that sounds pretty annoying to support on our end.
-    if self.thn.type != self.els.type:
+    # TODO: Unassigned makes things super-awkward, we need to figure that out.
+    # For now, just ignore them.
+    if (self.thn.type != None and self.els.type != None and
+            self.thn.type != self.els.type):
         raise TypeError("Condition on both sides of a Facet must have the "
                         "same type, they are %s and %s."
                         % (self.thn.type.__name__, self.els.type.__name__))
 
-    self.__dict__['type'] = self.thn.type
+    self.__dict__['type'] = self.thn.type or self.els.type
 
   def eval(self, env):
     return self.thn.eval(env) if self.cond.eval(env) else self.els.eval(env)
@@ -239,6 +242,19 @@ class Facet(FExpr):
       for _, obj in objs.iteritems():
         t = replace_obj_attributes(self, obj, getattr(obj, attribute), value)
         setattr(obj, attribute, t)
+
+  def __getitem__(self, attribute):
+    return Facet(self.cond,
+      self.thn[attribute],
+      self.els[attribute])
+
+  def __setitem__(self, attribute, value):
+    value = fexpr_cast(value)
+    objs = {}
+    get_objs_in_faceted_obj(self, objs)
+    for _, obj in objs.iteritems():
+      t = replace_obj_attributes(self, obj, obj[attribute], value)
+      obj[attribute] = t
 
   def __eq__(self, other):
     other = fexpr_cast(other)
@@ -282,6 +298,12 @@ class Facet(FExpr):
                                                    lambda : self.els >= other)
     else:
       return GtE(self, other)
+
+  def __len__(self):
+    if self.type == object:
+      return JeevesLib.jif(self.cond, self.thn.__len__, self.els.__len__)
+    else:
+      raise TypeError("no way bro")
     
 class Constant(FExpr):
   def __init__(self, v):
@@ -486,6 +508,8 @@ class GtE(BinaryExpr):
     return self.left.z3Node() >= self.right.z3Node()
 
 class Unassigned(FExpr):
+  def __init__(self):
+    self.type = None
   def eval(self, env):
     raise ValueError("Hey br0, you can't evaluate an expression that involves "
       "an unassigned value.")
@@ -493,12 +517,12 @@ class Unassigned(FExpr):
     pass #TODO ?? what goes here
   def getChildren(self):
     return []
-  def vars():
+  def vars(self):
     return set()
 
 # TODO(TJH): figure out the correct implementation of this
 def is_obj(o):
-  return hasattr(o, '__dict__')
+  return isinstance(o, list) or hasattr(o, '__dict__')
 
 # helper method
 def fexpr_cast(a):
@@ -538,6 +562,18 @@ class FObject(FExpr):
       self.__dict__[attribute] = val
     else:
       setattr(self.v, attribute, val)
+
+  def __getitem__(self, item):
+    try:
+      return self.v[item]
+    except IndexError:
+      return Unassigned()
+
+  def __setitem__(self, item, val):
+    self.v[item] = val
+
+  def __len__(self):
+    return self.v.__len__()
 
   def __eq__(self, other): 
     try:

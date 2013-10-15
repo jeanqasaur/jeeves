@@ -541,6 +541,33 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEquals(jl.concretize(False, jl.jhasElt(lst, lambda x: x == 3))
         , True)
 
+  def test_list(self):
+    jl = JeevesLib
+    x = jl.mkLabel('x')
+    jl.restrict(x, lambda ctxt : ctxt)
+
+    l = jl.mkSensitive(x, [40,41,42], [0,1,2,3])
+
+    self.assertEqual(jl.concretize(True, l[0]), 40)
+    self.assertEqual(jl.concretize(True, l[1]), 41)
+    self.assertEqual(jl.concretize(True, l[2]), 42)
+    self.assertEqual(jl.concretize(False, l[0]), 0)
+    self.assertEqual(jl.concretize(False, l[1]), 1)
+    self.assertEqual(jl.concretize(False, l[2]), 2)
+    self.assertEqual(jl.concretize(False, l[3]), 3)
+
+    self.assertEqual(jl.concretize(True, l.__len__()), 3)
+    self.assertEqual(jl.concretize(False, l.__len__()), 4)
+
+    l[1] = 19
+
+    self.assertEqual(jl.concretize(True, l[0]), 40)
+    self.assertEqual(jl.concretize(True, l[1]), 19)
+    self.assertEqual(jl.concretize(True, l[2]), 42)
+    self.assertEqual(jl.concretize(False, l[0]), 0)
+    self.assertEqual(jl.concretize(False, l[1]), 19)
+    self.assertEqual(jl.concretize(False, l[2]), 2)
+    self.assertEqual(jl.concretize(False, l[3]), 3)
 
 if __name__ == '__main__':
     unittest.main()
