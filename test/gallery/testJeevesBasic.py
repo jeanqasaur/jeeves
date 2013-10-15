@@ -37,7 +37,7 @@ class TestJeevesBasic(unittest.TestCase):
     alice = User(0)
     bob = User(1)
 
-    a = JeevesLib.mkLabel('a')
+    a = JeevesLib.mkLabel()
     JeevesLib.restrict(a, lambda oc: oc == alice)
     xS = JeevesLib.mkSensitive(a, 42, 0)
     self.assertEqual(42, JeevesLib.concretize(alice, xS))
@@ -52,7 +52,7 @@ class TestJeevesBasic(unittest.TestCase):
     bob = User(1)
     charlie = User(2)
 
-    a = JeevesLib.mkLabel('a')
+    a = JeevesLib.mkLabel()
     JeevesLib.restrict(a
         , lambda oc: JeevesLib.jor(lambda: oc == alice, lambda: oc == bob))
     xS = JeevesLib.mkSensitive(a, 42, 0)
@@ -69,7 +69,7 @@ class TestJeevesBasic(unittest.TestCase):
     charlie = User(2)
 
     friends = { alice: [bob], bob: [alice], charlie: [] }
-    a = JeevesLib.mkLabel('a')
+    a = JeevesLib.mkLabel()
     # Policy: can see if viewer is in the friends list.
     JeevesLib.restrict(a
         , lambda oc: JeevesLib.jhas(friends[alice], oc))
@@ -93,7 +93,7 @@ class TestJeevesBasic(unittest.TestCase):
     defaultLoc = GPS(sys.maxint, sys.maxint)
     
     alice = User(0)
-    a = JeevesLib.mkLabel ()
+    a = JeevesLib.mkLabel()
     aliceLoc = JeevesLib.mkSensitive(a, GPS(0, 0), defaultLoc)
     JeevesLib.restrict(a, lambda oc: oc.location.distance(aliceLoc) < 25)
     aliceCtxt = LocationContext(alice, aliceLoc)
@@ -109,13 +109,30 @@ class TestJeevesBasic(unittest.TestCase):
   Example with a circular dependency.
   '''
   def testCircularDependency(self):
-    pass
+    a = JeevesLib.mkLabel()
+    alice = User(0)
+    bob = User(1)
+    charlie = User(2)
+    guestList = [alice, bob]
+    guestListS = JeevesLib.mkSensitive(a, guestList, [])
+    JeevesLib.restrict(a, lambda oc: guestListS.__contains__(oc))
+
+    self.assertEqual(guestList, JeevesLib.concretize(alice, guestListS))
+    self.assertEqual(guestList, JeevesLib.concretize(alice, guestListS))
+    self.assertEqual([], JeevesLib.concretize(charlie, guestListS))
 
   '''
   Conditionals.
   '''
   def testConditional(self):
-    pass
+    a = JeevesLib.mkLabel()
+    alice = User(0) 
+    bob = User(1)
+    JeevesLib.restrict(a, lambda oc: oc == alice)
+    xS = JeevesLib.mkSensitive(a, 42, 0)
+    r = JeevesLib.jif(xS == 42, lambda: 1, lambda: 2)
+    self.assertEqual(1, JeevesLib.concretize(alice, r))
+    self.assertEqual(2, JeevesLib.concretize(bob, r))
 
   '''
   Functions.
