@@ -104,6 +104,11 @@ class FExpr:
   def __rmod__(r, l):
     return Mod(fexpr_cast(l), r)
 
+  def __abs__(v):
+    if isinstance(v, FExpr):
+      return Facet(v > 0, v, 0 - v)
+    return abs(v)
+
   # TODO bitwise operations? do we care?
 
   def __lt__(l, r):

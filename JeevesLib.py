@@ -125,6 +125,9 @@ def jhasElt(lst, f):
         return True
   return acc 
 
+def jhas(lst, v):
+  return jhasElt(lst, lambda x: x == v)
+
 class PositiveVariable:
   def __init__(self, var):
     self.var = var
