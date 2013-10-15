@@ -486,6 +486,10 @@ class Unassigned(FExpr):
       "an unassigned value.")
   def z3Node(self):
     pass #TODO ?? what goes here
+  def getChildren(self):
+    return []
+  def vars():
+    return set()
 
 # TODO(TJH): figure out the correct implementation of this
 def is_obj(o):

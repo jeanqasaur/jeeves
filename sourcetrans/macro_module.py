@@ -50,17 +50,19 @@ def jeeves(tree, **kw):
       return q[ JeevesLib.jif(ast[tree.test], lambda : ast[tree.body], lambda : ast[tree.orelse]) ]
 
     # a = b
-    # a += Reassign(b, Reassign.Replace)
+    # a = JeevesLib.jassign(a, b)
     if isinstance(tree, Assign):
       # TODO handle multiple assignments case later
+      # TODO handle cases where the left-hand side isn't so simple
       assert len(tree.targets) == 1
       return copy_location(
-        AugAssign(tree.targets[0], Add(), q[ JeevesLib.Reassign(ast[tree.value]) ]),
+        Assign([tree.targets[0]], q[ JeevesLib.jassign(ast[tree.targets[0]], ast[tree.value]) ]),
         tree
        )
 
     # a += b
     # a += Reassign(b, Reassign.Add)
+    """
     if isinstance(tree, AugAssign):
       if isinstance(tree.op, And):
         op = q[lambda x,y : x+y]
@@ -72,6 +74,7 @@ def jeeves(tree, **kw):
         AugAssign(tree.targets[0], Add(), q[ JeevesLib.Reassign(ast[tree.value], ast[op]) ]),
         tree
        )
+    """
 
     # in every function, find all variables that get assigned and initialize them
     # to Unassigned()
