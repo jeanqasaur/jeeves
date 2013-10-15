@@ -1,30 +1,29 @@
 import macropy.activate
 from smt.Z3 import *
 import unittest
-from demo.authentication.AuthConfidentiality import Authentication, Principal
-import JeevesGlobal
+from AuthConfidentiality import Authentication, Principal
 import JeevesLib
 
 class TestAuthConfidentiality(unittest.TestCase):
   def setUp(self):
-    JeevesGlobal.set_jeeves_state(JeevesLib.JeevesLib())
+    JeevesLib.init()
     self.alicePwd = "alicePwd"
     self.bobPwd = "bobPwd"
     self.aliceUser = Principal.User(1, "Alice", self.alicePwd)
     self.bobUser = Principal.User(2, "Bob", self.bobPwd)
 
   def testUserCanSeeOwnPassword(self):  
-    alicePwdToAlice = JeevesGlobal.jeevesLib.concretize(
+    alicePwdToAlice = JeevesLib.concretize(
         self.aliceUser, self.aliceUser.getPwd())
     self.assertEqual(alicePwdToAlice, self.alicePwd)
 
   def testUserCannotSeeOtherPassword(self):
-    bobPwdToAlice = JeevesGlobal.jeevesLib.concretize(
+    bobPwdToAlice = JeevesLib.concretize(
         self.aliceUser, self.bobUser.getPwd())
     self.assertEqual(bobPwdToAlice, "")
 
   def testLogin(self):
-    aliceLogin = JeevesGlobal.jeevesLib.concretize(
+    aliceLogin = JeevesLib.concretize(
           Authentication.login(self.aliceUser, self.alicePwd), self.aliceUser)
     self.assertEqual(aliceLogin, self.aliceUser)
 

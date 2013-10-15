@@ -2,7 +2,7 @@
 Authentication demo example for Jeeves with confidentiality policies.
 '''
 #from macropy.case_classes import macros, case
-import JeevesGlobal
+import JeevesLib
 
 class User:
   def __init__(self, userId):
@@ -16,11 +16,11 @@ class AuctionContext():
 
 class Bid:
   def __init__(self, value, owner, policy):
-    lab = JeevesGlobal.jeevesLib.mkLabel ()
+    lab = JeevesLib.mkLabel ()
     # TODO: Add policy that the output channel has to be either the owner or
     # satisfy the policy on it (policy(oc)).
-    JeevesGlobal.jeevesLib.restrict(lab
-        , lambda oc: JeevesGlobal.jeevesLib.jor(
+    JeevesLib.restrict(lab
+        , lambda oc: JeevesLib.jor(
             lambda: oc.user == owner, lambda: policy(oc)))
-    self.value = JeevesGlobal.jeevesLib.mkSensitive(lab, value, -1)
+    self.value = JeevesLib.mkSensitive(lab, value, -1)
     self.owner = owner
