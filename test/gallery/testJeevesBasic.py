@@ -99,7 +99,6 @@ class TestJeevesBasic(unittest.TestCase):
     aliceCtxt = LocationContext(alice, aliceLoc)
 
     bob = User(1)
-    bobCtxt = LocationContext(bob, GPS(5, 5))
     self.assertEqual(GPS(0, 0)
         , JeevesLib.concretize(LocationContext(bob, GPS(5, 5)), aliceLoc))
     self.assertEqual(defaultLoc
@@ -118,7 +117,7 @@ class TestJeevesBasic(unittest.TestCase):
     JeevesLib.restrict(a, lambda oc: guestListS.__contains__(oc))
 
     self.assertEqual(guestList, JeevesLib.concretize(alice, guestListS))
-    self.assertEqual(guestList, JeevesLib.concretize(alice, guestListS))
+    self.assertEqual(guestList, JeevesLib.concretize(bob, guestListS))
     self.assertEqual([], JeevesLib.concretize(charlie, guestListS))
 
   '''
