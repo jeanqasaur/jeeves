@@ -55,8 +55,10 @@ def jeeves(tree, **kw):
       # TODO handle multiple assignments case later
       # TODO handle cases where the left-hand side isn't so simple
       assert len(tree.targets) == 1
+      assert isinstance(tree.targets[0], Name)
+      nm = tree.targets[0].id
       return copy_location(
-        Assign([tree.targets[0]], q[ JeevesLib.jassign(ast[tree.targets[0]], ast[tree.value]) ]),
+        Assign([tree.targets[0]], q[ JeevesLib.jassign(name[nm], ast[tree.value]) ]),
         tree
        )
 
