@@ -522,7 +522,7 @@ class Unassigned(FExpr):
 
 # TODO(TJH): figure out the correct implementation of this
 def is_obj(o):
-  return isinstance(o, list) or hasattr(o, '__dict__')
+  return isinstance(o, list) or isinstance(o, tuple) or hasattr(o, '__dict__')
 
 # helper method
 def fexpr_cast(a):

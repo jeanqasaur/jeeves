@@ -26,9 +26,9 @@ def get_vars_in_scope(node):
   return list(set(v) - set(g))
 
 @macros.decorator
-def jeeves(tree, **kw):
+def jeeves(tree, gen_sym, **kw):
   @Walker
-  def transform(tree, stop, **kw):
+  def transform(tree, stop, ctx, set_ctx, **kw):
     # not expr
     # JeevesLib.jnot(expr)
     if isinstance(tree, UnaryOp) and isinstance(tree.op, Not):
@@ -78,6 +78,65 @@ def jeeves(tree, **kw):
        )
     """
 
+    # If a1,a2,..,an are all the local variables, change
+    #
+    # if condition:
+    #     thn_body
+    # else:
+    #     els_body
+    # 
+    # to
+    #
+    # def thn_fn_name(a1=a1,...,an=an):
+    #     thn_body
+    #     return (a1,...,an)
+    # def els_fn_name(a1=a1,...,an=an):
+    #     els_body
+    #     return (a1,...,an)
+    # (a1,...,an) = JeevesLib.liftTuple(jif(condition, thn_fn_name, els_fn_name))
+    if isinstance(tree, If):
+      # TODO search over the bodies, and only do this for the variables that
+      # get assigned to.
+      localvars = ctx
+      
+      thn_fn_name = gen_sym()
+      els_fn_name = gen_sym()
+
+      test = transform.recurse(tree.test, ctx=ctx)
+      thn_body = transform.recurse(tree.body, ctx=ctx)
+      els_body = transform.recurse(tree.orelse, ctx=ctx)
+      stop()
+
+      def get_func(funcname, funcbody):
+        return FunctionDef(
+          name=funcname, 
+          args=arguments(
+            args=[Name(id=v, ctx=Param()) for v in localvars],
+            vararg=None,
+            kwarg=None,
+            defaults=[Name(id=v, ctx=Load()) for v in localvars],
+          ),
+          body=funcbody + [
+            Return(value=Tuple(
+              elts=[Name(id=v, ctx=Load()) for v in localvars],
+              ctx=Load(),
+            )),
+          ],
+          decorator_list=[]
+        )
+
+      return [
+        get_func(thn_fn_name, thn_body),
+        get_func(els_fn_name, els_body),
+        copy_location(Assign(
+          targets=[Tuple(
+            elts=[Name(id=v, ctx=Store()) for v in localvars],
+            ctx=Store(),
+          )],
+          value=q[JeevesLib.liftTuple(JeevesLib.jif(ast[test], name[thn_fn_name], name[els_fn_name]))],
+        ),tree)
+      ]
+
     # in every function, find all variables that get assigned and initialize them
     # to Unassigned()
     if isinstance(tree, FunctionDef):
@@ -86,7 +145,7 @@ def jeeves(tree, **kw):
             q[JeevesLib.Unassigned()])
       name = tree.name
       args = transform.recurse(tree.args) 
-      body = transform.recurse(tree.body)
+      body = transform.recurse(tree.body, ctx=varnames)
       decorator_list = transform.recurse(tree.decorator_list)
       newtree = copy_location(
         FunctionDef(name=name, args=args,
@@ -97,4 +156,4 @@ def jeeves(tree, **kw):
       stop()
       return newtree
 
-  return transform.recurse(tree)
+  return transform.recurse(tree, ctx=None)
