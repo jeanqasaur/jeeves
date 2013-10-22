@@ -103,7 +103,7 @@ class TestSourceTransform(unittest.TestCase):
     self.assertEquals(jl.concretize((False, False), f), 104)
 
   @jeeves
-  def test_restrict(self):
+  def test_restrict_under_conditional(self):
     x = JeevesLib.mkLabel('x')
 
     value = JeevesLib.mkSensitive(x, 42, 0)
@@ -119,3 +119,42 @@ class TestSourceTransform(unittest.TestCase):
         JeevesLib.restrict(y, lambda ctxt : ctxt == 1)
     self.assertEquals(JeevesLib.concretize(0, value), 43)
     self.assertEquals(JeevesLib.concretize(1, value), 43)
+
+  @jeeves
+  def test_jbool_functions_fexprs(self):
+    jl = JeevesLib
+
+    x = jl.mkLabel('x')
+    jl.restrict(x, lambda (a,_) : a == 42)
+
+    for lh in (True, False):
+      for ll in (True, False):
+        for rh in (True, False):
+          for rl in (True, False):
+            l = jl.mkSensitive(x, lh, ll)
+            r = jl.mkSensitive(x, rh, rl)
+            self.assertEquals(jl.concretize((42,0), l and r), lh and rh)
+            self.assertEquals(jl.concretize((10,0), l and r), ll and rl)
+            self.assertEquals(jl.concretize((42,0), l or r), lh or rh)
+            self.assertEquals(jl.concretize((10,0), l or r), ll or rl)
+            self.assertEquals(jl.concretize((42,0), not l), not lh)
+            self.assertEquals(jl.concretize((10,0), not l), not ll)
+
+    y = jl.mkLabel('y')
+    jl.restrict(y, lambda (_,b) : b == 42)
+
+    for lh in (True, False):
+      for ll in (True, False):
+        for rh in (True, False):
+          for rl in (True, False):
+            l = jl.mkSensitive(x, lh, ll)
+            r = jl.mkSensitive(y, rh, rl)
+            self.assertEquals(jl.concretize((42,0), l and r), lh and rl)
+            self.assertEquals(jl.concretize((10,0), l and r), ll and rl)
+            self.assertEquals(jl.concretize((42,42), l and r), lh and rh)
+            self.assertEquals(jl.concretize((10,42), l and r), ll and rh)
+
+            self.assertEquals(jl.concretize((42,0), l or r), lh or rl)
+            self.assertEquals(jl.concretize((10,0), l or r), ll or rl)
+            self.assertEquals(jl.concretize((42,42), l or r), lh or rh)
+            self.assertEquals(jl.concretize((10,42), l or r), ll or rh)

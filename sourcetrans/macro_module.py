@@ -53,15 +53,17 @@ def jeeves(tree, gen_sym, **kw):
     if isinstance(tree, UnaryOp) and isinstance(tree.op, Not):
       return q[ JeevesLib.jnot(ast[tree.operand]) ]
 
-    # left and right
+    # a1 and a2 and ... and an
     # JeevesLib.jand(lambda : left, lambda : right)
-    if isinstance(tree, BoolOp) and isinstance(tree.op, And):
-      return q[ JeevesLib.jand(ast[tree.left], ast[tree.right]) ]
-
-    # left or right
-    # JeevesLib.jor(lambda : left, lambda : right)
-    if isinstance(tree, BoolOp) and isinstance(tree.op, And):
-      return q[ JeevesLib.jor(ast[tree.left], ast[tree.right]) ]
+    if isinstance(tree, BoolOp):
+      if isinstance(tree.op, And):
+        fn = q[ JeevesLib.jand ]
+      else:
+        fn = q[ JeevesLib.jor ]
+      result = tree.values[-1]
+      for operand in tree.values[-2::-1]:
+        result = q[ JeevesLib.jand(lambda : ast[operand], lambda : ast[result]) ]
+      return result
 
     # thn if cond else els
     # JeevesLib.jif(cond, lambda : thn, lambda : els)
