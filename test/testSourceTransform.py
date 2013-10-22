@@ -158,3 +158,61 @@ class TestSourceTransform(unittest.TestCase):
             self.assertEquals(jl.concretize((10,0), l or r), ll or rl)
             self.assertEquals(jl.concretize((42,42), l or r), lh or rh)
             self.assertEquals(jl.concretize((10,42), l or r), ll or rh)
+  
+  @jeeves
+  def test_jif_with_assign(self):
+    jl = JeevesLib
+
+    y = jl.mkLabel('y')
+    jl.restrict(y, lambda ctxt : ctxt == 42)
+
+    value0 = jl.mkSensitive(y, 0, 1)
+    value2 = jl.mkSensitive(y, 2, 3)
+
+    value = value0
+    value = value2
+    self.assertEquals(jl.concretize(42, value), 2)
+    self.assertEquals(jl.concretize(10, value), 3)
+
+    value = 100
+    value = value2
+    self.assertEquals(jl.concretize(42, value), 2)
+    self.assertEquals(jl.concretize(10, value), 3)
+
+    value = value0
+    value = 200
+    self.assertEquals(jl.concretize(42, value), 200)
+    self.assertEquals(jl.concretize(10, value), 200)
+
+    value = 100
+    value = 200
+    self.assertEquals(jl.concretize(42, value), 200)
+    self.assertEquals(jl.concretize(10, value), 200)
+
+  @jeeves
+  def test_jif_with_assign_with_pathvars(self):
+    jl = JeevesLib
+
+    x = jl.mkLabel('x')
+    y = jl.mkLabel('y')
+    jl.restrict(x, lambda (a,_) : a)
+    jl.restrict(y, lambda (_,b) : b)
+
+    value0 = jl.mkSensitive(y, 0, 1)
+    value2 = jl.mkSensitive(y, 2, 3)
+
+    value = value0
+    if x:
+      value = value2
+    self.assertEquals(jl.concretize((True, True), value), 2)
+    self.assertEquals(jl.concretize((True, False), value), 3)
+    self.assertEquals(jl.concretize((False, True), value), 0)
+    self.assertEquals(jl.concretize((False, False), value), 1)
+
+    value = value0
+    if not x:
+      value = value2
+    self.assertEquals(jl.concretize((False, True), value), 2)
+    self.assertEquals(jl.concretize((False, False), value), 3)
+    self.assertEquals(jl.concretize((True, True), value), 0)
+    self.assertEquals(jl.concretize((True, False), value), 1)

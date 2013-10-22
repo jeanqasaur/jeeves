@@ -27,8 +27,10 @@ def partialEval(f):
 def facetApply(f, opr):
   if isinstance(f, Facet):
     return Facet(f.cond, facetApply(f.thn, opr), facetApply(f.els, opr))
-  else:
-    return opr(f)
+  elif isinstance(f, Constant):
+    return Constant(opr(f.v))
+  elif isinstance(f, FObject):
+    return FObject(opr(f.v))
 
 '''
 This function should combine two 
