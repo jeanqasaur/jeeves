@@ -18,13 +18,15 @@ def get_params_in_arguments(node):
 
 # Takes a FunctionDef node and returns a pair
 # (list of local variables, list of parameter variables)
-# TODO deal with function names BLEARGH
 def get_vars_in_scope(node):
   @Walker
   def get_vars(tree, collect, stop, **kw):
     if isinstance(tree, Name) and isinstance(tree.ctx, Store):
       collect(tree.id)
-    if tree != node and (isinstance(tree, ClassDef) or isinstance(tree, FunctionDef)):
+    if isinstance(tree, ClassDef):
+      stop()
+    if tree != node and isinstance(tree, FunctionDef):
+      collect(tree.name)
       stop()
     if isinstance(tree, arguments):
       pass
@@ -44,6 +46,8 @@ def get_vars_in_scope(node):
 
 @macros.decorator
 def jeeves(tree, gen_sym, **kw):
+
+  top_node = tree
 
   # ctx is a mapping from variable names to the namespace
   @Walker
@@ -184,8 +188,22 @@ def jeeves(tree, gen_sym, **kw):
                 decorator_list=decorator_list),
         tree
       )
+
       stop()
-      return newtree
+      
+      if tree == top_node:
+        return newtree
+
+      outerAssignStmt = copy_location(Assign(
+        targets=[Attribute(
+          value=Name(id=ctx[tree.name], ctx=Load()),
+          attr=tree.name,
+          ctx=Store()
+        )],
+        value=Name(id=tree.name, ctx=Load()),
+      ), tree)
+        
+      return [newtree, outerAssignStmt]
 
     if isinstance(tree, Lambda):
       paramNames = get_params_in_arguments(tree.args)

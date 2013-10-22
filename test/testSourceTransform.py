@@ -216,3 +216,20 @@ class TestSourceTransform(unittest.TestCase):
     self.assertEquals(jl.concretize((False, False), value), 3)
     self.assertEquals(jl.concretize((True, True), value), 0)
     self.assertEquals(jl.concretize((True, False), value), 1)
+
+  @jeeves
+  def test_function_facets(self):
+    def add1(a):
+        return a+1
+    def add2(a):
+        return a+2
+
+    jl = JeevesLib
+
+    x = jl.mkLabel('x')
+    jl.restrict(x, lambda ctxt : ctxt == 42)
+
+    fun = jl.mkSensitive(x, add1, add2)
+    value = fun(15)
+    self.assertEquals(jl.concretize(42, value), 16)
+    self.assertEquals(jl.concretize(41, value), 17)
