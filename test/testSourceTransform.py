@@ -9,7 +9,7 @@ class TestSourceTransform(unittest.TestCase):
     JeevesLib.init()
 
   @jeeves
-  def test_restrict_al_permissive(self):
+  def test_restrict_all_permissive(self):
     x = JeevesLib.mkLabel('x')
     JeevesLib.restrict(x, lambda _: True)
     xConcrete = JeevesLib.concretize(None, x)

@@ -155,6 +155,12 @@ def liftTuple(t):
   else:
     raise TypeError("bad use of liftTuple")
 
+class Namespace:
+  def __init__(self, kw):
+    self.__dict__.update(kw)
+  def __getattr__(self, attr):
+    return Unassigned()
+
 from env.VarEnv import VarEnv
 from env.PolicyEnv import PolicyEnv
 from env.PathVars import PathVars
