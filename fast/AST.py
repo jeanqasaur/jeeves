@@ -555,7 +555,10 @@ class FObject(FExpr):
 
   # called whenever an attribute that does not exist is accessed
   def __getattr__(self, attribute):
-    return getattr(self.v, attribute)
+    if hasattr(self.v, attribute):
+      return getattr(self.v, attribute)
+    else:
+      return Unassigned()
 
   def __setattr__(self, attribute, val):
     if attribute in self.__dict__:

@@ -104,13 +104,19 @@ def jeeves(tree, gen_sym, **kw):
         if isinstance(tree, Store):
           return Load()
 
+      @Walker
+      def makeUnassigned(tree, stop, **kw):
+        if isinstance(tree, Attribute):
+          stop()
+          return q[ JeevesLib.jgetattr(ast[tree.value], u[tree.attr]) ]
+
       target = transform.recurse(tree.targets[0], ctx=ctx)
-      print ctx, dump(target)
       value = transform.recurse(tree.value, ctx=ctx)
       stop()
 
       newStore, prevStmts = pullExprs.recurse_collect(target)
-      exprLoad = makeLoad.recurse(copy.deepcopy(newStore))
+      exprLoad1 = makeLoad.recurse(copy.deepcopy(newStore))
+      exprLoad = makeUnassigned.recurse(exprLoad1)
 
       result = prevStmts + [copy_location(
         Assign([newStore], q[ JeevesLib.jassign(ast[exprLoad], ast[value]) ]),
@@ -268,5 +274,4 @@ def jeeves(tree, gen_sym, **kw):
       )
 
   result = transform.recurse(tree, ctx={})
-  print dump(result)
   return result

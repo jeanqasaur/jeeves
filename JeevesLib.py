@@ -158,8 +158,12 @@ def liftTuple(t):
 class Namespace:
   def __init__(self, kw):
     self.__dict__.update(kw)
-  def __getattr__(self, attr):
-    return Unassigned()
+
+def jgetattr(obj, attr):
+  if isinstance(obj, FExpr):
+    return getattr(obj, attr)
+  else:
+    return getattr(obj, attr) if hasattr(obj, attr) else Unassigned()
 
 from env.VarEnv import VarEnv
 from env.PolicyEnv import PolicyEnv

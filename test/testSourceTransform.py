@@ -4,9 +4,22 @@ from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
 
 class TestClass:
+  @jeeves
   def __init__(self, a, b):
     self.a = a
     self.b = b
+
+class TestClassMethod:
+  @jeeves
+  def __init__(self, a, b):
+    self.a = a
+    self.b = b
+  @jeeves
+  def add_a_to_b(self):
+    self.b = self.a + self.b
+  @jeeves
+  def return_sum(self):
+    return self.a + self.b
 
 class TestSourceTransform(unittest.TestCase):
   def setUp(self):
@@ -275,3 +288,30 @@ class TestSourceTransform(unittest.TestCase):
     self.assertEquals(jl.concretize(False, y.a), 3)
     self.assertEquals(jl.concretize(False, s.a), 1)
     self.assertEquals(jl.concretize(False, t.a), 3)
+
+  def test_objects_methodcall(self):
+    jl = JeevesLib
+
+    x = jl.mkLabel('x')
+    jl.restrict(x, lambda ctxt : ctxt)
+
+    s = TestClassMethod(1, 10)
+    t = TestClassMethod(100, 1000)
+    y = jl.mkSensitive(x, s, t)
+
+    self.assertEquals(jl.concretize(True, y.return_sum()), 11)
+    self.assertEquals(jl.concretize(False, y.return_sum()), 1100)
+
+    y.add_a_to_b()
+    self.assertEquals(jl.concretize(True, s.a), 1)
+    self.assertEquals(jl.concretize(True, s.b), 11)
+    self.assertEquals(jl.concretize(True, t.a), 100)
+    self.assertEquals(jl.concretize(True, t.b), 1000)
+    self.assertEquals(jl.concretize(True, y.a), 1)
+    self.assertEquals(jl.concretize(True, y.b), 11)
+    self.assertEquals(jl.concretize(False, s.a), 1)
+    self.assertEquals(jl.concretize(False, s.b), 10)
+    self.assertEquals(jl.concretize(False, t.a), 100)
+    self.assertEquals(jl.concretize(False, t.b), 1100)
+    self.assertEquals(jl.concretize(False, y.a), 100)
+    self.assertEquals(jl.concretize(False, y.b), 1100)
