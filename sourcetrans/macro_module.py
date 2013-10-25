@@ -191,6 +191,12 @@ def jeeves(tree, gen_sym, **kw):
         ])
       ]
 
+    if isinstance(tree, Compare):
+      assert len(tree.ops) == 1
+      # TODO other comparisons besides 'in'
+      if isinstance(tree.ops[0], In):
+        return q[ JeevesLib.jhas(ast[tree.comparators[0]], ast[tree.left]) ]
+
     if isinstance(tree, FunctionDef):
       varNames, paramNames = get_vars_in_scope(tree)
       namespaceName = gen_sym()

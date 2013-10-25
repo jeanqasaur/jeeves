@@ -464,3 +464,25 @@ class TestSourceTransform(unittest.TestCase):
     self.assertEquals(jl.concretize(False, v2 > v3), False)
     self.assertEquals(jl.concretize(False, v2 <= v3), True)
     self.assertEquals(jl.concretize(False, v2 >= v3), False)
+
+  @jeeves
+  def test_jhasElt(self):
+    jl = JeevesLib
+
+    a = jl.mkLabel ()
+    jl.restrict(a, lambda x: x)
+    xS = jl.mkSensitive(a, 42, 1)
+
+    b = jl.mkLabel ()
+    jl.restrict(b, lambda x: x)
+    yS = jl.mkSensitive(b, 43, 3)
+
+    lst = [xS, 2, yS]
+    self.assertEquals(jl.concretize(True, 42 in lst) , True)
+    self.assertEquals(jl.concretize(False, 42 in lst) , False)
+    self.assertEquals(jl.concretize(True, 1 in lst) , False)
+    self.assertEquals(jl.concretize(False, 1 in lst) , True)
+    self.assertEquals(jl.concretize(True, 43 in lst) , True)
+    self.assertEquals(jl.concretize(False, 43 in lst) , False)
+    self.assertEquals(jl.concretize(True, 3 in lst) , False)
+    self.assertEquals(jl.concretize(False, 3 in lst) , True)
