@@ -3,6 +3,11 @@ import macropy.activate
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
 
+class TestClass:
+  def __init__(self, a, b):
+    self.a = a
+    self.b = b
+
 class TestSourceTransform(unittest.TestCase):
   def setUp(self):
     # reset the Jeeves state
@@ -233,3 +238,40 @@ class TestSourceTransform(unittest.TestCase):
     value = fun(15)
     self.assertEquals(jl.concretize(42, value), 16)
     self.assertEquals(jl.concretize(41, value), 17)
+
+  @jeeves
+  def test_objects_faceted(self):
+    jl = JeevesLib
+
+    x = jl.mkLabel('x')
+    jl.restrict(x, lambda ctxt : ctxt)
+
+    y = jl.mkSensitive(x,
+      TestClass(1, 2),
+      TestClass(3, 4))
+
+    self.assertEquals(jl.concretize(True, y.a), 1)
+    self.assertEquals(jl.concretize(True, y.b), 2)
+    self.assertEquals(jl.concretize(False, y.a), 3)
+    self.assertEquals(jl.concretize(False, y.b), 4)
+
+  @jeeves
+  def test_objects_mutate(self):
+    jl = JeevesLib
+
+    x = jl.mkLabel('x')
+    jl.restrict(x, lambda ctxt : ctxt)
+
+    s = TestClass(1, None)
+    t = TestClass(3, None)
+    y = jl.mkSensitive(x, s, t)
+
+    if y.a == 1:
+      y.a = y.a + 100
+
+    self.assertEquals(jl.concretize(True, y.a), 101)
+    self.assertEquals(jl.concretize(True, s.a), 101)
+    self.assertEquals(jl.concretize(True, t.a), 3)
+    self.assertEquals(jl.concretize(False, y.a), 3)
+    self.assertEquals(jl.concretize(False, s.a), 1)
+    self.assertEquals(jl.concretize(False, t.a), 3)

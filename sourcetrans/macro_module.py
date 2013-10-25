@@ -2,6 +2,7 @@
 from macropy.core.macros import *
 from macropy.core.quotes import macros, q, ast, u
 from ast import *
+import copy
 
 macros = Macros()
 
@@ -80,12 +81,42 @@ def jeeves(tree, gen_sym, **kw):
       # TODO handle multiple assignments case later
       # TODO handle cases where the left-hand side isn't so simple
       assert len(tree.targets) == 1
-      assert isinstance(tree.targets[0], Name)
-      nm = tree.targets[0].id
-      return copy_location(
-        Assign([tree.targets[0]], q[ JeevesLib.jassign(ast[Name(id=nm, ctx=Load())], ast[tree.value]) ]),
+
+      @Walker
+      def pullExprs(tree, collect, **kw):
+        if isinstance(tree, Attribute):
+          if not isinstance(tree.value, Name):
+            valueName = gen_sym()
+            collect(Assign(
+              targets=[Name(id=valueName, ctx=Store())],
+              value=tree.value
+            ))
+            return Attribute(
+              value=Name(id=valueName, ctx=Load()),
+              attr=tree.attr,
+              ctx=Store()
+            )
+        if isinstance(tree, Subscript):
+          pass #TODO please
+      
+      @Walker
+      def makeLoad(tree, **kw):
+        if isinstance(tree, Store):
+          return Load()
+
+      target = transform.recurse(tree.targets[0], ctx=ctx)
+      print ctx, dump(target)
+      value = transform.recurse(tree.value, ctx=ctx)
+      stop()
+
+      newStore, prevStmts = pullExprs.recurse_collect(target)
+      exprLoad = makeLoad.recurse(copy.deepcopy(newStore))
+
+      result = prevStmts + [copy_location(
+        Assign([newStore], q[ JeevesLib.jassign(ast[exprLoad], ast[value]) ]),
         tree
-       )
+      )]
+      return result
 
     # a += b
     # a += Reassign(b, Reassign.Add)
@@ -237,4 +268,5 @@ def jeeves(tree, gen_sym, **kw):
       )
 
   result = transform.recurse(tree, ctx={})
+  print dump(result)
   return result
