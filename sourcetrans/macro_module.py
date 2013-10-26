@@ -97,7 +97,22 @@ def jeeves(tree, gen_sym, **kw):
               ctx=Store()
             )
         if isinstance(tree, Subscript):
-          pass #TODO please
+          assert isinstance(tree.slice, Index)
+          a = gen_sym()
+          b = gen_sym()
+          collect(Assign(
+            targets=[Name(id=a, ctx=Store())],
+            value=tree.value
+          ))
+          collect(Assign(
+            targets=[Name(id=b, ctx=Store())],
+            value=tree.slice.value
+          ))
+          return Subscript(
+            value=Name(id=a,ctx=Load()),
+            slice=Index(Name(id=b,ctx=Load())),
+            ctx=Store()
+          )
       
       @Walker
       def makeLoad(tree, **kw):
@@ -109,6 +124,9 @@ def jeeves(tree, gen_sym, **kw):
         if isinstance(tree, Attribute):
           stop()
           return q[ JeevesLib.jgetattr(ast[tree.value], u[tree.attr]) ]
+        if isinstance(tree, Subscript):
+          stop()
+          return q[ JeevesLib.jgetitem(ast[tree.value], ast[tree.slice.value]) ]
 
       target = transform.recurse(tree.targets[0], ctx=ctx)
       value = transform.recurse(tree.value, ctx=ctx)

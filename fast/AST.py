@@ -569,7 +569,7 @@ class FObject(FExpr):
   def __getitem__(self, item):
     try:
       return self.v[item]
-    except IndexError:
+    except (KeyError, IndexError, TypeError):
       return Unassigned()
 
   def __setitem__(self, item, val):

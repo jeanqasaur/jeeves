@@ -165,6 +165,12 @@ def jgetattr(obj, attr):
   else:
     return getattr(obj, attr) if hasattr(obj, attr) else Unassigned()
 
+def jgetitem(obj, item):
+  try:
+    return obj[item]
+  except (KeyError, KeyError, TypeError) as e:
+    return Unassigned()
+
 from env.VarEnv import VarEnv
 from env.PolicyEnv import PolicyEnv
 from env.PathVars import PathVars
