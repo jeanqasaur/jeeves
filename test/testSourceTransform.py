@@ -16,7 +16,7 @@ class TestClassMethod:
     self.b = b
   @jeeves
   def add_a_to_b(self):
-    self.b = self.a + self.b
+    self.b += self.a
   @jeeves
   def return_sum(self):
     return self.a + self.b

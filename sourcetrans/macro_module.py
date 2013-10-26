@@ -77,10 +77,9 @@ def jeeves(tree, gen_sym, **kw):
 
     # a = b
     # a = JeevesLib.jassign(a, b)
-    if isinstance(tree, Assign):
+    if isinstance(tree, Assign) or isinstance(tree, AugAssign):
       # TODO handle multiple assignments case later
       # TODO handle cases where the left-hand side isn't so simple
-      assert len(tree.targets) == 1
 
       @Walker
       def pullExprs(tree, collect, **kw):
@@ -128,7 +127,12 @@ def jeeves(tree, gen_sym, **kw):
           stop()
           return q[ JeevesLib.jgetitem(ast[tree.value], ast[tree.slice.value]) ]
 
-      target = transform.recurse(tree.targets[0], ctx=ctx)
+      if isinstance(tree, Assign):
+        assert len(tree.targets) == 1
+        target = tree.targets[0]
+      else:
+        target = tree.target
+      target = transform.recurse(target, ctx=ctx)
       value = transform.recurse(tree.value, ctx=ctx)
       stop()
 
@@ -136,27 +140,16 @@ def jeeves(tree, gen_sym, **kw):
       exprLoad1 = makeLoad.recurse(copy.deepcopy(newStore))
       exprLoad = makeUnassigned.recurse(exprLoad1)
 
+      if isinstance(tree, Assign):
+        newvalue = value
+      else:
+        newvalue = BinOp(exprLoad, tree.op, value)
+
       result = prevStmts + [copy_location(
-        Assign([newStore], q[ JeevesLib.jassign(ast[exprLoad], ast[value]) ]),
+        Assign([newStore], q[ JeevesLib.jassign(ast[exprLoad], ast[newvalue]) ]),
         tree
       )]
       return result
-
-    # a += b
-    # a += Reassign(b, Reassign.Add)
-    """
-    if isinstance(tree, AugAssign):
-      if isinstance(tree.op, And):
-        op = q[lambda x,y : x+y]
-      elif isinstance(tree.op, Sub):
-        op = q[lambda x,y : x-y]
-      else:
-        assert False # TODO other operators
-      return copy_location(
-        AugAssign(tree.targets[0], Add(), q[ JeevesLib.Reassign(ast[tree.value], ast[op]) ]),
-        tree
-       )
-    """
 
     # If a1,a2,..,an are all the local variables, change
     #
