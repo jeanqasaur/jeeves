@@ -619,6 +619,9 @@ class FObject(FExpr):
     except AttributeError:
       return GtE(self, other)
     return f(other)
+  
+  def __iter__(self):
+    return self.v.__iter__()
 
 """
   def __and__(l, r):
