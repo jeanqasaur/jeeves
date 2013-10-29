@@ -569,7 +569,7 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEqual(jl.concretize(False, l[2]), 2)
     self.assertEqual(jl.concretize(False, l[3]), 3)
 
-  def test_jmap(self):
+  def test_jmap_listcomp(self):
     x = JeevesLib.mkLabel('x')
     JeevesLib.restrict(x, lambda ctxt : ctxt)
 

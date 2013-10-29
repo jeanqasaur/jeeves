@@ -623,6 +623,10 @@ class FObject(FExpr):
   def __iter__(self):
     return self.v.__iter__()
 
+  def __add__(self, other):
+    f = getattr(self.v, '__add__')
+    return f(other)
+
 """
   def __and__(l, r):
   def __rand__(r, l):
