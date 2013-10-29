@@ -45,6 +45,7 @@ def get_vars_in_scope(node):
   p = get_params_in_arguments(node.args)
   return (list(set(v) - set(g)), p)
 
+
 @macros.decorator
 def jeeves(tree, gen_sym, **kw):
 
@@ -74,6 +75,30 @@ def jeeves(tree, gen_sym, **kw):
     # JeevesLib.jif(cond, lambda : thn, lambda : els)
     if isinstance(tree, IfExp):
       return q[ JeevesLib.jif(ast[tree.test], lambda : ast[tree.body], lambda : ast[tree.orelse]) ]
+
+    # [expr for args in iterator]
+    # JeevesLib.jmap(iterator
+    if isinstance(tree, ListComp):
+      elt = tree.elt
+      generators = tree.generators
+      assert len(generators) == 1
+      assert len(generators[0].ifs) == 0
+      @Walker
+      def toParam(tree, **kw):
+        if isinstance(tree, Store):
+          return Param()
+      target = toParam.recurse(generators[0].target)
+      iter = generators[0].iter
+      lmbda = Lambda(
+        args=arguments(
+          args=[target],
+          vararg=None,
+          kwarg=None,
+          defaults=[]
+        ),
+        body=elt
+      )
+      return q[ JeevesLib.jmap(ast[iter], ast[lmbda]) ]
 
     # a = b
     # a = JeevesLib.jassign(a, b)
