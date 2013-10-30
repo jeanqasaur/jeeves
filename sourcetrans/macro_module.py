@@ -45,6 +45,17 @@ def get_vars_in_scope(node):
   p = get_params_in_arguments(node.args)
   return (list(set(v) - set(g)), p)
 
+
+@Walker
+def toParam(tree, **kw):
+  if isinstance(tree, Store):
+    return Param()
+
+@Walker
+def makeLoad(tree, **kw):
+  if isinstance(tree, Store):
+    return Load()
+
 @macros.decorator
 def jeeves(tree, gen_sym, **kw):
 
@@ -74,6 +85,26 @@ def jeeves(tree, gen_sym, **kw):
     # JeevesLib.jif(cond, lambda : thn, lambda : els)
     if isinstance(tree, IfExp):
       return q[ JeevesLib.jif(ast[tree.test], lambda : ast[tree.body], lambda : ast[tree.orelse]) ]
+
+    # [expr for args in iterator]
+    # JeevesLib.jmap(iterator
+    if isinstance(tree, ListComp):
+      elt = tree.elt
+      generators = tree.generators
+      assert len(generators) == 1
+      assert len(generators[0].ifs) == 0
+      target = toParam.recurse(generators[0].target)
+      iter = generators[0].iter
+      lmbda = Lambda(
+        args=arguments(
+          args=[target],
+          vararg=None,
+          kwarg=None,
+          defaults=[]
+        ),
+        body=elt
+      )
+      return q[ JeevesLib.jmap(ast[iter], ast[lmbda]) ]
 
     # a = b
     # a = JeevesLib.jassign(a, b)
@@ -112,12 +143,7 @@ def jeeves(tree, gen_sym, **kw):
             slice=Index(Name(id=b,ctx=Load())),
             ctx=Store()
           )
-      
-      @Walker
-      def makeLoad(tree, **kw):
-        if isinstance(tree, Store):
-          return Load()
-
+     
       @Walker
       def makeUnassigned(tree, stop, **kw):
         if isinstance(tree, Attribute):
@@ -200,6 +226,36 @@ def jeeves(tree, gen_sym, **kw):
             ast[Name(id=els_fn_name,ctx=Load())],
           )
         ])
+      ]
+
+    if isinstance(tree, For):
+      localvars = ctx
+
+      body_fn_name = gen_sym()
+
+      iter = transform.recurse(tree.iter, ctx=ctx)
+      body = transform.recurse(tree.body, ctx=ctx)
+      targetParams = toParam.recurse(copy.deepcopy(tree.target))
+      targetStore = transform.recurse(copy.deepcopy(tree.target), ctx=ctx)
+      targetLoad = makeLoad.recurse(copy.deepcopy(tree.target))
+      assert len(tree.orelse) == 0 or isinstance(tree.orelse[0], Pass)
+      stop()
+
+      func = copy_location(FunctionDef(
+        name=body_fn_name,
+        args=arguments(
+          args=[targetParams],
+          vararg=None,
+          kwarg=None,
+          defaults=[],
+        ),
+        body=[Assign([targetStore], targetLoad)] + body,
+        decorator_list=[]
+      ), tree)
+
+      return [
+        func,
+        Expr(value=q[ JeevesLib.jmap(ast[iter], ast[Name(body_fn_name,Load())]) ])
       ]
 
     if isinstance(tree, Compare):

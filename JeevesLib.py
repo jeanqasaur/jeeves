@@ -171,6 +171,17 @@ def jgetitem(obj, item):
   except (KeyError, KeyError, TypeError) as e:
     return Unassigned()
 
+def jmap(iterator, mapper):
+    iteratator = partialEval(fexpr_cast(iterator))
+    return jmap2(iterator, mapper)
+def jmap2(iterator, mapper):
+    if isinstance(iterator, Facet):
+        return jif(iterator.cond,
+            lambda : jmap2(iterator.thn, mapper),
+            lambda : jmap2(iterator.els, mapper))
+    else:
+        return [mapper(item) for item in iterator]
+
 from env.VarEnv import VarEnv
 from env.PolicyEnv import PolicyEnv
 from env.PathVars import PathVars

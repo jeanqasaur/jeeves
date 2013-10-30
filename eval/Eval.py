@@ -21,6 +21,8 @@ def partialEval(f):
                          partialEval(f.els))
   elif isinstance(f, Var):
     return Facet(f, Constant(True), Constant(False))
+  elif isinstance(f, FObject):
+    return f
   else:
     raise TypeError("partialEval does not support type %s" % f.__class__.__name__)
 

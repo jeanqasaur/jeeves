@@ -513,3 +513,32 @@ class TestSourceTransform(unittest.TestCase):
     self.assertEqual(jl.concretize(False, l[1]), 19)
     self.assertEqual(jl.concretize(False, l[2]), 2)
     self.assertEqual(jl.concretize(False, l[3]), 3)
+
+  @jeeves
+  def test_jmap(self):
+    x = JeevesLib.mkLabel('x')
+    JeevesLib.restrict(x, lambda ctxt : ctxt)
+
+    l = JeevesLib.mkSensitive(x, [0,1,2], [3,4,5,6])
+    m = [x*x for x in l]
+
+    self.assertEqual(JeevesLib.concretize(True, m[0]), 0)
+    self.assertEqual(JeevesLib.concretize(True, m[1]), 1)
+    self.assertEqual(JeevesLib.concretize(True, m[2]), 4)
+    self.assertEqual(JeevesLib.concretize(False, m[0]), 9)
+    self.assertEqual(JeevesLib.concretize(False, m[1]), 16)
+    self.assertEqual(JeevesLib.concretize(False, m[2]), 25)
+    self.assertEqual(JeevesLib.concretize(False, m[3]), 36)
+
+  @jeeves
+  def test_jmap_for(self):
+    x = JeevesLib.mkLabel('x')
+    JeevesLib.restrict(x, lambda ctxt : ctxt)
+
+    l = JeevesLib.mkSensitive(x, [0,1,2], [3,4,5,6])
+    m = 0
+    for x in l:
+      m = m + x*x
+
+    self.assertEqual(JeevesLib.concretize(True, m), 5)
+    self.assertEqual(JeevesLib.concretize(False, m), 86)
