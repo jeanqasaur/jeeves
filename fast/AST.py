@@ -304,7 +304,7 @@ class Facet(FExpr):
       return JeevesLib.jif(self.cond, self.thn.__len__, self.els.__len__)
     else:
       raise TypeError("no way bro")
-    
+
 class Constant(FExpr):
   def __init__(self, v):
     self.v = v
@@ -619,9 +619,6 @@ class FObject(FExpr):
     except AttributeError:
       return GtE(self, other)
     return f(other)
-  
-  def __iter__(self):
-    return self.v.__iter__()
 
 """
   def __and__(l, r):

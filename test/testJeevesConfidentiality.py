@@ -584,5 +584,26 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEqual(JeevesLib.concretize(False, m[2]), 25)
     self.assertEqual(JeevesLib.concretize(False, m[3]), 36)
 
+  def test_jlist(self):
+    x = JeevesLib.mkLabel('x')
+    JeevesLib.restrict(x, lambda ctxt : ctxt)
+
+    l = JeevesLib.mkSensitive(x, JeevesLib.JList([0,1,2]), JeevesLib.JList([3,4,5,6]))
+    def add10():
+      l.append(10)
+    def add11():
+      l.append(11)
+    JeevesLib.jif(x, add10, add11)
+
+    self.assertEqual(JeevesLib.concretize(True, l[0]), 0)
+    self.assertEqual(JeevesLib.concretize(True, l[1]), 1)
+    self.assertEqual(JeevesLib.concretize(True, l[2]), 2)
+    self.assertEqual(JeevesLib.concretize(True, l[3]), 10)
+    self.assertEqual(JeevesLib.concretize(False, l[0]), 3)
+    self.assertEqual(JeevesLib.concretize(False, l[1]), 4)
+    self.assertEqual(JeevesLib.concretize(False, l[2]), 5)
+    self.assertEqual(JeevesLib.concretize(False, l[3]), 6)
+    self.assertEqual(JeevesLib.concretize(False, l[4]), 11)
+
 if __name__ == '__main__':
     unittest.main()

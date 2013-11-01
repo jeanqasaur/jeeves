@@ -522,6 +522,7 @@ class TestSourceTransform(unittest.TestCase):
     l = JeevesLib.mkSensitive(x, [0,1,2], [3,4,5,6])
     m = [x*x for x in l]
 
+    print m.prettyPrint()
     self.assertEqual(JeevesLib.concretize(True, m[0]), 0)
     self.assertEqual(JeevesLib.concretize(True, m[1]), 1)
     self.assertEqual(JeevesLib.concretize(True, m[2]), 4)
@@ -542,3 +543,26 @@ class TestSourceTransform(unittest.TestCase):
 
     self.assertEqual(JeevesLib.concretize(True, m), 5)
     self.assertEqual(JeevesLib.concretize(False, m), 86)
+
+  @jeeves
+  def test_jlist(self):
+    x = JeevesLib.mkLabel('x')
+    JeevesLib.restrict(x, lambda ctxt : ctxt)
+
+    l = JeevesLib.mkSensitive(x, [0,1,2], [3,4,5,6])
+    if x:
+      l.append(10)
+    else:
+      l.append(11)
+
+    self.assertEqual(JeevesLib.concretize(True, l[0]), 0)
+    self.assertEqual(JeevesLib.concretize(True, l[1]), 1)
+    self.assertEqual(JeevesLib.concretize(True, l[2]), 2)
+    self.assertEqual(JeevesLib.concretize(True, l[3]), 10)
+    self.assertEqual(JeevesLib.concretize(False, l[0]), 3)
+    self.assertEqual(JeevesLib.concretize(False, l[1]), 4)
+    self.assertEqual(JeevesLib.concretize(False, l[2]), 5)
+    self.assertEqual(JeevesLib.concretize(False, l[3]), 6)
+    self.assertEqual(JeevesLib.concretize(False, l[4]), 11)
+
+

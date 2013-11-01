@@ -171,16 +171,44 @@ def jgetitem(obj, item):
   except (KeyError, KeyError, TypeError) as e:
     return Unassigned()
 
-def jmap(iterator, mapper):
-    iteratator = partialEval(fexpr_cast(iterator))
-    return jmap2(iterator, mapper)
+def jmap(iterable, mapper):
+  iterable = partialEval(fexpr_cast(iterable))
+  return jmap2(iterable, mapper)
 def jmap2(iterator, mapper):
-    if isinstance(iterator, Facet):
-        return jif(iterator.cond,
-            lambda : jmap2(iterator.thn, mapper),
-            lambda : jmap2(iterator.els, mapper))
-    else:
-        return [mapper(item) for item in iterator]
+  if isinstance(iterator, Facet):
+    return jif(iterator.cond,
+        lambda : jmap2(iterator.thn, mapper),
+        lambda : jmap2(iterator.els, mapper))
+  elif isinstance(iterator, FObject):
+    return jmap2(iterator.v, mapper)
+  elif isinstance(iterator, JList):
+    return JList(jmap2(iterator.l, mapper))
+  elif isinstance(iterator, list) or isinstance(iterator, tuple):
+    return [mapper(item) for item in iterator]
+
+def facetMapper(facet, fn):
+  if isinstance(facet, Facet):
+    return Facet(facet.cond, facetMapper(facet.thn, fn), facetMapper(facet.els, fn))
+  elif isinstance(facet, Constant) or isinstance(facet, FObject):
+    return fexpr_cast(fn(facet.v))
+
+class JList:
+  def __init__(self, l):
+    self.l = fexpr_cast(l)
+  def __getitem__(self, i):
+    return self.l[i]
+  def __setitem__(self, i, val):
+    self.l[i] = val
+
+  def __len__(self):
+    return self.l.__len__()
+  def __iter__(self):
+    return self.l.__iter__()
+
+  def append(self, val):
+    l2 = facetMapper(self.l, list) #deep copy
+    l2.append(val)
+    self.l = jassign(self.l, l2)
 
 from env.VarEnv import VarEnv
 from env.PolicyEnv import PolicyEnv
@@ -188,3 +216,4 @@ from env.PathVars import PathVars
 from smt.Z3 import Z3
 from fast.AST import Facet, fexpr_cast, Constant, Var, Not, FExpr, Unassigned, FObject
 from eval.Eval import partialEval
+import copy

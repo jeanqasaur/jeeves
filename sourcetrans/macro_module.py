@@ -81,6 +81,12 @@ def jeeves(tree, gen_sym, **kw):
         result = q[ JeevesLib.jand(lambda : ast[operand], lambda : ast[result]) ]
       return result
 
+    if isinstance(tree, List):
+      elts = [transform.recurse(elt, ctx=ctx) for elt in tree.elts]
+      newlist = List(elts=elts, ctx=tree.ctx)
+      stop()
+      return q[ JeevesLib.JList(ast[newlist]) ]
+
     # thn if cond else els
     # JeevesLib.jif(cond, lambda : thn, lambda : els)
     if isinstance(tree, IfExp):
