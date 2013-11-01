@@ -9,7 +9,6 @@ class JeevesState:
 jeevesState = JeevesState()
 
 def init():
-  jeevesState.solver = Z3()
   jeevesState.varenv = VarEnv()
   jeevesState.pathenv = PathVars()
   jeevesState.policyenv = PolicyEnv()
