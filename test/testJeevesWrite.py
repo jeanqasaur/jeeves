@@ -26,16 +26,18 @@ class TestJeevesWrite(unittest.TestCase):
     self.carolUser = DummyUser(2)
 
   def allowUserWrite(self, user):
-    lambda _this: lambda ictxt: ictxt == user
+    lambda _this: lambda ictxt: lambda octxt: ictxt == user
 
   '''
   def test_write_allowed_for_all_viewers(self):
-    x = ProtectedRef(0, None, self.allowUserWrite(self.aliceUser), None)
+    x = ProtectedRef(0, None, self.allowUserWrite(self.aliceUser))
     assert x.update(self.aliceUser, self.aliceUser, 42) == UpdateResult.Success
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v), 42)
     self.assertEqual(JeevesLib.concretize(self.bobUser, x.v), 42)
     self.assertEqual(JeevesLib.concretize(self.carolUser, x.v), 42)
-  
+  ''' 
+
+  ''' 
   def test_write_disallowed_for_all_viewers(self):
     x = ProtectedRef(0, None, self.allowUserWrite(self.aliceUser), None)
     assert x.update(self.bobUser, self.bobUser, 42) == UpdateResult.Failure
