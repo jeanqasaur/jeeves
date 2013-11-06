@@ -3,27 +3,30 @@ import macropy.activate
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
 
+@jeeves
 class TestClass:
-  @jeeves
   def __init__(self, a, b):
     self.a = a
     self.b = b
 
+@jeeves
 class TestClassMethod:
-  @jeeves
   def __init__(self, a, b):
     self.a = a
     self.b = b
-  @jeeves
+
   def add_a_to_b(self):
     self.b += self.a
-  @jeeves
+
   def return_sum(self):
     return self.a + self.b
 
+@jeeves
 class TestClass1:
   def __init__(self, a):
     self.a = a
+
+@jeeves
 class TestClass1Eq:
   def __init__(self, a):
     self.a = a
@@ -538,8 +541,8 @@ class TestSourceTransform(unittest.TestCase):
 
     l = JeevesLib.mkSensitive(x, [0,1,2], [3,4,5,6])
     m = 0
-    for x in l:
-      m = m + x*x
+    for t in l:
+      m = m + t*t
 
     self.assertEqual(JeevesLib.concretize(True, m), 5)
     self.assertEqual(JeevesLib.concretize(False, m), 86)
@@ -564,5 +567,3 @@ class TestSourceTransform(unittest.TestCase):
     self.assertEqual(JeevesLib.concretize(False, l[2]), 5)
     self.assertEqual(JeevesLib.concretize(False, l[3]), 6)
     self.assertEqual(JeevesLib.concretize(False, l[4]), 11)
-
-

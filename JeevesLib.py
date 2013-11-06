@@ -158,6 +158,9 @@ class Namespace:
   def __init__(self, kw):
     self.__dict__.update(kw)
 
+  def __setattr__(self, attr, value):
+    self.__dict__[attr] = jassign(self.__dict__.get(attr, Unassigned()), value)
+
 def jgetattr(obj, attr):
   if isinstance(obj, FExpr):
     return getattr(obj, attr)
