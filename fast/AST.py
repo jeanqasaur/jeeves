@@ -40,6 +40,12 @@ class FExpr:
   def getChildren(self):
     return NotImplemented
 
+  # Return a version of yourself with the write-associated labels remapped to
+  # point to the new policy in addition to the previous policies.
+  @abstractmethod
+  def remapLabels(self, policy, writer):
+    return NotImplemented
+
   def prettyPrint(self, indent=""):
     return "%s%s\n%s" % (indent, type(self).__name__,
       "\n".join(child.prettyPrint(indent + "  ")
@@ -143,6 +149,9 @@ class Var(FExpr):
     except IndexError:
       raise CannotEvalException("Variable %s is not in path environment" % self)
 
+  def remapLabels(self, policy, writer):
+    return self
+
   def __str__(self):
     return self.name
 
@@ -221,6 +230,16 @@ class Facet(FExpr):
 
   def getChildren(self):
     return [self.cond, self.thn, self.els]
+
+  def remapLabels(self, policy, writer):
+    if isinstance(self.cond, Var):
+      newCond = JeevesLib.jeevesState.writeenv.addWritePolicy(
+                  self.cond, policy, writer)
+    else:
+      newCond = self.cond.remapLabels(policy, writer)
+    return Facet(newCond
+      , self.thn.remapLabels(policy, writer)
+      , self.els.remapLabels(policy, writer))
 
   def __call__(self, *args, **kw):
     return JeevesLib.jif(self.cond,
@@ -322,6 +341,9 @@ class Constant(FExpr):
   def getChildren(self):
     return []
 
+  def remapLabels(self, policy, writer):
+    return self
+
   def prettyPrint(self, indent=""):
     return indent + repr(self.v)
 
@@ -364,6 +386,10 @@ class Add(BinaryExpr):
     return self.left.eval(env) + self.right.eval(env)
   def z3Node(self):
     return self.left.z3Node() + self.right.z3Node()
+  def remapLabels(self, policy, writer):
+    return Add(
+        self.left.remapLabels(policy, writer)
+      , self.right.remapLabels(policy, writer))
 
 class Sub(BinaryExpr):
   opr = operator.sub
@@ -372,6 +398,10 @@ class Sub(BinaryExpr):
     return self.left.eval(env) - self.right.eval(env)
   def z3Node(self):
     return self.left.z3Node() - self.right.z3Node()
+  def remapLabels(self, policy, writer):
+    return Sub(
+        self.left.remapLabels(policy, writer)
+      , self.right.remapLabels(policy, writer))
 
 class Mult(BinaryExpr):
   opr = operator.mul
@@ -380,6 +410,10 @@ class Mult(BinaryExpr):
     return self.left.eval(env) * self.right.eval(env)
   def z3Node(self):
     return self.left.z3Node() * self.right.z3Node()
+  def remapLabels(self, policy, writer):
+    return Mult(
+        self.left.remapLabels(policy, writer)
+      , self.right.remapLabels(policy, writer))
 
 class Div(BinaryExpr):
   opr = operator.div
@@ -388,6 +422,10 @@ class Div(BinaryExpr):
     return self.left.eval(env) / self.right.eval(env)
   def z3Node(self):
     return NotImplemented
+  def remapLabels(self, policy, writer):
+    return Div(
+        self.left.remapLabels(policy, writer)
+      , self.right.remapLabels(policy, writer))
 
 class Mod(BinaryExpr):
   opr = operator.mod
@@ -396,6 +434,10 @@ class Mod(BinaryExpr):
     return self.left.eval(env) % self.right.eval(env)
   def z3Node(self):
     return NotImplemented
+  def remapLabels(self, policy, writer):
+    return Mod(
+        self.left.remapLabels(policy, writer)
+      , self.right.remapLabels(policy, writer))
 
 # Not sure if bitwise operations are supported by Z3?
 class BitAnd(BinaryExpr):
@@ -405,6 +447,10 @@ class BitAnd(BinaryExpr):
     return self.left.eval(env) & self.right.eval(env)
   def z3Node(self):
     return NotImplemented
+  def remapLabels(self, policy, writer):
+    return BitAnd(
+        self.left.remapLabels(policy, writer)
+      , self.right.remapLabels(policy, writer))
 
 class BitOr(BinaryExpr):
   opr = operator.or_
@@ -413,6 +459,10 @@ class BitOr(BinaryExpr):
     return self.left.eval(env) | self.right.eval(env)
   def z3Node(self):
     return NotImplemented
+  def remapLabels(self, policy, writer):
+    return BitOr(
+        self.left.remapLabels(policy, writer)
+      , self.right.remapLabels(policy, writer))
 
 class LShift(BinaryExpr):
   opr = operator.ilshift
@@ -421,6 +471,10 @@ class LShift(BinaryExpr):
     return self.left.eval(env) << self.right.eval(env)
   def z3Node(self):
     return NotImplemented
+  def remapLabels(self, policy, writer):
+    return LShift(
+        self.left.remapLabels(policy, writer)
+      , self.right.remapLabels(policy, writer))
 
 class RShift(BinaryExpr):
   opr = operator.irshift
@@ -429,6 +483,10 @@ class RShift(BinaryExpr):
     return self.left.eval(env) >> self.right.eval(env)
   def z3Node(self):
     return NotImplemented
+  def remapLabels(self, policy, writer):
+    return RShift(
+        self.left.remapLabels(policy, writer)
+      , self.right.remapLabels(policy, writer))
 
 # Boolean operations
 
@@ -439,6 +497,10 @@ class And(BinaryExpr):
     return self.left.eval(env) and self.right.eval(env)
   def z3Node(self):
     return z3.And(self.left.z3Node(), self.right.z3Node())
+  def remapLabels(self, policy, writer):
+    return And(
+        self.left.remapLabels(policy, writer)
+      , self.right.remapLabels(policy, writer))
 
 class Or(BinaryExpr):
   opr = operator.or_
@@ -447,6 +509,10 @@ class Or(BinaryExpr):
     return self.left.eval(env) or self.right.eval(env)
   def z3Node(self):
     return z3.Or(self.left.z3Node(), self.right.z3Node())
+  def remapLabels(self, policy, writer):
+    return Or(
+        self.left.remapLabels(policy, writer)
+      , self.right.remapLabels(policy, writer))
 
 class Not(UnaryExpr):
   opr = operator.not_
@@ -455,6 +521,8 @@ class Not(UnaryExpr):
     return not self.sub.eval(env)
   def z3Node(self):
     return z3.Not(self.sub.z3Node())
+  def remapLabels(self, policy, writer):
+    return Not(self.sub.remapLabels(policy, writer))
 
 # Doesn't correspond to a Python operator but is useful
 class Implies(BinaryExpr):
@@ -464,6 +532,10 @@ class Implies(BinaryExpr):
     return (not self.left.eval(env)) or self.right.eval(env)
   def z3Node(self):
     return z3.Implies(self.left.z3Node(), self.right.z3Node())
+  def remapLabels(self, policy, writer):
+    return Implies(
+        self.left.remapLabels(policy, writer)
+      , self.right.remapLabels(policy, writer))
 
 # Comparison operations
 
@@ -474,6 +546,10 @@ class Eq(BinaryExpr):
     return self.left.eval(env) == self.right.eval(env)
   def z3Node(self):
     return self.left.z3Node() == self.right.z3Node()
+  def remapLabels(self, policy, writer):
+    return Eq(
+        self.left.remapLabels(policy, writer)
+      , self.right.remapLabels(policy, writer))
 
 class Lt(BinaryExpr):
   opr = operator.lt
@@ -482,6 +558,10 @@ class Lt(BinaryExpr):
     return self.left.eval(env) < self.right.eval(env)
   def z3Node(self):
     return self.left.z3Node() < self.right.z3Node()
+  def remapLabels(self, policy, writer):
+    return Lt(
+        self.left.remapLabels(policy, writer)
+      , self.right.remapLabels(policy, writer))
 
 class LtE(BinaryExpr):
   opr = operator.le
@@ -490,6 +570,10 @@ class LtE(BinaryExpr):
     return self.left.eval(env) <= self.right.eval(env)
   def z3Node(self):
     return self.left.z3Node() <= self.right.z3Node()
+  def remapLabels(self, policy, writer):
+    return LtE(
+        self.left.remapLabels(policy, writer)
+      , self.right.remapLabels(policy, writer))
 
 class Gt(BinaryExpr):
   opr = operator.gt
@@ -498,6 +582,10 @@ class Gt(BinaryExpr):
     return self.left.eval(env) > self.right.eval(env)
   def z3Node(self):
     return self.left.z3Node() > self.right.z3Node()
+  def remapLabels(self, policy, writer):
+    return Gt(
+        self.left.remapLabels(policy, writer)
+      , self.right.remapLabels(policy, writer))
 
 class GtE(BinaryExpr):
   opr = operator.ge
@@ -506,6 +594,10 @@ class GtE(BinaryExpr):
     return self.left.eval(env) >= self.right.eval(env)
   def z3Node(self):
     return self.left.z3Node() >= self.right.z3Node()
+  def remapLabels(self, policy, writer):
+    return GtE(
+        self.left.remapLabels(policy, writer)
+      , self.right.remapLabels(policy, writer))
 
 class Unassigned(FExpr):
   def __init__(self):
@@ -517,8 +609,12 @@ class Unassigned(FExpr):
     pass #TODO ?? what goes here
   def getChildren(self):
     return []
+  def remapLabels(self, policy):
+    return self
   def vars(self):
     return set()
+  def remapLabels(self, policy, writer):
+    return self
 
 # TODO(TJH): figure out the correct implementation of this
 def is_obj(o):
@@ -549,6 +645,10 @@ class FObject(FExpr):
 
   def getChildren(self):
     return []
+
+  # TODO: Travis, how do we descend into the object fields and remap the labels?
+  def remapLabels(self, policy, writer):
+    return NotImplemented
 
   def __call__(self, *args, **kw):
     return self.v.__call__(*args, **kw)

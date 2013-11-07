@@ -567,3 +567,12 @@ class TestSourceTransform(unittest.TestCase):
     self.assertEqual(JeevesLib.concretize(False, l[2]), 5)
     self.assertEqual(JeevesLib.concretize(False, l[3]), 6)
     self.assertEqual(JeevesLib.concretize(False, l[4]), 11)
+
+  @jeeves
+  def test_or_in_lambda(self):
+    x = JeevesLib.mkLabel()
+    JeevesLib.restrict(x, lambda oc: oc == 1 or oc == 2)
+    self.assertTrue(JeevesLib.concretize(1, x))
+    self.assertTrue(JeevesLib.concretize(2, x))
+    self.assertFalse(JeevesLib.concretize(3, x))
+

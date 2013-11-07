@@ -12,6 +12,7 @@ def init():
   jeevesState.varenv = VarEnv()
   jeevesState.pathenv = PathVars()
   jeevesState.policyenv = PolicyEnv()
+  jeevesState.writeenv = WritePolicyEnv()
 
 # NOTE(JY): We have to take care of the scoping somehow to make sure that
 # we don't duplicate variables. One potential solution we can do, though, is
@@ -215,6 +216,7 @@ class JList:
 from env.VarEnv import VarEnv
 from env.PolicyEnv import PolicyEnv
 from env.PathVars import PathVars
+from env.WritePolicyEnv import WritePolicyEnv
 from smt.Z3 import Z3
 from fast.AST import Facet, fexpr_cast, Constant, Var, Not, FExpr, Unassigned, FObject
 from eval.Eval import partialEval

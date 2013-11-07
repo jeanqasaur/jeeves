@@ -10,7 +10,7 @@ class DummyUser:
   def __init__(self, userId):
     self.userId = userId
   def __eq__(self, other):
-    self.userId == other.userId
+    return self.userId == other.userId
 class DummyContext:
   def __init__(self, user, badUsers):
     self.user = user
@@ -26,7 +26,7 @@ class TestJeevesWrite(unittest.TestCase):
     self.carolUser = DummyUser(2)
 
   def allowUserWrite(self, user):
-    lambda _this: lambda ictxt: lambda octxt: ictxt == user
+    return lambda _this: lambda ictxt: lambda octxt: ictxt == user
 
   '''
   def test_write_allowed_for_all_viewers(self):
@@ -35,19 +35,17 @@ class TestJeevesWrite(unittest.TestCase):
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v), 42)
     self.assertEqual(JeevesLib.concretize(self.bobUser, x.v), 42)
     self.assertEqual(JeevesLib.concretize(self.carolUser, x.v), 42)
-  ''' 
 
-  ''' 
   def test_write_disallowed_for_all_viewers(self):
-    x = ProtectedRef(0, None, self.allowUserWrite(self.aliceUser), None)
+    x = ProtectedRef(0, None, self.allowUserWrite(self.aliceUser))
     assert x.update(self.bobUser, self.bobUser, 42) == UpdateResult.Failure
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v), 0)
     self.assertEqual(JeevesLib.concretize(self.bobUser, x.v), 0)
     self.assertEqual(JeevesLib.concretize(self.carolUser, x.v), 0)
-
+  
   @jeeves
   def test_write_selectively_allowed(self):
-    x = ProtectedRef(0, None, None
+    x = ProtectedRef(0, None
           , lambda _this: lambda ictxt: lambda octxt:
               ictxt == self.aliceUser and octxt == self.bobUser)
     assert x.update(self.aliceUser, self.aliceUser, 42) == UpdateResult.Unknown
@@ -56,38 +54,30 @@ class TestJeevesWrite(unittest.TestCase):
     self.assertEqual(JeevesLib.concretize(self.carolUser, x.v), 0)
 
   def test_permitted_writer_overwrite(self):  
-    x = ProtectedRef(0, None, self.allowUserWrite(self.bobUser), None)
+    x = ProtectedRef(0, None, self.allowUserWrite(self.bobUser))
     assert x.update(self.aliceUser, self.aliceUser, 42) == UpdateResult.Failure
     assert x.update(self.bobUser, self.bobUser, 43) == UpdateResult.Success
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v), 43)
     self.assertEqual(JeevesLib.concretize(self.bobUser, x.v), 43)
     self.assertEqual(JeevesLib.concretize(self.carolUser, x.v), 43)
 
-  def test_restricted_writer_overwrite(self):
-    x = ProtectedRef(0, None, self.allowUserWrite(self.bobUser), None)
-    x.update(self.bobUser, self.bobUser, 43)
-    x.update(self.aliceUser, self.aliceUser, 42)
-    self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v), 43)
-    self.assertEqual(JeevesLib.concretize(self.bobUser, x.v), 43)
-    self.assertEqual(JeevesLib.concretize(self.carolUser, x.v), 43)
-
   @jeeves
   def test_output_varies_depending_on_viewer(self):
-    x = ProtectedRef(0, None, None
+    x = ProtectedRef(0, None
           , lambda _this: lambda ictxt: lambda octxt:
               ictxt == self.aliceUser and octxt == self.bobUser)
-    x.update(self.aliceUser, self.aliceUser(), 42)
+    x.update(self.aliceUser, self.aliceUser, 42)
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v), 0)
     self.assertEqual(JeevesLib.concretize(self.bobUser, x.v), 42)
     self.assertEqual(JeevesLib.concretize(self.carolUser, x.v), 0)
 
   @jeeves
-  def test_combining_integrity_policies_in_operation(self):
-    x = ProtectedRef(0, None, self.allowUserWrite(self.bobUser), None)
+  def test_combining_write_policies_in_operation(self):
+    x = ProtectedRef(0, None, self.allowUserWrite(self.bobUser))
     x.update(self.bobUser, self.bobUser, 42)
-    y = ProtectedRef(2, None, None
+    y = ProtectedRef(2, None
       , lambda _this: lambda ictxt: lambda octxt:
-          ictxt == self.aliceUser or octxt == self.bobUser)
+          ictxt == self.aliceUser and octxt == self.bobUser)
     y.update(self.aliceUser, self.aliceUser, 43)
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v + y.v), 44)
     self.assertEqual(JeevesLib.concretize(self.bobUser, x.v + y.v), 85)
@@ -97,21 +87,21 @@ class TestJeevesWrite(unittest.TestCase):
   # Our write policies disallow Bob from accidentally writing a value from
   # Alice into y. (That is, without an explicit endorsement...)
   def test_prevent_flow_of_untrusted_writes(self):
-    x = ProtectedRef(0, None, self.allowUserWrite(self.aliceUser), None)
-    x.update(self.aliceUser, self.aliceUser, 42)
-    y = ProtectedRef(1, None, self.allowUserWrite(self.bobUser), None)
-    y.update(self.bobUser, self.bobUser, x.v)
+    x = ProtectedRef(0, None, self.allowUserWrite(self.aliceUser))
+    assert x.update(self.aliceUser, self.aliceUser, 42) == UpdateResult.Success
+    y = ProtectedRef(1, None, self.allowUserWrite(self.bobUser))
+    assert y.update(self.bobUser, self.bobUser, x.v) == UpdateResult.Success
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v), 42)
     self.assertEqual(JeevesLib.concretize(self.bobUser, x.v), 42)
     self.assertEqual(JeevesLib.concretize(self.aliceUser, y.v), 0)
     self.assertEqual(JeevesLib.concretize(self.bobUser, y.v), 0)   
 
   def test_prevent_flow_of_operations_on_untrusted_writes(self):
-    x = ProtectedRef(0, None, self.allowUserWrite(self.aliceUser), None)
+    x = ProtectedRef(0, None, self.allowUserWrite(self.aliceUser))
     x.update(self.aliceUser, self.aliceUser, 42)
-    y = ProtectedRef(1, None, self.allowUserWrite(self.bobUser), None)
+    y = ProtectedRef(1, None, self.allowUserWrite(self.bobUser))
     y.update(self.bobUser, self.bobUser, 43)
-    z = ProtectedRef(0, None, self.allowUserWrite(self.carolUser), None)
+    z = ProtectedRef(0, None, self.allowUserWrite(self.carolUser))
     z.update(self.carolUser, self.carolUser, x.v + y.v)
     self.assertEqual(JeevesLib.concretize(self.aliceUser, z.v), 1)
     self.assertEqual(JeevesLib.concretize(self.bobUser, z.v), 1)
@@ -122,23 +112,23 @@ class TestJeevesWrite(unittest.TestCase):
   # writes.
   @jeeves
   def test_prevent_untrusted_writes_through_implicit_flows(self):
-    x = ProtectedRef(0, None, self.allowUserWrite(self.aliceUser), None)
+    x = ProtectedRef(0, None, self.allowUserWrite(self.aliceUser))
     x.update(self.aliceUser, self.aliceUser, 42)
-    y = ProtectedRef(1, None, self.allowUserWrite(self.bobUser), None)
+    y = ProtectedRef(1, None, self.allowUserWrite(self.bobUser))
     y.update(self.bobUser, self.bobUser, 2 if x.v == 42 else 3)
     self.assertEqual(JeevesLib.concretize(self.aliceUser, y.v), 3)
     self.assertEqual(JeevesLib.concretize(self.bobUser, y.v), 3)
 
   @jeeves
   def test_prevent_implicit_flows_of_confidential_values(self):
-    x = ProtectedRef(0, None, None
+    x = ProtectedRef(0, None
           , lambda _this: lambda ictxt: lambda octxt:
               ictxt == self.aliceUser and octxt == self.aliceUser)
     x.update(self.aliceUser, self.aliceUser, 42)
-    y = ProtectedRef(1, None, None
+    y = ProtectedRef(1, None
           , lambda _this: lambda ictxt: lambda octxt:
-              ictxt == self.bobUser or ctxt == self.aliceUser)
-    y.update(self.bobUser, self.bobUser, 2 if x.v == 42 else 3)
+              ictxt == self.bobUser or ictxt == self.aliceUser)
+    y.update(self.bobUser, self.bobUser, if x.v == 42 else 3)
     self.assertEqual(JeevesLib.concretize(self.aliceUser, y.v), 2)
     self.assertEqual(JeevesLib.concretize(self.bobUser, y.v), 3)
 
