@@ -241,6 +241,11 @@ class Facet(FExpr):
       , self.thn.remapLabels(policy, writer)
       , self.els.remapLabels(policy, writer))
 
+  '''
+  def prettyPrint(self, indent=""):
+    return "< " + self.cond.prettyPrint() + " ? " + self.thn.prettyPrint() + " : " + self.els.prettyPrint() + " >"
+  '''
+
   def __call__(self, *args, **kw):
     return JeevesLib.jif(self.cond,
         lambda:self.thn(*args, **kw), lambda:self.els(*args, **kw))

@@ -5,8 +5,6 @@ import JeevesLib
 from AST import And, Facet, FExpr
 from eval.Eval import partialEval
 
-import inspect
-
 @enum
 class UpdateResult:
   Success, Unknown, Failure
@@ -36,7 +34,6 @@ class ProtectedRef:
   def applyOutputWP(self, writer):
     if self.outputWP:
       try:
-        print inspect.getsource(self.outputWP)
         r = self.outputWP(self.v)(writer)(Undefined)
         if isinstance(r, FExpr):
           r = PartialEval(r)
@@ -84,33 +81,36 @@ class ProtectedRef:
     if self.applyInputWP(writer, writeCtxt) == UpdateResult.Failure:
       return UpdateResult.Failure
     else:
-      success = self.applyOutputWP(writer)
-      print success 
-      if not (success == UpdateResult.Failure):
-        # Create a new label and map it to the resulting confidentiality policy
-        # in the confidentiality policy environment.
-        wvar = JeevesLib.mkLabel() # TODO: Label this?
-        if self.outputWP:
-          JeevesLib.restrict(wvar
-            , lambda octxt: self.outputWP(self.v)(writer)(octxt))
+      if self.outputWP:
+        success = self.applyOutputWP(writer)
+        if not (success == UpdateResult.Failure):
+          # Create a new label and map it to the resulting confidentiality
+          # policy in the confidentiality policy environment.
+          wvar = JeevesLib.mkLabel() # TODO: Label this?
+          vOld = self.v
+          if success == UpdateResult.Unknown:
+            JeevesLib.restrict(wvar
+              , lambda octxt: self.outputWP(vOld)(writer)(octxt))
 
-        if self.outputWP and isinstance(vNew, FExpr):
-          vNewRemapped = vNew.remapLabels(self.outputWP(self.v), writer)
-        else:
-          vNewRemapped = vNew
+          if isinstance(vNew, FExpr):
+            vNewRemapped = vNew.remapLabels(self.outputWP(vOld), writer)
+          else:
+            vNewRemapped = vNew
 
-        # Create a faceted value < wvar ? vNew' : vOld >, where vNew' has the
-        # write-associated labels remapped to take into account the new writer.
-        # Add the path conditions.
-        JeevesLib.jeevesState.pathenv.push(wvar, True)
-        rPC = mkFacetTree(JeevesLib.jeevesState.pathenv.getEnv().items()
-                , vNewRemapped, self.v)
-        JeevesLib.jeevesState.pathenv.pop()
+          # Create a faceted value < wvar ? vNew' : vOld >, where vNew' has the
+          # write-associated labels remapped to take into account the new
+          # writer. Add the path conditions.
+          JeevesLib.jeevesState.pathenv.push(wvar, True)
+          rPC = mkFacetTree(JeevesLib.jeevesState.pathenv.getEnv().items()
+                  , vNewRemapped, vOld)
+          JeevesLib.jeevesState.pathenv.pop()
 
-        # Map the context down here to avoid overhead in making a new label
-        # twice.
-        JeevesLib.jeevesState.writeenv.mapPrimaryContext(wvar, writer)
+          # Map the context down here to avoid overhead in making a new label
+          # twice.
+          JeevesLib.jeevesState.writeenv.mapPrimaryContext(wvar, writer)
 
-        self.v = rPC
+          self.v = rPC
+      else:
+        self.v = vNew
 
       return success
