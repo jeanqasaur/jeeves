@@ -28,7 +28,7 @@ def basic_expr_transform(node):
         fn = q[ JeevesLib.jor ]
       result = tree.values[-1]
       for operand in tree.values[-2::-1]:
-        result = q[ JeevesLib.jand(lambda : ast[operand], lambda : ast[result]) ]
+        result = q[ ast[fn](lambda : ast[operand], lambda : ast[result]) ]
       return result
 
     if isinstance(tree, List):

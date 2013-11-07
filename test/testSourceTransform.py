@@ -2,6 +2,7 @@ import unittest
 import macropy.activate
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
+import operator
 
 @jeeves
 class TestClass:
@@ -173,12 +174,12 @@ class TestSourceTransform(unittest.TestCase):
           for rl in (True, False):
             l = jl.mkSensitive(x, lh, ll)
             r = jl.mkSensitive(x, rh, rl)
-            self.assertEquals(jl.concretize((42,0), l and r), lh and rh)
-            self.assertEquals(jl.concretize((10,0), l and r), ll and rl)
-            self.assertEquals(jl.concretize((42,0), l or r), lh or rh)
-            self.assertEquals(jl.concretize((10,0), l or r), ll or rl)
-            self.assertEquals(jl.concretize((42,0), not l), not lh)
-            self.assertEquals(jl.concretize((10,0), not l), not ll)
+            self.assertEquals(jl.concretize((42,0), l and r), operator.and_(lh, rh))
+            self.assertEquals(jl.concretize((10,0), l and r), operator.and_(ll, rl))
+            self.assertEquals(jl.concretize((42,0), l or r), operator.or_(lh, rh))
+            self.assertEquals(jl.concretize((10,0), l or r), operator.or_(ll, rl))
+            self.assertEquals(jl.concretize((42,0), not l), operator.not_(lh))
+            self.assertEquals(jl.concretize((10,0), not l), operator.not_(ll))
 
     y = jl.mkLabel('y')
     jl.restrict(y, lambda (_,b) : b == 42)
@@ -189,15 +190,15 @@ class TestSourceTransform(unittest.TestCase):
           for rl in (True, False):
             l = jl.mkSensitive(x, lh, ll)
             r = jl.mkSensitive(y, rh, rl)
-            self.assertEquals(jl.concretize((42,0), l and r), lh and rl)
-            self.assertEquals(jl.concretize((10,0), l and r), ll and rl)
-            self.assertEquals(jl.concretize((42,42), l and r), lh and rh)
-            self.assertEquals(jl.concretize((10,42), l and r), ll and rh)
+            self.assertEquals(jl.concretize((42,0), l and r), operator.and_(lh, rl))
+            self.assertEquals(jl.concretize((10,0), l and r), operator.and_(ll, rl))
+            self.assertEquals(jl.concretize((42,42), l and r), operator.and_(lh, rh))
+            self.assertEquals(jl.concretize((10,42), l and r), operator.and_(ll, rh))
 
-            self.assertEquals(jl.concretize((42,0), l or r), lh or rl)
-            self.assertEquals(jl.concretize((10,0), l or r), ll or rl)
-            self.assertEquals(jl.concretize((42,42), l or r), lh or rh)
-            self.assertEquals(jl.concretize((10,42), l or r), ll or rh)
+            self.assertEquals(jl.concretize((42,0), l or r), operator.or_(lh, rl))
+            self.assertEquals(jl.concretize((10,0), l or r), operator.or_(ll, rl))
+            self.assertEquals(jl.concretize((42,42), l or r), operator.or_(lh, rh))
+            self.assertEquals(jl.concretize((10,42), l or r), operator.or_(ll, rh))
   
   @jeeves
   def test_jif_with_assign(self):
