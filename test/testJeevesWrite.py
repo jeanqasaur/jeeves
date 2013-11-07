@@ -162,12 +162,14 @@ class TestJeevesWrite(unittest.TestCase):
     self.assertEqual(JeevesLib.concretize(self.bobUser, z.v), 85)
     self.assertEqual(JeevesLib.concretize(self.carolUser, z.v), 44)
 
-  '''
-  # TODO: This has a Z3 error... Look into this once more stuff is implemented.
-  def test_integrity_policies_with_confidentiality(self):  
+  def test_write_policies_with_confidentiality(self):  
+    # Make a sensitive value that is either Bob or the nobody user. Only Bob
+    # can see this.
     a = JeevesLib.mkLabel ()
     JeevesLib.restrict(a, lambda ctxt: ctxt == self.bobUser)
     secretWriter = JeevesLib.mkSensitive(a, self.bobUser, self.nobodyUser)
+    # We now make a protected reference where the input channel has to be the
+    # secret writer.
     x = ProtectedRef(0, None
           , lambda _this: lambda ictxt: lambda octxt: ictxt == secretWriter)
     x.update(self.bobUser, self.bobUser, 42)
@@ -177,11 +179,34 @@ class TestJeevesWrite(unittest.TestCase):
       , self.nobodyUser)
     self.assertEqual(JeevesLib.concretize(self.aliceUser, secretWriter)
       , self.nobodyUser)
+    # Only Bob should be able to see the value he wrote.
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v), 0)   
-    self.assertEqual(JeevesLib.concretize(self.bobUser, x.v), 0)
+    self.assertEqual(JeevesLib.concretize(self.bobUser, x.v), 42)
     self.assertEqual(JeevesLib.concretize(self.carolUser, x.v), 0)
-  '''
-  
+ 
+  def test_input_write_policies_with_confidentiality(self):
+    # Make a sensitive value that is either Bob or the nobody user. Only Bob
+    # can see this.
+    a = JeevesLib.mkLabel ()
+    JeevesLib.restrict(a, lambda ctxt: ctxt == self.bobUser)
+    secretWriter = JeevesLib.mkSensitive(a, self.bobUser, self.nobodyUser)
+    # We now make a protected reference where the input channel has to be the
+    # secret writer.
+    x = ProtectedRef(0
+          , lambda _this: lambda ictxt: ictxt == secretWriter
+          , None)
+    x.update(self.bobUser, self.bobUser, 42)
+    self.assertEqual(JeevesLib.concretize(self.bobUser, secretWriter)
+      , self.bobUser)
+    self.assertEqual(JeevesLib.concretize(self.aliceUser, secretWriter)
+      , self.nobodyUser)
+    self.assertEqual(JeevesLib.concretize(self.aliceUser, secretWriter)
+      , self.nobodyUser)
+    # Only Bob should be able to see the value he wrote.
+    self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v), 42)
+    self.assertEqual(JeevesLib.concretize(self.bobUser, x.v), 42)
+    self.assertEqual(JeevesLib.concretize(self.carolUser, x.v), 42)
+ 
   # If Alice does something bad, then we will reject all of her influences.
   def test_determine_writer_trust_later(self):
     x = ProtectedRef(0, None

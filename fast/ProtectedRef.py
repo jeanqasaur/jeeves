@@ -81,9 +81,14 @@ class ProtectedRef:
     if self.applyInputWP(writer, writeCtxt) == UpdateResult.Failure:
       return UpdateResult.Failure
     else:
+      if not self.outputWP:
+        self.v = vNew
+        return UpdateResult.Success
       if self.outputWP:
         success = self.applyOutputWP(writer)
-        if not (success == UpdateResult.Failure):
+        if success == UpdateResult.Failure:
+          return success
+        else:
           # Create a new label and map it to the resulting confidentiality
           # policy in the confidentiality policy environment.
           wvar = JeevesLib.mkLabel() # TODO: Label this?
@@ -110,7 +115,4 @@ class ProtectedRef:
           JeevesLib.jeevesState.writeenv.mapPrimaryContext(wvar, writer)
 
           self.v = rPC
-      else:
-        self.v = vNew
-
-      return success
+          return success
