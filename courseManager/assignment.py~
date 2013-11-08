@@ -1,0 +1,47 @@
+import sys
+sys.path.append("..")
+import JeevesLib
+import math
+
+class Assignment():
+  def __init__(self, assignmentId, name, dueDate, maxPoints, prompt, authorId):
+    self.assignmentId = assignmentId
+    self.name = name
+    self.dueDate = dueDate
+    self.maxPoints = maxPoints
+    self.prompt = prompt
+    self.authorId = authorId
+    self.submissionList = {}
+    
+    # Policies
+
+  def __repr__(self):
+    return "Assignment(" + self.name + ", id=" + self.assignmentId + ", prompt=" + prompt + ")"
+
+    # Math Functions
+    def average(self, l):
+      return float(sum(l))/len(l)
+   
+    def std(self, l):
+      mean = self.average(l)
+      sum_x2 = sum([x**2 for x in l])
+      stdev = sqrt((sum_x2 / len(l)) - (mean * mean)) 
+      return Math.sqrt(variances.sum/(variances.length-1))
+   
+    def median(self, l):
+      sortedL = sorted(l)
+      length = len(sortedL)
+      if length % 2:          
+        return sortedL[length / 2]
+      else:
+        return self.average( sortedL[length / 2], sortedL[length/2 - 1] )
+       
+    # Getters
+    def getSubmissionCount(context: ObjectExpr[CmContext]): Int = {
+      assignmentSubmissions.size
+    }
+
+  if __name__ == '__main__':
+    print("A User!")
+}
+
