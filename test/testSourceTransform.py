@@ -526,7 +526,6 @@ class TestSourceTransform(unittest.TestCase):
     l = JeevesLib.mkSensitive(x, [0,1,2], [3,4,5,6])
     m = [x*x for x in l]
 
-    print m.prettyPrint()
     self.assertEqual(JeevesLib.concretize(True, m[0]), 0)
     self.assertEqual(JeevesLib.concretize(True, m[1]), 1)
     self.assertEqual(JeevesLib.concretize(True, m[2]), 4)
@@ -569,6 +568,11 @@ class TestSourceTransform(unittest.TestCase):
     self.assertEqual(JeevesLib.concretize(False, l[3]), 6)
     self.assertEqual(JeevesLib.concretize(False, l[4]), 11)
 
+    if x:
+        l[0] = 20
+    self.assertEqual(JeevesLib.concretize(True, l[0]), 20)
+    self.assertEqual(JeevesLib.concretize(False, l[0]), 3)
+
   @jeeves
   def test_or_in_lambda(self):
     x = JeevesLib.mkLabel()
@@ -577,3 +581,44 @@ class TestSourceTransform(unittest.TestCase):
     self.assertTrue(JeevesLib.concretize(2, x))
     self.assertFalse(JeevesLib.concretize(3, x))
 
+  @jeeves
+  def test_return(self):
+    x = JeevesLib.mkLabel('x')
+    JeevesLib.restrict(x, lambda ctxt : ctxt)
+
+    y = [5]
+
+    def awesome_function():
+      y[0] = 7
+      if x:
+        return 30
+      y[0] = 19
+      return 17
+
+    z = awesome_function()
+
+    self.assertEqual(JeevesLib.concretize(True, y[0]), 7)
+    self.assertEqual(JeevesLib.concretize(False, y[0]), 19)
+    self.assertEqual(JeevesLib.concretize(True, z), 30)
+    self.assertEqual(JeevesLib.concretize(False, z), 17)
+
+  @jeeves
+  def test_scope(self):
+    x = JeevesLib.mkLabel('x')
+    JeevesLib.restrict(x, lambda ctxt : ctxt)
+
+    y = 5
+
+    def awesome_function():
+      y = 7
+      if x:
+        return 30
+      y = 19
+      return 17
+
+    z = awesome_function()
+
+    self.assertEqual(JeevesLib.concretize(True, y), 5)
+    self.assertEqual(JeevesLib.concretize(False, y), 5)
+    self.assertEqual(JeevesLib.concretize(True, z), 30)
+    self.assertEqual(JeevesLib.concretize(False, z), 17)

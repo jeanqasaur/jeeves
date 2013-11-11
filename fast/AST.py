@@ -211,11 +211,11 @@ class Facet(FExpr):
     # distinct, but that sounds pretty annoying to support on our end.
     # TODO: Unassigned makes things super-awkward, we need to figure that out.
     # For now, just ignore them.
-    if (self.thn.type != None and self.els.type != None and
-            self.thn.type != self.els.type):
-        raise TypeError("Condition on both sides of a Facet must have the "
-                        "same type, they are %s and %s."
-                        % (self.thn.type.__name__, self.els.type.__name__))
+    #if (self.thn.type != None and self.els.type != None and
+    #        self.thn.type != self.els.type):
+    #    raise TypeError("Condition on both sides of a Facet must have the "
+    #                    "same type, they are %s and %s."
+    #                    % (self.thn.type.__name__, self.els.type.__name__))
 
     self.__dict__['type'] = self.thn.type or self.els.type
 
@@ -380,7 +380,7 @@ class UnaryExpr(FExpr):
 Operators.
 '''
 class Add(BinaryExpr):
-  opr = operator.add
+  opr = staticmethod(operator.add)
   ret_type = int
   def eval(self, env):
     return self.left.eval(env) + self.right.eval(env)
@@ -392,7 +392,7 @@ class Add(BinaryExpr):
       , self.right.remapLabels(policy, writer))
 
 class Sub(BinaryExpr):
-  opr = operator.sub
+  opr = staticmethod(operator.sub)
   ret_type = int
   def eval(self, env):
     return self.left.eval(env) - self.right.eval(env)
@@ -404,7 +404,7 @@ class Sub(BinaryExpr):
       , self.right.remapLabels(policy, writer))
 
 class Mult(BinaryExpr):
-  opr = operator.mul
+  opr = staticmethod(operator.mul)
   ret_type = int
   def eval(self, env):
     return self.left.eval(env) * self.right.eval(env)
@@ -416,7 +416,7 @@ class Mult(BinaryExpr):
       , self.right.remapLabels(policy, writer))
 
 class Div(BinaryExpr):
-  opr = operator.div
+  opr = staticmethod(operator.div)
   ret_type = int
   def eval(self, env):
     return self.left.eval(env) / self.right.eval(env)
@@ -428,7 +428,7 @@ class Div(BinaryExpr):
       , self.right.remapLabels(policy, writer))
 
 class Mod(BinaryExpr):
-  opr = operator.mod
+  opr = staticmethod(operator.mod)
   ret_type = int
   def eval(self, env):
     return self.left.eval(env) % self.right.eval(env)
@@ -441,7 +441,7 @@ class Mod(BinaryExpr):
 
 # Not sure if bitwise operations are supported by Z3?
 class BitAnd(BinaryExpr):
-  opr = operator.and_
+  opr = staticmethod(operator.and_)
   ret_type = int
   def eval(self, env):
     return self.left.eval(env) & self.right.eval(env)
@@ -453,7 +453,7 @@ class BitAnd(BinaryExpr):
       , self.right.remapLabels(policy, writer))
 
 class BitOr(BinaryExpr):
-  opr = operator.or_
+  opr = staticmethod(operator.or_)
   ret_type = int
   def eval(self, env):
     return self.left.eval(env) | self.right.eval(env)
@@ -465,7 +465,7 @@ class BitOr(BinaryExpr):
       , self.right.remapLabels(policy, writer))
 
 class LShift(BinaryExpr):
-  opr = operator.ilshift
+  opr = staticmethod(operator.ilshift)
   ret_type = int
   def eval(self, env):
     return self.left.eval(env) << self.right.eval(env)
@@ -477,7 +477,7 @@ class LShift(BinaryExpr):
       , self.right.remapLabels(policy, writer))
 
 class RShift(BinaryExpr):
-  opr = operator.irshift
+  opr = staticmethod(operator.irshift)
   ret_type = int
   def eval(self, env):
     return self.left.eval(env) >> self.right.eval(env)
@@ -491,7 +491,7 @@ class RShift(BinaryExpr):
 # Boolean operations
 
 class And(BinaryExpr):
-  opr = operator.and_
+  opr = staticmethod(operator.and_)
   ret_type = bool
   def eval(self, env):
     return self.left.eval(env) and self.right.eval(env)
@@ -503,7 +503,7 @@ class And(BinaryExpr):
       , self.right.remapLabels(policy, writer))
 
 class Or(BinaryExpr):
-  opr = operator.or_
+  opr = staticmethod(operator.or_)
   ret_type = bool
   def eval(self, env):
     return self.left.eval(env) or self.right.eval(env)
@@ -515,7 +515,7 @@ class Or(BinaryExpr):
       , self.right.remapLabels(policy, writer))
 
 class Not(UnaryExpr):
-  opr = operator.not_
+  opr = staticmethod(operator.not_)
   ret_type = bool
   def eval(self, env):
     return not self.sub.eval(env)
@@ -526,7 +526,7 @@ class Not(UnaryExpr):
 
 # Doesn't correspond to a Python operator but is useful
 class Implies(BinaryExpr):
-  opr = lambda x, y : (not x) or y
+  opr = staticmethod(lambda x, y : (not x) or y)
   ret_type = bool
   def eval(self, env):
     return (not self.left.eval(env)) or self.right.eval(env)
@@ -540,7 +540,7 @@ class Implies(BinaryExpr):
 # Comparison operations
 
 class Eq(BinaryExpr):
-  opr = operator.eq
+  opr = staticmethod(operator.eq)
   ret_type = bool
   def eval(self, env):
     return self.left.eval(env) == self.right.eval(env)
@@ -552,7 +552,7 @@ class Eq(BinaryExpr):
       , self.right.remapLabels(policy, writer))
 
 class Lt(BinaryExpr):
-  opr = operator.lt
+  opr = staticmethod(operator.lt)
   ret_type = bool
   def eval(self, env):
     return self.left.eval(env) < self.right.eval(env)
@@ -564,7 +564,7 @@ class Lt(BinaryExpr):
       , self.right.remapLabels(policy, writer))
 
 class LtE(BinaryExpr):
-  opr = operator.le
+  opr = staticmethod(operator.le)
   ret_type = bool
   def eval(self, env):
     return self.left.eval(env) <= self.right.eval(env)
@@ -576,7 +576,7 @@ class LtE(BinaryExpr):
       , self.right.remapLabels(policy, writer))
 
 class Gt(BinaryExpr):
-  opr = operator.gt
+  opr = staticmethod(operator.gt)
   ret_type = bool
   def eval(self, env):
     return self.left.eval(env) > self.right.eval(env)
@@ -588,7 +588,7 @@ class Gt(BinaryExpr):
       , self.right.remapLabels(policy, writer))
 
 class GtE(BinaryExpr):
-  opr = operator.ge
+  opr = staticmethod(operator.ge)
   ret_type = bool
   def eval(self, env):
     return self.left.eval(env) >= self.right.eval(env)

@@ -7,12 +7,14 @@ from basic_expr import basic_expr_transform
 from body_stmts import body_stmts_transform
 from namespace import replace_local_scopes_with_namespace
 from classes import classes_transform
+from return_transform import return_transform
 
 macros = Macros()
 
 @macros.decorator
 def jeeves(tree, gen_sym, **kw):
     tree = basic_expr_transform(tree)
+    tree = return_transform(tree, gen_sym)
     tree = replace_local_scopes_with_namespace(tree, gen_sym)
     tree = body_stmts_transform(tree, gen_sym)
 
