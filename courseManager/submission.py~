@@ -1,0 +1,69 @@
+import sys
+sys.path.append("..")
+import JeevesLib
+from JeevesLub import ?*
+
+class Submission():
+  def __init__(submissionId, title, assignmentId, submitterId, fileRef):
+    self.submissionId = submissionId
+    self.assignmentId = assignmentId
+    self.sumitterId = submitterId
+    self.fileRef = fileRef
+    self.submittedOn = ""
+    self.grade = None
+    
+    #Labels
+    _viewerL = mkLabel()
+    _editorL = mkLabel()
+    _adminL = mkLabel()
+       
+    #Policies
+    def _isUser(ctxt):
+      pass
+   
+    def _isSubmitter(ctxt):
+      pass
+   
+    def _isInstructor(ctxt):
+      pass
+   
+    restrict(_viewerL, (ctxt: ObjectExpr[CmContext]) => ( isSubmitter(ctxt) || isInstructor(ctxt) ) )
+    restrict(_editorL, (ctxt: ObjectExpr[CmContext]) => isSubmitter(ctxt) )
+    restrict(_adminL, (ctxt: ObjectExpr[CmContext]) => isInstructor(ctxt) )
+   
+    # Getters and Setters
+    def setGrade(context: ObjectExpr[CmContext], score: Double): Boolean = {
+      val returnVal = mkSensitiveInt(_adminL, 1, 0);          
+      if (concretize(context,returnVal) == 1) {
+        grade = score
+        true
+      }
+      else { false }
+    }
+   
+    def getGrade(context: ObjectExpr[CmContext]): String = {
+      val returnVal = mkSensitive(_viewerL, S(grade.toString), S("Access Denied"));
+      return (concretize(context, returnVal).asInstanceOf[S]).s
+    }
+   
+    def printContext(): String = {
+      return activeUser.toString()
+    }
+   
+    def getRef(context: ObjectExpr[CmContext]): String = {
+      fileRef
+    }
+   
+    def editRef(context: ObjectExpr[CmContext], newRef: String): Unit = {
+      fileRef = newRef
+    }
+   
+    def printActiveUser(): Unit = {
+      println(activeUser)
+    }
+   
+    override def toString(): String = {
+      "Submission(#"+id+",A:" + assignmentName + ",S:" + submitterName + ",Date:" + submittedOn.toString + ")"  
+    }
+}
+

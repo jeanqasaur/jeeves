@@ -1,0 +1,44 @@
+import sys
+sys.path.append("..")
+import JeevesLib
+import hashlib
+
+class User:
+  def __init__(self, userId, userName, firstName, lastName, email):
+    self.userId = userId
+    self.userName = userName
+    self.firstName = firstName
+    self.lastName = lastName
+    self.email = email
+    self._password = ""
+
+  def __repr__(self):
+    return "User"
+
+  # Labels
+
+  # Policies
+
+  # Password Functions
+  def md5(self, string):
+    return hashlib.md5(string).hexdigest()
+
+  def setPassword(self, password):
+    self._passwordDigest = md5(password)
+
+  def validate(self, password):
+    self._passwordDigest == md5(password)
+
+  # Actions
+  def submitAssignment(self, assignment, name):
+    pass
+  
+  def createAssignment(self, assignmentname, dueDate, maxPoints, prompt):
+    pass
+    
+
+  def submit():
+    return "a"
+
+  if __name__ == '__main__':
+    print("A User!")

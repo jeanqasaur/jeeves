@@ -541,6 +541,15 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertEquals(jl.concretize(False, jl.jhasElt(lst, lambda x: x == 3))
         , True)
 
+  def test_jhas_in_policy(self):
+    jl = JeevesLib
+    a = jl.mkLabel ()
+    jl.restrict(a, lambda oc: jl.jhas(oc, 3))
+    self.assertTrue(jl.concretize([1, 2, 3], a))
+    self.assertTrue(jl.concretize([3], a))
+    self.assertFalse(jl.concretize([], a))
+    self.assertFalse(jl.concretize([1, 2], a))
+
   def test_list(self):
     jl = JeevesLib
     x = jl.mkLabel('x')

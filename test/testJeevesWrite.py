@@ -11,10 +11,6 @@ class DummyUser:
     self.userId = userId
   def __eq__(self, other):
     return self.userId == other.userId
-class DummyContext:
-  def __init__(self, user, badUsers):
-    self.user = user
-    self.badUsers = badUsers
 
 class TestJeevesWrite(unittest.TestCase):
   def setUp(self):
@@ -28,7 +24,6 @@ class TestJeevesWrite(unittest.TestCase):
   def allowUserWrite(self, user):
     return lambda _this: lambda ictxt: lambda octxt: ictxt == user
 
-  '''
   def test_write_allowed_for_all_viewers(self):
     x = ProtectedRef(0, None, self.allowUserWrite(self.aliceUser))
     assert x.update(self.aliceUser, self.aliceUser, 42) == UpdateResult.Success
@@ -128,7 +123,7 @@ class TestJeevesWrite(unittest.TestCase):
     y = ProtectedRef(1, None
           , lambda _this: lambda ictxt: lambda octxt:
               ictxt == self.bobUser or ictxt == self.aliceUser)
-    y.update(self.bobUser, self.bobUser, if x.v == 42 else 3)
+    y.update(self.bobUser, self.bobUser, 2 if x.v == 42 else 3)
     self.assertEqual(JeevesLib.concretize(self.aliceUser, y.v), 2)
     self.assertEqual(JeevesLib.concretize(self.bobUser, y.v), 3)
 
@@ -136,11 +131,11 @@ class TestJeevesWrite(unittest.TestCase):
   # x + y should be allowed to be written to a value where they are both
   # allowed to write.
   def test_combining_values_into_permissive_write(self):
-    x = ProtectedRef(0, None, self.allowUserWrite(self.bobUser), None)
+    x = ProtectedRef(0, None, self.allowUserWrite(self.bobUser))
     x.update(self.bobUser, self.bobUser, 42)
-    y = ProtectedRef(1, None, self.allowUserWrite(self.aliceUser), None)
+    y = ProtectedRef(1, None, self.allowUserWrite(self.aliceUser))
     y.update(self.aliceUser, self.aliceUser, 43)
-    z = ProtectedRef(0, None, None
+    z = ProtectedRef(0, None
           , lambda _this: lambda ictxt: lambda otxt:
               ictxt == self.aliceUser or ictxt == self.bobUser
                 or ictxt == self.carolUser)
@@ -152,13 +147,13 @@ class TestJeevesWrite(unittest.TestCase):
   # Only bob can see the special value alice wrote to him...
   @jeeves
   def test_combining_confidentiality_with_operations(self):  
-    x = ProtectedRef(0, None, self.allowUserWrite(self.bobUser), self.bobUser)
+    x = ProtectedRef(0, None, self.allowUserWrite(self.bobUser))
     x.update(self.bobUser, self.bobUser, 42)
-    y = ProtectedRef(2, None, None
+    y = ProtectedRef(2, None
           , lambda _this: lambda ictxt: lambda octxt:
               ictxt == self.aliceUser and octxt == self.bobUser)
     y.update(self.aliceUser, self.aliceUser, 43)
-    z = ProtectedRef(0, None, None
+    z = ProtectedRef(0, None
           , lambda _this: lambda ictxt: lambda octxt:
               ictxt == self.aliceUser or ictxt == self.bobUser
                 or ictxt == self.carolUser)
@@ -167,12 +162,15 @@ class TestJeevesWrite(unittest.TestCase):
     self.assertEqual(JeevesLib.concretize(self.bobUser, z.v), 85)
     self.assertEqual(JeevesLib.concretize(self.carolUser, z.v), 44)
 
-  # TODO: This has a Z3 error... Look into this once more stuff is implemented.
-  def test_integrity_policies_with_confidentiality(self):  
+  def test_write_policies_with_confidentiality(self):  
+    # Make a sensitive value that is either Bob or the nobody user. Only Bob
+    # can see this.
     a = JeevesLib.mkLabel ()
     JeevesLib.restrict(a, lambda ctxt: ctxt == self.bobUser)
     secretWriter = JeevesLib.mkSensitive(a, self.bobUser, self.nobodyUser)
-    x = ProtectedRef(0, None, None
+    # We now make a protected reference where the input channel has to be the
+    # secret writer.
+    x = ProtectedRef(0, None
           , lambda _this: lambda ictxt: lambda octxt: ictxt == secretWriter)
     x.update(self.bobUser, self.bobUser, 42)
     self.assertEqual(JeevesLib.concretize(self.bobUser, secretWriter)
@@ -181,45 +179,66 @@ class TestJeevesWrite(unittest.TestCase):
       , self.nobodyUser)
     self.assertEqual(JeevesLib.concretize(self.aliceUser, secretWriter)
       , self.nobodyUser)
+    # Only Bob should be able to see the value he wrote.
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v), 0)   
-    self.assertEqual(JeevesLib.concretize(self.bobUser, x.v), 0)
+    self.assertEqual(JeevesLib.concretize(self.bobUser, x.v), 42)
     self.assertEqual(JeevesLib.concretize(self.carolUser, x.v), 0)
-
+ 
+  def test_input_write_policies_with_confidentiality(self):
+    # Make a sensitive value that is either Bob or the nobody user. Only Bob
+    # can see this.
+    a = JeevesLib.mkLabel ()
+    JeevesLib.restrict(a, lambda ctxt: ctxt == self.bobUser)
+    secretWriter = JeevesLib.mkSensitive(a, self.bobUser, self.nobodyUser)
+    # We now make a protected reference where the input channel has to be the
+    # secret writer.
+    x = ProtectedRef(0
+          , lambda _this: lambda ictxt: ictxt == secretWriter
+          , None)
+    x.update(self.bobUser, self.bobUser, 42)
+    self.assertEqual(JeevesLib.concretize(self.bobUser, secretWriter)
+      , self.bobUser)
+    self.assertEqual(JeevesLib.concretize(self.aliceUser, secretWriter)
+      , self.nobodyUser)
+    self.assertEqual(JeevesLib.concretize(self.aliceUser, secretWriter)
+      , self.nobodyUser)
+    # Only Bob should be able to see the value he wrote.
+    self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v), 42)
+    self.assertEqual(JeevesLib.concretize(self.bobUser, x.v), 42)
+    self.assertEqual(JeevesLib.concretize(self.carolUser, x.v), 42)
+ 
   # If Alice does something bad, then we will reject all of her influences.
   def test_determine_writer_trust_later(self):
-    x = ProtectedRef(0, None, None
+    x = ProtectedRef(0, None
           , lambda _this: lambda ictxt: lambda octxt:
-              JeevesLib.jhas(octxt.badUsers, ictxt))
+              JeevesLib.jhas(octxt, ictxt))
     x.update(self.aliceUser, self.aliceUser, 42)
-    self.assertEqual(
-        JeevesLib.concretize(DummyContext(self.aliceUser
-          , [self.aliceUser]), x.v)
-      , 0)
-    self.assertEqual(JeevesLib.concretize(DummyContext(self.aliceUser, []), x.v)
-      , 42)
+    self.assertEqual(JeevesLib.concretize([self.aliceUser], x.v), 42)
+    self.assertEqual(JeevesLib.concretize([], x.v), 0)
 
   def test_function_facets_allowed_to_write(self):
     def id(x):
       return x
     def inc(x):
       return x+1
-    x = ProtectedRef(id, None, self.allowUserWrite(self.bobUser), None)
+    x = ProtectedRef(id, None, self.allowUserWrite(self.bobUser))
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v)(1), 1)
     x.update(self.bobUser, self.bobUser, inc)
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v)(1), 2)
-    
+  
   def test_function_facets_cannot_write(self):
     def id(x):
       return x
     def inc(x):
       return x+1
-    x = ProtectedRef(id, None, self.allowUserWrite(self.bobUser), None)
+    x = ProtectedRef(id, None, self.allowUserWrite(self.bobUser))
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v)(1), 1)
     x.update(self.aliceUser, self.aliceUser, inc)
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v)(1), 1)
 
+  @jeeves
   def test_output_write_policy_with_this_cannot_update(self):  
-    x = ProtectedRef(0, None, None
+    x = ProtectedRef(0, None
           , lambda v: lambda ictxt: lambda _octxt:
               (not (v == 3)) and ictxt == self.aliceUser)    
     x.update(self.aliceUser, self.aliceUser, 1)
@@ -231,13 +250,13 @@ class TestJeevesWrite(unittest.TestCase):
 
   @jeeves
   def test_output_write_policies_involving_this_can_update(self):
-    x = ProtectedRef(0, None, None
-          , lambda v: lambda ictxt: lambda _: v == 0 and ictxt == alice)
+    x = ProtectedRef(0, None
+          , lambda v: lambda ictxt: lambda _:
+              v == 0 and ictxt == self.aliceUser)
     x.update(self.aliceUser, self.aliceUser, 1)
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v), 1)
     x.update(self.aliceUser, self.aliceUser, 3)
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v), 1)
-  '''
 
 if __name__ == '__main__':
     unittest.main()

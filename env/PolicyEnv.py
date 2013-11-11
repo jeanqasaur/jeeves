@@ -3,7 +3,8 @@ import JeevesLib
 import fast.AST
 import smt.SMT
 from collections import defaultdict
-from eval import Eval
+from eval.Eval import partialEval
+from fast.AST import FExpr
 
 class PolicyEnv:
   def __init__(self):
@@ -37,7 +38,7 @@ class PolicyEnv:
       predicate = policy(ctxt) #predicate should be True if label can be HIGH
       predicate_vars = predicate.vars()
       dependencies[label] |= predicate_vars
-      constraints.append(Eval.partialEval(fast.AST.Implies(label, predicate)))
+      constraints.append(partialEval(fast.AST.Implies(label, predicate)))
 
     # If a depends on b, then we want (b == Low ==> a == Low)
     for (label, label_deps) in dependencies.iteritems():
