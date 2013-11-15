@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Register</h2>
+    <form method="post" action="">
+    	{{ form }}
+    	{{ csrf_token }}
+        <input type="submit" value="Register" />
+        <a href="/registration/password_reset_form">Forgot password?</a>
+    </form>
+{% endblock %}

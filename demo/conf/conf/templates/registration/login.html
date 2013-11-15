@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Log in</h2>
+    <form method="post" action="">
+    	{{ form }}
+        <input type="submit" value="Login" />
+        <a href="/registration/password_reset_form">Forgot password?</a>
+    </form>
+{% endblock %}
