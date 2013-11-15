@@ -37,7 +37,7 @@ class Square:
     JeevesLib.mkSensitive(a, ship, NoShip)
 
   def updateShip(self, ctxt, ship):
-    self.shipRef.update(ctxt, ctxt, self.mkShipSecret(ship)) == UpdateResult.Success
+    return self.shipRef.update(ctxt, ctxt, self.mkShipSecret(ship)) == UpdateResult.Success
   def hasShip(self):
     not self.shipRef.v == NoShip
   def getShip(self):

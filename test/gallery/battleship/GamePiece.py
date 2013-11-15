@@ -1,7 +1,9 @@
 from abc import ABCMeta, abstractmethod
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
+from fast.ProtectedRef import ProtectedRef, UpdateResult
 from util.Singleton import Singleton
+from Point import Point
 
 @jeeves
 class GamePiece:
@@ -9,11 +11,11 @@ class GamePiece:
 
   def __init__(self, owner):
     self.owner = owner  
-    self.placedRef = ProtectedRef(False
+    self._placedRef = ProtectedRef(False
       , lambda hasShip: lambda ic: (not hasShip) and self.isOwner(ic)
       , None)
     # TODO: See if we can do away with this...
-    self.placed = False
+    self._placed = False
 
     self.bombedRef = ProtectedRef(False
       , lambda hasBomb: lambda ic: not hasBomb
@@ -21,19 +23,22 @@ class GamePiece:
     # TODO: See if we can do away with this...
     self.bombed = False
 
-    self.squares = []
+    self._squares = []
+
+  def __eq__(self, other):
+    return self.__class__.__name__ == other.__class__.__name__ and self.owner == other.owner
 
   def isOwner(self, ctxt):
     return ctxt.user == self.owner
 
   def placePiece(self, ctxt):
-    if (self.placedRef.update(ctxt, ctxt, true) == UpdateResult.Success):
-      self.placed = True
+    if (self._placedRef.update(ctxt, ctxt, True) == UpdateResult.Success):
+      self._placed = True
       return True
     else:
       return False
   def isPlaced(self):
-    return self.placed
+    return self._placed
   
   def bombPiece(self, ctxt):
     if (self.bombedRef.update(ctxt, ctxt, true) == UpdateResult.Success):
@@ -44,8 +49,9 @@ class GamePiece:
   def isBombed(self):
     return self.bombed
 
+  @jeeves
   def getPiecePoints(self, start, end):
-    if start.inLine(end) and start.distance(end) == size:
+    if start.inLine(end) and start.distance(end) == self.size:
       # If we are on the same horizontal line...
       if start.x == end.x:
         yPts = range(start.y
@@ -60,10 +66,10 @@ class GamePiece:
   
   # TODO: Return whether the update succeeded...
   def addSquare(self, s):
-    self.squares.append(s)
+    self._squares.append(s)
     return True
   def getSquares(self):
-    return self.squares
+    return self._squares
 
 class Carrier(GamePiece):
   def __init__(self, owner):

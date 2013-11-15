@@ -1,5 +1,7 @@
-from fast.AST import FExpr
+import JeevesLib
+from sourcetrans.macro_module import macros, jeeves
 
 @jeeves
 class Bomb:
-  pass
+  def __init__(self, owner):
+    self.owner = owner

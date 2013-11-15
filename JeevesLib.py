@@ -42,6 +42,7 @@ def concretize(ctxt, v):
 def jif(cond, thn_fn, els_fn):
   condTrans = partialEval(fexpr_cast(cond))
   if condTrans.type != bool:
+    print condTrans.prettyPrint()
     raise TypeError("jif must take a boolean as a condition")
   return jif2(condTrans, thn_fn, els_fn)
 

@@ -3,17 +3,6 @@ from GamePiece import Carrier, Battleship, Cruiser, Destroyer, Submarine, NoShip
 from sourcetrans.macro_module import macros, jeeves
 from Square import Square
 
-class Point:
-  def __init__(self, x, y):
-    self.x = x
-    self.y = y
-
-  def distance(self, other):
-    abs(self.x - other.x) + abs(self.y - other.y)
-
-  def inLine(self, other):
-    self.x == other.x or self.y == other.y
-
 class Board:
   class OutOfBoundsException(Exception):
     pass
@@ -25,6 +14,7 @@ class Board:
     # Initialize the board.
     self.board = []
     for i in range(0, self.boardSize):
+      curCol = []
       for j in range(0, self.boardSize):      
         curCol.append(Square(self.owner))
       self.board.append(curCol)    
@@ -38,19 +28,19 @@ class Board:
 
   # Question: How do we know the identities of each destroyer?
   @jeeves
-  def placeShip(ctxt, ship, start, end):
-    for cur in pieces:
+  def placeShip(self, ctxt, ship, start, end):
+    for cur in self.pieces:
+      print cur
       if cur == ship and not cur.isPlaced():
         # Update the relevant board pieces.
         pts = cur.getPiecePoints(start, end)
-        if pts:
+        if not (pts == None):
           for pt in pts:
-            shipUpdated = self.board(pt.x)(pt.y).updateShip(ctxt, cur)
-            squareUpdated = cur.addSquare(self.board(x)(y))
+            shipUpdated = self.board[pt.x][pt.y].updateShip(ctxt, cur)
+            squareUpdated = cur.addSquare(self.board[pt.x][pt.y])
             if not (shipUpdated and squareUpdated):
               return False
-            else:
-              return cur.placePiece(ctxt)
+          return cur.placePiece(ctxt)
         # If the points didn't fit, then we can't place the ship.
         else:        
             print "Piece didn't fit: "
