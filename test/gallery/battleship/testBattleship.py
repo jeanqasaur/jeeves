@@ -27,11 +27,11 @@ class TestBattleship(unittest.TestCase):
     self.bobCtxt =  GameContext(self.bob, self.game)
 
   def test_can_only_put_pieces_on_board(self):
+    '''
     self.assertTrue(
       self.aliceBoard.placeShip(
         self.aliceCtxt, Carrier(self.alice), Point(0, 0), Point(0, 5)))
     
-    '''
     # Cannot place the same piece again.
     expectResult(false) {
       aliceBoard.placeShip(aliceCtxt, Carrier(alice), Point(0,0), Point(0, 5))
