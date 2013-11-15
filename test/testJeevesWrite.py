@@ -258,5 +258,13 @@ class TestJeevesWrite(unittest.TestCase):
     x.update(self.aliceUser, self.aliceUser, 3)
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v), 1)
 
+  def test_not_tracking_implicit_flows(self):
+    x = ProtectedRef(0, None, self.allowUserWrite(self.aliceUser), False)
+    x.update(self.aliceUser, self.aliceUser, 42)
+    y = ProtectedRef(1, None, self.allowUserWrite(self.bobUser), False)
+    y.update(self.bobUser, self.bobUser, 2 if x.v == 42 else 3)
+    self.assertEqual(JeevesLib.concretize(self.aliceUser, y.v), 2)
+    self.assertEqual(JeevesLib.concretize(self.bobUser, y.v), 2)
+
 if __name__ == '__main__':
     unittest.main()
