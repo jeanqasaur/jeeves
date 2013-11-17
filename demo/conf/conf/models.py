@@ -1,4 +1,4 @@
-from django.models import Model, ManyToManyField, ForeignKey, CharField, TextField, DateTimeField, IntegerField
+from django.db.models import Model, ManyToManyField, ForeignKey, CharField, TextField, DateTimeField, IntegerField
 from django.contrib.auth.models import User
 
 class UserProfile(Model):
@@ -9,7 +9,7 @@ class Paper(Model):
     reviewers = ManyToManyField(User)
 
 class PaperVersion(Model):
-    paper = ForeignKey(paper)
+    paper = ForeignKey(Paper)
 
     title = CharField(1024)
     contents = CharField(1024) #filename
