@@ -40,12 +40,14 @@ def paper_view(request):
 @login_required
 def submit_view(request):
     if request.method == 'POST':
-        form = forms.ProfileForm(request.POST)
+        form = forms.SubmitForm(request.POST, request.FILES)
+        print 'hello'
         if form.is_valid():
-            paper = form.save()
+            print 'hi'
+            paper = form.save(request.user)
             return HttpResponseRedirect("paper?id=%d" % paper.id)
     else:
-        form = forms.ProfileForm()
+        form = forms.SubmitForm()
 
     return render_to_response("profile.html", RequestContext(request, {'form' : form}))
 

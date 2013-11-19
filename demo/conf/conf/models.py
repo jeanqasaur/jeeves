@@ -1,24 +1,36 @@
-from django.db.models import Model, ManyToManyField, ForeignKey, CharField, TextField, DateTimeField, IntegerField
+from django.db.models import Model, ManyToManyField, ForeignKey, CharField, TextField, DateTimeField, IntegerField, FileField
 from django.contrib.auth.models import User
 
 class UserProfile(Model):
     user = ForeignKey(User)
 
+    class Meta:
+        db_table = 'user_profiles'
+
 class Paper(Model):
-    authors = ManyToManyField(User)
-    reviewers = ManyToManyField(User)
+    authors = ManyToManyField(User, related_name='authors')
+    reviewers = ManyToManyField(User, related_name='reviewers')
+
+    class Meta:
+        db_table = 'papers'
 
 class PaperVersion(Model):
     paper = ForeignKey(Paper)
 
-    title = CharField(1024)
-    contents = CharField(1024) #filename
+    title = CharField(max_length=1024)
+    contents = FileField(upload_to='papers')
     abstract = TextField()
     time = DateTimeField(auto_now_add=True)
 
+    class Meta:
+        db_table = 'paper_versions'
+
 class Tag(Model):
-    name = CharField(32)
+    name = CharField(max_length=32)
     paper = ForeignKey(Paper)
+
+    class Meta:
+        db_table = 'tags'
 
 class Review(Model):
     time = DateTimeField(auto_now_add=True)
@@ -30,3 +42,6 @@ class Review(Model):
     score_presentation = IntegerField()
     score_technical = IntegerField()
     score_confidence = IntegerField()
+
+    class Meta:
+        db_table = 'reviews'
