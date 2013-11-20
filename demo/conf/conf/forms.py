@@ -2,6 +2,7 @@ from django.forms import Form, ModelForm, CharField, FileField, Textarea
 
 from models import Paper, PaperVersion
 from django.contrib.auth.models import User
+import random
 
 class SubmitForm(Form):
     coauthor1 = CharField(required=False)
@@ -48,6 +49,8 @@ class SubmitForm(Form):
         for coauthor in d['coauthors']:
             paper.authors.add(coauthor)
         paper.save()
+
+        d['contents'].name = '%030x' % random.randrange(16**30) + ".pdf"
 
         paper_version = PaperVersion(
             paper = paper,

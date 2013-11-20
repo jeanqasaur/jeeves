@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 
 class UserProfile(Model):
     user = ForeignKey(User)
+    name = CharField(max_length=1024)
 
     class Meta:
         db_table = 'user_profiles'
@@ -10,6 +11,7 @@ class UserProfile(Model):
 class Paper(Model):
     authors = ManyToManyField(User, related_name='authors')
     reviewers = ManyToManyField(User, related_name='reviewers')
+    pc_conflicts = ManyToManyField(User, related_name='pc_conflicts')
 
     class Meta:
         db_table = 'papers'

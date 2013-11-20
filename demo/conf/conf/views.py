@@ -4,8 +4,11 @@ from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect, HttpResponse
+from django.contrib.auth.models import User
 
-import forms, models
+import forms
+
+from models import Paper, PaperVersion
 
 def register_account(request):
     if request.user.is_authenticated():
@@ -31,19 +34,27 @@ def index(request):
 @login_required
 def paper_view(request):
     try:
-        paper = models.Paper.objects().get(int(request.GET['id']))
-    except Exception:
+        paper = Paper.objects.filter(id=int(request.GET['id'])).get()
+        paper_versions = list(PaperVersion.objects.filter(paper=paper).order_by('-time').all())
+        authors = paper.authors.all()
+        latest_abstract = paper_versions[-1]
+    except Paper.DoesNotExist:
         paper = None
+        paper_versions = []
+        authors = []
+        latest_abstract = None
 
-    return render_to_response("paper.html", RequestContext(request, {'paper' : paper}))
+    return render_to_response("paper.html", RequestContext(request, {
+        'paper' : paper,
+        'paper_versions' : paper_versions,
+        'authors' : authors,
+    }))
 
 @login_required
 def submit_view(request):
     if request.method == 'POST':
         form = forms.SubmitForm(request.POST, request.FILES)
-        print 'hello'
         if form.is_valid():
-            print 'hi'
             paper = form.save(request.user)
             return HttpResponseRedirect("paper?id=%d" % paper.id)
     else:

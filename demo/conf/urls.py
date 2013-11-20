@@ -3,6 +3,9 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
+from django.conf.urls.static import static
+from django.conf import settings
+
 from conf import views
 
 urlpatterns = patterns('',
@@ -21,4 +24,5 @@ urlpatterns = patterns('',
     url(r'^index$', views.index),
     url(r'^$', views.index),
     url(r'^submit$', views.submit_view),
-)
+    url(r'^paper$', views.paper_view),
+) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

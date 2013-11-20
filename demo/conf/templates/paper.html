@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if paper %}
+        <div>
+            <h3> Authors </h3>
+            <ul>
+                {% for author in authors %}
+                    <li>
+                        <div> {{author.name}} </div>
+                        <div> {{author.email}} </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div>
+            <h3> Versions </h3>
+            <ul>
+                {% for paper_version in paper_versions %}
+                    <a href="{{paper_version.contents.url}}">{{paper_version.time}}</a>
+                {% endfor %}
+            </ul>
+        </div>
+        <div>
+            <h3> Abstract </h3>
+            <pre>{{paper_version.abstract}}</pre>
+        </div>
+    {% else %}
+        Not found. The planets must not be aligned correctly, or perhaps no paper with the given 'id' exists.
+    {% endif %}
+{% endblock %}
