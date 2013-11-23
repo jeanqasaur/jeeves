@@ -1,6 +1,6 @@
-from django.forms import Form, ModelForm, CharField, FileField, Textarea
+from django.forms import Form, ModelForm, CharField, FileField, Textarea, ModelForm
 
-from models import Paper, PaperVersion
+from models import Paper, PaperVersion, UserProfile
 from django.contrib.auth.models import User
 import random
 
@@ -61,3 +61,8 @@ class SubmitForm(Form):
         paper_version.save()
 
         return paper
+
+class ProfileForm(ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['name']

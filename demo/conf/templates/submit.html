@@ -4,7 +4,9 @@
     <h2>Submit a paper</h2>
     <form method="post" action="" enctype="multipart/form-data">
     	{% csrf_token %}
-    	{{ form }}
+    	<table>
+			{{ form }}
+		</table>
         <input type="submit" value="Submit" />
     </form>
 {% endblock %}

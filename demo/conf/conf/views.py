@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 
 import forms
 
-from models import Paper, PaperVersion
+from models import Paper, PaperVersion, UserProfile
 
 def register_account(request):
     if request.user.is_authenticated():
@@ -60,16 +60,23 @@ def submit_view(request):
     else:
         form = forms.SubmitForm()
 
-    return render_to_response("profile.html", RequestContext(request, {'form' : form}))
+    return render_to_response("submit.html", RequestContext(request, {'form' : form}))
 
 @login_required
 def profile_view(request):
+    try:
+        profile = UserProfile.objects.filter(user=request.user).get()
+    except UserProfile.DoesNotExist:
+        profile = None
+
     if request.method == 'POST':
-        form = forms.ProfileForm(request.POST)
+        if not profile:
+            profile = UserProfile()
+            profile.user = request.user
+        form = forms.ProfileForm(request.POST, instance=profile)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect("accounts/profile")
     else:
-        form = forms.ProfileForm()
+        form = forms.ProfileForm(instance=profile)
 
     return render_to_response("profile.html", RequestContext(request, {'form' : form}))
