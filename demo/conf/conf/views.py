@@ -16,16 +16,28 @@ def register_account(request):
 
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
-        if form.is_valid():
+        profile_form = forms.ProfileForm(request.POST)
+        if form.is_valid() and profile_form.is_valid():
             user = form.save()
+
+            profile = UserProfile()
+            profile.user = user
+            profile_form = forms.ProfileForm(request.POST, instance=profile)
+            profile_form.save()
+
             user = authenticate(username=request.POST['username'],
                          password=request.POST['password1'])
             login(request, user)
             return HttpResponseRedirect("index")
     else:
         form = UserCreationForm()
+        profile_form = forms.ProfileForm()
 
-    return render_to_response("registration/account.html", RequestContext(request, {'form' : form}))
+    return render_to_response("registration/account.html", RequestContext(request,
+        {
+            'form' : form,
+            'profile_form' : profile_form,
+        }))
 
 @login_required
 def index(request):
