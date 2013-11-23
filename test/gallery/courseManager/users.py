@@ -1,5 +1,5 @@
 import sys
-sys.path.append("..")
+sys.path.append("../../..")
 import JeevesLib
 import hashlib
 
@@ -53,11 +53,3 @@ class Student(User):
 class Instructor(User):
   def __init__(self, userId, userName, firstName, lastName, email):
     User.__init__(self, userId, userName, firstName, lastName, email)
-
-
-if __name__ == '__main__':
-  a = User(1,"bob","Bob","Barker","bbarker@mit.edu")
-  a.setPassword("password")
-  print(a)
-  if a.validate("password"):
-    print("Log In Success")

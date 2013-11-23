@@ -1,5 +1,5 @@
 import sys
-sys.path.append("..")
+sys.path.append("../../..")
 import JeevesLib
 import math
 from datetime import *
@@ -25,9 +25,9 @@ class Assignment():
 
   def std(self, l):
     mean = self.average(l)
-    sum_x2 = sum([float(x**2) for x in l])
-    stdev = math.sqrt((sum_x2 / len(l)) - (mean * mean)) 
-    return stdev #check value
+    variance = map(lambda x: (float(x) - mean)**2, l)
+    stdev = math.sqrt(self.average(variance))
+    return stdev #check precision
 
   def median(self, l):
     sortedL = sorted(l)
@@ -42,18 +42,6 @@ class Assignment():
   # Set
 
   # Show
-
-if __name__ == '__main__':
-  due = datetime(2013, 11, 15, 12, 13, 14)
-  a = Assignment(1, "Documentation", due, 100, "Create Documentation", 1)
-  tlist = [1,2,4,5,6]
-  print(a)
-  print(a.average(tlist))
-  print(a.std(tlist))
-  print(a.median(tlist) )
-
-
-
 
 
 
