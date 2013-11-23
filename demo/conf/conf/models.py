@@ -3,7 +3,12 @@ from django.contrib.auth.models import User
 
 class UserProfile(Model):
     user = ForeignKey(User)
+
     name = CharField(max_length=1024)
+    affiliation = CharField(max_length=1024)
+    acm_number = CharField(max_length=1024)
+
+    pc_conflicts = ManyToManyField(User, related_name='pc_conflicts_profile')
 
     class Meta:
         db_table = 'user_profiles'

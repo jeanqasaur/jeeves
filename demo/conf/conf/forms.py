@@ -65,4 +65,5 @@ class SubmitForm(Form):
 class ProfileForm(ModelForm):
     class Meta:
         model = UserProfile
-        fields = ['name']
+        # TODO pc_conflicts should only have PC members
+        fields = ['name', 'affiliation', 'acm_number', 'pc_conflicts']
