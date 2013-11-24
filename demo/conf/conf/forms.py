@@ -1,6 +1,6 @@
 from django.forms import Form, ModelForm, CharField, FileField, Textarea, ModelForm
 
-from models import Paper, PaperVersion, UserProfile
+from models import Paper, PaperVersion, UserProfile, Review
 from django.contrib.auth.models import User
 import random
 
@@ -67,3 +67,8 @@ class ProfileForm(ModelForm):
         model = UserProfile
         # TODO pc_conflicts should only have PC members
         fields = ['name', 'affiliation', 'acm_number', 'pc_conflicts']
+
+class SubmitReviewForm(ModelForm):
+    class Meta:
+        model = Review
+        fields = ['comment', 'score_novelty', 'score_presentation', 'score_technical', 'score_confidence']

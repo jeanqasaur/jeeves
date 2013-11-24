@@ -23,8 +23,25 @@
         </div>
         <div>
             <h3> Abstract </h3>
-            <pre>{{paper_version.abstract}}</pre>
+            <pre>{{latest_abstract}}</pre>
         </div>
+        <div>
+            <h3> Reviews </h3>
+            <ul>
+                {% for review in reviews %}
+                    <li>
+                        <div> {{review.reviewer.username}} at {{review.time}} </div>
+                        <div> Comment: <pre>{{review.comment}}</pre> </div>
+                        <div> Novelty: {{review.score_novelty}} </div>
+                        <div> Presentation: {{review.score_presentation}} </div>
+                        <div> Technical: {{review.score_technical}} </div>
+                        <div> Confidence: {{review.score_confidence}} </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+		<a href="/submit_review?id={{paper.id}}">Submit review</a>
     {% else %}
         Not found. The planets must not be aligned correctly, or perhaps no paper with the given 'id' exists.
     {% endif %}
