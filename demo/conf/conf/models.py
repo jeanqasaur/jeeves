@@ -21,6 +21,17 @@ class Paper(Model):
     class Meta:
         db_table = 'papers'
 
+class ReviewAssignment(Model):
+    paper = ForeignKey(Paper, null=False)
+    user = ForeignKey(User, null=False)
+    type = CharField(max_length=8, null=False,
+        choices=(('none','none'),
+                ('assigned','assigned'),
+                ('conflict','conflict')))
+
+    class Meta:
+        db_table = 'review_assignments'
+
 class PaperVersion(Model):
     paper = ForeignKey(Paper)
 

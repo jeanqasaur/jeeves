@@ -1,8 +1,9 @@
-from django.forms import Form, ModelForm, CharField, FileField, Textarea, ModelForm
+from django.forms import Form, ModelForm, CharField, FileField, Textarea, ModelForm, HiddenInput
 
-from models import Paper, PaperVersion, UserProfile, Review
+from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment
 from django.contrib.auth.models import User
 import random
+from django.forms.formsets import formset_factory
 
 class SubmitForm(Form):
     coauthor1 = CharField(required=False)
@@ -72,3 +73,14 @@ class SubmitReviewForm(ModelForm):
     class Meta:
         model = Review
         fields = ['comment', 'score_novelty', 'score_presentation', 'score_technical', 'score_confidence']
+
+class ReviewAssignmentForm(ModelForm):
+    class Meta:
+        model = ReviewAssignment
+        fields = ['type', 'user', 'paper']
+        widgets = {
+            'user' : HiddenInput(),
+            'paper' : HiddenInput(),
+        }
+
+ReviewAssignmentFormset = formset_factory(ReviewAssignmentForm, extra=0)

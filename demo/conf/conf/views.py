@@ -5,10 +5,11 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
+import urllib
 
 import forms
 
-from models import Paper, PaperVersion, UserProfile, Review
+from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment
 
 def register_account(request):
     if request.user.is_authenticated():
@@ -124,4 +125,57 @@ def submit_review_view(request):
     return render_to_response("submit_review.html", RequestContext(request, {
         'form' : form,
         'paper' : paper,
+    }))
+
+@login_required
+def assign_reviews_view(request):
+    possible_reviewers = list(User.objects.all()) # TODO filter by people who are reviewers
+
+    reviewer = None
+    try:
+        reviewer_username = request.GET['reviewer_username']
+        for r in possible_reviewers:
+            if r.username == reviewer_username:
+                reviewer = r
+                break
+    except KeyError:
+        pass
+    if not reviewer:
+        reviewer = request.user
+
+    papers = list(Paper.objects.all())
+    assignments = list(ReviewAssignment.objects.filter(user=reviewer).all())
+
+    # Construct initial_data which is a list of ReviewAssignments for
+    # the ReviewAssignmentFormset. For the given user, we should have one
+    # for each paper. If one does not already exist for some paper, create it.
+    data = {assignment.paper : {
+        'user' : assignment.user,
+        'paper' : assignment.paper,
+        'type' : assignment.type
+      } for assignment in assignments}
+    for paper in papers:
+        if paper not in data:
+            data[paper] = {
+                'user' : reviewer,
+                'paper' : paper,
+                'type' : 'none'
+            }
+    initial_data = data.values()
+
+    if request.method == 'POST':
+        formset = forms.ReviewAssignmentFormset(request.POST, initial=initial_data)
+        if formset.is_valid():
+            for form in formset.forms:
+                form.save()
+            return HttpResponseRedirect("assign_reviews?reviewer_username=%s" % urllib.quote(reviewer.username))
+    else:
+        formset = forms.ReviewAssignmentFormset(initial=initial_data)
+
+    print formset.forms
+
+    return render_to_response("assign_reviews.html", RequestContext(request, {
+        'reviewer' : reviewer,
+        'formset' : formset,
+        'possible_reviewers' : possible_reviewers,
     }))

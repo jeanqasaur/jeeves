@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Profile</h2>
+
+    <form method="get" action="">
+        <h4> Select reviewer </h4>
+        <select name="reviewer_username">
+            {% for r in possible_reviewers %}
+                <option value="{{r.username}}" {% if r == reviewer %}selected{% endif %}>{{r.username}}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Go" />
+    </form>
+
+    <h4> Make assignments </h4>
+    <form method="post" action="">
+    	{% csrf_token %}
+    	{{ formset.management_form }}
+    	<table>
+    	    {% for form in formset.forms %}
+                <tr> <td colspan="2"> {{form.initial.user.username}} </td> </tr>
+    	        {{ form }}
+    	    {% endfor %}
+    	</table>
+        <input type="submit" value="Save" />
+    </form>
+{% endblock %}
