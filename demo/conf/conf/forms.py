@@ -1,4 +1,4 @@
-from django.forms import Form, ModelForm, CharField, FileField, Textarea, ModelForm, HiddenInput
+from django.forms import Form, ModelForm, CharField, FileField, Textarea, ModelForm, HiddenInput, MultipleChoiceField, CheckboxSelectMultiple
 
 from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment
 from django.contrib.auth.models import User
@@ -13,6 +13,15 @@ class SubmitForm(Form):
     title = CharField(1024, required=True)
     contents = FileField(required=True)
     abstract = CharField(widget=Textarea, required=True)
+
+    def __init__(self, possible_reviewers, default_conflict_reviewers, *args, **kwargs):
+        super(SubmitForm, self).__init__(*args, **kwargs)
+
+        choices = []
+        for r in possible_reviewers:
+            choices.append((r.username, r))
+
+        self.fields['conflicts'] = MultipleChoiceField(widget=CheckboxSelectMultiple(), required=False, choices=choices, initial=list(default_conflict_reviewers))
 
     def is_valid(self):
         if not super(SubmitForm, self).is_valid():
@@ -60,6 +69,13 @@ class SubmitForm(Form):
             contents = d['contents'],
         )
         paper_version.save()
+
+        for conflict_username in d['conflicts']:
+            ra = ReviewAssignment()
+            ra.user = User.objects.get(username=conflict_username)
+            ra.paper = paper
+            ra.type = 'conflict'
+            ra.save()
 
         return paper
 

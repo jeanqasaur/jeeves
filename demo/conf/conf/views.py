@@ -69,13 +69,18 @@ def paper_view(request):
 
 @login_required
 def submit_view(request):
+    possible_reviewers = list(User.objects.all())
+    profile = UserProfile.objects.filter(user=request.user).get()
+    default_conflicts = list(profile.pc_conflicts.all())
+
     if request.method == 'POST':
-        form = forms.SubmitForm(request.POST, request.FILES)
+        form = forms.SubmitForm(possible_reviewers, default_conflicts,
+            request.POST, request.FILES)
         if form.is_valid():
             paper = form.save(request.user)
             return HttpResponseRedirect("paper?id=%d" % paper.id)
     else:
-        form = forms.SubmitForm()
+        form = forms.SubmitForm(possible_reviewers, default_conflicts)
 
     return render_to_response("submit.html", RequestContext(request, {'form' : form}))
 
