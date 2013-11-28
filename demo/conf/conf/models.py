@@ -54,7 +54,7 @@ class Review(Model):
     time = DateTimeField(auto_now_add=True)
     paper = ForeignKey(Paper)
     reviewer = ForeignKey(User)
-    comment = TextField()
+    contents = TextField()
 
     score_novelty = IntegerField()
     score_presentation = IntegerField()
@@ -63,3 +63,12 @@ class Review(Model):
 
     class Meta:
         db_table = 'reviews'
+
+class Comment(Model):
+    time = DateTimeField(auto_now_add=True)
+    paper = ForeignKey(Paper)
+    user = ForeignKey(User)
+    contents = TextField()
+
+    class Meta:
+        db_table = 'comments'

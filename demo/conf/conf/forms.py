@@ -1,6 +1,6 @@
 from django.forms import Form, ModelForm, CharField, FileField, Textarea, ModelForm, HiddenInput, MultipleChoiceField, CheckboxSelectMultiple
 
-from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment
+from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment, Comment
 from django.contrib.auth.models import User
 import random
 from django.forms.formsets import formset_factory
@@ -88,7 +88,12 @@ class ProfileForm(ModelForm):
 class SubmitReviewForm(ModelForm):
     class Meta:
         model = Review
-        fields = ['comment', 'score_novelty', 'score_presentation', 'score_technical', 'score_confidence']
+        fields = ['contents', 'score_novelty', 'score_presentation', 'score_technical', 'score_confidence']
+
+class SubmitCommentForm(ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['contents']
 
 class ReviewAssignmentForm(ModelForm):
     class Meta:

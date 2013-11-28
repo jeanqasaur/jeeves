@@ -31,7 +31,7 @@
                 {% for review in reviews %}
                     <li>
                         <div> {{review.reviewer.username}} at {{review.time}} </div>
-                        <div> Comment: <pre>{{review.comment}}</pre> </div>
+                        <div> Comment: <pre>{{review.contents}}</pre> </div>
                         <div> Novelty: {{review.score_novelty}} </div>
                         <div> Presentation: {{review.score_presentation}} </div>
                         <div> Technical: {{review.score_technical}} </div>
@@ -40,8 +40,27 @@
                 {% endfor %}
             </ul>
         </div>
+        <div>
+            <h3> Comments </h3>
+            <ul>
+                {% for comment in comments %}
+                    <li>
+                        <div> {{comment.user.username}} at {{comment.time}} </div>
+                        <div> Comment: <pre>{{comment.contents}}</pre> </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
 
-		<a href="/submit_review?id={{paper.id}}">Submit review</a>
+
+
+        <div>
+            <a href="/submit_review?id={{paper.id}}">Submit review</a>
+        </div>
+
+        <div>
+            <a href="/submit_comment?id={{paper.id}}">Submit comment</a>
+        </div>
     {% else %}
         Not found. The planets must not be aligned correctly, or perhaps no paper with the given 'id' exists.
     {% endif %}

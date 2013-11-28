@@ -9,7 +9,7 @@ import urllib
 
 import forms
 
-from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment
+from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment, Comment
 
 def register_account(request):
     if request.user.is_authenticated():
@@ -52,12 +52,14 @@ def paper_view(request):
         authors = paper.authors.all()
         latest_abstract = paper_versions[-1].abstract if paper_versions else None
         reviews = list(Review.objects.filter(paper=paper).order_by('-time').all())
+        comments = list(Comment.objects.filter(paper=paper).order_by('-time').all())
     except Paper.DoesNotExist:
         paper = None
         paper_versions = []
         authors = []
         latest_abstract = None
         reviews = []
+        comments = []
 
     return render_to_response("paper.html", RequestContext(request, {
         'paper' : paper,
@@ -65,6 +67,7 @@ def paper_view(request):
         'authors' : authors,
         'latest_abstract' : latest_abstract,
         'reviews' : reviews,
+        'comments' : comments,
     }))
 
 @login_required
@@ -122,12 +125,37 @@ def submit_review_view(request):
         else:
             form = forms.SubmitReviewForm()
     except (ValueError, KeyError, Paper.DoesNotExist):
-        import traceback
-        print traceback.format_exc()
         paper = None
         form = None
 
     return render_to_response("submit_review.html", RequestContext(request, {
+        'form' : form,
+        'paper' : paper,
+    }))
+
+@login_required
+def submit_comment_view(request):
+    try:
+        if request.method == 'GET':
+            paper_id = int(request.GET['id'])
+        elif request.method == 'POST':
+            paper_id = int(request.POST['id'])
+        paper = Paper.objects.filter(id=paper_id).get()
+        comment = Comment()
+        comment.paper = paper
+        comment.user = request.user
+        if request.method == 'POST':
+            form = forms.SubmitCommentForm(request.POST, instance=comment)
+            if form.is_valid():
+                form.save(paper)
+                return HttpResponseRedirect("paper?id=%d" % paper_id)
+        else:
+            form = forms.SubmitCommentForm()
+    except (ValueError, KeyError, Paper.DoesNotExist):
+        paper = None
+        form = None
+
+    return render_to_response("submit_comment.html", RequestContext(request, {
         'form' : form,
         'paper' : paper,
     }))
