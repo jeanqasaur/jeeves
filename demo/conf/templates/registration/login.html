@@ -4,7 +4,9 @@
     <h2>Log in</h2>
     <form method="post" action="">
     	{% csrf_token %}
-    	{{ form }}
+    	<table>
+            {{ form }}
+    	</table>
         <input type="submit" value="Login" />
         <a href="/registration/password_reset_form">Forgot password?</a>
     </form>

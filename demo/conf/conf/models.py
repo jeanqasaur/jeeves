@@ -3,7 +3,12 @@ from django.contrib.auth.models import User
 
 class UserProfile(Model):
     user = ForeignKey(User)
+
     name = CharField(max_length=1024)
+    affiliation = CharField(max_length=1024)
+    acm_number = CharField(max_length=1024)
+
+    pc_conflicts = ManyToManyField(User, related_name='pc_conflicts_profile')
 
     class Meta:
         db_table = 'user_profiles'
@@ -15,6 +20,17 @@ class Paper(Model):
 
     class Meta:
         db_table = 'papers'
+
+class ReviewAssignment(Model):
+    paper = ForeignKey(Paper, null=False)
+    user = ForeignKey(User, null=False)
+    type = CharField(max_length=8, null=False,
+        choices=(('none','none'),
+                ('assigned','assigned'),
+                ('conflict','conflict')))
+
+    class Meta:
+        db_table = 'review_assignments'
 
 class PaperVersion(Model):
     paper = ForeignKey(Paper)
@@ -38,7 +54,7 @@ class Review(Model):
     time = DateTimeField(auto_now_add=True)
     paper = ForeignKey(Paper)
     reviewer = ForeignKey(User)
-    comment = TextField()
+    contents = TextField()
 
     score_novelty = IntegerField()
     score_presentation = IntegerField()
@@ -47,3 +63,12 @@ class Review(Model):
 
     class Meta:
         db_table = 'reviews'
+
+class Comment(Model):
+    time = DateTimeField(auto_now_add=True)
+    paper = ForeignKey(Paper)
+    user = ForeignKey(User)
+    contents = TextField()
+
+    class Meta:
+        db_table = 'comments'

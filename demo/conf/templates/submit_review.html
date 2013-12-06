@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Submit a review</h2>
+    <form method="post" action="">
+    	{% csrf_token %}
+    	<input type="hidden" name="id" value="{{paper.id}}" />
+    	<table>
+			{{ form }}
+		</table>
+        <input type="submit" value="Submit" />
+    </form>
+{% endblock %}

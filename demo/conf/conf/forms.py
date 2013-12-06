@@ -1,8 +1,9 @@
-from django.forms import Form, ModelForm, CharField, FileField, Textarea
+from django.forms import Form, ModelForm, CharField, FileField, Textarea, ModelForm, HiddenInput, MultipleChoiceField, CheckboxSelectMultiple
 
-from models import Paper, PaperVersion
+from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment, Comment
 from django.contrib.auth.models import User
 import random
+from django.forms.formsets import formset_factory
 
 class SubmitForm(Form):
     coauthor1 = CharField(required=False)
@@ -12,6 +13,15 @@ class SubmitForm(Form):
     title = CharField(1024, required=True)
     contents = FileField(required=True)
     abstract = CharField(widget=Textarea, required=True)
+
+    def __init__(self, possible_reviewers, default_conflict_reviewers, *args, **kwargs):
+        super(SubmitForm, self).__init__(*args, **kwargs)
+
+        choices = []
+        for r in possible_reviewers:
+            choices.append((r.username, r))
+
+        self.fields['conflicts'] = MultipleChoiceField(widget=CheckboxSelectMultiple(), required=False, choices=choices, initial=list(default_conflict_reviewers))
 
     def is_valid(self):
         if not super(SubmitForm, self).is_valid():
@@ -60,4 +70,38 @@ class SubmitForm(Form):
         )
         paper_version.save()
 
+        for conflict_username in d['conflicts']:
+            ra = ReviewAssignment()
+            ra.user = User.objects.get(username=conflict_username)
+            ra.paper = paper
+            ra.type = 'conflict'
+            ra.save()
+
         return paper
+
+class ProfileForm(ModelForm):
+    class Meta:
+        model = UserProfile
+        # TODO pc_conflicts should only have PC members
+        fields = ['name', 'affiliation', 'acm_number', 'pc_conflicts']
+
+class SubmitReviewForm(ModelForm):
+    class Meta:
+        model = Review
+        fields = ['contents', 'score_novelty', 'score_presentation', 'score_technical', 'score_confidence']
+
+class SubmitCommentForm(ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['contents']
+
+class ReviewAssignmentForm(ModelForm):
+    class Meta:
+        model = ReviewAssignment
+        fields = ['type', 'user', 'paper']
+        widgets = {
+            'user' : HiddenInput(),
+            'paper' : HiddenInput(),
+        }
+
+ReviewAssignmentFormset = formset_factory(ReviewAssignmentForm, extra=0)

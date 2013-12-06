@@ -1,10 +1,12 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>Submit a paper</h2>
-    <form method="post" action="" enctype="multipart/form-data">
+    <h2>Profile</h2>
+    <form method="post" action="">
     	{% csrf_token %}
-    	{{ form }}
-        <input type="submit" value="Submit" />
+    	<table>
+            {{ form }}
+    	</table>
+        <input type="submit" value="Save" />
     </form>
 {% endblock %}
