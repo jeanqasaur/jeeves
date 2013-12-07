@@ -40,9 +40,8 @@ def concretize(ctxt, v):
   return jeevesState.policyenv.concretizeExp(ctxt, v)
 
 def jif(cond, thn_fn, els_fn):
-  condTrans = partialEval(fexpr_cast(cond))
+  condTrans = partialEval(fexpr_cast(cond), jeevesState.pathenv.getEnv())
   if condTrans.type != bool:
-    print condTrans.prettyPrint()
     raise TypeError("jif must take a boolean as a condition")
   return jif2(condTrans, thn_fn, els_fn)
 
@@ -50,33 +49,17 @@ def jif2(cond, thn_fn, els_fn):
   if isinstance(cond, Constant):
     return thn_fn() if cond.v else els_fn()
 
-  #elif isinstance(cond, Var):
-  #  with PositiveVariable(cond):
-  #    thn = thn_fn()
-  #  with NegativeVariable(cond):
-  #    els = els_fn()
-  #  return Facet(cond, fexpr_cast(thn), fexpr_cast(els))
-
   elif isinstance(cond, Facet):
     if not isinstance(cond.cond, Var):
       raise TypeError("facet conditional is of type %s"
                       % cond.cond.__class__.__name__)
-    hasP = jeevesState.pathenv.hasPosVar(cond.cond)
-    hasN = jeevesState.pathenv.hasNegVar(cond.cond)
 
-    if not hasN:
-      with PositiveVariable(cond.cond):
-        thn = jif2(cond.thn, thn_fn, els_fn)
-    if not hasP:
-      with NegativeVariable(cond.cond):
-        els = jif2(cond.els, thn_fn, els_fn)
+    with PositiveVariable(cond.cond):
+      thn = jif2(cond.thn, thn_fn, els_fn)
+    with NegativeVariable(cond.cond):
+      els = jif2(cond.els, thn_fn, els_fn)
 
-    if hasP:
-      return thn
-    elif hasN:
-      return els
-    else:
-      return Facet(cond.cond, thn, els)
+    return Facet(cond.cond, thn, els)
 
   else:
     raise TypeError("jif condition must be a constant or a var")
