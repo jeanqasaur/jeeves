@@ -90,7 +90,8 @@ def jnot(f):
 
 def jassign(old, new):
   res = new
-  for (var, val) in jeevesState.pathenv.conditions:
+  for vs in jeevesState.pathenv.conditions:
+    (var, val) = (vs.var, vs.val)
     if val:
       res = Facet(var, res, old)
     else:

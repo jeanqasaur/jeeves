@@ -17,18 +17,18 @@ def partialEval(f, env={}):
   elif isinstance(f, Constant):
     return f
   elif isinstance(f, Facet):
-    if f.cond in env:
-      return partialEval(f.thn, env) if env[f.cond] else partialEval(f.els, env)
+    if f.cond.name in env:
+      return partialEval(f.thn, env) if env[f.cond.name] else partialEval(f.els, env)
     else:
       true_env = dict(env)
-      true_env[f.cond] = True
+      true_env[f.cond.name] = True
       false_env = dict(env)
-      false_env[f.cond] = False
+      false_env[f.cond.name] = False
       return Facet(f.cond, partialEval(f.thn, true_env),
                            partialEval(f.els, false_env))
   elif isinstance(f, Var):
-    if f in env:
-      return Constant(env[f])
+    if f.name in env:
+      return Constant(env[f.name])
     else:
       return Facet(f, Constant(True), Constant(False))
   elif isinstance(f, FObject):
