@@ -41,7 +41,7 @@ class TestBattleship(unittest.TestCase):
       self.aliceBoard.placeShip(
         self.aliceCtxt, Battleship(self.alice), Point(0, 0), Point(0, 4)))
     
-    # self.assertFalse(self.aliceBoard.allPlaced())
+    self.assertFalse(self.aliceBoard.allPlaced())
 
   '''
   test ("Cannot place bombs until all pieces have been placed") {

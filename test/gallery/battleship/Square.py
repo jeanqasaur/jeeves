@@ -8,10 +8,10 @@ class Square:
   @jeeves
   def __init__(self, owner):
     self.owner = owner
-    self.shipRef = ProtectedRef(NoShip
+    self.shipRef = ProtectedRef(NoShip()
       # Policy for updating: must be owner and there can't be a ship there
       # already.
-      , lambda ship: lambda ic: ship == NoShip
+      , lambda ship: lambda ic: ship == NoShip()
       , lambda ship: lambda ic: lambda _oc: self.isOwner(ic))
     self.hasBombRef = ProtectedRef(None
       , lambda _bomb: lambda ic: self.hasTurn(ic)
@@ -34,14 +34,12 @@ class Square:
     JeevesLib.restrict(a
       , lambda ctxt:
           self.hasBomb() or self.isOwner(ctxt) or self.gameOver(ctxt));
-    return JeevesLib.mkSensitive(a, ship, NoShip)
+    return JeevesLib.mkSensitive(a, ship, NoShip())
 
   def updateShip(self, ctxt, ship):
-    print "current ship: "
-    print self.shipRef.v
     return self.shipRef.update(ctxt, ctxt, self.mkShipSecret(ship)) == UpdateResult.Success
   def hasShip(self):
-    not self.shipRef.v == NoShip
+    not self.shipRef.v == NoShip()
   def getShip(self):
     shipRef.v
 

@@ -58,9 +58,8 @@ class Board:
       boardShip = self.board[x][y].getShip();
       bomb = Bomb(ctxt.user)
       bombedPoint = self.board[x][y].bomb(ctxt, bomb)
-      # TODO: We might need to define our own "all" function here...
-      succeeded = bombedPoint if boardShip == NoShip else all(map(lambda s: s.bomb(ctxt, bomb) and s.bombPiece(ctxt), boardShip.getSquares()))
-      return boardShip if succeeded else NoShip
+      succeeded = bombedPoint if boardShip == NoShip() else all(map(lambda s: s.bomb(ctxt, bomb) and s.bombPiece(ctxt), boardShip.getSquares()))
+      return boardShip if succeeded else NoShip()
     else:
       print "Bomb location outside of board: (" + x + ", " + y + ")" + "\n"
       raise OutOfBoundsException
