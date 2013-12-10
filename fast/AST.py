@@ -241,10 +241,11 @@ class Facet(FExpr):
       , self.thn.remapLabels(policy, writer)
       , self.els.remapLabels(policy, writer))
 
-  '''
   def prettyPrint(self, indent=""):
     return "< " + self.cond.prettyPrint() + " ? " + self.thn.prettyPrint() + " : " + self.els.prettyPrint() + " >"
-  '''
+  def __str__(self):
+    return self.prettyPrint()
+
 
   def __call__(self, *args, **kw):
     return JeevesLib.jif(self.cond,
@@ -651,9 +652,12 @@ class FObject(FExpr):
   def getChildren(self):
     return []
 
-  # TODO: Travis, how do we descend into the object fields and remap the labels?
+  # TODO: Make sure this is right...
   def remapLabels(self, policy, writer):
-    return NotImplemented
+    if isinstance(self.v, FExpr):
+      return FObject(self.v.remapLabels(policy, writer))
+    else:
+      return self
 
   def __call__(self, *args, **kw):
     return self.v.__call__(*args, **kw)

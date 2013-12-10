@@ -34,9 +34,11 @@ class Square:
     JeevesLib.restrict(a
       , lambda ctxt:
           self.hasBomb() or self.isOwner(ctxt) or self.gameOver(ctxt));
-    JeevesLib.mkSensitive(a, ship, NoShip)
+    return JeevesLib.mkSensitive(a, ship, NoShip)
 
   def updateShip(self, ctxt, ship):
+    print "current ship: "
+    print self.shipRef.v
     return self.shipRef.update(ctxt, ctxt, self.mkShipSecret(ship)) == UpdateResult.Success
   def hasShip(self):
     not self.shipRef.v == NoShip
