@@ -1,4 +1,5 @@
 import JeevesLib
+from Bomb import Bomb
 from GamePiece import Carrier, Battleship, Cruiser, Destroyer, Submarine, NoShip
 from sourcetrans.macro_module import macros, jeeves
 from Square import Square
@@ -24,13 +25,12 @@ class Board:
                   , Submarine(owner), Submarine(owner) ]
 
   def getSquare(self, x, y):
-    self.board[x][y]
+    return self.board[x][y]
 
   # Question: How do we know the identities of each destroyer?
   @jeeves
   def placeShip(self, ctxt, ship, start, end):
     for cur in self.pieces:
-      print cur
       if cur == ship and not cur.isPlaced():
         # Update the relevant board pieces.
         pts = cur.getPiecePoints(start, end)
@@ -54,10 +54,12 @@ class Board:
 
   @jeeves
   def placeBomb(self, ctxt, x, y):
-    if x < boardSize and y < boardSize:
-      boardShip = self.board[x][y].getShip();
+    if x < self.boardSize and y < self.boardSize:
+      boardShip = self.board[x][y].getShip()
       bomb = Bomb(ctxt.user)
       bombedPoint = self.board[x][y].bomb(ctxt, bomb)
+      # TODO: The problem here is that the call to all is not on a list, but
+      # an FObject or potentially, Unassigned.
       succeeded = bombedPoint if boardShip == NoShip() else all(map(lambda s: s.bomb(ctxt, bomb) and s.bombPiece(ctxt), boardShip.getSquares()))
       return boardShip if succeeded else NoShip()
     else:
@@ -65,9 +67,9 @@ class Board:
       raise OutOfBoundsException
 
   def allPlaced(self):
-    all(map(lambda p: p.isPlaced(), self.pieces))
+    return all(map(lambda p: p.isPlaced(), self.pieces))
   def hasLost(self):
-    all(map(lambda p: p.isBombed(), self.pieces))
+    return all(map(lambda p: p.isBombed(), self.pieces))
 
   def printBoard(self, ctxt):
     for j in range(0, 10):
@@ -80,6 +82,13 @@ class Board:
         else:
           print("W")
       print("\n")
+
+  def printUnplacedPieces(self):
+    print "Remaining unplaced pieces:\n"
+    for p in self.pieces:
+      if not p.isPlaced():
+        print p
+        print "\n"
 
   def printRemainingPieces(self):
     print "Remaining pieces:\n"

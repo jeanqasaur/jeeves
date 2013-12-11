@@ -3,16 +3,17 @@ Battleship game demo example.
 '''
 import JeevesLib
 import Board
+from Bomb import Bomb
 from sourcetrans.macro_module import macros, jeeves
 
 class Game:
   class NoSuchUserException(Exception):
     def __init__(self, u):
       self.u = u
-      self._moves = []
 
   def __init__(self, boards):
     self.boards = boards
+    self._moves = []
 
   def getBoard(self, user):
     try:
@@ -22,10 +23,10 @@ class Game:
 
   # TODO: Need to further jeevesify this?
   def allShipsPlaced(self):
-    all(map(lambda b: b.allPlaced(), self.boards.values()))
+    return all(map(lambda b: b.allPlaced(), self.boards.values()))
 
   def gameOver(self):
-    any(map(lambda b: b.hasLost(), self.boards.value()))
+    return any(map(lambda b: b.hasLost(), self.boards.values()))
 
   @jeeves
   def hasTurn(self, user):
@@ -33,7 +34,7 @@ class Game:
   
   def bomb(self, ctxt, user, x, y):
     piece = self.getBoard(user).placeBomb(ctxt, x, y)
-    _moves.append(Bomb(ctxt.user))
+    self._moves.append(Bomb(ctxt.user))
     return piece
 
 '''

@@ -39,12 +39,12 @@ class Square:
   def updateShip(self, ctxt, ship):
     return self.shipRef.update(ctxt, ctxt, self.mkShipSecret(ship)) == UpdateResult.Success
   def hasShip(self):
-    not self.shipRef.v == NoShip()
+    return not self.shipRef.v == NoShip()
   def getShip(self):
-    shipRef.v
+    return self.shipRef.v
 
   def bomb(self, ctxt, bomb):
-    self.hasBombRef.update(ctxt, ctxt, bomb) == UpdateResult.Success
+    return self.hasBombRef.update(ctxt, ctxt, bomb) == UpdateResult.Success
   
   def hasBomb(self):
-    not (self.hasBombRef.v == None)
+    return not (self.hasBombRef.v == None)
