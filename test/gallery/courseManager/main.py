@@ -26,6 +26,10 @@ class CourseManager:
     else:
       return False
 
+  def log_out(self):
+    self.session = none
+    return True
+
   def addStudent(self, uName, fName, lName, email, password):
     sId = len(self.userList)+1
     stud = Student(sId, uName, fName, lName, email)

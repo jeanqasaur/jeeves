@@ -37,7 +37,7 @@ class Submission():
     self._adminL = JeevesLib.mkLabel()
   
     ## Restrict Labels ##
-    JeevesLib.restrict(self._viewerL, lambda oc: JeevesLib.jor(_isSubmitter(oc),  _isInstructor(oc) ) )
+    JeevesLib.restrict(self._viewerL, lambda oc: JeevesLib.jor(lambda :_isSubmitter(oc),  lambda : _isInstructor(oc) ) )
     JeevesLib.restrict(self._editorL, lambda oc: _isSubmitter(oc) )
     JeevesLib.restrict(self._adminL, lambda oc: _isInstructor(oc) )
 
@@ -54,7 +54,8 @@ class Submission():
     self.grade = score
 
   def showGrade(self, context):
-    return JeevesLib.concretize(context, self.getGrade())
+    faceted_value = self.getGrade()
+    return JeevesLib.concretize(context, faceted_value)
 
   #Submission Details (fileRef)
   def getSubmissionDetails(self):
