@@ -622,3 +622,20 @@ class TestSourceTransform(unittest.TestCase):
     self.assertEqual(JeevesLib.concretize(False, y), 5)
     self.assertEqual(JeevesLib.concretize(True, z), 30)
     self.assertEqual(JeevesLib.concretize(False, z), 17)
+
+  @jeeves
+  def test_return_in_for(self):
+    x = JeevesLib.mkLabel('x')
+    JeevesLib.restrict(x, lambda ctxt : ctxt)
+
+    y = JeevesLib.mkSensitive(x, [5,60,7], [11,2,4,81,3,12])
+
+    def bulbasaur():
+      for j in y:
+        if j >= 40:
+          return j
+
+    z = bulbasaur()
+
+    self.assertEqual(JeevesLib.concretize(True, z), 60)
+    self.assertEqual(JeevesLib.concretize(False, z), 81)

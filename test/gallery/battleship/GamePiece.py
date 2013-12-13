@@ -95,3 +95,4 @@ class NoShip(GamePiece, Singleton):
   def __init__(self):
     self.size = 0
     self.owner = None
+    self._squares = []

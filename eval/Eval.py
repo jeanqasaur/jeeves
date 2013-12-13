@@ -6,21 +6,31 @@ that in Python.
 
 from fast.AST import *
 
-def partialEval(f):
+def partialEval(f, env={}):
   if isinstance(f, BinaryExpr):
-    left = partialEval(f.left)
-    right = partialEval(f.right)
+    left = partialEval(f.left, env)
+    right = partialEval(f.right, env)
     return facetJoin(left, right, f.opr)
   elif isinstance(f, UnaryExpr):
-    sub = partialEval(f.sub)
+    sub = partialEval(f.sub, env)
     return facetApply(sub, f.opr)
   elif isinstance(f, Constant):
     return f
   elif isinstance(f, Facet):
-    return Facet(f.cond, partialEval(f.thn),
-                         partialEval(f.els))
+    if f.cond.name in env:
+      return partialEval(f.thn, env) if env[f.cond.name] else partialEval(f.els, env)
+    else:
+      true_env = dict(env)
+      true_env[f.cond.name] = True
+      false_env = dict(env)
+      false_env[f.cond.name] = False
+      return Facet(f.cond, partialEval(f.thn, true_env),
+                           partialEval(f.els, false_env))
   elif isinstance(f, Var):
-    return Facet(f, Constant(True), Constant(False))
+    if f.name in env:
+      return Constant(env[f.name])
+    else:
+      return Facet(f, Constant(True), Constant(False))
   elif isinstance(f, FObject):
     return f
   else:

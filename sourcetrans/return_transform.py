@@ -37,8 +37,23 @@ def return_transform(node, gen_sym):
                   orelse=return_recurse(stmt.orelse)
                 ), stmt),
             ]
-          #elif isinstance(stmt, For):
-          #  pass #TODO
+          elif isinstance(stmt, For):
+            tail = [
+              If(test=Name(id=hasnt_returned_var,ctx=Load()),
+                body=tail[::-1],
+                orelse=[Pass()],
+              ),
+              copy_location(
+                For(target=stmt.target,
+                  iter=stmt.iter,
+                  body=[If(
+                    test=Name(hasnt_returned_var,Load()),
+                    body=return_recurse(stmt.body),
+                    orelse=[Pass()],
+                  )],
+                  orelse=[Pass()]
+                ), stmt),
+            ]
           else:
             tail.append(stmt)
 

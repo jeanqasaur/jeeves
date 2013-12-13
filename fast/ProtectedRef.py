@@ -61,7 +61,10 @@ class ProtectedRef:
     # For each variable, make a copy of it and add policies.
     def mkFacetTree(pathvars, high, low):
       if pathvars:
-        (bv, isPos) = pathvars.pop()
+        #(bv, isPos) = pathvars.pop()
+        vs = pathvars.pop()
+        bv = vs.var
+        isPos = vs.val
         bvNew = self.addWritePolicy(bv, writer)
         
         lv = JeevesLib.mkLabel(bv.name)
@@ -113,7 +116,7 @@ class ProtectedRef:
             # the write-associated labels remapped to take into account the new
             # writer. Add the path conditions.
             JeevesLib.jeevesState.pathenv.push(wvar, True)
-            rPC = mkFacetTree(JeevesLib.jeevesState.pathenv.getEnv().items()
+            rPC = mkFacetTree(list(JeevesLib.jeevesState.pathenv.conditions)
                     , vNewRemapped, vOld)
             JeevesLib.jeevesState.pathenv.pop()
 
