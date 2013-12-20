@@ -28,4 +28,5 @@ urlpatterns = patterns('',
     url(r'^submit_review$', views.submit_review_view),
     url(r'^submit_comment$', views.submit_comment_view),
     url(r'^assign_reviews$', views.assign_reviews_view),
+    url(r'^search$', views.search_view),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

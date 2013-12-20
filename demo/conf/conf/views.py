@@ -212,3 +212,20 @@ def assign_reviews_view(request):
         'formset' : formset,
         'possible_reviewers' : possible_reviewers,
     }))
+
+@login_required
+def search_view(request):
+    # TODO choose the actual set of possible reviewers
+    possible_reviewers = list(User.objects.all())
+    possible_authors = list(User.objects.all())
+
+    form = forms.SearchForm(request.GET, reviewers=possible_reviewers, authors=possible_authors)
+    if form.is_valid():
+        results = form.get_results()
+    else:
+        results = []
+
+    return render_to_response("search.html", RequestContext(request, {
+        'form' : form,
+        'results' : results,
+    }))

@@ -1,4 +1,4 @@
-from django.forms import Form, ModelForm, CharField, FileField, Textarea, ModelForm, HiddenInput, MultipleChoiceField, CheckboxSelectMultiple
+from django.forms import Form, ModelForm, CharField, FileField, Textarea, ModelForm, HiddenInput, MultipleChoiceField, CheckboxSelectMultiple, BooleanField, ChoiceField
 
 from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment, Comment
 from django.contrib.auth.models import User
@@ -25,7 +25,6 @@ class SubmitForm(Form):
 
     def is_valid(self):
         if not super(SubmitForm, self).is_valid():
-            print 'foo'
             return False
 
         try:
@@ -35,7 +34,6 @@ class SubmitForm(Form):
                     coauthor = User.objects.filter(username=self.cleaned_data[coauthor_id]).get()
                     coauthors.append(coauthor)
         except User.DoesNotExist:
-            print 'moo'
             return False
 
         self.cleaned_data['coauthors'] = coauthors
@@ -69,6 +67,10 @@ class SubmitForm(Form):
             contents = d['contents'],
         )
         paper_version.save()
+
+        # need to save paper twice since paper and paper_version point to each other...
+        paper.latest_version = paper_version
+        paper.save()
 
         for conflict_username in d['conflicts']:
             ra = ReviewAssignment()
@@ -105,3 +107,67 @@ class ReviewAssignmentForm(ModelForm):
         }
 
 ReviewAssignmentFormset = formset_factory(ReviewAssignmentForm, extra=0)
+
+class SearchForm(Form):
+    # should only show accepted papers
+    filter_accepted = BooleanField(required=False)
+
+    # should only show papers accepted by a reviewer
+    # filter_reviewer (defined in __init__ below)
+
+    # should only show papers by the given author
+    # filter_author (defined in __init__ below)
+
+    filter_title_contains = CharField(required=False)
+
+    sort_by = ChoiceField(required=True,
+                            choices=(('---', None),
+                                     ('title', 'title'),
+                                     ('score_technical', 'score_technical'),
+                                    ))
+
+    def __init__(self, *args, **kwargs):
+        reviewers = kwargs['reviewers']
+        authors = kwargs['authors']
+        del kwargs['reviewers']
+        del kwargs['authors']
+
+        super(SearchForm, self).__init__(*args, **kwargs)
+        
+        self.fields['filter_reviewer'] = ChoiceField(required=False,
+            choices=[('', '---')] + [(r.username, r) for r in reviewers])
+        self.fields['filter_author'] = ChoiceField(required=False,
+            choices=[('', '---')] + [(r.username, r) for r in authors])
+
+    def get_results(self):
+        d = self.cleaned_data
+
+        query = Paper.objects
+
+        # TODO enable support for accepting papers and then enable this
+        #if d['filter_accepted']:
+        #    query = query.filter(
+
+        if d.get('filter_reviewer', ''):
+            query = query.filter(authors__username=d['filter_reviewer'])
+
+        if d.get('filter_author', ''):
+            query = query.filter(reviewers__username=d['filter_author'])
+
+        if d.get('filter_title_contains', ''):
+            query = query.filter(latest_version__title__contains=d['filter_title_contains'])
+
+        if d.get('sort_by','') == 'title':
+            query = query.order_by('latest_version__title')
+        elif d.get('sort_by','') == 'score_technical':
+            query = query.order_by('latest_version__score_technical')
+
+        print query.query.__str__()
+        results = list(query.all())
+
+        return list(results)
+
+
+
+
+

@@ -18,6 +18,8 @@ class Paper(Model):
     reviewers = ManyToManyField(User, related_name='reviewers')
     pc_conflicts = ManyToManyField(User, related_name='pc_conflicts')
 
+    latest_version = ForeignKey('PaperVersion', related_name='latest_version_of', null=True)
+
     class Meta:
         db_table = 'papers'
 
