@@ -12,15 +12,18 @@ class UpdateResult:
 class Undefined(Exception):
   pass
 
+@JeevesLib.supports_jeeves
 class ProtectedRef:
   # TODO: Find nice ways of supplying defaults for inputWritePolicy and
   # outputWritePolicy?
+  @JeevesLib.supports_jeeves
   def __init__(self, v, inputWP, outputWP, trackImplicit=True):
     self.v = v
     self.inputWP = inputWP
     self.outputWP = outputWP
     self.trackImplicit = trackImplicit
 
+  @JeevesLib.supports_jeeves
   def applyInputWP(self, writer, writeCtxt):
     if self.inputWP:
       r = self.inputWP(self.v)(writer)
@@ -32,6 +35,8 @@ class ProtectedRef:
         return UpdateResult.Failure
     else:
       return UpdateResult.Success
+
+  @JeevesLib.supports_jeeves
   def applyOutputWP(self, writer):
     if self.outputWP:
       try:
@@ -49,6 +54,7 @@ class ProtectedRef:
     else:
       return UpdateResult.Success
 
+  @JeevesLib.supports_jeeves
   def addWritePolicy(self, label, writer):
     if self.outputWP:
       return JeevesLib.jeevesState.writeenv.addWritePolicy(label
@@ -57,6 +63,7 @@ class ProtectedRef:
       return label
 
   # TODO: store the current writer with the Jeeves environment?
+  @JeevesLib.supports_jeeves
   def update(self, writer, writeCtxt, vNew):
     # For each variable, make a copy of it and add policies.
     def mkFacetTree(pathvars, high, low):

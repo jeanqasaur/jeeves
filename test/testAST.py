@@ -229,3 +229,5 @@ class TestAST(unittest.TestCase):
         self.assertEqual(ap.eval({l1:True, l2:False}), 1001)
         self.assertEqual(ap.eval({l1:False, l2:True}), 110)
         self.assertEqual(ap.eval({l1:False, l2:False}), 1010)
+
+

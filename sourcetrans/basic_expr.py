@@ -68,4 +68,21 @@ def basic_expr_transform(node):
       if isinstance(tree.ops[0], In):
         return q[ JeevesLib.jhas(ast[tree.comparators[0]], ast[tree.left]) ]
 
+    # replace f(...) with jfun(f, ...)
+    if isinstance(tree, Call):
+      func = transform.recurse(tree.func)
+      args = [transform.recurse(arg) for arg in tree.args]
+      keywords = [transform.recurse(kw) for kw in tree.keywords]
+      starargs = transform.recurse(tree.starargs)
+      kwargs = transform.recurse(tree.kwargs)
+      stop()
+
+      return Call(
+        func=q[JeevesLib.jfun],
+        args=[func] + args,
+        keywords=keywords,
+        starargs=starargs,
+        kwargs=kwargs
+      )
+
   return transform.recurse(node)

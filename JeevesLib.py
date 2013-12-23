@@ -14,31 +14,27 @@ def init():
   jeevesState.policyenv = PolicyEnv()
   jeevesState.writeenv = WritePolicyEnv()
 
-# NOTE(JY): We have to take care of the scoping somehow to make sure that
-# we don't duplicate variables. One potential solution we can do, though, is
-# to have a tight coupling with the solver where
+def supports_jeeves(f):
+  f.__jeeves = 0
+  return f
+
+@supports_jeeves
 def mkLabel(varName = ""):
   return jeevesState.policyenv.mkLabel(varName)
 
-# NOTE(JY): Maybe we can just define a macro transformation here and interact
-# directly with the environment.
-# I think we can do this quite nicely by defining a mapping from our AST
-# expressions to Z3 expressions and then directly adding those to the solver.
+@supports_jeeves
 def restrict(varLabel, pred):
-  # 1. Walk over the predicate AST and turn it into a Z3 formula.
-  # 2. Add the formula (not pred) ==> (varLabel == false) to the constraint
-  #    environment.
-
-  # NOTE(JY): This should never be unsat...
   jeevesState.policyenv.restrict(varLabel, pred)
 
+@supports_jeeves
 def mkSensitive(varLabel, vHigh, vLow):
   return Facet(varLabel, fexpr_cast(vHigh), fexpr_cast(vLow))
 
-# TODO: Push a context, try setting things to high 
+@supports_jeeves
 def concretize(ctxt, v):
   return jeevesState.policyenv.concretizeExp(ctxt, v)
 
+@supports_jeeves
 def jif(cond, thn_fn, els_fn):
   condTrans = partialEval(fexpr_cast(cond), jeevesState.pathenv.getEnv())
   if condTrans.type != bool:
@@ -68,12 +64,14 @@ def jif2(cond, thn_fn, els_fn):
 # supports short-circuiting
 # without short-circuiting jif is unnecessary
 # are there performance issues?
+@supports_jeeves
 def jand(l, r): # inputs are functions
   left = l()
   if not isinstance(left, FExpr):
     return left and r()
   return jif(left, r, lambda:left)
 
+@supports_jeeves
 def jor(l, r): # inputs are functions
   left = l()
   if not isinstance(left, FExpr):
@@ -82,12 +80,14 @@ def jor(l, r): # inputs are functions
 
 # this one is more straightforward
 # just takes an expression
+@supports_jeeves
 def jnot(f):
   if isinstance(f, FExpr):
     return Not(f)
   else:
     return not f
 
+@supports_jeeves
 def jassign(old, new):
   res = new
   for vs in jeevesState.pathenv.conditions:
@@ -98,6 +98,7 @@ def jassign(old, new):
       res = Facet(var, old, res)
   return res
 
+@supports_jeeves
 def jhasElt(lst, f):
   acc = False
   # Short circuits.
@@ -110,6 +111,7 @@ def jhasElt(lst, f):
         return True
   return acc 
 
+@supports_jeeves
 def jhas(lst, v):
   return jhasElt(lst, lambda x: x == v)
 
@@ -147,18 +149,21 @@ class Namespace:
   def __setattr__(self, attr, value):
     self.__dict__[attr] = jassign(self.__dict__.get(attr, Unassigned()), value)
 
+@supports_jeeves
 def jgetattr(obj, attr):
   if isinstance(obj, FExpr):
     return getattr(obj, attr)
   else:
     return getattr(obj, attr) if hasattr(obj, attr) else Unassigned()
 
+@supports_jeeves
 def jgetitem(obj, item):
   try:
     return obj[item]
   except (KeyError, KeyError, TypeError) as e:
     return Unassigned()
 
+@supports_jeeves
 def jmap(iterable, mapper):
   iterable = partialEval(fexpr_cast(iterable))
   return jmap2(iterable, mapper)
@@ -197,6 +202,58 @@ class JList:
     l2 = facetMapper(self.l, list) #deep copy
     l2.append(val)
     self.l = jassign(self.l, l2)
+
+@supports_jeeves
+def jfun(f, *args, **kw):
+  if hasattr(f, '__jeeves'):
+    return f(*args, **kw)
+  else:
+    env = jeevesState.pathenv.getEnv()
+    if len(args) > 0:
+      return jfun2(f, args, kw, 0, partialEval(fexpr_cast(args[0]), env), [])
+    else:
+      it = kw.__iter__()
+      try:
+        fst = next(it)
+      except StopIteration:
+        return fexpr_cast(f())
+      return jfun3(f, kw, it, fst, partialEval(fexpr_cast(kw[fst]), env), (), {})
+
+def jfun2(f, args, kw, i, arg, args_concrete):
+  if isinstance(arg, Constant) or isinstance(arg, FObject):
+    env = jeevesState.pathenv.getEnv()
+    if i < len(args) - 1:
+      return jfun2(f, args, kw, i+1, partialEval(fexpr_cast(args[i]), env), tuple(list(args_concrete) + [arg.v]))
+    else:
+      it = kw.__iter__()
+      try:
+        fst = next(it)
+      except StopIteration:
+        return fexpr_cast(f(*tuple(list(args_concrete) + [arg.v])))
+      return jfun3(f, kw, it, fst, partialEval(fexpr_cast(kw[fst]), env), tuple(list(args_concrete) + [arg.v]), {})
+  else:
+    with PositiveVariable(arg.cond):
+      thn = jfun2(f, args, kw, i, arg.thn, args_concrete)
+    with NegativeVariable(arg.cond):
+      els = jfun2(f, args, kw, i, arg.els, args_concrete)
+    return Facet(arg.cond, thn, els)
+
+def jfun3(f, kw, it, key, val, args_concrete, kw_concrete):
+  if isinstance(val, Constant) or isinstance(val, FObject):
+    kw_c = dict(kw_concrete)
+    kw_c[key] = val.v
+    try:
+      next_key = next(it)
+    except StopIteration:
+      return fexpr_cast(f(*args_concrete, **kw_c))
+    env = jeevesState.pathenv.getEnv()
+    return jfun3(f, kw, it, next_key, partialEval(fexpr_cast(kw[next_key]), env), args_concrete, kw_c)
+  else:
+    with PositiveVariable(val.cond):
+      thn = jfun3(f, kw, it, key, val.thn, args_concrete, kw_concrete)
+    with NegativeVariable(val.cond):
+      els = jfun3(f, kw, it, key, val.els, args_concrete, kw_concrete)
+    return Facet(arg.cond, thn, els)
 
 from env.VarEnv import VarEnv
 from env.PolicyEnv import PolicyEnv
