@@ -2,7 +2,7 @@
 # Is there a better way to do this?
 from macropy.case_classes import macros, enum
 import JeevesLib
-from AST import And, Facet, FExpr
+from AST import And, Facet, FExpr, FObject
 from eval.Eval import partialEval
 
 @enum
@@ -10,6 +10,8 @@ class UpdateResult:
   Success, Unknown, Failure
 
 class Undefined(Exception):
+  pass
+class PolicyError(Exception):
   pass
 
 @JeevesLib.supports_jeeves
@@ -19,8 +21,23 @@ class ProtectedRef:
   @JeevesLib.supports_jeeves
   def __init__(self, v, inputWP, outputWP, trackImplicit=True):
     self.v = v
-    self.inputWP = inputWP
-    self.outputWP = outputWP
+
+    if isinstance(inputWP, FExpr):
+      if isinstance(inputWP, FObject):
+        self.inputWP = inputWP.v
+      else:
+        raise PolicyError("Input write policy cannot be faceted.")
+    else:
+      self.inputWP = inputWP
+    
+    if isinstance(outputWP, FExpr):
+      if isinstance(outputWP, FObject):
+        self.outputWP = outputWP.v
+      else:
+        raise PolicyError("Output write policy cannot be faceted.")
+    else:
+      self.outputWP = outputWP
+
     self.trackImplicit = trackImplicit
 
   @JeevesLib.supports_jeeves

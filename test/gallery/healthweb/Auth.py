@@ -1,39 +1,55 @@
 import JeevesLib
-from macropy.case_classes import macros, case
-from macropy.experimental.pattern import macros, switch
 from sourcetrans.macro_module import macros, jeeves
 
-@jeeves
-class Authentication:
+'''
+TODO:
+- Think about what Jeeves policies are good for here.
+- Think about whether there is even any point of having credentials if we can
+  just use Jeeves.
+- Add @jeeves to things.
+'''
 
-  @case
-  class Prin():
-    pass
-    '''
-    class U(name):
-      def __eq__(self, other):
-        self.name == other.name
-    class Admin:
-      pass
-    '''
+class InternalAuthError(Exception):
+  pass
 
-  @case
-  class Cred():
-    pass
-    '''
-    class MkCred(prin):
-      def __eq__(self, other):
-        self.prin == other.prin
-    '''
+class Cred:
+  pass
 
-  def login(self, p, pw):
-    pass
-    '''
-    with switch(p, pw):
-      if (U("Alice"), "AlicePW"):
-        return Cred.MkCred(p)
-      elif (Admin, "AdminPW"):
-        return Cred.MkCred(p)
+class MkCred(Cred):
+  def __init__(self, prin):
+    self.prin = prin
+  def __eq__(self, other):
+    return self.prin == other.prin
+  def __str__(self):
+    return "Cred(" + self.prin.__str__() + ")"
+
+class Prin:
+  passwords = { 'Alice': 'AlicePW' }
+
+  def login(self, pw):
+    if isinstance(self, U):
+      actualPwd = Prin.passwords[self.name]
+      if actualPwd == pw:
+        return MkCred(self)
       else:
         return None
-    '''
+    elif isinstance(self, Admin):
+      if pw == "AdminPW":
+        return MkCred(self)
+      else:
+        return None
+    else:
+      raise InternalAuthError
+
+class U(Prin):
+  def __init__(self, name):
+    self.name = name
+  def __eq__(self, other):
+    return self.name == other.name
+  def __str__(self):
+    return self.name
+class Admin(Prin):
+  def __str__(self):
+    return "Admin"
+  def __eq__(self, other):
+    return isinstance(other, Admin)

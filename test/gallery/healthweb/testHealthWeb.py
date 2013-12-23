@@ -1,14 +1,28 @@
 import JeevesLib
 import unittest
-from Auth import Authentication
+import Auth
 
 class TestHealthWeb(unittest.TestCase):
   def setUp(self):
     JeevesLib.init()
-    self.auth = Authentication()
-    # self.alicePrin = Authentication.Prin.U("Alice")
-    # self.adminPrin = Authentication.Prin.Admin
+    # x = Auth.Test()
+    # self.auth = Authentication()
+    self.alicePrin = Auth.U("Alice")
+    self.adminPrin = Auth.Admin()
+
+  '''
+  Test Auth.
+  '''
+  def testEqualities(self):
+    self.assertEqual(Auth.U("Alice"), Auth.U("Alice"))
+    self.assertEqual(Auth.MkCred(self.alicePrin), Auth.MkCred(self.alicePrin))
+    self.assertEqual(Auth.Admin(), Auth.Admin())
+    self.assertNotEqual(Auth.U("Alice"), Auth.Admin())
 
   def testLogin(self):
-    pass
-    # self.assertEqual(self.auth.login(self.alicePrin, "AlicePW"), Cred.MkCred(self.alicePrin))
+    self.assertEqual(
+      self.alicePrin.login("AlicePW"), Auth.MkCred(self.alicePrin))
+    self.assertEqual(self.alicePrin.login("xyz"), None)
+    self.assertEqual(self.adminPrin.login("AdminPW"), Auth.MkCred(self.adminPrin))
+
+  
