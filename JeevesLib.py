@@ -223,7 +223,7 @@ def jfun2(f, args, kw, i, arg, args_concrete):
   if isinstance(arg, Constant) or isinstance(arg, FObject):
     env = jeevesState.pathenv.getEnv()
     if i < len(args) - 1:
-      return jfun2(f, args, kw, i+1, partialEval(fexpr_cast(args[i]), env), tuple(list(args_concrete) + [arg.v]))
+      return jfun2(f, args, kw, i+1, partialEval(fexpr_cast(args[i+1]), env), tuple(list(args_concrete) + [arg.v]))
     else:
       it = kw.__iter__()
       try:

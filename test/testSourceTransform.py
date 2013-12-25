@@ -639,3 +639,20 @@ class TestSourceTransform(unittest.TestCase):
 
     self.assertEqual(JeevesLib.concretize(True, z), 60)
     self.assertEqual(JeevesLib.concretize(False, z), 81)
+
+  @jeeves
+  def test_jfun(self):
+    x = JeevesLib.mkLabel('x')
+    JeevesLib.restrict(x, lambda ctxt : ctxt)
+    
+    y = JeevesLib.mkSensitive(x, [1,2,3], [4,5,6,7])
+
+    z = map(lambda x : x*x, y)
+
+    self.assertEqual(JeevesLib.concretize(True, z[0]), 1)
+    self.assertEqual(JeevesLib.concretize(True, z[1]), 4)
+    self.assertEqual(JeevesLib.concretize(True, z[2]), 9)
+    self.assertEqual(JeevesLib.concretize(False, z[0]), 16)
+    self.assertEqual(JeevesLib.concretize(False, z[1]), 25)
+    self.assertEqual(JeevesLib.concretize(False, z[2]), 36)
+    self.assertEqual(JeevesLib.concretize(False, z[3]), 49)
