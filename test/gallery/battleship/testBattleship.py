@@ -111,13 +111,12 @@ class TestBattleship(unittest.TestCase):
       , JeevesLib.concretize(
           self.aliceCtxt, self.game.bomb(self.aliceCtxt, self.bob, 9, 9)))
 
-    '''
     # TODO: Need function calls on facets to work for this to pass...
     # Can bomb a piece with a ship.
     self.assertEqual(Carrier(self.alice)
       , JeevesLib.concretize(
           self.aliceCtxt, self.game.bomb(self.bobCtxt, self.alice, 0, 0)))
-    '''
+  
   '''
   test ("Cannot put two bombs in a row") {
     expectResult(NoShip) {
