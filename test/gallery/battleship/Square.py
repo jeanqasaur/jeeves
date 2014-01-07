@@ -14,9 +14,9 @@ class Square:
       , lambda ship: lambda ic: ship == NoShip()
       , lambda ship: lambda ic: lambda _oc: self.isOwner(ic))
     self.hasBombRef = ProtectedRef(None
-      , lambda _bomb: lambda ic: self.hasTurn(ic)
-      , lambda _bomb: lambda ic:
-          self.allShipsPlaced(ic) and (not self.gameOver(ic)))
+      , lambda _bomb: lambda ic: True
+      , lambda _bomb: lambda ic: lambda _oc:
+          self.hasTurn(ic) and self.allShipsPlaced(ic) and (not self.gameOver(ic)))
 
   def isOwner(self, ctxt):
     return ctxt.user == self.owner

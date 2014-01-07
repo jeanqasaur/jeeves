@@ -116,7 +116,7 @@ class TestBattleship(unittest.TestCase):
     self.assertEqual(Carrier(self.alice)
       , JeevesLib.concretize(
           self.aliceCtxt, self.game.bomb(self.bobCtxt, self.alice, 0, 0)))
-  
+
   '''
   test ("Cannot put two bombs in a row") {
     expectResult(NoShip) {

@@ -21,20 +21,23 @@ class Game:
     except Exception:
       raise NoSuchUserException(user)
 
-  # TODO: Need to further jeevesify this?
+  @jeeves
   def allShipsPlaced(self):
     return all(map(lambda b: b.allPlaced(), self.boards.values()))
 
+  @jeeves
   def gameOver(self):
     return any(map(lambda b: b.hasLost(), self.boards.values()))
 
   @jeeves
   def hasTurn(self, user):
-    (not self._moves) or (not self._moves[-1].owner == user)
+    r = (not self._moves) or (not self._moves[-1] == user)
+    print r
+    return r
   
   def bomb(self, ctxt, user, x, y):
     piece = self.getBoard(user).placeBomb(ctxt, x, y)
-    self._moves.append(Bomb(ctxt.user))
+    self._moves.append(ctxt.user)
     return piece
 
 '''
