@@ -1,4 +1,5 @@
 import ExternDB
+from PolicyTypes import Sign
 
 '''
 Data model.
@@ -77,29 +78,15 @@ def AuthAPI:
   val consent_to_treatment: pat:prin -> cred pat -> doc:prin ->
                             s:permit pat (ConsentTo doc) -> StateIs s ->
                             (t:extendedstate s (IsTreating doc pat) * StateIs t)
-
-  let consent_to_treatment pat c doc s tok =
-    let s' = ACons (IsTreating doc pat) s in
-      s', Sign s'
-                              
+  def consentToTreatment(patient, cred, doc, s, tok):
+    s.addElt
+    return s, Sign(s)
+  
+  '''
   val annotate_record: p:prin -> cred p -> r:record -> a:annotation ->
                        s:permit p (Annotate r.recid) -> StateIs s -> StateIs s
-                       
-  let annotate_record p c r a s tok =
-    let pc' = match r.private_contents with
-      | Contents d c al -> Contents d c (ConsAnnot a al) in
-    let r' = {recid=r.recid; patient=r.patient; author=r.author;
-              subject=r.subject; private_contents=pc'} in
-    let _ = persist_record (unparse_rec r') in
-      tok
-
-'''
-API implementation.
-'''
-class State:
-  def __init__(self, s, state):
-    self.s = s
-    self.state = state
-  def initialState():
-    authState = parseAuthstate(readAuthState())
-    return (authstate, Sign(authstate))
+  '''
+  def annotateRecord(p, c, r, a, s, tok):                    
+    r.privateContents.a.append(a)
+    ExternDP.persistRecord(unparseRec(r))
+    return tok
