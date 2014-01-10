@@ -59,9 +59,11 @@ class DatabaseAPI:
     recs = map(ExternDB.parseDBRecord, dbrecs)
     return recs, tok
 
+  '''
   val read_contents: p:prin -> cred p -> r:record -> 
                      s:permit p (Read r.recid) -> StateIs s -> 
                      (date * string * annots * StateIs s)
+  '''
   def readContents(prin, cred, r, s, tok):
     pc = r.privateContents
     return (pc.d, pc.c, pc.a, tok)
@@ -69,15 +71,12 @@ class DatabaseAPI:
 '''
 Public API for authorization-related functions.
 '''
-def AuthAPI:
+class AuthAPI:
   def activateRole(p, c, r, s, tok):
     # TODO: Define ActiveRole.
     s.append(ActiveRole(p, r))
     return (s, Sign(s))
 
-  val consent_to_treatment: pat:prin -> cred pat -> doc:prin ->
-                            s:permit pat (ConsentTo doc) -> StateIs s ->
-                            (t:extendedstate s (IsTreating doc pat) * StateIs t)
   def consentToTreatment(patient, cred, doc, s, tok):
     s.addElt
     return s, Sign(s)

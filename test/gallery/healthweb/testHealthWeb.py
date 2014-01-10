@@ -1,6 +1,13 @@
 import JeevesLib
 import unittest
+import mock
+# from mock import MagicMock
+from mock import patch
+
 import Auth
+import ExternNetwork
+from ExternNetwork import Request, Response
+import HealthMgr
 
 class TestHealthWeb(unittest.TestCase):
   def setUp(self):
@@ -25,4 +32,16 @@ class TestHealthWeb(unittest.TestCase):
     self.assertEqual(self.alicePrin.login("xyz"), None)
     self.assertEqual(self.adminPrin.login("AdminPW"), Auth.MkCred(self.adminPrin))
 
-  
+  '''
+  Test that we're mocking things up correctly...
+  '''
+  def testMockNetwork(self):
+    ExternNetwork.request = mock.Mock(return_value=[])
+    self.assertEqual(ExternNetwork.request(), [])
+
+    ExternNetwork.respond = mock.Mock()
+    ExternNetwork.respond(Response.Ok)
+    ExternNetwork.respond.assert_called_with(Response.Ok)
+
+  def testEvlLoop(self):
+    pass

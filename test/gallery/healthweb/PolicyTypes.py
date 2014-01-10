@@ -12,9 +12,11 @@ class Action:
   class Write:
     def __init__(self, v):
       self.v = v
-  class Annotate(self, v):
+  class Annotate:
+    def __init__(self, v):
       self.v = v
-  class Delete(self, v):
+  class Delete:
+    def __init__(self, v):
       self.v = v
   class Search:
     pass
@@ -67,10 +69,13 @@ assume forall (a:attribute). (not (In a ANil))
 assume forall (a:attribute) (b:attribute) (tl:authstate). ((not (In a tl)) && (not (a=b)))
   => (not (In a (ACons b tl)))
 '''
-'''
-private type StateIs :: authstate => A =
-  | Sign : s:authstate -> StateIs s
+class Sign:
+  def __init__(self, authstate):
+    self.authstate = authstate
+  def __eq__(self, other):
+    return self.authstate == other.authstate
 
+'''
 type GrantedIn :: permission => authstate => P
 (* Some commonly used type abbreviations *)
 type permit (p:prin) (a:action) = s:authstate { GrantedIn (Permit p a) s}

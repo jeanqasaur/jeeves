@@ -35,7 +35,7 @@ def evtLoop(s, tok):
                     Attribute.ActiveRole(p, RoleType.Psychiatrist), s)) or
                ((not isinstance(r.subject, HealthDB.Psychiatric) and 
                   PolicyTypes.checkIn(
-                    Attribute.ActiveRole(p, RoleType.Doctor), s))))
+                    Attribute.ActiveRole(p, RoleType.Doctor), s))))))
     if test:
       d, con, al, tokNew = HealthDB.readContents(p, cred, r, s, tok)
       ExternNetwork.respond(Response.RecordContents(d, con, al))
@@ -63,5 +63,5 @@ def evtLoop(s, tok):
       ExternNetwork.respond(Response.Ok)
       evtLoop(sNew, tokNew)
     else:
-      ExternNetwork.respond(Response.Denied "Sorry, insufficient privilege")
+      ExternNetwork.respond(Response.Denied("Sorry, insufficient privilege"))
       evtLoop(s, tok)
