@@ -44,4 +44,4 @@ class TestHealthWeb(unittest.TestCase):
     ExternNetwork.respond.assert_called_with(Response.Ok)
 
   def testEvlLoop(self):
-    pass
+    HealthMgr.evt
