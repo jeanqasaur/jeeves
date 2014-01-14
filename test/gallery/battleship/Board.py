@@ -1,3 +1,6 @@
+'''
+Defines a battleship game board.
+'''
 import JeevesLib
 from Bomb import Bomb
 from GamePiece import Carrier, Battleship, Cruiser, Destroyer, Submarine, NoShip
@@ -27,7 +30,8 @@ class Board:
   def getSquare(self, x, y):
     return self.board[x][y]
 
-  # Question: How do we know the identities of each destroyer?
+  # Places a ship on the board. Looks in the list of current pieces to mark
+  # it as placed. Updates the ship and the board.
   @jeeves
   def placeShip(self, ctxt, ship, start, end):
     for cur in self.pieces:
@@ -52,6 +56,10 @@ class Board:
     print "\n"
     return False
 
+  # Places a bomb. Updates the specific square on the board. If there is a
+  # ship at this point, this function also updates the ship with the fact that
+  # it has been bombed.
+  # NOTE: This seems to be a problematic function causing some tests to fail...
   @jeeves
   def placeBomb(self, ctxt, x, y):
     if x < self.boardSize and y < self.boardSize:
@@ -60,14 +68,20 @@ class Board:
       bombedPoint = self.board[x][y].bomb(ctxt, bomb)
       # TODO: The problem here is that the call to all is not on a list, but
       # an FObject or potentially, Unassigned.
-      succeeded = bombedPoint if boardShip == NoShip() else all(map(lambda s: s.bomb(ctxt, bomb) and s.bombPiece(ctxt), boardShip.getSquares()))
+      succeeded = (bombedPoint if boardShip == NoShip()
+                    else all(map(lambda s: s.bomb(ctxt, bomb) and
+                              s.bombPiece(ctxt), boardShip.getSquares())))
       return boardShip if succeeded else NoShip()
     else:
       print "Bomb location outside of board: (" + x + ", " + y + ")" + "\n"
       raise OutOfBoundsException
 
+  # Determines if all of a player's pieces have been placed. This variable
+  # should always be concrete.
   def allPlaced(self):
     return all(map(lambda p: p.isPlaced(), self.pieces))
+  # Determines if all pieces on the board have been bombed. This variable
+  # should always be concrete.
   def hasLost(self):
     return all(map(lambda p: p.isBombed(), self.pieces))
 

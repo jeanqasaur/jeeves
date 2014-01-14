@@ -26,29 +26,36 @@ class GamePiece:
     self._squares = []
 
   def __eq__(self, other):
-    return self.__class__.__name__ == other.__class__.__name__ and self.owner == other.owner
+    return (self.__class__.__name__ == other.__class__.__name__ and
+              self.owner == other.owner)
 
   def isOwner(self, ctxt):
     return ctxt.user == self.owner
 
+  # If the current user is allowed to place the pice, then we mark the current
+  # piece as placed and return True. Otherwise we return False.
   def placePiece(self, ctxt):
     if (self._placedRef.update(ctxt, ctxt, True) == UpdateResult.Success):
       self._placed = True
       return True
     else:
       return False
+  # This is always a concrete value.
   def isPlaced(self):
     return self._placed
-  
+  # If the current user is allowed to bomb the piece, then we mark the piece
+  # and return True. Otherwise we return False.
   def bombPiece(self, ctxt):
     if (self.bombedRef.update(ctxt, ctxt, true) == UpdateResult.Success):
       self.bombed = True;
       return True
     else:
-      return False  
+      return False
+  # This is always a concrete value.
   def isBombed(self):
     return self.bombed
 
+  # Gets the board coordinates associated with a given piece.
   @jeeves
   def getPiecePoints(self, start, end):
     if start.inLine(end) and start.distance(end) == self.size:
@@ -64,7 +71,7 @@ class GamePiece:
     else:
       return None
   
-  # TODO: Return whether the update succeeded...
+  # Adds a piece to the list of squares associated with a given piece.
   def addSquare(self, s):
     self._squares.append(s)
     return True
