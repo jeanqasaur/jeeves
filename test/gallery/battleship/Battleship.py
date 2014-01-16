@@ -32,6 +32,8 @@ class Game:
   @jeeves
   def hasTurn(self, user):
     r = (not self._moves) or (not self._moves[-1] == user)
+    print self._moves
+    print user
     print r
     return r
   

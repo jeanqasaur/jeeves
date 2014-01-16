@@ -69,7 +69,7 @@ class Board:
       # TODO: The problem here is that the call to all is not on a list, but
       # an FObject or potentially, Unassigned.
       succeeded = (bombedPoint if boardShip == NoShip()
-                    else all(map(lambda s: s.bomb(ctxt, bomb) and
+                    else JeevesLib.jall(map(lambda s: s.bomb(ctxt, bomb) and
                               s.bombPiece(ctxt), boardShip.getSquares())))
       return boardShip if succeeded else NoShip()
     else:
