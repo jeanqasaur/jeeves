@@ -5,12 +5,17 @@ from HealthDB import AuthAPI
 from PolicyTypes import Attribute, RoleType
 
 '''
-Evaluation loop.
-Processes requests from the network.
+Event loop. Runs everything by processing requests from the network. Each
+iteration of the loop gets the next request from the network and returns a
+response.
 '''
+# TODO: Jeeves-ify this.
 # @jeeves
 def evtLoop(s, tok):
+  # Each request comes with a principal, some credentials, and the body of the
+  # request. (We'll just be mocking the request for now...)
   (p, cred, request) = ExternNetwork.nextRequest()
+  # If this is a request for patient records
   if isinstance(request, Request.GetPatientRecords):
     test = (PolicyTypes.checkIn(PolicyTypes.ActiveRole(p, RoleType.Doctor), s)
             or PolicyTypes.checkIn(Attribute.ActiveRole(p, RoleType.Nurse), s)

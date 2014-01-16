@@ -101,6 +101,7 @@ def jassign(old, new):
       res = Facet(var, old, res)
   return res
 
+'''
 @supports_jeeves
 def jhasElt(lst, f):
   acc = False
@@ -117,6 +118,7 @@ def jhasElt(lst, f):
 @supports_jeeves
 def jhas(lst, v):
   return jhasElt(lst, lambda x: x == v)
+'''
 
 class PositiveVariable:
   def __init__(self, var):
@@ -257,3 +259,5 @@ def jfun3(f, kw, it, key, val, args_concrete, kw_concrete):
     with NegativeVariable(val.cond):
       els = jfun3(f, kw, it, key, val.els, args_concrete, kw_concrete)
     return Facet(arg.cond, thn, els)
+
+from jlib.JContainer import *
