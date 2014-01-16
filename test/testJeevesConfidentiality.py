@@ -9,7 +9,6 @@ import JeevesLib
 from smt.Z3 import *
 import unittest
 from JeevesLib import PositiveVariable, NegativeVariable
-from jlib import JContainer
 
 class TestJeevesConfidentiality(unittest.TestCase):
   def setUp(self):
@@ -525,27 +524,27 @@ class TestJeevesConfidentiality(unittest.TestCase):
     yS = jl.mkSensitive(b, 43, 3)
 
     lst = [xS, 2, yS]
-    self.assertEquals(jl.concretize(True, JContainer.jhasElt(lst, lambda x: x == 42))
+    self.assertEquals(jl.concretize(True, jl.jhasElt(lst, lambda x: x == 42))
         , True)
-    self.assertEquals(jl.concretize(False, JContainer.jhasElt(lst, lambda x: x == 42))
+    self.assertEquals(jl.concretize(False, jl.jhasElt(lst, lambda x: x == 42))
         , False)
-    self.assertEquals(jl.concretize(True, JContainer.jhasElt(lst, lambda x: x == 1))
+    self.assertEquals(jl.concretize(True, jl.jhasElt(lst, lambda x: x == 1))
         , False)
-    self.assertEquals(jl.concretize(False, JContainer.jhasElt(lst, lambda x: x == 1))
+    self.assertEquals(jl.concretize(False, jl.jhasElt(lst, lambda x: x == 1))
         , True)
-    self.assertEquals(jl.concretize(True, JContainer.jhasElt(lst, lambda x: x == 43))
+    self.assertEquals(jl.concretize(True, jl.jhasElt(lst, lambda x: x == 43))
         , True)
-    self.assertEquals(jl.concretize(False, JContainer.jhasElt(lst, lambda x: x == 43))
+    self.assertEquals(jl.concretize(False, jl.jhasElt(lst, lambda x: x == 43))
         , False)
-    self.assertEquals(jl.concretize(True, JContainer.jhasElt(lst, lambda x: x == 3))
+    self.assertEquals(jl.concretize(True, jl.jhasElt(lst, lambda x: x == 3))
         , False)
-    self.assertEquals(jl.concretize(False, JContainer.jhasElt(lst, lambda x: x == 3))
+    self.assertEquals(jl.concretize(False, jl.jhasElt(lst, lambda x: x == 3))
         , True)
 
   def test_jhas_in_policy(self):
     jl = JeevesLib
     a = jl.mkLabel ()
-    jl.restrict(a, lambda oc: JContainer.jhas(oc, 3))
+    jl.restrict(a, lambda oc: jl.jhas(oc, 3))
     self.assertTrue(jl.concretize([1, 2, 3], a))
     self.assertTrue(jl.concretize([3], a))
     self.assertFalse(jl.concretize([], a))

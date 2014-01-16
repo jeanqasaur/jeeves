@@ -5,7 +5,6 @@ import unittest
 from sourcetrans.macro_module import macros, jeeves
 from fast.ProtectedRef import ProtectedRef, UpdateResult
 import JeevesLib
-from jlib import JContainer
 
 class DummyUser:
   def __init__(self, userId):
@@ -212,7 +211,7 @@ class TestJeevesWrite(unittest.TestCase):
   def test_determine_writer_trust_later(self):
     x = ProtectedRef(0, None
           , lambda _this: lambda ictxt: lambda octxt:
-              JContainer.jhas(octxt, ictxt))
+              JeevesLib.jhas(octxt, ictxt))
     x.update(self.aliceUser, self.aliceUser, 42)
     self.assertEqual(JeevesLib.concretize([self.aliceUser], x.v), 42)
     self.assertEqual(JeevesLib.concretize([], x.v), 0)
