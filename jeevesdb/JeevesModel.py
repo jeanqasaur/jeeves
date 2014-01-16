@@ -7,6 +7,10 @@ from django.db.models.query import QuerySet
 from django.db.models import Manager
 from django.db.models import Field, CharField
 
+import JeevesLib
+from JeevesLib import fexpr_cast
+from eval.Eval import partialEval
+
 import string
 import random
 import itertools
@@ -34,16 +38,16 @@ class JeevesQuerySet(QuerySet):
 
 class JeevesManager(Manager):
   def get_queryset(self):
-    return (super(JeevesManager, self)
+    return (super(JeevesManager, self).get_queryset()
               ._clone(klass=JeevesQuerySet)
-              ._order_by('jeeves_id')
+              .order_by('jeeves_id')
            )
 
 alphanum = string.digits + string.letters
 sysrand = random.SystemRandom()
 JEEVES_ID_LEN = 32
 def get_random_jeeves_id():
-  return "".join(alphanum[sysrand(0, len(alphanum)-1)]
+  return "".join(alphanum[sysrand.randint(0, len(alphanum)-1)]
                     for i in xrange(JEEVES_ID_LEN))
 
 # From python docs
@@ -57,6 +61,10 @@ def serialize_vars(e):
   return ';' + ''.join('%s=%d;' % (var_name, var_value)
                         for var_name, var_value in e.iteritems())
 
+def fullEval(val, env):
+  p = partialEval(val, env)
+  return p.v
+
 # Make a Jeeves Model that enhances the vanilla Django model with information
 # about how labels work and that kind of thing. We'll also need to override
 # some methods so that we can create records and make queries appropriately.
@@ -67,7 +75,7 @@ class JeevesModel(models.Model):
   jeeves_vars = CharField(max_length=1024, null=False)
 
   def save(self, *args, **kw):
-    if self.jeeves_id is None:
+    if not self.jeeves_id:
       self.jeeves_id = get_random_jeeves_id()
 
     if kw.get("update_field", None) is not None:
@@ -80,7 +88,7 @@ class JeevesModel(models.Model):
 
     all_vars = []
     d = {}
-    env = jeevesState.pathenv.getEnv()
+    env = JeevesLib.jeevesState.pathenv.getEnv()
     for field_name in field_names:
       value = getattr(self, field_name)
       f = partialEval(fexpr_cast(value), env)
@@ -94,20 +102,19 @@ class JeevesModel(models.Model):
       e.update({tv : True for tv in true_vars})
       e.update({fv : False for fv in false_vars})
 
-      delete_query = self.objects.filter(jeeves_id=self.jeeves_id)
+      delete_query = self.__class__._objects_ordinary.filter(jeeves_id=self.jeeves_id)
       for var_name, var_value in e:
         delete_query = delete_query.filter(jeeves_vars__contains =
               ';%s=%d;' % (var_name, var_value))
-      delete_args = {'using' : kw['using']} if 'using' in kw else {}
-      delete_query.delete(**delete_args)
+      delete_query.delete()
 
       klass = self.__class__
-      obj_to_save = klass({
+      obj_to_save = klass(**{
         field_name : fullEval(field_value, env)
         for field_name, field_value in d.iteritems()
       })
       obj_to_save.jeeves_vars = serialize_vars(e)
-      obj_to_save.save(*args, **kw)
+      super(JeevesModel, obj_to_save).save(*args, **kw)
 
   def delete(self, *args, **kw):
     if self.jeeves_id is None:
@@ -120,7 +127,7 @@ class JeevesModel(models.Model):
 
     all_vars = []
     d = {}
-    env = jeevesState.pathenv.getEnv()
+    env = JeevesLib.jeevesState.pathenv.getEnv()
     for field_name in field_names:
       value = getattr(self, field_name)
       f = partialEval(fexpr_cast(value), env)
@@ -134,12 +141,13 @@ class JeevesModel(models.Model):
       e.update({tv : True for tv in true_vars})
       e.update({fv : False for fv in false_vars})
 
-      delete_query = self.objects.filter(jeeves_id=self.jeeves_id)
+      delete_query = self.__class__._objects_ordinary.filter(jeeves_id=self.jeeves_id)
       for var_name, var_value in e:
         delete_query = delete_query.filter(jeeves_vars__contains =
               ';%s=%d;' % (var_name, var_value))
-      delete_args = {'using' : kw['using']} if 'using' in kw else {}
-      delete_query.delete(**delete_args)
+      delete_query.delete()
 
   class Meta:
     abstract = True
+
+  _objects_ordinary = Manager()
