@@ -524,22 +524,14 @@ class TestJeevesConfidentiality(unittest.TestCase):
     yS = jl.mkSensitive(b, 43, 3)
 
     lst = [xS, 2, yS]
-    self.assertEquals(jl.concretize(True, jl.jhasElt(lst, lambda x: x == 42))
-        , True)
-    self.assertEquals(jl.concretize(False, jl.jhasElt(lst, lambda x: x == 42))
-        , False)
-    self.assertEquals(jl.concretize(True, jl.jhasElt(lst, lambda x: x == 1))
-        , False)
-    self.assertEquals(jl.concretize(False, jl.jhasElt(lst, lambda x: x == 1))
-        , True)
-    self.assertEquals(jl.concretize(True, jl.jhasElt(lst, lambda x: x == 43))
-        , True)
-    self.assertEquals(jl.concretize(False, jl.jhasElt(lst, lambda x: x == 43))
-        , False)
-    self.assertEquals(jl.concretize(True, jl.jhasElt(lst, lambda x: x == 3))
-        , False)
-    self.assertEquals(jl.concretize(False, jl.jhasElt(lst, lambda x: x == 3))
-        , True)
+    self.assertTrue(jl.concretize(True, jl.jhasElt(lst, lambda x: x == 42)))
+    self.assertFalse(jl.concretize(False, jl.jhasElt(lst, lambda x: x == 42)))
+    self.assertFalse(jl.concretize(True, jl.jhasElt(lst, lambda x: x == 1)))
+    self.assertTrue(jl.concretize(False, jl.jhasElt(lst, lambda x: x == 1)))
+    self.assertTrue(jl.concretize(True, jl.jhasElt(lst, lambda x: x == 43)))
+    self.assertFalse(jl.concretize(False, jl.jhasElt(lst, lambda x: x == 43)))
+    self.assertFalse(jl.concretize(True, jl.jhasElt(lst, lambda x: x == 3)))
+    self.assertTrue(jl.concretize(False, jl.jhasElt(lst, lambda x: x == 3)))
 
   def test_jhas_in_policy(self):
     jl = JeevesLib
@@ -549,6 +541,21 @@ class TestJeevesConfidentiality(unittest.TestCase):
     self.assertTrue(jl.concretize([3], a))
     self.assertFalse(jl.concretize([], a))
     self.assertFalse(jl.concretize([1, 2], a))
+
+  def test_jall(self):
+    jl = JeevesLib
+    a = jl.mkLabel ()
+    jl.restrict(a, lambda x: x)
+    xS = jl.mkSensitive(a, True, False)
+
+    b = jl.mkLabel ()
+    jl.restrict(b, lambda x: jl.jnot(x) )
+    yS = jl.mkSensitive(b, False, True)
+
+    lst = [xS, True, yS]
+
+    self.assertTrue(jl.concretize(True, jl.jall(lst)))
+    self.assertFalse(jl.concretize(False, jl.jall(lst)))
 
   def test_list(self):
     jl = JeevesLib
