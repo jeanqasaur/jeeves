@@ -2,11 +2,14 @@
 This will define the code for the Jeeves library.
 '''
 
-# Import statements at bottom
-
-class JeevesState:
-    pass
-jeevesState = JeevesState()
+from env.VarEnv import VarEnv
+from env.PolicyEnv import PolicyEnv
+from env.PathVars import PathVars
+from env.WritePolicyEnv import WritePolicyEnv
+from smt.Z3 import Z3
+from fast.AST import Facet, fexpr_cast, Constant, Var, Not, FExpr, Unassigned, FObject, jeevesState
+from eval.Eval import partialEval
+import copy
 
 def init():
   jeevesState.varenv = VarEnv()
@@ -254,12 +257,3 @@ def jfun3(f, kw, it, key, val, args_concrete, kw_concrete):
     with NegativeVariable(val.cond):
       els = jfun3(f, kw, it, key, val.els, args_concrete, kw_concrete)
     return Facet(arg.cond, thn, els)
-
-from env.VarEnv import VarEnv
-from env.PolicyEnv import PolicyEnv
-from env.PathVars import PathVars
-from env.WritePolicyEnv import WritePolicyEnv
-from smt.Z3 import Z3
-from fast.AST import Facet, fexpr_cast, Constant, Var, Not, FExpr, Unassigned, FObject
-from eval.Eval import partialEval
-import copy

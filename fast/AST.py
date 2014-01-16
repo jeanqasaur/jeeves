@@ -10,7 +10,9 @@ import operator
 import z3
 import JeevesLib
 
-#TODO the type stuff
+class JeevesState:
+  pass
+jeevesState = JeevesState()
 
 '''
 Abstract class for sensitive expressions.
@@ -233,7 +235,7 @@ class Facet(FExpr):
 
   def remapLabels(self, policy, writer):
     if isinstance(self.cond, Var):
-      newCond = JeevesLib.jeevesState.writeenv.addWritePolicy(
+      newCond = jeevesState.writeenv.addWritePolicy(
                   self.cond, policy, writer)
     else:
       newCond = self.cond.remapLabels(policy, writer)
