@@ -632,6 +632,8 @@ def is_obj(o):
 def fexpr_cast(a):
   if isinstance(a, FExpr):
     return a
+  elif isinstance(a, list):
+    return FObject(JeevesLib.JList(a))
   elif is_obj(a):
     return FObject(a)
   else:
@@ -693,42 +695,42 @@ class FObject(FExpr):
     try:
       f = getattr(self.v, '__eq__')
     except AttributeError:
-      return Eq(self, other)
+      return Eq(self, fexpr_cast(other))
     return f(other)
 
   def __ne__(self, other):
     try:
       f = getattr(self.v, '__ne__')
     except AttributeError:
-      return Not(Eq(self, other))
+      return Not(Eq(self, fexpr_cast(other)))
     return f(other)
 
   def __lt__(self, other):
     try:
       f = getattr(self.v, '__lt__')
     except AttributeError:
-      return Lt(self, other)
+      return Lt(self, fexpr_cast(other))
     return f(other)
 
   def __gt__(self, other):
     try:
       f = getattr(self.v, '__gt__')
     except AttributeError:
-      return Gt(self, other)
+      return Gt(self, fexpr_cast(other))
     return f(other)
 
   def __le__(self, other):
     try:
       f = getattr(self.v, '__le__')
     except AttributeError:
-      return LtE(self, other)
+      return LtE(self, fexpr_cast(other))
     return f(other)
 
   def __ge__(self, other):
     try:
       f = getattr(self.v, '__ge__')
     except AttributeError:
-      return GtE(self, other)
+      return GtE(self, fexpr_cast(other))
     return f(other)
 
 """

@@ -2,7 +2,7 @@
 List-type functions for Jeeves containers.
 '''
 import JeevesLib
-from fast.AST import FExpr
+from fast.AST import FExpr, Constant
 
 @JeevesLib.supports_jeeves
 def jhasElt(lst, f):
@@ -23,7 +23,13 @@ def jhas(lst, v):
 
 @JeevesLib.supports_jeeves
 def jall(lst):
-  acc = True
-  for elt in lst:
-    acc = JeevesLib.jand(lambda: elt, lambda: acc)
-  return acc
+  def myall(lst):
+    acc = True
+    for elt in lst:
+      acc = JeevesLib.jand(lambda: elt, lambda: acc)
+    return acc
+
+  if isinstance(lst, list):
+    return myall(lst)
+  else: # lst is a JList
+    return JeevesLib.facetMapper(lst.l, myall, Constant)

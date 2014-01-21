@@ -184,15 +184,15 @@ def jmap2(iterator, mapper):
   elif isinstance(iterator, list) or isinstance(iterator, tuple):
     return [mapper(item) for item in iterator]
 
-def facetMapper(facet, fn):
+def facetMapper(facet, fn, wrapper):
   if isinstance(facet, Facet):
     return Facet(facet.cond, facetMapper(facet.thn, fn), facetMapper(facet.els, fn))
   elif isinstance(facet, Constant) or isinstance(facet, FObject):
-    return fexpr_cast(fn(facet.v))
+    return wrapper(fn(facet.v))
 
 class JList:
   def __init__(self, l):
-    self.l = fexpr_cast(l)
+    self.l = l if isinstance(l, FExpr) else FObject(l)
   def __getitem__(self, i):
     return self.l[i]
   def __setitem__(self, i, val):
@@ -204,7 +204,7 @@ class JList:
     return self.l.__iter__()
 
   def append(self, val):
-    l2 = facetMapper(self.l, list) #deep copy
+    l2 = facetMapper(self.l, list, FObject) #deep copy
     l2.append(val)
     self.l = jassign(self.l, l2)
 
