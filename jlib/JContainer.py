@@ -32,4 +32,4 @@ def jall(lst):
   if isinstance(lst, list):
     return myall(lst)
   else: # lst is a JList
-    return JeevesLib.facetMapper(lst.l, myall, Constant)
+    return JeevesLib.facetMapper(lst.l, myall)

@@ -184,7 +184,7 @@ def jmap2(iterator, mapper):
   elif isinstance(iterator, list) or isinstance(iterator, tuple):
     return [mapper(item) for item in iterator]
 
-def facetMapper(facet, fn, wrapper):
+def facetMapper(facet, fn, wrapper=fexpr_cast):
   if isinstance(facet, Facet):
     return Facet(facet.cond, facetMapper(facet.thn, fn), facetMapper(facet.els, fn))
   elif isinstance(facet, Constant) or isinstance(facet, FObject):

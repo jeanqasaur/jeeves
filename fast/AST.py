@@ -334,6 +334,7 @@ class Facet(FExpr):
 
 class Constant(FExpr):
   def __init__(self, v):
+    assert not isinstance(v, FExpr)
     self.v = v
     self.type = type(v)
 
@@ -353,7 +354,7 @@ class Constant(FExpr):
     return self
 
   def prettyPrint(self, indent=""):
-    return indent + repr(self.v)
+    return indent + "const:" + repr(self.v)
 
   def __call__(self, *args, **kw):
     return self.v(*args, **kw)
