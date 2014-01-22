@@ -66,8 +66,8 @@ class Board:
       boardShip = self.board[x][y].getShip()
       bomb = Bomb(ctxt.user)
       bombedPoint = self.board[x][y].bomb(ctxt, bomb)
-      # TODO: The problem here is that the call to all is not on a list, but
-      # an FObject or potentially, Unassigned.
+      print boardShip
+      print boardShip == NoShip()
       succeeded = (bombedPoint if boardShip == NoShip()
                     else JeevesLib.jall(map(lambda s: s.bomb(ctxt, bomb) and
                               s.bombPiece(ctxt), boardShip.getSquares())))
