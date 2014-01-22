@@ -47,7 +47,10 @@ class TestBattleship(unittest.TestCase):
       self.aliceBoard.placeShip(
         self.aliceCtxt, Battleship(self.alice), Point(0, 0), Point(0, 4)))
     
-    self.assertFalse(self.aliceBoard.allPlaced())
+    self.assertFalse(
+      JeevesLib.concretize(self.aliceCtxt, self.aliceBoard.allPlaced()))
+    self.assertFalse(
+      JeevesLib.concretize(self.bobCtxt, self.aliceBoard.allPlaced()))
 
     # Cannot bomb until all pieces placed.
     self.assertFalse(

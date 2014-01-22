@@ -23,7 +23,7 @@ class Game:
 
   @jeeves
   def allShipsPlaced(self):
-    return all(map(lambda b: b.allPlaced(), self.boards.values()))
+    return JeevesLib.jall(map(lambda b: b.allPlaced(), self.boards.values()))
 
   @jeeves
   def gameOver(self):
