@@ -79,11 +79,11 @@ class Board:
   # Determines if all of a player's pieces have been placed. This variable
   # should always be concrete.
   def allPlaced(self):
-    return all(map(lambda p: p.isPlaced(), self.pieces))
+    return JeevesLib.jall(map(lambda p: p.isPlaced(), self.pieces))
   # Determines if all pieces on the board have been bombed. This variable
   # should always be concrete.
   def hasLost(self):
-    return all(map(lambda p: p.isBombed(), self.pieces))
+    return JeevesLib.jall(map(lambda p: p.isBombed(), self.pieces))
 
   def printBoard(self, ctxt):
     for j in range(0, 10):

@@ -27,7 +27,7 @@ class Game:
 
   @jeeves
   def gameOver(self):
-    return any(map(lambda b: b.hasLost(), self.boards.values()))
+    return not JeevesLib.jall(map(lambda b: not b.hasLost(), self.boards.values()))
 
   @jeeves
   def hasTurn(self, user):
