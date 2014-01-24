@@ -103,14 +103,14 @@ class JeevesModel(models.Model):
       e.update({fv : False for fv in false_vars})
 
       delete_query = self.__class__._objects_ordinary.filter(jeeves_id=self.jeeves_id)
-      for var_name, var_value in e:
+      for var_name, var_value in e.iteritems():
         delete_query = delete_query.filter(jeeves_vars__contains =
               ';%s=%d;' % (var_name, var_value))
       delete_query.delete()
 
       klass = self.__class__
       obj_to_save = klass(**{
-        field_name : fullEval(field_value, env)
+        field_name : fullEval(field_value, e)
         for field_name, field_value in d.iteritems()
       })
       obj_to_save.jeeves_vars = serialize_vars(e)
@@ -142,7 +142,7 @@ class JeevesModel(models.Model):
       e.update({fv : False for fv in false_vars})
 
       delete_query = self.__class__._objects_ordinary.filter(jeeves_id=self.jeeves_id)
-      for var_name, var_value in e:
+      for var_name, var_value in e.iteritems():
         delete_query = delete_query.filter(jeeves_vars__contains =
               ';%s=%d;' % (var_name, var_value))
       delete_query.delete()
