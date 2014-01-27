@@ -26,7 +26,7 @@ class GamePiece:
     self._squares = []
 
   def __eq__(self, other):
-    return (self.__class__.__name__ == other.__class__.__name__ and
+    return (self.name == other.name and
               self.owner == other.owner)
 
   def isOwner(self, ctxt):
@@ -79,26 +79,32 @@ class GamePiece:
     return self._squares
 
 class Carrier(GamePiece):
+  name = 'carrier'
   def __init__(self, owner):
     self.size = 5
     GamePiece.__init__(self, owner)
 class Battleship(GamePiece):
+  name = 'battleship'
   def __init__(self, owner):
     self.size = 4
     GamePiece.__init__(self, owner)
 class Cruiser(GamePiece):
+  name = 'cruiser'
   def __init__(self, owner):
     self.size = 3
     GamePiece.__init__(self, owner)
 class Destroyer(GamePiece):
+  name = 'destroyer'
   def __init__(self, owner):
     self.size = 2
     GamePiece.__init__(self, owner)
 class Submarine(GamePiece):
+  name = 'submarine'
   def __init__(self, owner):
     self.size = 1
     GamePiece.__init__(self, owner)
 class NoShip(GamePiece, Singleton):
+  name = 'noship'
   def __init__(self):
     self.size = 0
     self.owner = None

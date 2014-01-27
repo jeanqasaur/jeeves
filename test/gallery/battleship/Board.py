@@ -66,8 +66,9 @@ class Board:
       boardShip = self.board[x][y].getShip()
       bomb = Bomb(ctxt.user)
       bombedPoint = self.board[x][y].bomb(ctxt, bomb)
-      print boardShip
-      print boardShip == NoShip()
+      print 'boardShip is', boardShip
+      print 'NoShip() is', NoShip()
+      print 'comparison is', boardShip == NoShip()
       succeeded = (bombedPoint if boardShip == NoShip()
                     else JeevesLib.jall(map(lambda s: s.bomb(ctxt, bomb) and
                               s.bombPiece(ctxt), boardShip.getSquares())))
