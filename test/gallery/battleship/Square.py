@@ -14,7 +14,7 @@ class Square:
       , lambda ship: lambda ic: ship == NoShip()
       , lambda ship: lambda ic: lambda _oc: self.isOwner(ic))
     self.hasBombRef = ProtectedRef(None
-      , None
+      , lambda _bomb: lambda ic: self.hasTurn(ic)
       , lambda _bomb: lambda ic: lambda _oc:
           self.hasTurn(ic) and self.allShipsPlaced(ic) and
             (not self.gameOver(ic)))
@@ -45,14 +45,13 @@ class Square:
   def getShip(self):
     return self.shipRef.v
 
-  @jeeves
   def bomb(self, ctxt, bomb):
-    r = self.hasBombRef.update(ctxt, ctxt, bomb)
+    r = self.hasBombRef.update(ctxt, ctxt, bomb) == UpdateResult.Success
     print 'hasTurn is', self.hasTurn(ctxt)
     print 'allShipsPlaced is', self.allShipsPlaced(ctxt)
     print 'gameOver is', self.gameOver(ctxt)
     print 'update bomb is', r
-    return r == UpdateResult.Success
+    return r
   
   def hasBomb(self):
     return not (self.hasBombRef.v == None)
