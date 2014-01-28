@@ -16,11 +16,6 @@ class GamePiece:
       , None)
     # TODO: See if we can do away with this...
     self._placed = False
-
-    self._bombedRef = ProtectedRef(False
-      , lambda hasBomb: lambda ic: not hasBomb
-      , None)
-    # TODO: See if we can do away with this...
     self._bombed = False
 
     self._squares = []
@@ -45,11 +40,9 @@ class GamePiece:
   # If the current user is allowed to bomb the piece, then we mark the piece
   # and return True. Otherwise we return False.
   def bombPiece(self, ctxt):
-    if (self._bombedRef.update(ctxt, ctxt, True) == UpdateResult.Success):
-      self._bombed = True;
-      return True
-    else:
-      return False
+    self._bombed = True;
+    return True
+  
   # This is always a concrete value.
   def isBombed(self):
     return self._bombed

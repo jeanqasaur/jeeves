@@ -266,5 +266,14 @@ class TestJeevesWrite(unittest.TestCase):
     self.assertEqual(JeevesLib.concretize(self.aliceUser, y.v), 2)
     self.assertEqual(JeevesLib.concretize(self.bobUser, y.v), 2)
 
+  '''
+  def test_with_objects(self):
+    x = ProtectedRef(None
+      , lambda _bomb: lambda ic: True
+      , lambda _bomb: lambda ic: lambda _oc:
+          self.hasTurn(ic) and self.allShipsPlaced(ic) and
+            (not self.gameOver(ic))
+  '''
+
 if __name__ == '__main__':
     unittest.main()

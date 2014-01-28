@@ -14,7 +14,7 @@ class Square:
       , lambda ship: lambda ic: ship == NoShip()
       , lambda ship: lambda ic: lambda _oc: self.isOwner(ic))
     self.hasBombRef = ProtectedRef(None
-      , lambda _bomb: lambda ic: True
+      , None
       , lambda _bomb: lambda ic: lambda _oc:
           self.hasTurn(ic) and self.allShipsPlaced(ic) and
             (not self.gameOver(ic)))
@@ -24,9 +24,7 @@ class Square:
   # TODO: Make sure function applications get applied correctly here.
   # Do we need another @jeeves annotation?
   def hasTurn(self, ctxt):
-    r = ctxt.game.hasTurn(ctxt.user)
-    print 'hasTurn is', r
-    return r
+    return ctxt.game.hasTurn(ctxt.user)
   def allShipsPlaced(self, ctxt):
     return ctxt.game.allShipsPlaced()
   def gameOver(self, ctxt):
@@ -47,12 +45,14 @@ class Square:
   def getShip(self):
     return self.shipRef.v
 
+  @jeeves
   def bomb(self, ctxt, bomb):
-    r = self.hasBombRef.update(ctxt, ctxt, bomb) == UpdateResult.Success
+    r = self.hasBombRef.update(ctxt, ctxt, bomb)
     print 'hasTurn is', self.hasTurn(ctxt)
+    print 'allShipsPlaced is', self.allShipsPlaced(ctxt)
     print 'gameOver is', self.gameOver(ctxt)
     print 'update bomb is', r
-    return r
+    return r == UpdateResult.Success
   
   def hasBomb(self):
     return not (self.hasBombRef.v == None)
