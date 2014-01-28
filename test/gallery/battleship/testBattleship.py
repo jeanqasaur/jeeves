@@ -14,11 +14,11 @@ class TestBattleship(unittest.TestCase):
   def setUp(self):
     JeevesLib.init()
 
-    self.alice = User(0)
+    self.alice = User(0, "Alice")
     self.aliceBoard = Board(self.alice)
     self.aliceBomb = Bomb(self.alice)
 
-    self.bob = User(1)
+    self.bob = User(1, "Bob")
     self.bobBoard = Board(self.bob)
     self.bobBomb = Bomb(self.bob)
 
@@ -114,8 +114,7 @@ class TestBattleship(unittest.TestCase):
       , JeevesLib.concretize(
           self.aliceCtxt, self.game.bomb(self.aliceCtxt, self.bob, 9, 9)))
 
-    # TODO: Need function calls on facets to work for this to pass...
-    # Can bomb a piece with a ship.
+    # Can bomb a piece with some ship.
     self.assertEqual(Carrier(self.alice)
       , JeevesLib.concretize(
           self.aliceCtxt, self.game.bomb(self.bobCtxt, self.alice, 0, 0)))

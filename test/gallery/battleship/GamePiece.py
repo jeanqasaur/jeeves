@@ -17,17 +17,16 @@ class GamePiece:
     # TODO: See if we can do away with this...
     self._placed = False
 
-    self.bombedRef = ProtectedRef(False
+    self._bombedRef = ProtectedRef(False
       , lambda hasBomb: lambda ic: not hasBomb
       , None)
     # TODO: See if we can do away with this...
-    self.bombed = False
+    self._bombed = False
 
     self._squares = []
 
   def __eq__(self, other):
-    return (self.name == other.name and
-              self.owner == other.owner)
+    return (self.name == other.name and self.owner == other.owner)
 
   def isOwner(self, ctxt):
     return ctxt.user == self.owner
@@ -46,14 +45,14 @@ class GamePiece:
   # If the current user is allowed to bomb the piece, then we mark the piece
   # and return True. Otherwise we return False.
   def bombPiece(self, ctxt):
-    if (self.bombedRef.update(ctxt, ctxt, true) == UpdateResult.Success):
-      self.bombed = True;
+    if (self._bombedRef.update(ctxt, ctxt, true) == UpdateResult.Success):
+      self._bombed = True;
       return True
     else:
       return False
   # This is always a concrete value.
   def isBombed(self):
-    return self.bombed
+    return self._bombed
 
   # Gets the board coordinates associated with a given piece.
   @jeeves
