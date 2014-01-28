@@ -24,7 +24,9 @@ class Square:
   # TODO: Make sure function applications get applied correctly here.
   # Do we need another @jeeves annotation?
   def hasTurn(self, ctxt):
-    return ctxt.game.hasTurn(ctxt.user)
+    r = ctxt.game.hasTurn(ctxt.user)
+    print 'hasTurn is', r
+    return r
   def allShipsPlaced(self, ctxt):
     return ctxt.game.allShipsPlaced()
   def gameOver(self, ctxt):
@@ -46,7 +48,11 @@ class Square:
     return self.shipRef.v
 
   def bomb(self, ctxt, bomb):
-    return self.hasBombRef.update(ctxt, ctxt, bomb) == UpdateResult.Success
+    r = self.hasBombRef.update(ctxt, ctxt, bomb) == UpdateResult.Success
+    print 'hasTurn is', self.hasTurn(ctxt)
+    print 'gameOver is', self.gameOver(ctxt)
+    print 'update bomb is', r
+    return r
   
   def hasBomb(self):
     return not (self.hasBombRef.v == None)

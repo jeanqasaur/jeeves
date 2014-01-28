@@ -45,7 +45,7 @@ class GamePiece:
   # If the current user is allowed to bomb the piece, then we mark the piece
   # and return True. Otherwise we return False.
   def bombPiece(self, ctxt):
-    if (self._bombedRef.update(ctxt, ctxt, true) == UpdateResult.Success):
+    if (self._bombedRef.update(ctxt, ctxt, True) == UpdateResult.Success):
       self._bombed = True;
       return True
     else:

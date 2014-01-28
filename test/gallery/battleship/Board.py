@@ -71,10 +71,7 @@ class Board:
       print 'comparison is', boardShip == NoShip()
       print 'concretized comparison is', JeevesLib.concretize(ctxt, boardShip == NoShip())
       succeeded = (bombedPoint if boardShip == NoShip()
-                    else JeevesLib.jall(map(lambda s: s.bomb(ctxt, bomb) and
-                              s.bombPiece(ctxt), boardShip.getSquares())))
-      print 'concretized bombing is', JeevesLib.concretize(ctxt, JeevesLib.jall(map(lambda s: s.bomb(ctxt, bomb) and
-                              s.bombPiece(ctxt), boardShip.getSquares())))
+                    else boardShip.bombPiece(ctxt) and JeevesLib.jall(map(lambda s: s.bomb(ctxt, bomb), boardShip.getSquares())))
       print 'concretized succeeded is', JeevesLib.concretize(ctxt, succeeded)
       return boardShip if succeeded else NoShip()
     else:
