@@ -152,21 +152,21 @@ class Namespace:
     self.__dict__.update(kw)
 
   def __setattr__(self, attr, value):
-    self.__dict__[attr] = jassign(self.__dict__.get(attr, Unassigned()), value)
+    self.__dict__[attr] = jassign(self.__dict__.get(attr, Unassigned("variable '%s'" % attr)), value)
 
 @supports_jeeves
 def jgetattr(obj, attr):
   if isinstance(obj, FExpr):
     return getattr(obj, attr)
   else:
-    return getattr(obj, attr) if hasattr(obj, attr) else Unassigned()
+    return getattr(obj, attr) if hasattr(obj, attr) else Unassigned("attribute '%s'" % attr)
 
 @supports_jeeves
 def jgetitem(obj, item):
   try:
     return obj[item]
   except (KeyError, KeyError, TypeError) as e:
-    return Unassigned()
+    return Unassigned("item '%s'" % attr)
 
 @supports_jeeves
 def jmap(iterable, mapper):

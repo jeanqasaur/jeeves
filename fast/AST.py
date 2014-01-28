@@ -9,6 +9,7 @@ from abc import ABCMeta, abstractmethod
 import operator
 import z3
 import JeevesLib
+import traceback
 
 class JeevesState:
   pass
@@ -609,11 +610,11 @@ class GtE(BinaryExpr):
       , self.right.remapLabels(policy, writer))
 
 class Unassigned(FExpr):
-  def __init__(self):
+  def __init__(self, thing_not_found):
     self.type = None
+    self.thing_not_found = thing_not_found
   def eval(self, env):
-    raise ValueError("Hey br0, you can't evaluate an expression that involves "
-      "an unassigned value.")
+    raise self.getException()
   def z3Node(self):
     pass #TODO ?? what goes here
   def getChildren(self):
@@ -624,6 +625,8 @@ class Unassigned(FExpr):
     return set()
   def remapLabels(self, policy, writer):
     return self
+  def getException(self):
+    return Exception("wow such error: %s does not exist." % (self.thing_not_found,))
 
 # TODO(TJH): figure out the correct implementation of this
 def is_obj(o):
@@ -672,7 +675,7 @@ class FObject(FExpr):
     if hasattr(self.v, attribute):
       return getattr(self.v, attribute)
     else:
-      return Unassigned()
+      return Unassigned("attribute '%s'" % attribute)
 
   def __setattr__(self, attribute, val):
     if attribute in self.__dict__:
@@ -684,7 +687,7 @@ class FObject(FExpr):
     try:
       return self.v[item]
     except (KeyError, IndexError, TypeError):
-      return Unassigned()
+      return Unassigned("item '%s'" % item)
 
   def __setitem__(self, item, val):
     self.v[item] = val

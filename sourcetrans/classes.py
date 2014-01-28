@@ -10,7 +10,7 @@ def classes_transform(node, gen_sym):
 
       # Add the function
       # def __setattr__(self, attr, value):
-      #   self.__dict__[attr] = jassign(self.__dict__.get(attr, Unassigned()), value)
+      #   self.__dict__[attr] = jassign(self.__dict__.get(attr, Unassigned("attribute '%s'" % attr)), value)
       self_name = gen_sym()
       attr_name = gen_sym()
       value_name = gen_sym()
@@ -37,7 +37,7 @@ def classes_transform(node, gen_sym):
             ctx=Store(),
           )],
           q[ JeevesLib.jassign(name[self_name].__dict__.get(name[attr_name],
-                JeevesLib.Unassigned()), name[value_name]) ]
+                JeevesLib.Unassigned("attribute '%s'" % name[attr_name])), name[value_name]) ]
           )
         ]
       )

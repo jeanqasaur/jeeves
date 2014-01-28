@@ -33,7 +33,8 @@ def partialEval(f, env={}):
       return Facet(f, Constant(True), Constant(False))
   elif isinstance(f, FObject):
     return f
-      
+  elif isinstance(f, Unassigned):
+   raise f.getException()
   else:
     raise TypeError("partialEval does not support type %s" % f.__class__.__name__)
 
