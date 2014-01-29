@@ -28,7 +28,7 @@ class PolicyEnv:
     )
 
   # Takes a context and an expression
-  def concretizeExp(self, ctxt, f):
+  def concretizeExp(self, ctxt, f, pathenv):
     f = fast.AST.fexpr_cast(f)
     dependencies = defaultdict(set)
     constraints = []
@@ -38,7 +38,7 @@ class PolicyEnv:
       predicate = policy(ctxt) #predicate should be True if label can be HIGH
       predicate_vars = predicate.vars()
       dependencies[label] |= predicate_vars
-      constraints.append(partialEval(fast.AST.Implies(label, predicate)))
+      constraints.append(partialEval(fast.AST.Implies(label, predicate), pathenv))
 
     # If a depends on b, then we want (b == Low ==> a == Low)
     for (label, label_deps) in dependencies.iteritems():

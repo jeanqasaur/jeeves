@@ -45,7 +45,7 @@ class ProtectedRef:
     if self.inputWP:
       r = self.inputWP(self.v)(writer)
       if isinstance(r, FExpr):
-        r = JeevesLib.concretize(writeCtxt, partialEval(r))
+        r = JeevesLib.concretize(writeCtxt, partialEval(r, JeevesLib.jeevesState.pathenv.getEnv()))
       if r:
         return UpdateResult.Success
       else:

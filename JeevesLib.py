@@ -35,7 +35,7 @@ def mkSensitive(varLabel, vHigh, vLow):
 
 @supports_jeeves
 def concretize(ctxt, v):
-  return jeevesState.policyenv.concretizeExp(ctxt, v)
+  return jeevesState.policyenv.concretizeExp(ctxt, v, jeevesState.pathenv.getEnv())
 
 @supports_jeeves
 def jif(cond, thn_fn, els_fn):
