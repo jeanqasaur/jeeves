@@ -288,8 +288,11 @@ class TestJeevesConfidentiality(unittest.TestCase):
   def test_objects_mutate(self):
     class TestClass:
       def __init__(self, a, b):
-        self.a = a
-        self.b = b
+        self.__dict__['a'] = a
+        self.__dict__['b'] = b
+      def __setattr__(self, attr, val):
+        self.__dict__[attr] = JeevesLib.jassign(
+            self.__dict__[attr], val)
 
     jl = JeevesLib
 
@@ -301,7 +304,7 @@ class TestJeevesConfidentiality(unittest.TestCase):
     y = jl.mkSensitive(x, s, t)
 
     def mut():
-      y.a = jl.jassign(y.a, y.a + 100)
+      y.a = y.a + 100
     def nonmut():
       pass
 

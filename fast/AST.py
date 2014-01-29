@@ -171,21 +171,33 @@ class Var(FExpr):
     return indent + self.name
 
 # helper methods for faceted __setattr__
-def get_objs_in_faceted_obj(f, d):
+def get_objs_in_faceted_obj(f, d, env):
   if isinstance(f, Facet):
-    get_objs_in_faceted_obj(f.thn, d)
-    get_objs_in_faceted_obj(f.els, d)
+    if f.cond.name in env:
+      if env[f.cond.name]:
+        get_objs_in_faceted_obj(f.thn, d, env)
+      else:
+        get_objs_in_faceted_obj(f.els, d, env)
+    else:
+      get_objs_in_faceted_obj(f.thn, d, env)
+      get_objs_in_faceted_obj(f.els, d, env)
   elif isinstance(f, FObject):
     d[id(f.v)] = f.v
   else:
     raise TypeError("wow such error: attribute access for non-object type; %s"
             % f.__class__.__name__)
 
-def replace_obj_attributes(f, obj, oldvalue, newvalue):
+def replace_obj_attributes(f, obj, oldvalue, newvalue, env):
   if isinstance(f, Facet):
-    return Facet(f.cond,
-      replace_obj_attributes(f.thn, obj, oldvalue, newvalue),
-      replace_obj_attributes(f.els, obj, oldvalue, newvalue))
+    if f.cond.name in env:
+      if env[f.cond.name]:
+        return replace_obj_attributes(f.thn, obj, oldvalue, newvalue, env)
+      else:
+        return replace_obj_attributes(f.els, obj, oldvalue, newvalue, env)
+    else:
+      return Facet(f.cond,
+        replace_obj_attributes(f.thn, obj, oldvalue, newvalue, env),
+        replace_obj_attributes(f.els, obj, oldvalue, newvalue, env))
   elif f.v is obj:
     return newvalue
   else:
@@ -267,11 +279,12 @@ class Facet(FExpr):
     if attribute in self.__dict__:
       self.__dict__[attribute] = value
     else:
+      env = jeevesState.pathenv.getEnv()
       value = fexpr_cast(value)
       objs = {}
-      get_objs_in_faceted_obj(self, objs)
+      get_objs_in_faceted_obj(self, objs, env)
       for _, obj in objs.iteritems():
-        t = replace_obj_attributes(self, obj, getattr(obj, attribute), value)
+        t = replace_obj_attributes(self, obj, getattr(obj, attribute), value, env)
         setattr(obj, attribute, t)
 
   def __getitem__(self, attribute):
@@ -280,11 +293,12 @@ class Facet(FExpr):
       self.els[attribute])
 
   def __setitem__(self, attribute, value):
+    env = jeevesState.pathenv.getEnv()
     value = fexpr_cast(value)
     objs = {}
-    get_objs_in_faceted_obj(self, objs)
+    get_objs_in_faceted_obj(self, objs, env)
     for _, obj in objs.iteritems():
-      t = replace_obj_attributes(self, obj, obj[attribute], value)
+      t = replace_obj_attributes(self, obj, obj[attribute], value, env)
       obj[attribute] = t
 
   def __eq__(self, other):
