@@ -2,10 +2,17 @@
 List-type functions for Jeeves containers.
 '''
 import JeevesLib
-from fast.AST import FExpr, Constant
+from fast.AST import FExpr, Constant, Facet
 
 @JeevesLib.supports_jeeves
 def jhasElt(lst, f):
+  if isinstance(lst, Facet):
+    return JeevesLib.jif(lst.cond, lambda:jhasElt(lst.thn, f), lambda:jhasElt(lst.els, f))
+  elif isinstance(lst, JeevesLib.JList):
+    return jhasElt(lst.l, f)
+  elif isinstance(lst, JeevesLib.FObject):
+    return jhasElt(lst.v, f)
+
   acc = False
   # Short circuits.
   for elt in lst:

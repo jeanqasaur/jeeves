@@ -115,7 +115,7 @@ class FExpr:
 
   def __abs__(v):
     if isinstance(v, FExpr):
-      return Facet(v > 0, v, 0 - v)
+      return JeevesLib.jif(v > 0, lambda:v, lambda:0 - v)
     return abs(v)
 
   # TODO bitwise operations? do we care?
@@ -200,6 +200,8 @@ the type of the facet...
 '''
 class Facet(FExpr):
   def __init__(self, cond, thn, els):
+    assert isinstance(cond, Var)
+
     self.__dict__['cond'] = cond
     self.__dict__['thn'] = fexpr_cast(thn)
     self.__dict__['els'] = fexpr_cast(els)
@@ -332,7 +334,7 @@ class Facet(FExpr):
     if self.type == object:
       return JeevesLib.jif(self.cond, self.thn.__len__, self.els.__len__)
     else:
-      raise TypeError("no way bro")
+      raise TypeError("cannot take len of non-object; type %s" % self.type.__name__)
 
 class Constant(FExpr):
   def __init__(self, v):
@@ -628,6 +630,8 @@ class Unassigned(FExpr):
     return self
   def getException(self):
     return Exception("wow such error: %s does not exist." % (self.thing_not_found,))
+  def __call__(self, *args, **kwargs):
+    raise self.getException()
 
 # TODO(TJH): figure out the correct implementation of this
 def is_obj(o):

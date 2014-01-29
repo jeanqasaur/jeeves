@@ -112,13 +112,13 @@ class TestJeevesBasic(unittest.TestCase):
     alice = User(0)
     bob = User(1)
     charlie = User(2)
-    guestList = [alice, bob]
-    guestListS = JeevesLib.mkSensitive(a, guestList, [])
-    JeevesLib.restrict(a, lambda oc: guestListS.__contains__(oc))
+    guestList = JeevesLib.JList([alice, bob])
+    guestListS = JeevesLib.mkSensitive(a, guestList, JeevesLib.JList([]))
+    JeevesLib.restrict(a, lambda oc: JeevesLib.jhas(guestListS, oc))
 
     self.assertEqual(guestList, JeevesLib.concretize(alice, guestListS))
     self.assertEqual(guestList, JeevesLib.concretize(bob, guestListS))
-    self.assertEqual([], JeevesLib.concretize(charlie, guestListS))
+    self.assertEqual([], JeevesLib.concretize(charlie, guestListS).l)
 
   '''
   Conditionals.
