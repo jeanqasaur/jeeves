@@ -148,11 +148,12 @@ def liftTuple(t):
     raise TypeError("bad use of liftTuple")
 
 class Namespace:
-  def __init__(self, kw):
+  def __init__(self, kw, funcname):
     self.__dict__.update(kw)
+    self.__dict__['_jeeves_funcname'] = funcname
 
   def __setattr__(self, attr, value):
-    self.__dict__[attr] = jassign(self.__dict__.get(attr, Unassigned("variable '%s'" % attr)), value)
+    self.__dict__[attr] = jassign(self.__dict__.get(attr, Unassigned("variable '%s' in %s" % (attr, self._jeeves_funcname))), value)
 
 @supports_jeeves
 def jgetattr(obj, attr):

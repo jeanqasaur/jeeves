@@ -1,5 +1,6 @@
 import unittest
 import macropy.activate
+import test.gallery.battleship
 from macropy.core.exporters import SaveExporter
 macropy.exporter = SaveExporter("exported", ".")
 

@@ -51,7 +51,7 @@ def replace_local_scopes_with_namespace(node, gen_sym):
       varNames, paramNames = get_vars_in_scope(tree)
       namespaceName = gen_sym()
 
-      # namespaceName = Namespace(param1=value1,...)
+      # namespaceName = Namespace({param1:value1,...},funcname)
       namespaceStmt = Assign(
         targets=[Name(id=namespaceName,ctx=Store())],
         value=Call(
@@ -59,7 +59,9 @@ def replace_local_scopes_with_namespace(node, gen_sym):
           args=[Dict(
             keys=[Str(p) for p in paramNames],
             values=[Name(id=p, ctx=Load()) for p in paramNames],
-          )],
+          ),
+            Str(s=tree.name)
+          ],
           keywords=[],
           starargs=None,
           kwargs=None,
