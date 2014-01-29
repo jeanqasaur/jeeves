@@ -45,6 +45,7 @@ class Square:
   def getShip(self):
     return self.shipRef.v
 
+  @jeeves
   def bomb(self, ctxt, bomb):
     r = self.hasBombRef.update(ctxt, ctxt, bomb) == UpdateResult.Success
     print 'hasTurn is', self.hasTurn(ctxt)
