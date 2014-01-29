@@ -178,7 +178,8 @@ def get_objs_in_faceted_obj(f, d):
   elif isinstance(f, FObject):
     d[id(f.v)] = f.v
   else:
-    raise TypeError("wow such error: attribute access for non-object type")
+    raise TypeError("wow such error: attribute access for non-object type; %s"
+            % f.__class__.__name__)
 
 def replace_obj_attributes(f, obj, oldvalue, newvalue):
   if isinstance(f, Facet):
