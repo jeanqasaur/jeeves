@@ -664,6 +664,7 @@ def fexpr_cast(a):
 
 class FObject(FExpr):
   def __init__(self, v):
+    assert not isinstance(v, JeevesLib.Namespace)
     self.__dict__['v'] = v
     self.__dict__['type'] = object
 

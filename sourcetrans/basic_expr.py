@@ -14,6 +14,11 @@ A if CONDITION else B -> jif
 def basic_expr_transform(node):
   @Walker
   def transform(tree, stop, **kw):
+    if isinstance(tree, FunctionDef) or isinstance(tree, ClassDef):
+      for decorator in tree.decorator_list:
+        if isinstance(decorator, Name) and decorator.id == "jeeves":
+          raise Exception("Do not use nested @jeeves")
+
     # not expr
     # JeevesLib.jnot(expr)
     if isinstance(tree, UnaryOp) and isinstance(tree.op, Not):

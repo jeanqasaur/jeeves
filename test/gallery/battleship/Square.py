@@ -5,7 +5,6 @@ from sourcetrans.macro_module import macros, jeeves
 
 @jeeves
 class Square:
-  @jeeves
   def __init__(self, owner):
     self.owner = owner
     self.shipRef = ProtectedRef(NoShip()
@@ -29,7 +28,6 @@ class Square:
     return ctxt.game.allShipsPlaced()
   def gameOver(self, ctxt):
     return ctxt.game.gameOver()
-  @jeeves
   def mkShipSecret(self, ship):
     a = JeevesLib.mkLabel("ship")
     JeevesLib.restrict(a
@@ -45,13 +43,12 @@ class Square:
   def getShip(self):
     return self.shipRef.v
 
-  @jeeves
   def bomb(self, ctxt, bomb):
     r = self.hasBombRef.update(ctxt, ctxt, bomb) == UpdateResult.Success
-    print 'hasTurn is', self.hasTurn(ctxt)
-    print 'allShipsPlaced is', self.allShipsPlaced(ctxt)
-    print 'gameOver is', self.gameOver(ctxt)
-    print 'update bomb is', r
+    #print 'hasTurn is', self.hasTurn(ctxt)
+    #print 'allShipsPlaced is', self.allShipsPlaced(ctxt)
+    #print 'gameOver is', self.gameOver(ctxt)
+    #print 'update bomb is', r
     return r
   
   def hasBomb(self):

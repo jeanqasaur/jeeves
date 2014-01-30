@@ -1,6 +1,5 @@
 import unittest
 import macropy.activate
-import test.gallery.battleship
 from macropy.core.exporters import SaveExporter
 macropy.exporter = SaveExporter("exported", ".")
 
@@ -8,7 +7,6 @@ import test.testAST
 import test.testJeevesConfidentiality
 import test.testSourceTransform
 import test.testZ3
-
 import test.gallery.battleship.testBattleship
 
 unittest.TextTestRunner().run(unittest.TestSuite([

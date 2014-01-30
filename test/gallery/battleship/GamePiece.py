@@ -48,7 +48,6 @@ class GamePiece:
     return self._bombed
 
   # Gets the board coordinates associated with a given piece.
-  @jeeves
   def getPiecePoints(self, start, end):
     if start.inLine(end) and start.distance(end) == self.size:
       # If we are on the same horizontal line...
