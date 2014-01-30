@@ -119,83 +119,63 @@ class TestBattleship(unittest.TestCase):
       , JeevesLib.concretize(
           self.aliceCtxt, self.game.bomb(self.bobCtxt, self.alice, 0, 0)))
 
-  '''
-  test ("Cannot put two bombs in a row") {
-    expectResult(NoShip) {
-      concretize(bobCtxt, game.bomb(bobCtxt, alice, 0, 0))
-    }
-  }
+    self.assertEqual(NoShip()
+      , JeevesLib.concretize(
+          self.bobCtxt, self.game.bomb(self.bobCtxt, self.alice, 0, 0)))
 
-  test ("Can see ship if bombed") {
-    // debugPrint(bobCtxt, aliceBoard.getSquare(0, 0).getShip())(BattleshipGame)
-    expectResult(Carrier(alice)) {
-      concretize(bobCtxt, aliceBoard.getSquare(0, 0).getShip())
-    }
-    expectResult(Carrier(alice)) {
-      concretize(bobCtxt, aliceBoard.getSquare(0, 3).getShip())
-    }            
-  }
+    self.assertEqual(Carrier(self.alice)
+      , JeevesLib.concretize(
+          self.bobCtxt, self.aliceBoard.getSquare(0, 0).getShip()))
+    self.assertEqual(Carrier(self.alice)
+      , JeevesLib.concretize(
+          self.bobCtxt, self.aliceBoard.getSquare(0, 3).getShip()))
 
-  test ("Cannot see ship if not bombed") {
-    expectResult(NoShip) {
-      concretize(aliceCtxt, bobBoard.getSquare(0, 0).getShip())
-    }
-  }
+    self.assertEqual(NoShip()
+      , JeevesLib.concretize(
+          self.aliceCtxt, self.bobBoard.getSquare(0, 0).getShip()))
+    
+    self.assertEqual(Carrier(self.bob)
+      , JeevesLib.concretize(
+          self.aliceCtxt, self.game.bomb(self.aliceCtxt, self.bob, 0, 0)))
+    self.assertEqual(Battleship(self.alice)
+      , JeevesLib.concretize(
+          self.bobCtxt, self.game.bomb(self.bobCtxt, self.alice, 1, 0)))
+    self.assertEqual(Battleship(self.bob)
+      , JeevesLib.concretize(
+          self.aliceCtxt, self.game.bomb(self.aliceCtxt, self.bob, 1, 0)))
+    self.assertEqual(Cruiser(self.alice)
+      , JeevesLib.concretize(
+          self.bobCtxt, self.game.bomb(self.bobCtxt, self.alice, 2, 0)))
+    self.assertEqual(Cruiser(self.bob)
+      , JeevesLib.concretize(
+          self.aliceCtxt, self.game.bomb(self.aliceCtxt, self.bob, 2, 0)))
+    self.assertEqual(Destroyer(self.alice)
+      , JeevesLib.concretize(
+          self.bobCtxt, self.game.bomb(self.bobCtxt, self.alice, 3, 0)))
+    self.assertEqual(Destroyer(self.bob)
+      , JeevesLib.concretize(
+          self.aliceCtxt, self.game.bomb(self.aliceCtxt, self.bob, 3, 0)))
+    self.assertEqual(Destroyer(self.alice)
+      , JeevesLib.concretize(
+        self.bobCtxt, self.game.bomb(self.bobCtxt, self.alice, 4, 0)))
+    self.assertEqual(Destroyer(self.bob)
+      , JeevesLib.concretize(
+        self.aliceCtxt, self.game.bomb(self.aliceCtxt, self.bob, 4, 0)))
+    self.assertEqual(Submarine(self.alice)
+      , JeevesLib.concretize(
+        self.bobCtxt, self.game.bomb(self.bobCtxt, self.alice, 5, 0)))
+    self.assertEqual(Submarine(self.bob)
+      , JeevesLib.concretize(
+        self.aliceCtxt, self.game.bomb(self.aliceCtxt, self.bob, 5, 0)))
+    self.assertTrue(self.game.gameOver())
 
-  test ("Playing the rest of the game..." ) {
-    expectResult(Carrier(bob)) {
-      concretize(aliceCtxt, game.bomb(aliceCtxt, bob, 0, 0))
-    }
-    expectResult(Battleship(alice)) {
-      concretize(bobCtxt, game.bomb(bobCtxt, alice, 1, 0))
-    }
-    expectResult(Battleship(bob)) {
-      concretize(aliceCtxt, game.bomb(aliceCtxt, bob, 1, 0))
-    }
-    expectResult(Cruiser(alice)) {
-      concretize(bobCtxt, game.bomb(bobCtxt, alice, 2, 0))
-    }
-    expectResult(Cruiser(bob)) {
-      concretize(aliceCtxt, game.bomb(aliceCtxt, bob, 2, 0))
-    }
-    expectResult(Destroyer(alice)) {
-      concretize(bobCtxt, game.bomb(bobCtxt, alice, 3, 0))
-    }
-    expectResult(Destroyer(bob)) {
-      concretize(aliceCtxt, game.bomb(aliceCtxt, bob, 3, 0))
-    }
-    expectResult(Destroyer(alice)) {
-      concretize(bobCtxt, game.bomb(bobCtxt, alice, 4, 0))
-    }
-    expectResult(Destroyer(bob)) {
-      concretize(aliceCtxt, game.bomb(aliceCtxt, bob, 4, 0))
-    }
-    expectResult(Submarine(alice)) {
-      concretize(bobCtxt, game.bomb(bobCtxt, alice, 5, 0))
-    }
-    expectResult(Submarine(bob)) {
-      concretize(aliceCtxt, game.bomb(aliceCtxt, bob, 5, 0))
-    }
-    expectResult(Submarine(alice)) {
-      concretize(bobCtxt, game.bomb(bobCtxt, alice, 5, 1))
-    }
-    expectResult(true) {
-      game.gameOver()
-    }
-  }
-
-  test ("Cannot place ships once somebody has won") {
-    expectResult(NoShip) {
-      concretize(aliceCtxt, game.bomb(aliceCtxt, bob, 5, 1))
-    }
-  }
-
-  test ("Can see all ships once done") {
-    expectResult(Submarine(bob)) {
-      concretize(aliceCtxt, bobBoard.getSquare(5, 1).getShip())
-    }
-  }
-  '''
+    self.assertEqual(NoShip()
+      , JeevesLib.concretize(
+        self.aliceCtxt, self.game.bomb(self.aliceCtxt, self.bob, 5, 1)))
+    
+    self.assertEqual(Submarine(self.bob)
+      , JeevesLib.concretize(
+        self.aliceCtxt, self.bobBoard.getSquare(5, 1).getShip()))
 
 if __name__ == '__main__':
     unittest.main()

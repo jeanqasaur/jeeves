@@ -13,10 +13,10 @@ class Square:
       , lambda ship: lambda ic: ship == NoShip()
       , lambda ship: lambda ic: lambda _oc: self.isOwner(ic))
     self.hasBombRef = ProtectedRef(None
-      , lambda _bomb: lambda ic: self.hasTurn(ic)
-      , lambda _bomb: lambda ic: lambda _oc:
+      , lambda _bomb: lambda ic:
           self.hasTurn(ic) and self.allShipsPlaced(ic) and
-            (not self.gameOver(ic)))
+            not self.gameOver(ic)
+      , None)
 
   def isOwner(self, ctxt):
     return ctxt.user == self.owner
@@ -45,10 +45,6 @@ class Square:
 
   def bomb(self, ctxt, bomb):
     r = self.hasBombRef.update(ctxt, ctxt, bomb) == UpdateResult.Success
-    #print 'hasTurn is', self.hasTurn(ctxt)
-    #print 'allShipsPlaced is', self.allShipsPlaced(ctxt)
-    #print 'gameOver is', self.gameOver(ctxt)
-    #print 'update bomb is', r
     return r
   
   def hasBomb(self):
