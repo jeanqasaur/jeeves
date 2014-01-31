@@ -1,5 +1,6 @@
 import unittest
-from BaseOpenmrsObject import *
+from Order import *
+from Obs import *
 
 class TestOrderFunctions(unittest.TestCase):
 
@@ -47,6 +48,72 @@ class TestOrderFunctions(unittest.TestCase):
         self.assertTrue(self.order.equals(obj))
 
         self.assertIs(self.order.serialVersionUID, 1)
+        
+class TestObsFunctions(unittest.TestCase):
+
+    def setUp(self):
+        self.obs = Obs(913)
+        
+    def test_newInstance_method(self):
+        concept = Concept()
+        concept.setDatatype(True)
+        
+        self.obsToCopy = Obs(Person(), concept, datetime.now(), Location())
+        self.newObs = self.obs.newInstance(self.obsToCopy)
+        self.assertTrue(self.newObs == self.obsToCopy)#both have None obsId
+        self.assertIsNot(self.newObs, self.obsToCopy) 
+        
+        self.obsToCopy = Obs(9118)
+        self.newObs = self.obs.newInstance(self.obsToCopy)
+        self.assertFalse(self.newObs == self.obsToCopy)#newObs has None obsId but obsToCopy has an obsId
+
+    def test_obs_group_methods(self):
+        self.obsToCopy.setObsGroup(None)
+        assertFalse(self.obsToCopy.hasGroupMembers())
+
+        self.obs1 = Obs(127)
+        self.obs2 = Obs(9827)
+        concept = Concept()
+        concept.setSet(True)
+        self.obsToCopy..setConcept(concept)
+        self.obsToCopy.setGroupMembers(set([self.obs1, self.obs2]))
+        self.assertTrue(self.obsTopCopy.getGroupMembers(True) != None)
+        self.assertTrue(self.obsToCopy.getGroupMembers(False) != None)
+
+        self.obsToCopy.addGroupMember(Obs(7543))
+        self.obsToCopy.addGroupMember(self.obsToCopy)
+        self.assertRaises(APIException) #the line before should raise this exception
+
+        self.obsToCopy.removeGroupMember(self.obs1)
+        self.assertIsNone(self.obs1.getObsGroup())
+
+        #self.obsToCopy should be parent group of obs members.  
+        ret = self.obsToCopy.getRelatedObservations()
+        for i in ret:
+            self.assertFalse(i.isObsGrouping())
+            
+    def test_value_methods(self):
+        self.obsToCopy.setValueBoolean(True)
+        self.assertIsNotNone(self.obsToCopy.getValueCoded())
+
+        self.obsToCopy.setValueNumeric(1)
+        self.assertTrue(self.obsToCopy.getValueAsBoolean())
+
+        self.obsToCopy.setValueNumeric(0)
+        self.assertFalse(self.obsToCopy.getValueAsBoolean())
+
+        self.assertFalse(self.obsToCopy.isComplex())
+        
+        self.obsToCopy.setValueAsString("True")
+        self.assertTrue(self.obsToCopy.getValueAsString())
+
+        concept1 = Concept()
+        concept1.setConceptDatatype(ConceptDatatype(13))
+        self.obsToCopy.setConcept(concept1)
+        self.obsToCopy.getConcept().getDatatype().setHl7Abbreviation("NM")
+        self.obsToCopy.setValueAsString("13")
+        self.assertTrue(self.obsToCopy.getValueAsString() == "13")
+
         
 if __name__ == "__main__":
     unittest.main()
