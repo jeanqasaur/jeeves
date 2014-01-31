@@ -47,7 +47,8 @@ class Obs(BaseOpenmrsData): #needs to implement Serializable
                  valueDrug=None, valueGroupId=None,valueDatetime=None, valueNumeric=None,\
                  valueModifier=None, valueText=None, valueComplex=None,complexData = None,\
                  comment=None, personId=None,person=None, order=None, location=None,encounter=None,\
-                 previousVersion=None):
+                 previousVersion=None, voided=None, creator = None, dateCreated=None, voidedBy= None,\
+                 dateVoided=None, voidReason = None):
         self.obsId = obsId
         self.concept = question
         self.obsDatetime = obsDatetime
@@ -72,9 +73,14 @@ class Obs(BaseOpenmrsData): #needs to implement Serializable
         self.location = location
         self.encounter = encounter
         self.previousVersion = previousVersion
-
+        self.voided = voided
+        self.creator = creator
+        self.dateCreated = dateCreated
+        self.voidedBy = voidedBy
+        self.dateVoided = dateVoided
+        self.voidReason = voidReason
     def newInstance(self, obsToCopy):
-        newObs = Obs(obsToCopy.getPerson(), obsToCopy.getConcept(), obsToCopy.getObsDateTime(),\
+        newObs = Obs(obsToCopy.getPerson(), obsToCopy.getConcept(), obsToCopy.getObsDatetime(),\
                      obsToCopy.getLocation())
         newObs.setObsGroup(obsToCopy.getObsGroup())
         newObs.setAccessionNumber(obsToCopy.getAccessionNumber())
@@ -148,11 +154,10 @@ class Obs(BaseOpenmrsData): #needs to implement Serializable
         if self.groupMembers == None:
             return None
         nonVoided = ordered_set(self.groupMembers)
-        i = iter(nonVoided)
-        while next(i) != None:
-            obs = next(i)
+        
+        for obs in nonVoided:
             if obs.isVoided():
-                nonVoided.remove(i) #not sure if this is what's required
+                nonVoided.remove(obs) #not sure if this is what's required
         return nonVoided
     def setGroupMembers(self, groupMembers):
         self.groupMembers = groupMembers
@@ -161,9 +166,9 @@ class Obs(BaseOpenmrsData): #needs to implement Serializable
             return None
         if self.getGroupMembers() == None:
             self.groupMembers = sets.ImmutableSet() #Same as HashSet?
-        if member == self:
-            raise APIException("An obsGroup cannot have itself as a mentor. obsGroup: " + self \
-			        + " obsMember attempting to add: " + member)
+##        if member == self:
+##            raise APIException("An obsGroup cannot have itself as a mentor. obsGroup: " + self \
+##			        + " obsMember attempting to add: " + member)
             #I think APIException is defined in another JAVA class file; not sure if Python has this
         member.setObsGroup(self)
         self.groupMembers.add(member)
@@ -257,12 +262,12 @@ class Obs(BaseOpenmrsData): #needs to implement Serializable
     def setValueTime(self, valueTime):
         self.valueDatetime = valueTime
     def getValueGroupId(self):
-        return valueGroupId
+        return self.valueGroupId
     def setValueGroupId(self, valueGroupId):
         self.valueGroupId = valueGroupId
     def getValueModifier(self):
         return self.valueModifier
-    def setValueModifier(self, valueModifier)):
+    def setValueModifier(self, valueModifier):
         self.valueModifier = valueModifier
     def getValueNumeric(self):
         return self.valueNumeric
@@ -292,8 +297,8 @@ class Obs(BaseOpenmrsData): #needs to implement Serializable
         #Needs NumberFormat and other built in functions
         pass
     def setValueAsString(self, s):
-        logging.logger.debug("self.getConcept() == " + str(self.getConcept()))
-        if (self.getConcept() != None) and (isBlank(s)): #isBlank(s) checks if s is whitespace, null, or empty. Need to find Python equivalent. 
+        #logging.Logger.debug("self.getConcept() == " + str(self.getConcept()))
+        if (self.getConcept() != None): #and (isBlank(s)): #isBlank(s) checks if s is whitespace, null, or empty. Need to find Python equivalent. 
             abbrev = self.getConcept().getDatatype().getHl7Abbreviation()
             if abbrev == "BIT":
                 self.setValueBoolean(s) #s might be lowercase true, not True. Solve this.
@@ -309,10 +314,10 @@ class Obs(BaseOpenmrsData): #needs to implement Serializable
                 self.setValueDatetime(s) #datetimeFormat.parse(s)
             elif abbrev == "ST":
                 self.setValueText(s)
-            else:
-                raise RuntimeException("Don't know how to handle " + str(abbrev))
-        else:
-            raise RuntimeException("concept is None for " + str(self))
+##            else:
+##                raise RuntimeException("Don't know how to handle " + str(abbrev))
+##        else:
+##            raise RuntimeException("concept is None for " + str(self))
     def __str__(self):
         if self.obsId == None:
             return "obs id is None"
