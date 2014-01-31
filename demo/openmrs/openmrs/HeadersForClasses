@@ -1,0 +1,24 @@
+class Concept:
+    def __init__(self, dataType=None, Set=False, hl7Abbreviation=None):
+        self.dataType = dataType
+        self.set = Set
+        self.hl7Abbreviation = hl7Abbreviation
+    def setDatatype(self, dataType):
+        self.dataType = dataType
+    def getDatatype(self):
+        return self.dataType
+    def setSet(self, Set):
+        self.set = Set
+class ConceptDatatype:
+    def __init__(self, conceptId):
+        self.conceptId = conceptId
+    def setHl7Abbreviation(self, abb):
+        self.hl7Abbreviation = abb
+    def getHl7Abbreviation(self):
+        return self.hl7Abbreviation
+    
+class Location:
+    pass
+
+class Person:
+    pass
