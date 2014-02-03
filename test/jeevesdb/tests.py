@@ -76,7 +76,6 @@ class TestJeevesModel(TestCase):
             JeevesLib.mkSensitive(self.y, 'b', 'c'),
             JeevesLib.mkSensitive(self.y, 'd', 'e')))
     Animal.objects.filter(name='delete_test1').filter(sound='b').delete()
-
     a = list(Animal._objects_ordinary.filter(name='delete_test1').all())
     self.assertTrue(areRowsEqual(a, [
       ({'name':'delete_test1', 'sound':'c'}, {self.x.name:True, self.y.name:False}),
@@ -91,8 +90,47 @@ class TestJeevesModel(TestCase):
     with JeevesLib.PositiveVariable(self.x):
       an.delete()
     a = list(Animal._objects_ordinary.filter(name='delete_test2').all())
-
     self.assertTrue(areRowsEqual(a, [
       ({'name':'delete_test2', 'sound':'d'}, {self.x.name:False, self.y.name:True}),
       ({'name':'delete_test2', 'sound':'e'}, {self.x.name:False, self.y.name:False}),
      ]))
+
+    an = Animal.objects.create(name='delete_test3', sound='b')
+    with JeevesLib.PositiveVariable(self.x):
+      an.delete()
+    a = list(Animal._objects_ordinary.filter(name='delete_test3').all())
+    self.assertTrue(areRowsEqual(a, [
+      ({'name':'delete_test3', 'sound':'b'}, {self.x.name:False})
+    ]))
+
+    an = Animal.objects.create(name='delete_test4', sound='b')
+    with JeevesLib.PositiveVariable(self.x):
+      with JeevesLib.NegativeVariable(self.y):
+        an.delete()
+    a = list(Animal._objects_ordinary.filter(name='delete_test4').all())
+    self.assertTrue(areRowsEqual(a, [
+      ({'name':'delete_test4', 'sound':'b'}, {self.x.name:False}),
+      ({'name':'delete_test4', 'sound':'b'}, {self.x.name:True, self.y.name:True}),
+    ]) or areRowsEqual(a, [
+      ({'name':'delete_test4', 'sound':'b'}, {self.y.name:True}),
+      ({'name':'delete_test4', 'sound':'b'}, {self.y.name:False, self.x.name:False}),
+    ]))
+
+    an = Animal.objects.create(name='delete_test5',
+            sound=JeevesLib.mkSensitive(self.x, 'b', 'c'))
+    with JeevesLib.PositiveVariable(self.x):
+      an.delete()
+    a = list(Animal._objects_ordinary.filter(name='delete_test5').all())
+    self.assertTrue(areRowsEqual(a, [
+      ({'name':'delete_test5', 'sound':'c'}, {self.x.name:False})
+    ]))
+
+    an = Animal.objects.create(name='delete_test6',
+            sound=JeevesLib.mkSensitive(self.x, 'b', 'c'))
+    with JeevesLib.PositiveVariable(self.y):
+      an.delete()
+    a = list(Animal._objects_ordinary.filter(name='delete_test6').all())
+    self.assertTrue(areRowsEqual(a, [
+      ({'name':'delete_test6', 'sound':'b'}, {self.x.name:True,self.y.name:False}),
+      ({'name':'delete_test6', 'sound':'c'}, {self.x.name:False,self.y.name:False}),
+    ]))

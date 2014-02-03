@@ -57,9 +57,22 @@ def powerset(iterable):
   return itertools.chain.from_iterable(
         itertools.combinations(s, r) for r in range(len(s)+1))
 
+def clone(old):
+  new_kwargs = dict([(fld.name, getattr(old, fld.name)) for fld in old._meta.fields]);
+  return old.__class__(**new_kwargs)
+
 def serialize_vars(e):
   return ';' + ''.join('%s=%d;' % (var_name, var_value)
                         for var_name, var_value in e.iteritems())
+
+def unserialize_vars(s):
+  t = s[1:].split(';')
+  e = {}
+  for u in t:
+    if u != "":
+      v = u.split('=')
+      e[v[0]] = bool(int(v[1]))
+  return e
 
 def fullEval(val, env):
   p = partialEval(val, env)
@@ -141,11 +154,30 @@ class JeevesModel(models.Model):
       e.update({tv : True for tv in true_vars})
       e.update({fv : False for fv in false_vars})
 
-      delete_query = self.__class__._objects_ordinary.filter(jeeves_id=self.jeeves_id)
-      for var_name, var_value in e.iteritems():
-        delete_query = delete_query.filter(jeeves_vars__contains =
-              ';%s=%d;' % (var_name, var_value))
-      delete_query.delete()
+      if len(e) == 0:
+        delete_query = self.__class__._objects_ordinary.filter(jeeves_id=self.jeeves_id)
+        delete_query.delete()
+      else:
+        filter_query = self.__class__._objects_ordinary.filter(jeeves_id=self.jeeves_id)
+        objs = list(filter_query)
+        for obj in objs:
+          eobj = unserialize_vars(obj.jeeves_vars)
+          if any(var_name in eobj and eobj[var_name] != var_value
+                 for var_name, var_value in e.iteritems()):
+            continue
+          if all(var_name in eobj and eobj[var_name] == var_value
+                 for var_name, var_value in e.iteritems()):
+            super(JeevesModel, obj).delete()
+            continue
+          addon = ""
+          for var_name, var_value in e.iteritems():
+            if var_name not in eobj:
+              new_obj = clone(obj)
+              if addon != "":
+                new_obj.id = None # so when we save a new row will be made
+              new_obj.jeeves_vars += addon + '%s=%d;' % (var_name, not var_value)
+              addon += '%s=%d;' % (var_name, var_value)
+              super(JeevesModel, new_obj).save()
 
   class Meta:
     abstract = True
