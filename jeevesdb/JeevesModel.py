@@ -87,6 +87,32 @@ class JeevesModel(models.Model):
   jeeves_id = CharField(max_length=JEEVES_ID_LEN, null=False)
   jeeves_vars = CharField(max_length=1024, null=False)
 
+  def do_delete(self, e):
+    if len(e) == 0:
+      delete_query = self.__class__._objects_ordinary.filter(jeeves_id=self.jeeves_id)
+      delete_query.delete()
+    else:
+      filter_query = self.__class__._objects_ordinary.filter(jeeves_id=self.jeeves_id)
+      objs = list(filter_query)
+      for obj in objs:
+        eobj = unserialize_vars(obj.jeeves_vars)
+        if any(var_name in eobj and eobj[var_name] != var_value
+               for var_name, var_value in e.iteritems()):
+          continue
+        if all(var_name in eobj and eobj[var_name] == var_value
+               for var_name, var_value in e.iteritems()):
+          super(JeevesModel, obj).delete()
+          continue
+        addon = ""
+        for var_name, var_value in e.iteritems():
+          if var_name not in eobj:
+            new_obj = clone(obj)
+            if addon != "":
+              new_obj.id = None # so when we save a new row will be made
+            new_obj.jeeves_vars += addon + '%s=%d;' % (var_name, not var_value)
+            addon += '%s=%d;' % (var_name, var_value)
+            super(JeevesModel, new_obj).save()
+
   def save(self, *args, **kw):
     if not self.jeeves_id:
       self.jeeves_id = get_random_jeeves_id()
@@ -115,11 +141,7 @@ class JeevesModel(models.Model):
       e.update({tv : True for tv in true_vars})
       e.update({fv : False for fv in false_vars})
 
-      delete_query = self.__class__._objects_ordinary.filter(jeeves_id=self.jeeves_id)
-      for var_name, var_value in e.iteritems():
-        delete_query = delete_query.filter(jeeves_vars__contains =
-              ';%s=%d;' % (var_name, var_value))
-      delete_query.delete()
+      self.do_delete(e)
 
       klass = self.__class__
       obj_to_save = klass(**{
@@ -154,30 +176,7 @@ class JeevesModel(models.Model):
       e.update({tv : True for tv in true_vars})
       e.update({fv : False for fv in false_vars})
 
-      if len(e) == 0:
-        delete_query = self.__class__._objects_ordinary.filter(jeeves_id=self.jeeves_id)
-        delete_query.delete()
-      else:
-        filter_query = self.__class__._objects_ordinary.filter(jeeves_id=self.jeeves_id)
-        objs = list(filter_query)
-        for obj in objs:
-          eobj = unserialize_vars(obj.jeeves_vars)
-          if any(var_name in eobj and eobj[var_name] != var_value
-                 for var_name, var_value in e.iteritems()):
-            continue
-          if all(var_name in eobj and eobj[var_name] == var_value
-                 for var_name, var_value in e.iteritems()):
-            super(JeevesModel, obj).delete()
-            continue
-          addon = ""
-          for var_name, var_value in e.iteritems():
-            if var_name not in eobj:
-              new_obj = clone(obj)
-              if addon != "":
-                new_obj.id = None # so when we save a new row will be made
-              new_obj.jeeves_vars += addon + '%s=%d;' % (var_name, not var_value)
-              addon += '%s=%d;' % (var_name, var_value)
-              super(JeevesModel, new_obj).save()
+      self.do_delete(e)
 
   class Meta:
     abstract = True
