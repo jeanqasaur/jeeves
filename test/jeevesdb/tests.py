@@ -41,6 +41,8 @@ class TestJeevesModel(TestCase):
 
     self.x = JeevesLib.mkLabel()
     self.y = JeevesLib.mkLabel()
+    JeevesLib.restrict(self.x, lambda (a,_) : a)
+    JeevesLib.restrict(self.y, lambda (_,a) : a)
 
     Animal.objects.create(name='fox',
         sound=JeevesLib.mkSensitive(self.x, 'Hatee-hatee-hatee-ho!',
@@ -228,3 +230,93 @@ class TestJeevesModel(TestCase):
         ({'name':'save_test7', 'sound':'b'}, {self.x.name:True, self.y.name:False}),
         ({'name':'save_test7', 'sound':'c'}, {self.x.name:False}),
     ]))
+
+  def testGet1():
+    an = Animal.objects.create(name='get_test1', sound='b')
+
+    bn = Animal.objects.get(name='get_test1')
+    self.assertEqual(an.name, 'get_test1')
+    self.assertEqual(an.sound, 'b')
+
+    cn = Animal.objects.get(sound='b')
+    self.assertEqual(cn.name, 'get_test1')
+    self.assertEqual(cn.sound, 'b')
+
+    self.assertEqual(an, bn)
+    self.assertEqual(an, cn)
+    self.assertEqual(bn, cn)
+
+  def testGet2():
+    an = Animal.objects.create(name='get_test2', sound=JeevesLib.mkSensitive(self.x, 'b', 'c'))
+
+    bn = Animal.objects.get(name='get_test2')
+
+    self.assertEqual(an == bn)
+    self.assertEqual(an.name, 'get_test2')
+    self.assertEqual(an.sound.cond.name, self.x.name)
+    self.assertEqual(an.sound.thn.v, 'b')
+    self.assertEqual(an.sound.thn.v, 'c')
+
+  def testGet3():
+    an = Animal.objects.create(name='get_test3', sound=JeevesLib.mkSensitive(self.x, JeevesLib.mkSensitive(self.y, 'b', 'c'), JeevesLib.mkSensitive(self.y, 'd', 'e')))
+
+    bn = Animal.objects.get(name='get_test3')
+
+    self.assertEqual(an == bn)
+    self.assertEqual(JeevesLib.concretize((True,True), bn.sound), 'b')
+    self.assertEqual(JeevesLib.concretize((True,False), bn.sound), 'c')
+    self.assertEqual(JeevesLib.concretize((False,True), bn.sound), 'd')
+    self.assertEqual(JeevesLib.concretize((False,False), bn.sound), 'e')
+
+  def testGet4():
+    with JeevesLib.PositiveVariable(self.x):
+      an = Animal.objects.create(name='get_test4', sound='a')
+    with JeevesLib.NegativeVariable(self.y):
+      bn = Animal.objects.create(name='get_test4', sound='b')
+    
+    cn = Animal.objects.get(name='get_test4')
+    self.assertEqual(cn.cond.name, self.x.name)
+    self.assertEqual(cn.thn.v.name, 'get_test4')
+    self.assertEqual(cn.thn.v.sound, 'a')
+    self.assertEqual(cn.els.v.name, 'get_test4')
+    self.assertEqual(cn.els.v.sound, 'b')
+
+    an1 = cn.thn
+    bn1 = cn.els
+    self.assertTrue(an == an1)
+    self.assertTrue(bn == bn1)
+    self.assertTrue(an != bn)
+    self.assertTrue(an != bn1)
+    self.assertTrue(bn != an)
+    self.assertTrue(bn != an1)
+
+  def testFilter1():
+    an = Animal.objects.create(name='filter_test1', sound='a')
+
+    bl = Animal.objects.filter(name='filter_test1').get_jiter()
+    self.assertEquals(bl, [(an, {})])
+
+  def testFilter2():
+    with JeevesLib.PositiveVariable(self.x):
+      an = Animal.objects.create(name='filter_test2', sound='a')
+
+    bl = Animal.objects.filter(name='filter_test2').get_jiter()
+    self.assertEquals(bl, [(an, {self.x.name:True})])
+
+  def testFilter3():
+    with JeevesLib.PositiveVariable(self.x):
+      an = Animal.objects.create(name='filter_test3', sound='a')
+    with JeevesLib.NegativeVariable(self.y):
+      bn = Animal.objects.create(name='filter_test3', sound='b')
+
+    bl = Animal.objects.filter(name='filter_test2').order_by('sound').get_jiter()
+    self.assertEquals(bl, [(an, {self.x.name:True}), (bn, {self.y.name:False})])
+
+  def testFilter4():
+    an = Animal.objects.create(name='filter_test3', sound='b')
+    bn = Animal.objects.create(name='filter_test3', sound=JeevesLib.mkSensitive(self.x, 'a', 'c'))
+
+    bl = Animal.objects.filter(name='filter_test2').order_by('sound').get_jiter()
+    self.assertEquals(bl, [(an, {self.x.name:True}), (bn, {}), (an, {self.x.name:False})])
+
+
