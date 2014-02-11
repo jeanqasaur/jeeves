@@ -16,6 +16,13 @@ import random
 import itertools
 
 class JeevesQuerySet(QuerySet):
+  def get_jiter(self):
+    self._fetch_all()
+    return [
+        (obj, unserialize_vars(obj.jeeves_vars))
+        for obj in self._result_cache
+    ]
+
   # methods that return a queryset subclass of the ordinary QuerySet
   # need to be overridden
 
@@ -33,8 +40,6 @@ class JeevesQuerySet(QuerySet):
 
   def none(self):
     raise NotImplementedError
-
-
 
 class JeevesManager(Manager):
   def get_queryset(self):
@@ -182,3 +187,6 @@ class JeevesModel(models.Model):
     abstract = True
 
   _objects_ordinary = Manager()
+
+  def __eq__(self, other):
+    return self.jeeves_id == other.jeeves_id
