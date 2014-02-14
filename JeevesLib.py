@@ -274,4 +274,13 @@ def jfun3(f, kw, it, key, val, args_concrete, kw_concrete):
       els = jfun3(f, kw, it, key, val.els, args_concrete, kw_concrete)
     return Facet(arg.cond, thn, els)
 
+def evalToConcrete(f):
+    g = partialEval(fexpr_cast(f), jeevesState.pathenv.getEnv())
+    if isinstance(g, Constant):
+      return g.v
+    elif isinstance(g, FObject):
+      return g.v
+    else:
+      raise Exception("wow such error: evalToConcrete on non-concrete thingy-ma-bob")
+
 from jlib.JContainer import *
