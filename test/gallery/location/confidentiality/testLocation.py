@@ -1,11 +1,14 @@
 import JeevesLib
 from smt.Z3 import *
 import unittest
-from Location import Location, GPS, City, Country, User
+from Location import Location, GPS, City, Country, User, LocationNetwork
 import JeevesLib
 
 class TestLocation(unittest.TestCase):
   def setUp(self):
+    def canSee(owner, ctxt):
+      return owner == ctxt or owner.isFriends(ctxt)
+
     # Need to initialize the JeevesLib environment.
     JeevesLib.init()
 
@@ -15,8 +18,10 @@ class TestLocation(unittest.TestCase):
     self.gpsMIT = GPS(40.589063, -74.159178, self.cityCambridge) 
 
     # Define some users.
-    # TODO: Make some faceted location values.
-    self.alice = User(0, self.cityCambridge)
+    aliceLabel = JeevesLib.mkLabel()
+    JeevesLib.restrict(aliceLabel, lambda oc: canSee(self.alice, oc))
+    self.alice = User(0
+      , JeevesLib.mkSensitive(aliceLabel, self.gpsMIT, self.cityCambridge))
     self.bob = User(1, self.cityCambridge)
     self.carol = User(2, self.countryUSA)
 
@@ -42,15 +47,23 @@ class TestLocation(unittest.TestCase):
     self.assertFalse(
       JeevesLib.concretize(self.alice, self.carol.isFriends(self.alice)))
 
-'''
-    lab = JeevesLib.mkLabel ()
-    # TODO: Add policy that the output channel has to be either the owner or
-    # satisfy the policy on it (policy(oc)).
-    JeevesLib.restrict(lab
-        , lambda oc: JeevesLib.jor(
-            lambda: oc.user == owner, lambda: policy(oc)))
-    '''
+  def testViewLocation(self):
+    # Alice and Bob can see the high-confidentiality version of Alice's
+    # location, but Carol cannot.
+    self.assertEqual(JeevesLib.concretize(self.alice, self.alice.location)
+      , self.gpsMIT)
+    self.assertEqual(JeevesLib.concretize(self.bob, self.alice.location)
+      , self.gpsMIT)
+    self.assertEqual(JeevesLib.concretize(self.carol, self.alice.location)
+      , self.cityCambridge)
 
+  def testCountUsersInLocation(self):
+    # Only Alice and Bob can see Alice's "high" location of S
+    locNetwork = LocationNetwork([self.alice, self.bob, self.carol])
+    usersInStata = locNetwork.countUsersInLocation(self.gpsMIT)
+    self.assertEqual(JeevesLib.concretize(self.alice, usersInStata), 1)
+    self.assertEqual(JeevesLib.concretize(self.bob, usersInStata), 1)
+    self.assertEqual(JeevesLib.concretize(self.carol, usersInStata), 0)
 
 if __name__ == '__main__':
     unittest.main()

@@ -23,7 +23,7 @@ class GPS(Location):
     self.longitude = longitude
     self.city = city
   def __eq__(self, other):
-    return ((self.latitude == other.latitude)
+    return (isinstance(other, GPS) and (self.latitude == other.latitude)
       and (self.longitude == other.longitude))
   def isIn(self, loc):
     if isinstance(loc, GPS):
@@ -39,7 +39,7 @@ class City(Location):
     self.city = city
     self.country = country
   def __eq__(self, other):
-    return ((self.city == other.city)
+    return (isinstance(other, City) and (self.city == other.city)
       and (self.country == other.country))
   def isIn(self, loc):
     if isinstance(loc, GPS):
@@ -54,7 +54,7 @@ class Country(Location):
   def __init__(self, name):
     self.name = name
   def __eq__(self, other):
-    return self.name == other.name
+    return isinstance(other, Country) and self.name == other.name
   def isIn(self, loc):
     if isinstance(loc, GPS):
       return False
@@ -71,11 +71,13 @@ class User:
   def __init__(self, userId, location, friends=[]):
     self.userId = userId
     self.location = location
-    self.friends = friends
+    self.friends = list(friends)
   def addFriend(self, friend):
     self.friends.append(friend)
   def isFriends(self, other):
     return JeevesLib.jhas(self.friends, other)
+  def prettyPrint(self):
+    return "user" # str(self.userId)
 
 class LocationNetwork:
   def __init__(self, users=[]):
@@ -84,7 +86,7 @@ class LocationNetwork:
   @jeeves
   def countUsersInLocation(self, loc):
     sum = 0
-    for user in users:
+    for user in self.users:
       if user.location.isIn(loc):
         sum += 1
     return sum

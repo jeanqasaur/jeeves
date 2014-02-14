@@ -209,6 +209,19 @@ class JList:
     l2.append(val)
     self.l = jassign(self.l, l2)
 
+  def prettyPrint(self):
+    def tryPrint(x):
+      return x.__class__.__name__
+      '''
+      try:
+        return x.__class__.__name__ #x.prettyPrint()
+      except AttributeError:
+        return str(x)
+      '''
+    print self.l
+    print self.l.v
+    return str(len(self.l)) #''.join(map(tryPrint, self.l))
+
 @supports_jeeves
 def jfun(f, *args, **kw):
   if hasattr(f, '__jeeves'):
