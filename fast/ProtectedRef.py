@@ -59,7 +59,10 @@ class ProtectedRef:
       try:
         r = self.outputWP(self.v)(writer)(Undefined)
         if isinstance(r, FExpr):
-          r = PartialEval(r)
+          try:
+            r = JeevesLib.evalToConcrete(r)
+          except Exception:
+            r = PartialEval(r)
         if r == True:
           return UpdateResult.Success
         elif r == False:
