@@ -85,6 +85,10 @@ class ProtectedRef:
   # TODO: store the current writer with the Jeeves environment?
   @JeevesLib.supports_jeeves
   def update(self, writer, writeCtxt, vNew):
+    print 'vNew is', JeevesLib.fexpr_cast(vNew).prettyPrint()
+    print 'writeCtxt is', writeCtxt
+    print 'writer is', writer
+
     # For each variable, make a copy of it and add policies.
     def mkFacetTree(pathvars, high, low):
       if pathvars:

@@ -44,7 +44,7 @@ class Square:
 
   def bomb(self, ctxt, bomb):
     r = self.hasBombRef.update(ctxt, ctxt, bomb)
-    print r
+    print 'moooooooooo', r
     return r == UpdateResult.Success
   
   def hasBomb(self):

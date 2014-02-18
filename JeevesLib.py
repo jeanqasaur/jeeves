@@ -91,14 +91,15 @@ def jnot(f):
     return not f
 
 @supports_jeeves
-def jassign(old, new):
+def jassign(old, new, base_env={}):
   res = new
   for vs in jeevesState.pathenv.conditions:
     (var, val) = (vs.var, vs.val)
-    if val:
-      res = Facet(var, res, old)
-    else:
-      res = Facet(var, old, res)
+    if var.name not in base_env:
+      if val:
+        res = Facet(var, res, old)
+      else:
+        res = Facet(var, old, res)
   return res
 
 '''
@@ -151,9 +152,10 @@ class Namespace:
   def __init__(self, kw, funcname):
     self.__dict__.update(kw)
     self.__dict__['_jeeves_funcname'] = funcname
+    self.__dict__['_jeeves_base_env'] = jeevesState.pathenv.getEnv()
 
   def __setattr__(self, attr, value):
-    self.__dict__[attr] = jassign(self.__dict__.get(attr, Unassigned("variable '%s' in %s" % (attr, self._jeeves_funcname))), value)
+    self.__dict__[attr] = jassign(self.__dict__.get(attr, Unassigned("variable '%s' in %s" % (attr, self._jeeves_funcname))), value, self.__dict__['_jeeves_base_env'])
 
 @supports_jeeves
 def jgetattr(obj, attr):
