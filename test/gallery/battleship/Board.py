@@ -68,6 +68,7 @@ class Board:
       bombedPoint = self.board[x][y].bomb(ctxt, bomb)
       succeeded = (bombedPoint if boardShip == NoShip()
                     else boardShip.bombPiece(ctxt) and JeevesLib.jall(map(lambda s: s.bomb(ctxt, bomb), boardShip.getSquares())))
+      print "succeeded: ", succeeded
       return boardShip if succeeded else NoShip()
     else:
       print "Bomb location outside of board: (" + x + ", " + y + ")" + "\n"
