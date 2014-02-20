@@ -5,7 +5,7 @@ from django.test import TestCase
 import JeevesLib
 
 from jeevesdb import JeevesModel
-from testdb.models import Animal
+from testdb.models import Animal, Zoo
 
 def parse_vars_row(vs):
   d = {}
@@ -318,3 +318,19 @@ class TestJeevesModel(TestCase):
 
     bl = Animal.objects.filter(name='filter_test4').order_by('sound').get_jiter()
     self.assertEquals(bl, [(bn, {self.x.name:True}), (an, {}), (bn, {self.x.name:False})])
+
+  def testJeevesForeignKey(self):
+    an = Animal.objects.create(name='fkey_test1_an', sound='a')
+    bn = Animal.objects.create(name='fkey_test1_bn', sound='b')
+    zoo = Zoo.objects.create(name='fkey_test1_zoo',
+        inhabitant=JeevesLib.mkSensitive(self.x, an, bn))
+    a = list(Animal._objects_ordinary.filter(name='fkey_test1_an').all())
+    b = list(Animal._objects_ordinary.filter(name='fkey_test1_bn').all())
+    z = list(Zoo._objects_ordinary.filter(name='fkey_test1_zoo').all())
+    self.assertTrue(areRowsEqual(z, [
+      ({'name':'fkey_test1_zoo', 'inhabitant_id':a.jeeves_id}, {self.x.name:True}),
+      ({'name':'fkey_test1_zoo', 'inhabitant_id':b.jeeves_id}, {self.x.name:False}),
+     ]))
+    z = list(Zoo.objects.filter(name='fkey_test1_zoo').all())
+    self.assertEqual(JeevesLib.concretize((True, True), z.inhabitant), an)
+    self.assertEqual(JeevesLib.concretize((False, True), z.inhabitant), bn)

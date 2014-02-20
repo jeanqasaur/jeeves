@@ -7,3 +7,7 @@ class Animal(JeevesModel.JeevesModel):
 
   def speak(self):
     return "The %s says \"%s\"" % (self.name, self.sound)
+
+class Zoo(JeevesModel.JeevesModel):
+  name = models.CharField(max_length=30)
+  inhabitant = JeevesModel.JeevesForeignKey(Animal)

@@ -9,7 +9,7 @@ from fast.AST import FExpr
 class PolicyEnv:
   def __init__(self):
     self.labels = []
-    self.policies = {}
+    self.policies = []
 
   def mkLabel(self, name=""):
     label = fast.AST.Var(name)
@@ -20,12 +20,12 @@ class PolicyEnv:
   # if the label is allowed to be HIGH
   def restrict(self, label, policy):
     pcFormula = JeevesLib.jeevesState.pathenv.getPathFormula()
-    self.policies[label] = (lambda ctxt :
+    self.policies.append((label, lambda ctxt :
       fast.AST.Implies(
         pcFormula,
         fast.AST.fexpr_cast(policy(ctxt)),
       )
-    )
+    ))
 
   # Takes a context and an expression
   def concretizeExp(self, ctxt, f, pathenv):
@@ -34,7 +34,7 @@ class PolicyEnv:
     constraints = []
     # First, find all all the dependencies between labels
     # and add Not(predicate) ==> label == LOW conditions
-    for (label, policy) in self.policies.iteritems():
+    for label, policy in self.policies:
       predicate = policy(ctxt) #predicate should be True if label can be HIGH
       predicate_vars = predicate.vars()
       dependencies[label] |= predicate_vars

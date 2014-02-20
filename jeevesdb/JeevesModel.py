@@ -5,7 +5,8 @@ Questions:
 from django.db import models
 from django.db.models.query import QuerySet
 from django.db.models import Manager
-from django.db.models import Field, CharField
+from django.db.models import Field, CharField, ForeignKey
+import django.db.models.fields.related
 
 import JeevesLib
 from JeevesLib import fexpr_cast
@@ -189,4 +190,13 @@ class JeevesModel(models.Model):
   _objects_ordinary = Manager()
 
   def __eq__(self, other):
-    return self.jeeves_id == other.jeeves_id
+    return isinstance(other, self.__class__) and self.jeeves_id == other.jeeves_id
+
+class JeevesForeignKey(ForeignKey):
+  requires_unique_target = False
+  def __init__(self, to, to_field=None, rel_class=django.db.models.fields.related.ManyToOneRel,
+                    db_constraint=True, **kwargs):
+    if to_field is None:
+      to_field = 'jeeves_id'
+    super(JeevesForeignKey, self).__init__(to, to_field=to_field, rel_class=rel_class,
+                    db_constraint=db_constraint, **kwargs)
