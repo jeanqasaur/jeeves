@@ -3,6 +3,7 @@ Questions:
 - Can we get what we need by subclassing Model?
 '''
 from django.db import models
+from django.db.models.fields import IntegerField
 from django.db.models.query import QuerySet
 from django.db.models import Manager
 from django.db.models import Field, CharField, ForeignKey
@@ -11,6 +12,7 @@ import django.db.models.fields.related
 import JeevesLib
 from JeevesLib import fexpr_cast
 from eval.Eval import partialEval
+from fast.AST import Facet, FObject
 
 import string
 import random
@@ -84,11 +86,24 @@ def fullEval(val, env):
   p = partialEval(val, env)
   return p.v
 
+#from django.db.models.base import ModelBase
+#class JeevesModelMeta(ModelBase):
+#    def __instancecheck__(cls, instance):
+#        if isinstance(instance, Facet):
+#            return isinstance(instance.thn, cls) and \
+#                    isinstance(instance.els, cls)
+#        elif isinstance(instance, FObject):
+#            return isinstance(instance.v, cls)
+#        else:
+#            return False
+                
 # Make a Jeeves Model that enhances the vanilla Django model with information
 # about how labels work and that kind of thing. We'll also need to override
 # some methods so that we can create records and make queries appropriately.
 
 class JeevesModel(models.Model):
+#  __metaclass__ = JeevesModelMeta
+
   objects = JeevesManager()
   jeeves_id = CharField(max_length=JEEVES_ID_LEN, null=False)
   jeeves_vars = CharField(max_length=1024, null=False)
@@ -192,11 +207,45 @@ class JeevesModel(models.Model):
   def __eq__(self, other):
     return isinstance(other, self.__class__) and self.jeeves_id == other.jeeves_id
 
-class JeevesForeignKey(ForeignKey):
+class JeevesRelatedObjectDescriptor(property):
+  def __init__(self, field):
+    self.field = field
+    self.cache = {}
+
+  def __get__(self, instance, instance_type):
+    if instance is None:
+      return self
+    raise NotImplementedError
+
+  def __set__(self, instance, value):
+    print '__set__ was called'
+    def getID(obj):
+      if obj is None:
+        return None
+      if obj.jeeves_id is None:
+        raise Exception("Object must be saved before it can be attached via JeevesForeignKey.")
+      return obj.jeeves_id
+    ids = JeevesLib.facetMapper(fexpr_cast(value), getID)
+    setattr(instance, self.field.get_attname(), ids)
+
+class JeevesForeignKey(Field):
   requires_unique_target = False
-  def __init__(self, to, to_field=None, rel_class=django.db.models.fields.related.ManyToOneRel,
-                    db_constraint=True, **kwargs):
-    if to_field is None:
-      to_field = 'jeeves_id'
-    super(JeevesForeignKey, self).__init__(to, to_field=to_field, rel_class=rel_class,
-                    db_constraint=db_constraint, **kwargs)
+  def __init__(self, to, *args, **kwargs):
+    super(JeevesForeignKey, self).__init__(self, *args, **kwargs)
+    self.to = to
+
+  def contribute_to_class(self, cls, name, virtual_only=False):
+    super(JeevesForeignKey, self).contribute_to_class(cls, name, virtual_only=virtual_only)
+    print 'self.name is', self.name
+    setattr(cls, self.name, JeevesRelatedObjectDescriptor(self))
+
+  def get_attname(self):
+    return '%s_id' % self.name
+  
+  def get_attname_column(self):
+    attname = self.get_attname()
+    column = self.db_column or attname
+    return attname, column
+
+  def db_type(self, connection):
+    return IntegerField().db_type(connection=connection)

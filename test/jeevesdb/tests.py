@@ -328,9 +328,13 @@ class TestJeevesModel(TestCase):
     b = list(Animal._objects_ordinary.filter(name='fkey_test1_bn').all())
     z = list(Zoo._objects_ordinary.filter(name='fkey_test1_zoo').all())
     self.assertTrue(areRowsEqual(z, [
-      ({'name':'fkey_test1_zoo', 'inhabitant_id':a.jeeves_id}, {self.x.name:True}),
-      ({'name':'fkey_test1_zoo', 'inhabitant_id':b.jeeves_id}, {self.x.name:False}),
+      ({'name':'fkey_test1_zoo', 'inhabitant_id':an.jeeves_id}, {self.x.name:True}),
+      ({'name':'fkey_test1_zoo', 'inhabitant_id':bn.jeeves_id}, {self.x.name:False}),
      ]))
-    z = list(Zoo.objects.filter(name='fkey_test1_zoo').all())
+    z = list(Zoo.objects.filter(name='fkey_test1_zoo').all())[0]
     self.assertEqual(JeevesLib.concretize((True, True), z.inhabitant), an)
     self.assertEqual(JeevesLib.concretize((False, True), z.inhabitant), bn)
+
+  def testNullFields(self):
+    # TODO
+    pass
