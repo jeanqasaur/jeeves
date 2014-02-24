@@ -50,8 +50,7 @@ class UserNetwork:
     self.users = users
 
   def getAverageActivityLevel(self):
-    userSum = reduce(lambda acc, u: acc + u.getAverageActivityLevel()
-                , self.users)
+    userSum = reduce(lambda acc, u: acc + u.averageActivityLevel(), self.users)
     return userSum / len(self.users)
 
   def atLeastKSimilar(self, avg, k, delta):
