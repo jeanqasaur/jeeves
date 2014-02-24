@@ -231,64 +231,76 @@ class TestJeevesModel(TestCase):
         ({'name':'save_test7', 'sound':'c'}, {self.x.name:False}),
     ]))
 
-  def testGet1():
-    an = Animal.objects.create(name='get_test1', sound='b')
+  def testGet1(self):
+    an = Animal.objects.create(name='get_test1', sound='get_test1_sound_xyz')
 
     bn = Animal.objects.get(name='get_test1')
     self.assertEqual(an.name, 'get_test1')
-    self.assertEqual(an.sound, 'b')
+    self.assertEqual(an.sound, 'get_test1_sound_xyz')
 
-    cn = Animal.objects.get(sound='b')
+    cn = Animal.objects.get(sound='get_test1_sound_xyz')
     self.assertEqual(cn.name, 'get_test1')
-    self.assertEqual(cn.sound, 'b')
+    self.assertEqual(cn.sound, 'get_test1_sound_xyz')
 
-    self.assertEqual(an, bn)
-    self.assertEqual(an, cn)
-    self.assertEqual(bn, cn)
+    self.assertTrue(JeevesLib.concretize((True, True), an == bn))
+    self.assertTrue(JeevesLib.concretize((True, True), an == cn))
+    self.assertTrue(JeevesLib.concretize((True, True), bn == cn))
 
-  def testGet2():
+    self.assertTrue(JeevesLib.concretize((False, True), an == bn))
+    self.assertTrue(JeevesLib.concretize((False, True), an == cn))
+    self.assertTrue(JeevesLib.concretize((False, True), bn == cn))
+
+  def testGet2(self):
     an = Animal.objects.create(name='get_test2', sound=JeevesLib.mkSensitive(self.x, 'b', 'c'))
 
     bn = Animal.objects.get(name='get_test2')
 
-    self.assertEqual(an == bn)
+    self.assertEqual(JeevesLib.concretize((True, True), an == bn), True)
+    self.assertEqual(JeevesLib.concretize((False, True), an == bn), True)
     self.assertEqual(an.name, 'get_test2')
     self.assertEqual(an.sound.cond.name, self.x.name)
     self.assertEqual(an.sound.thn.v, 'b')
-    self.assertEqual(an.sound.thn.v, 'c')
+    self.assertEqual(an.sound.els.v, 'c')
 
-  def testGet3():
+  def testGet3(self):
     an = Animal.objects.create(name='get_test3', sound=JeevesLib.mkSensitive(self.x, JeevesLib.mkSensitive(self.y, 'b', 'c'), JeevesLib.mkSensitive(self.y, 'd', 'e')))
 
     bn = Animal.objects.get(name='get_test3')
 
-    self.assertEqual(an == bn)
+    self.assertEqual(JeevesLib.concretize((True, True), an == bn), True)
+    self.assertEqual(JeevesLib.concretize((False, True), an == bn), True)
     self.assertEqual(JeevesLib.concretize((True,True), bn.sound), 'b')
     self.assertEqual(JeevesLib.concretize((True,False), bn.sound), 'c')
     self.assertEqual(JeevesLib.concretize((False,True), bn.sound), 'd')
     self.assertEqual(JeevesLib.concretize((False,False), bn.sound), 'e')
 
-  def testGet4():
+  def testGet4(self):
     with JeevesLib.PositiveVariable(self.x):
       an = Animal.objects.create(name='get_test4', sound='a')
     with JeevesLib.NegativeVariable(self.y):
       bn = Animal.objects.create(name='get_test4', sound='b')
     
-    cn = Animal.objects.get(name='get_test4')
-    self.assertEqual(cn.cond.name, self.x.name)
-    self.assertEqual(cn.thn.v.name, 'get_test4')
-    self.assertEqual(cn.thn.v.sound, 'a')
-    self.assertEqual(cn.els.v.name, 'get_test4')
-    self.assertEqual(cn.els.v.sound, 'b')
+    got_exc = False
+    try:
+      cn = Animal.objects.get(name='get_test4')
+    except Exception:
+      got_exc = True
 
-    an1 = cn.thn
-    bn1 = cn.els
-    self.assertTrue(an == an1)
-    self.assertTrue(bn == bn1)
-    self.assertTrue(an != bn)
-    self.assertTrue(an != bn1)
-    self.assertTrue(bn != an)
-    self.assertTrue(bn != an1)
+    self.assertTrue(got_exc)
+    #self.assertEqual(cn.cond.name, self.x.name)
+    #self.assertEqual(cn.thn.v.name, 'get_test4')
+    #self.assertEqual(cn.thn.v.sound, 'a')
+    #self.assertEqual(cn.els.v.name, 'get_test4')
+    #self.assertEqual(cn.els.v.sound, 'b')
+
+    #an1 = cn.thn
+    #bn1 = cn.els
+    #self.assertTrue(an == an1)
+    #self.assertTrue(bn == bn1)
+    #self.assertTrue(an != bn)
+    #self.assertTrue(an != bn1)
+    #self.assertTrue(bn != an)
+    #self.assertTrue(bn != an1)
 
   def testFilter1(self):
     an = Animal.objects.create(name='filter_test1', sound='a')
@@ -327,13 +339,38 @@ class TestJeevesModel(TestCase):
     a = list(Animal._objects_ordinary.filter(name='fkey_test1_an').all())
     b = list(Animal._objects_ordinary.filter(name='fkey_test1_bn').all())
     z = list(Zoo._objects_ordinary.filter(name='fkey_test1_zoo').all())
+    self.assertTrue(areRowsEqual(a, [
+      ({'name':'fkey_test1_an', 'sound':'a'}, {})
+     ]))
+    self.assertTrue(areRowsEqual(b, [
+      ({'name':'fkey_test1_bn', 'sound':'b'}, {})
+     ]))
     self.assertTrue(areRowsEqual(z, [
       ({'name':'fkey_test1_zoo', 'inhabitant_id':an.jeeves_id}, {self.x.name:True}),
       ({'name':'fkey_test1_zoo', 'inhabitant_id':bn.jeeves_id}, {self.x.name:False}),
      ]))
-    z = list(Zoo.objects.filter(name='fkey_test1_zoo').all())[0]
+    z = Zoo.objects.get(name='fkey_test1_zoo')
     self.assertEqual(JeevesLib.concretize((True, True), z.inhabitant), an)
     self.assertEqual(JeevesLib.concretize((False, True), z.inhabitant), bn)
+
+    z.inhabitant.sound = 'd'
+    z.inhabitant.save()
+
+    a = list(Animal._objects_ordinary.filter(name='fkey_test1_an').all())
+    b = list(Animal._objects_ordinary.filter(name='fkey_test1_bn').all())
+    z = list(Zoo._objects_ordinary.filter(name='fkey_test1_zoo').all())
+    self.assertTrue(areRowsEqual(a, [
+      ({'name':'fkey_test1_an', 'sound':'a'}, {self.x.name:False}),
+      ({'name':'fkey_test1_an', 'sound':'d'}, {self.x.name:True}),
+     ]))
+    self.assertTrue(areRowsEqual(b, [
+      ({'name':'fkey_test1_bn', 'sound':'b'}, {self.x.name:True}),
+      ({'name':'fkey_test1_bn', 'sound':'d'}, {self.x.name:False}),
+     ]))
+    self.assertTrue(areRowsEqual(z, [
+      ({'name':'fkey_test1_zoo', 'inhabitant_id':an.jeeves_id}, {self.x.name:True}),
+      ({'name':'fkey_test1_zoo', 'inhabitant_id':bn.jeeves_id}, {self.x.name:False}),
+     ]))
 
   def testNullFields(self):
     # TODO

@@ -12,7 +12,7 @@ import django.db.models.fields.related
 import JeevesLib
 from JeevesLib import fexpr_cast
 from eval.Eval import partialEval
-from fast.AST import Facet, FObject
+from fast.AST import Facet, FObject, Unassigned, get_var_by_name, FExpr
 
 import string
 import random
@@ -25,6 +25,29 @@ class JeevesQuerySet(QuerySet):
         (obj, unserialize_vars(obj.jeeves_vars))
         for obj in self._result_cache
     ]
+
+  def get(self, **kwargs):
+    l = self.filter(**kwargs).get_jiter()
+    if len(l) == 0:
+      raise Exception("wow such error: get() returned no values")
+    
+    for (o, _) in l:
+      if o.jeeves_id != l[0][0].jeeves_id:
+        raise Exception("wow such error: get() found rows for more than one jeeves_id")
+
+    cur = Unassigned("")
+    for (o, conditions) in l:
+      old = cur
+      cur = FObject(o)
+      for var_name, val in conditions.iteritems():
+        if val:
+          cur = Facet(get_var_by_name(var_name), cur, old)
+        else:
+          cur = Facet(get_var_by_name(var_name), old, cur)
+    try:
+      return partialEval(cur, JeevesLib.jeevesState.pathenv.conditions)
+    except TypeError:
+      raise Exception("wow such error: could not find a row for every condition")
 
   # methods that return a queryset subclass of the ordinary QuerySet
   # need to be overridden
@@ -205,25 +228,43 @@ class JeevesModel(models.Model):
   _objects_ordinary = Manager()
 
   def __eq__(self, other):
+    if isinstance(other, FExpr):
+      return other == self
     return isinstance(other, self.__class__) and self.jeeves_id == other.jeeves_id
 
 class JeevesRelatedObjectDescriptor(property):
   def __init__(self, field):
     self.field = field
-    self.cache = {}
+
+  def get_cache(self, instance):
+    cache_attr_name = '_jfkey_cache_' + self.field.name
+    if hasattr(instance, cache_attr_name):
+      cache = getattr(instance, cache_attr_name)
+    else:
+      cache = {}
+      setattr(instance, cache_attr_name, cache)
+    return cache
 
   def __get__(self, instance, instance_type):
     if instance is None:
       return self
-    raise NotImplementedError
+    cache = self.get_cache(instance)
+    def getObj(jeeves_id):
+      if jeeves_id not in cache:
+        cache[jeeves_id] = self.field.to.objects.get(jeeves_id=jeeves_id)
+      return cache[jeeves_id]
+    if instance is None:
+      return self
+    return JeevesLib.facetMapper(fexpr_cast(getattr(instance, self.field.get_attname())), getObj)
 
   def __set__(self, instance, value):
-    print '__set__ was called'
+    cache = self.get_cache(instance)
     def getID(obj):
       if obj is None:
         return None
       if obj.jeeves_id is None:
         raise Exception("Object must be saved before it can be attached via JeevesForeignKey.")
+      cache[obj.jeeves_id] = obj
       return obj.jeeves_id
     ids = JeevesLib.facetMapper(fexpr_cast(value), getID)
     setattr(instance, self.field.get_attname(), ids)
@@ -236,7 +277,6 @@ class JeevesForeignKey(Field):
 
   def contribute_to_class(self, cls, name, virtual_only=False):
     super(JeevesForeignKey, self).contribute_to_class(cls, name, virtual_only=virtual_only)
-    print 'self.name is', self.name
     setattr(cls, self.name, JeevesRelatedObjectDescriptor(self))
 
   def get_attname(self):

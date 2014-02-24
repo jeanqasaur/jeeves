@@ -135,6 +135,11 @@ class FExpr:
 class CannotEvalException(Exception):
   pass
 
+def get_var_by_name(var_name):
+  v = Var()
+  v.name = var_name
+  return v
+
 class Var(FExpr):
   counter = 0
 
