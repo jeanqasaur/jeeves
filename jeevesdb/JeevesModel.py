@@ -49,6 +49,20 @@ class JeevesQuerySet(QuerySet):
     except TypeError:
       raise Exception("wow such error: could not find a row for every condition")
 
+  def filter(self, **kwargs):
+    l = []
+    for argname, _ in kwargs.iteritems():
+      t = argname.split('__')
+      if len(t) > 0:
+        l.append("__".join(t[:-1]))
+    if len(l) > 0:
+       return super(JeevesQuerySet, self).filter(**kwargs).select_related(*l)
+    else:
+       return super(JeevesQuerySet, self).filter(**kwargs)
+      
+  def exclude(self, **kwargs):
+    raise NotImplementedError
+
   # methods that return a queryset subclass of the ordinary QuerySet
   # need to be overridden
 
@@ -275,6 +289,13 @@ class JeevesForeignKey(Field):
     super(JeevesForeignKey, self).__init__(self, *args, **kwargs)
     self.to = to
 
+    for f in self.to._meta.fields:
+      if f.name == 'jeeves_id':
+        self.join_field = f
+        break
+    else:
+      raise Exception("Need jeeves_id field")
+
   def contribute_to_class(self, cls, name, virtual_only=False):
     super(JeevesForeignKey, self).contribute_to_class(cls, name, virtual_only=virtual_only)
     setattr(cls, self.name, JeevesRelatedObjectDescriptor(self))
@@ -289,3 +310,18 @@ class JeevesForeignKey(Field):
 
   def db_type(self, connection):
     return IntegerField().db_type(connection=connection)
+
+  def get_path_info(self):
+    opts = self.to._meta
+    from_opts = self.model._meta
+    return [django.db.models.fields.related.PathInfo(from_opts, opts, (self.join_field,), self, False, True)]
+
+  def get_joining_columns(self):
+    return ((self.column, self.join_field.column),)
+
+  @property
+  def foreign_related_fields(self):
+    return (self.join_field,)
+
+  def get_extra_restriction(self, where_class, alias, related_alias):
+    return None

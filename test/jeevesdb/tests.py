@@ -372,6 +372,15 @@ class TestJeevesModel(TestCase):
       ({'name':'fkey_test1_zoo', 'inhabitant_id':bn.jeeves_id}, {self.x.name:False}),
      ]))
 
+  def testFilterForeignKeys(self):
+    an = Animal.objects.create(name='filterfkey_test1_an', sound='a')
+    bn = Animal.objects.create(name='filterfkey_test1_bn', sound='b')
+    zoo = Zoo.objects.create(name='filterfkey_test1_zoo',
+        inhabitant=JeevesLib.mkSensitive(self.x, an, bn))
+
+    zool = Zoo.objects.filter(inhabitant__name='filterfkey_test1_an').get_jiter()
+    self.assertEquals(zool, [(zoo, {self.x.name:True})])
+
   def testNullFields(self):
     # TODO
     pass
