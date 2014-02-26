@@ -21,10 +21,24 @@ import itertools
 class JeevesQuerySet(QuerySet):
   def get_jiter(self):
     self._fetch_all()
-    return [
-        (obj, unserialize_vars(obj.jeeves_vars))
-        for obj in self._result_cache
-    ]
+
+    def get_env(obj, fields, env):
+      vs = unserialize_vars(obj.jeeves_vars)
+      for var_name, value in vs.iteritems():
+        if var_name in env and env[var_name] != value:
+          return None
+        env[var_name] = value
+      for field, subs in fields.iteritems():
+        if field and get_env(getattr(obj, field), subs, env) is None:
+          return None
+      return env
+
+    results = []
+    for obj in self._result_cache:
+      env = get_env(obj, self.query.select_related, {})
+      if env is not None:
+        results.append((obj, env))
+    return results
 
   def get(self, **kwargs):
     l = self.filter(**kwargs).get_jiter()
@@ -123,24 +137,11 @@ def fullEval(val, env):
   p = partialEval(val, env)
   return p.v
 
-#from django.db.models.base import ModelBase
-#class JeevesModelMeta(ModelBase):
-#    def __instancecheck__(cls, instance):
-#        if isinstance(instance, Facet):
-#            return isinstance(instance.thn, cls) and \
-#                    isinstance(instance.els, cls)
-#        elif isinstance(instance, FObject):
-#            return isinstance(instance.v, cls)
-#        else:
-#            return False
-                
 # Make a Jeeves Model that enhances the vanilla Django model with information
 # about how labels work and that kind of thing. We'll also need to override
 # some methods so that we can create records and make queries appropriately.
 
 class JeevesModel(models.Model):
-#  __metaclass__ = JeevesModelMeta
-
   objects = JeevesManager()
   jeeves_id = CharField(max_length=JEEVES_ID_LEN, null=False)
   jeeves_vars = CharField(max_length=1024, null=False)
@@ -249,11 +250,17 @@ class JeevesModel(models.Model):
 class JeevesRelatedObjectDescriptor(property):
   def __init__(self, field):
     self.field = field
+    self.cache_name = field.get_cache_name()
 
   def get_cache(self, instance):
-    cache_attr_name = '_jfkey_cache_' + self.field.name
+    cache_attr_name = self.cache_name
     if hasattr(instance, cache_attr_name):
       cache = getattr(instance, cache_attr_name)
+      if not isinstance(cache, dict):
+        jid = getattr(instance, self.field.get_attname())
+        assert not isinstance(jid, FExpr)
+        cache = {jid : cache}
+        setattr(instance, cache_attr_name, cache)
     else:
       cache = {}
       setattr(instance, cache_attr_name, cache)
@@ -262,6 +269,7 @@ class JeevesRelatedObjectDescriptor(property):
   def __get__(self, instance, instance_type):
     if instance is None:
       return self
+
     cache = self.get_cache(instance)
     def getObj(jeeves_id):
       if jeeves_id not in cache:
@@ -283,10 +291,10 @@ class JeevesRelatedObjectDescriptor(property):
     ids = JeevesLib.facetMapper(fexpr_cast(value), getID)
     setattr(instance, self.field.get_attname(), ids)
 
-class JeevesForeignKey(Field):
+from django.db.models.fields.related import ForeignObject
+class JeevesForeignKey(ForeignObject):
   requires_unique_target = False
   def __init__(self, to, *args, **kwargs):
-    super(JeevesForeignKey, self).__init__(self, *args, **kwargs)
     self.to = to
 
     for f in self.to._meta.fields:
@@ -295,6 +303,9 @@ class JeevesForeignKey(Field):
         break
     else:
       raise Exception("Need jeeves_id field")
+
+    super(JeevesForeignKey, self).__init__(to, [self], [self.join_field], *args, **kwargs)
+    self.db_constraint = False
 
   def contribute_to_class(self, cls, name, virtual_only=False):
     super(JeevesForeignKey, self).contribute_to_class(cls, name, virtual_only=virtual_only)
@@ -323,5 +334,20 @@ class JeevesForeignKey(Field):
   def foreign_related_fields(self):
     return (self.join_field,)
 
+  @property
+  def local_related_fields(self):
+    return (self,)
+
+  @property
+  def related_fields(self):
+    return ((self, self.join_field),)
+
+  @property
+  def reverse_related_fields(self):
+    return ((self.join_field, self),)
+
   def get_extra_restriction(self, where_class, alias, related_alias):
     return None
+
+  def get_cache_name(self):
+    return '_jfkey_cache_' + self.name
