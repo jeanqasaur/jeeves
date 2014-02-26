@@ -1,6 +1,11 @@
-'''
-This will define the code for the Jeeves library.
-'''
+"""API for Python Jeeves libary.
+
+  :synopsis: Functions for creating sensitive values, labels, and policies.
+
+.. moduleauthor:: Travis Hance <tjhance7@gmail.com>
+.. moduleauthor:: Jean Yang <jeanyang@csail.mit.edu>
+
+"""
 
 from env.VarEnv import VarEnv
 from env.PolicyEnv import PolicyEnv
@@ -12,6 +17,11 @@ from eval.Eval import partialEval
 import copy
 
 def init():
+  """Initialization function for Jeeves library.
+
+  You should always call this before you do anything Jeeves-y.
+
+  """
   jeevesState.varenv = VarEnv()
   jeevesState.pathenv = PathVars()
   jeevesState.policyenv = PolicyEnv()
@@ -23,18 +33,48 @@ def supports_jeeves(f):
 
 @supports_jeeves
 def mkLabel(varName = ""):
+  """Makes a label to associate with policies and sensitive values.
+
+  :param varName: Optional variable name (to help with debugging).
+  :type varName: string
+  :returns: Var - fresh label.
+  """
   return jeevesState.policyenv.mkLabel(varName)
 
 @supports_jeeves
 def restrict(varLabel, pred):
+  """Associates a policy with a label.
+
+  :param varLabel: Label to associate with policy.
+  :type varLabel: string
+  :param pred: Policy: function taking output channel and returning Boolean result.
+  :type pred: T -> bool, where T is the type of the output channel
+  """
   jeevesState.policyenv.restrict(varLabel, pred)
 
 @supports_jeeves
 def mkSensitive(varLabel, vHigh, vLow):
+  """Creates a sensitive value with two facets.
+
+  :param varLabel: Label to associate with sensitive value.
+  :type varLabel: Var
+  :param vHigh: High-confidentiality facet for viewers with restricted access.
+  :type vHigh: T
+  :param vLow: Low-confidentiality facet for other viewers.
+  :type vLow: T
+  """
   return Facet(varLabel, fexpr_cast(vHigh), fexpr_cast(vLow))
 
 @supports_jeeves
 def concretize(ctxt, v):
+  """Projects out a single value to the viewer.
+
+  :param ctxt: Output channel (viewer).
+  :type ctxt: T, where policies have type T -> bool
+  :param v: Value to concretize.
+  :type v: FExpr
+  :returns: The concrete (non-faceted) version of T under the policies in the environment.
+  """
   return jeevesState.policyenv.concretizeExp(ctxt, v, jeevesState.pathenv.getEnv())
 
 @supports_jeeves
@@ -63,7 +103,6 @@ def jif2(cond, thn_fn, els_fn):
   else:
     raise TypeError("jif condition must be a constant or a var")
 
-# NOTE(tjhance):
 # supports short-circuiting
 # without short-circuiting jif is unnecessary
 # are there performance issues?
