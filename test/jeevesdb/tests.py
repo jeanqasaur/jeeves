@@ -5,7 +5,7 @@ from django.test import TestCase
 import JeevesLib
 
 from jeevesdb import JeevesModel
-from testdb.models import Animal, Zoo
+from testdb.models import Animal, Zoo, AnimalWithPolicy
 
 def parse_vars_row(vs):
   d = {}
@@ -392,3 +392,13 @@ class TestJeevesModel(TestCase):
   def testNullFields(self):
     # TODO
     pass
+
+  def testPolicy(self):
+    awp = AnimalWithPolicy.objects.create(name='testpolicy1', sound='meow')
+
+    a = list(AnimalWithPolicy._objects_ordinary.filter(name='testpolicy1').all())
+    name = 'AnimalWithPolicy__sound__' + awp.jeeves_id
+    self.assertTrue(areRowsEqual(a, [
+      ({'name':'testpolicy1', 'sound':'meow'}, {name:True}),
+      ({'name':'testpolicy1', 'sound':''}, {name:False}),
+     ]))

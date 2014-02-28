@@ -11,8 +11,8 @@ class PolicyEnv:
     self.labels = []
     self.policies = []
 
-  def mkLabel(self, name=""):
-    label = fast.AST.Var(name)
+  def mkLabel(self, name="", uniquify=True):
+    label = fast.AST.Var(name, uniquify)
     self.labels.append(label)
     return label
 

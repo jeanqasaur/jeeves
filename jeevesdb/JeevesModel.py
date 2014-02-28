@@ -6,7 +6,7 @@ from django.db import models
 from django.db.models.fields import IntegerField
 from django.db.models.query import QuerySet
 from django.db.models import Manager
-from django.db.models import Field, CharField, ForeignKey
+from django.db.models import Field, CharField, ForeignKey, get_model
 import django.db.models.fields.related
 
 import JeevesLib
@@ -137,6 +137,20 @@ def fullEval(val, env):
   p = partialEval(val, env)
   return p.v
 
+def acquire_label_by_name(label_name):
+  if JeevesLib.doesLabelExist(label_name):
+    return JeevesLib.getLabel(label_name)
+  else:
+    label = JeevesLib.mkLabel(label_name, uniquify=False)
+    model_name, field_name, jeeves_id = label_name.split('__')
+    model = get_model(model_name)
+    # TODO: optimization: most of the time this obj will be the one we are
+    # already fetching
+    obj = model.objects.get(jeeves_id=jeeves_id)
+    restrictor = getattr(model, 'jeeves_restrict_' + field_name)
+    JeevesLib.restrict(label, restrictor)
+    return label
+
 # Make a Jeeves Model that enhances the vanilla Django model with information
 # about how labels work and that kind of thing. We'll also need to override
 # some methods so that we can create records and make queries appropriately.
@@ -172,6 +186,16 @@ class JeevesModel(models.Model):
             addon += '%s=%d;' % (var_name, var_value)
             super(JeevesModel, new_obj).save()
 
+  def acquire_label(self, field_name):
+    label_name = '%s__%s__%s' % (self.__class__.__name__, field_name, self.jeeves_id)
+    if JeevesLib.doesLabelExist(label_name):
+      return JeevesLib.getLabel(label_name)
+    else:
+      label = JeevesLib.mkLabel(label_name, uniquify=False)
+      restrictor = getattr(self, 'jeeves_restrict_' + field_name)
+      JeevesLib.restrict(label, restrictor)
+      return label
+
   def save(self, *args, **kw):
     if not self.jeeves_id:
       self.jeeves_id = get_random_jeeves_id()
@@ -183,6 +207,17 @@ class JeevesModel(models.Model):
     for field in self._meta.concrete_fields:
       if not field.primary_key and not hasattr(field, 'through'):
         field_names.add(field.attname)
+
+    for field_name in field_names:
+      if hasattr(self, 'jeeves_restrict_' + field_name):
+        public_field_value = getattr(self, field_name)
+        private_field_value = getattr(self, 'jeeves_get_private_' + field_name)(self)
+        label = self.acquire_label(field_name)
+        faceted_field_value = partialEval(
+          JeevesLib.mkSensitive(label, public_field_value, private_field_value),
+          JeevesLib.jeevesState.pathenv.conditions
+        )
+        setattr(self, field_name, faceted_field_value)
 
     all_vars = []
     d = {}
