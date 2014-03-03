@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>Log in</h2>
+    <h2>Log In</h2>
     <form method="post" action="">
     	{% csrf_token %}
     	<table>
             {{ form }}
     	</table>
-        <input type="submit" value="Login" />
+        <p class="submit"><input type="submit" value="Login" /></a>
         <a href="/registration/password_reset_form">Forgot password?</a>
     </form>
 {% endblock %}
