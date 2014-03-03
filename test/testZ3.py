@@ -35,8 +35,7 @@ class TestZ3(unittest.TestCase):
 
   def test_ast(self):
     b1 = AST.Var('x')
-    b2 = AST.Var('x')
-    # should be a different var even if the user accidentally has a name collision
+    b2 = AST.Var('y')
 
     t = AST.Facet(b1, 1, 10) + AST.Facet(b2, 100, 1000)
 

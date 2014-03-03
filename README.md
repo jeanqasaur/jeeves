@@ -39,6 +39,6 @@ You can also use ```nose``` to run specific tests. For instance:
     nosetests tests/gallery/authentication
     
 ## Using Jeeves
-There is more documentation on our [Wiki](https://github.com/jeanqasaur/jeeves/wiki).
+There is documentation for the JeevesLib API [here](http://projects.csail.mit.edu/jeeves/doc/jeeveslib.html). There is more documentation on our [Wiki](https://github.com/jeanqasaur/jeeves/wiki). We have a [Quick Introduction to Jeeves](https://github.com/jeanqasaur/jeeves/wiki/A-Quick-Introduction-to-Jeeves). (Happy to take suggestions on how to make it more useful!)
 
 You may also find it helpful to read our tests in ```test``` and ```test/gallery```.

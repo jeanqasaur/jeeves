@@ -166,8 +166,3 @@ class SearchForm(Form):
         results = list(query.all())
 
         return list(results)
-
-
-
-
-

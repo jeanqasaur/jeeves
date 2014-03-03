@@ -143,9 +143,12 @@ def get_var_by_name(var_name):
 class Var(FExpr):
   counter = 0
 
-  def __init__(self, name=None):
+  def __init__(self, name=None, uniquify=True):
     if name:
-      self.name = "v%d_%s" % (Var.counter, name)
+      if uniquify:
+        self.name = "v%d_%s" % (Var.counter, name)
+      else:
+        self.name = name
     else:
       self.name = "v%d" % Var.counter
     self.type = bool

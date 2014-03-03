@@ -5,7 +5,7 @@ from django.test import TestCase
 import JeevesLib
 
 from jeevesdb import JeevesModel
-from testdb.models import Animal, Zoo
+from testdb.models import Animal, Zoo, AnimalWithPolicy
 
 def parse_vars_row(vs):
   d = {}
@@ -372,6 +372,33 @@ class TestJeevesModel(TestCase):
       ({'name':'fkey_test1_zoo', 'inhabitant_id':bn.jeeves_id}, {self.x.name:False}),
      ]))
 
+  def testFilterForeignKeys1(self):
+    an = Animal.objects.create(name='filterfkey_test1_an', sound='a')
+    bn = Animal.objects.create(name='filterfkey_test1_bn', sound='b')
+    zoo = Zoo.objects.create(name='filterfkey_test1_zoo',
+        inhabitant=JeevesLib.mkSensitive(self.x, an, bn))
+
+    zool = Zoo.objects.filter(inhabitant__name='filterfkey_test1_an').get_jiter()
+    self.assertEquals(zool, [(zoo, {self.x.name:True})])
+
+  def testFilterForeignKeys2(self):
+    an = Animal.objects.create(name='filterfkey_test2_an',
+                sound=JeevesLib.mkSensitive(self.x, 'a', 'b'))
+    zoo = Zoo.objects.create(name='filterfkey_zoo', inhabitant=an)
+
+    zool = Zoo.objects.filter(inhabitant__name='filterfkey_test2_an').filter(inhabitant__sound='a').get_jiter()
+    self.assertEquals(zool, [(zoo, {self.x.name:True})])
+
   def testNullFields(self):
     # TODO
     pass
+
+  def testPolicy(self):
+    awp = AnimalWithPolicy.objects.create(name='testpolicy1', sound='meow')
+
+    a = list(AnimalWithPolicy._objects_ordinary.filter(name='testpolicy1').all())
+    name = 'AnimalWithPolicy__sound__' + awp.jeeves_id
+    self.assertTrue(areRowsEqual(a, [
+      ({'name':'testpolicy1', 'sound':'meow'}, {name:True}),
+      ({'name':'testpolicy1', 'sound':''}, {name:False}),
+     ]))

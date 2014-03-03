@@ -27,19 +27,32 @@ def init():
   jeevesState.policyenv = PolicyEnv()
   jeevesState.writeenv = WritePolicyEnv()
 
+  # TODO this needs to be GC'ed somehow
+  jeevesState.all_labels = {}
+
 def supports_jeeves(f):
   f.__jeeves = 0
   return f
 
 @supports_jeeves
-def mkLabel(varName = ""):
+def mkLabel(varName = "", uniquify=True):
   """Makes a label to associate with policies and sensitive values.
 
   :param varName: Optional variable name (to help with debugging).
   :type varName: string
   :returns: Var - fresh label.
   """
-  return jeevesState.policyenv.mkLabel(varName)
+  label = jeevesState.policyenv.mkLabel(varName, uniquify)
+  jeevesState.all_labels[label.name] = label
+  return label
+
+@supports_jeeves
+def doesLabelExist(varName):
+  return varName in jeevesState.all_labels
+
+@supports_jeeves
+def getLabel(varName):
+  return jeevesState.all_labels[varName]
 
 @supports_jeeves
 def restrict(varLabel, pred):
@@ -259,8 +272,6 @@ class JList:
       except AttributeError:
         return str(x)
       '''
-    print self.l
-    print self.l.v
     return str(len(self.l)) #''.join(map(tryPrint, self.l))
 
 @supports_jeeves
