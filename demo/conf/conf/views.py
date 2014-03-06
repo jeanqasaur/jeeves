@@ -229,3 +229,6 @@ def search_view(request):
         'form' : form,
         'results' : results,
     }))
+
+def about_view(request):
+  return render_to_response("about.html", RequestContext(request))
