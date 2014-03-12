@@ -28,9 +28,6 @@ class UserPCConflict(Model):
 
     @staticmethod
     def jeeves_restrict_user(uppc, ctxt):
-        print 'HEY'
-        print uppc.thn.thn.v.user
-        print ctxt
         return uppc.user == ctxt
     @staticmethod
     def jeeves_restrict_pc(uppc, ctxt):

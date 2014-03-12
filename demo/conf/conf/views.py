@@ -103,8 +103,6 @@ def request_wrapper(view_fn):
         #                for key in context_dict}
         concretize = lambda val : JeevesLib.concretize(request.user, val)
         context_dict['concretize'] = concretize
-        print context_dict['pc_conflicts']
-        print concretize(context_dict['pc_conflicts'])
         return render_to_response(template_name, RequestContext(request, context_dict))
     real_view_fn.__name__ = view_fn.__name__
     return real_view_fn
@@ -133,7 +131,6 @@ def profile_view(request):
             pc_conflicts.append(new_pc_conflict)
     else:
         pc_conflicts = [uppc.pc for uppc in UserPCConflict.objects.filter(user=user)]
-        print pc_conflicts.l.thn.thn.v.l.v
 
     return ("profile.html", {
         "name": profile.name,
@@ -241,8 +238,6 @@ def assign_reviews_view(request):
             return HttpResponseRedirect("assign_reviews?reviewer_username=%s" % urllib.quote(reviewer.username))
     else:
         formset = forms.ReviewAssignmentFormset(initial=initial_data)
-
-    print formset.forms
 
     return render_to_response("assign_reviews.html", RequestContext(request, {
         'reviewer' : reviewer,
