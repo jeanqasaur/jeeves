@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+ 	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+		<!--[if lt IE 9]>
+		  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+		  <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+		<!-- jQuery  -->
+		<script src="jquery-2.1.0.min.js"></script>
+		<!-- Bootstrap -->
+		<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+		<script src="bootstrap/js/bootstrap.min.js"></script>
+
+		<link href="default.css" rel="stylesheet">
+
+		<title>CourseManager | Page Title</title>
+  	</head>
+
+  	<body>
+		<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+	      <div class="container">
+	        <div class="navbar-header">
+	          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+	            <span class="sr-only">Toggle navigation</span>
+	            <span class="icon-bar"></span>
+	            <span class="icon-bar"></span>
+	            <span class="icon-bar"></span>
+	          </button>
+	          <a class="navbar-brand" href="#">Course Manager</a>
+	        </div>
+	        <div class="collapse navbar-collapse">
+	          <ul class="nav navbar-nav">
+	            <li class="active"><a href="#">Home</a></li>
+	            <li><a href="#about">Courses</a></li>
+	           	<li><a href="#contact">Submissions</a></li>
+	            <li class="dropdown">
+	                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Your Courses<b class="caret"></b></a>
+	                <ul class="dropdown-menu">
+	                  <li><a href="#">Action</a></li>
+	                  <li><a href="#">Another action</a></li>
+	                  <li><a href="#">Something else here</a></li>
+	                  <li class="divider"></li>
+	                  <li class="dropdown-header">Nav header</li>
+	                  <li><a href="#">Separated link</a></li>
+	                  <li><a href="#">One more separated link</a></li>
+	                </ul>
+              	</li>
+	          </ul>
+	        </div><!--/.nav-collapse -->
+	      </div>
+	    </div><!--/navbar-->
+
+	    <div class="container" id="mainContainer">
+
+	    	<button type="button" class="btn btn-primary" id="edit-button">Edit</button>
+	    	<div style="clear: both;"></div>
+
+			<div class="panel panel-default submissionPanel">
+			      <!-- Default panel contents -->
+			      <div class="panel-heading">
+			      	<b> Submission for GR1 - Analysis </b>
+			      </div>
+
+			      <table class="table submissionDetails">
+			        <tbody>
+			          <tr>
+			            <td><b>Submitter</b></td>
+			            <td>Mark</td>
+			          </tr>
+			          <tr>
+			            <td><b>Assignment</b></td>
+			            <td> GR1 - Analysis</td>
+			          </tr>
+  			          <tr>
+			            <td><b>Submitted</b></td>
+			            <td>3/8/14</td>
+			          </tr>
+			          <tr>
+			            <td><b>File Link</b></td>
+			            <td><a href='#'>GR1-mark.pdf</a></td>
+			          </tr>
+			          <tr>
+			            <td><b>Grade</b></td>
+			            <td>N/A</td>
+			          </tr>
+			        </tbody>
+			      </table>
+			    </div>
+			</div>
+			<div style="clear: both;"></div>
+
+			<div class="commentSection">
+				<div id="commentsTitle"><b> Comments (2) </b></div>
+				<div class="commentBoxContainer">
+					<textarea class="commentBox"></textarea><br />
+					<!-- Split button -->
+					<div class="btn-group submit-button">
+					  <button type="button" class="btn btn-default">Submit</button>
+					  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+					    <span class="caret"></span>
+					    <span class="sr-only">Toggle Dropdown</span>
+					  </button>
+					  <ul class="dropdown-menu" role="menu">
+					    <li><a href="#">Publicly</a></li>
+					 	<li class="divider"></li>
+					    <li><a href="#">To Collaborators</a></li>
+					    <li><a href="#">To Instructors</a></li>
+					  </ul>
+					</div>
+					<div style="clear: both;"></div>
+				</div>
+				<div class="comments">
+					<span>
+						<i>Instructor (only visible to you)</i>, 3/10/14
+						<div class="well comment"> Interesting algorithm. Are you sure you used the ones we recommended?</div>
+					</span>
+					<span>
+						<i>Mark (only visible to Instructors)</i>, 3/11/14
+						<div class="well comment"> Wow, sorry professor I think I accidentally submitted a custom version I made to show my friends. Would it be OK if I resubmitted?</div>
+					</span>
+				</div>
+			</div>
+    	</div><!--/container-->
+
+    	<div id="footer">
+      		<div class="container">
+      			<hr>
+        		<p class="text-muted">Footer content here. Stuff like contact information.</p>
+      		</div>
+    	</div><!--/footer-->
+
+  	</body>
+</html>
+
+<!-- These Elements are defaults that can be incorporated into any page much like Rails partials -->

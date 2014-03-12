@@ -77,7 +77,7 @@ class User:
   def isFriends(self, other):
     return JeevesLib.jhas(self.friends, other)
   def prettyPrint(self):
-    return "user" # str(self.userId)
+    return str(self.userId)
 
 class LocationNetwork:
   def __init__(self, users=[]):

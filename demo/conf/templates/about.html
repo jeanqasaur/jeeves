@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>About This Site</h2>
+    <div class="imagebox">
+      <p><img src="/static/img/research_statement_doge.png"></p>
+      <p>The Jeeves research mission doge.<br>Image created using <a href="http://noodlytime.com/create-doge.html" target="blank">NoodlyTime.com</a>.</p>
+    </div>
+    <p>Because of all of the interactions between different roles and permissions, conference management systems have become a standard benchmark for language and system approaches to security.</p>
+
+    <p>We have created this site to demonstrate the capabilities of the <a href="http://jeeveslang.org" target="blank">Jeeves language</a> for automatically enforcing privacy policies. That's right: this website is running on Python-Jeeves, an embedded domain-specific language implemented in Python. In these Python-Jeeves programs, we can separately implement policies about who can see what values from the rest of the functionality. The main goal of this approach is to decrease the possible places where programmer error can cause the information to be shown inappropriately! We rely on the Pyton-Jeeves runtime to show the right versions of papers, authors, scores, and reviewer identities to you.</p>
+
+<p>We have also integrated Jeeves with the Django web framework so we can guarantee that interactions with the database do not violate privacy policies.</p>
+
+<p>You may read more about Jeeves <a href="http://projects.csail.mit.edu/jeeves/about.php" target="blank">here</a> or browse the Python-Jeeves source code <a href="https://github.com/jeanqasaur/jeeves" target="blank">here</a>.</p>
+{% endblock %}

@@ -270,6 +270,15 @@ textarea {
 	text-transform: uppercase;
 }
 
+.imagebox {
+  float: left;
+  padding: 8px;
+  margin-right: 20px;
+  text-align: center;
+  font-size: small;
+  border-style: none;
+}
+
 /* Footer */
 #footer {
 	width: 800px;
@@ -287,3 +296,5 @@ border: 1px black solid;
 	font-size: smaller;
   	color: #000000;
 }
+
+
