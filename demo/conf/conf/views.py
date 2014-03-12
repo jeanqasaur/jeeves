@@ -43,6 +43,21 @@ def register_account(request):
             'profile_form' : profile_form,
         }))
 
+def request_wrapper(view_fn):
+    def real_view_fn(request):
+        try:
+            (template_name, context_dict) = view_fn(request)
+        except Exception:
+            import traceback
+            traceback.print_exc()
+            raise
+        template_name = JeevesLib.concretize(request.user, template_name)
+        concretize = lambda val : JeevesLib.concretize(request.user, val)
+        context_dict['concretize'] = concretize
+        return render_to_response(template_name, RequestContext(request, context_dict))
+    real_view_fn.__name__ = view_fn.__name__
+    return real_view_fn
+
 @login_required
 def index(request):
     return render_to_response("index.html", RequestContext(request))
@@ -89,23 +104,6 @@ def submit_view(request):
         form = forms.SubmitForm(possible_reviewers, default_conflicts)
 
     return render_to_response("submit.html", RequestContext(request, {'form' : form}))
-
-def request_wrapper(view_fn):
-    def real_view_fn(request):
-        try:
-            (template_name, context_dict) = view_fn(request)
-        except Exception:
-            import traceback
-            traceback.print_exc()
-            raise
-        template_name = JeevesLib.concretize(request.user, template_name)
-        #context_dict = {key : JeevesLib.concretize(request.user, context_dict[key])
-        #                for key in context_dict}
-        concretize = lambda val : JeevesLib.concretize(request.user, val)
-        context_dict['concretize'] = concretize
-        return render_to_response(template_name, RequestContext(request, context_dict))
-    real_view_fn.__name__ = view_fn.__name__
-    return real_view_fn
 
 @login_required
 @request_wrapper
