@@ -229,15 +229,23 @@ def jmap(iterable, mapper):
   return jmap2(iterable, mapper)
 def jmap2(iterator, mapper):
   if isinstance(iterator, Facet):
-    return jif(iterator.cond,
-        lambda : jmap2(iterator.thn, mapper),
-        lambda : jmap2(iterator.els, mapper))
+    if jeevesState.pathenv.hasPosVar(iterator.cond):
+      return jmap2(iterator.thn, mapper)
+    if jeevesState.pathenv.hasNegVar(iterator.cond):
+      return jmap2(iterator.els, mapper)
+    with PositiveVariable(iterator.cond):
+      thn = jmap2(iterator.thn, mapper)
+    with NegativeVariable(iterator.cond):
+      els = jmap2(iterator.els, mapper)
+    return Facet(iterator.cond, thn, els)
   elif isinstance(iterator, FObject):
     return jmap2(iterator.v, mapper)
   elif isinstance(iterator, JList):
     return JList(jmap2(iterator.l, mapper))
   elif isinstance(iterator, list) or isinstance(iterator, tuple):
     return [mapper(item) for item in iterator]
+  else:
+    return jmap2(iterator.__iter__(), mapper)
 
 def facetMapper(facet, fn, wrapper=fexpr_cast):
   if isinstance(facet, Facet):
@@ -273,6 +281,10 @@ class JList:
         return str(x)
       '''
     return str(len(self.l)) #''.join(map(tryPrint, self.l))
+
+class JIterator:
+  def __init__(self, l):
+    self.l = l
 
 @supports_jeeves
 def jfun(f, *args, **kw):

@@ -9,7 +9,10 @@ import urllib
 
 import forms
 
-from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment, Comment
+from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment, Comment, UserPCConflict
+
+from sourcetrans.macro_module import macros, jeeves
+import JeevesLib
 
 def register_account(request):
     if request.user.is_authenticated():
@@ -87,24 +90,58 @@ def submit_view(request):
 
     return render_to_response("submit.html", RequestContext(request, {'form' : form}))
 
+def request_wrapper(view_fn):
+    def real_view_fn(request):
+        try:
+            (template_name, context_dict) = view_fn(request)
+        except Exception:
+            import traceback
+            traceback.print_exc()
+            raise
+        template_name = JeevesLib.concretize(request.user, template_name)
+        #context_dict = {key : JeevesLib.concretize(request.user, context_dict[key])
+        #                for key in context_dict}
+        concretize = lambda val : JeevesLib.concretize(request.user, val)
+        context_dict['concretize'] = concretize
+        print context_dict['pc_conflicts']
+        print concretize(context_dict['pc_conflicts'])
+        return render_to_response(template_name, RequestContext(request, context_dict))
+    real_view_fn.__name__ = view_fn.__name__
+    return real_view_fn
+
 @login_required
+@request_wrapper
+@jeeves
 def profile_view(request):
-    try:
-        profile = UserProfile.objects.filter(user=request.user).get()
-    except UserProfile.DoesNotExist:
-        profile = None
-
+    user = request.user
+    profile = UserProfile.objects.get(user=user)
+    if profile == None:
+        profile = UserProfile()
+    pcs = User.objects.all()
+    
     if request.method == 'POST':
-        if not profile:
-            profile = UserProfile()
-            profile.user = request.user
-        form = forms.ProfileForm(request.POST, instance=profile)
-        if form.is_valid():
-            form.save()
-    else:
-        form = forms.ProfileForm(instance=profile)
+        profile.name = request.POST.get('name', '')
+        profile.affiliation = request.POST.get('affiliation', '')
+        profile.acm_number = request.POST.get('acm_number', '')
+        profile.save()
 
-    return render_to_response("profile.html", RequestContext(request, {'form' : form}))
+        UserPCConflict.objects.filter(user=user).delete()
+        pc_conflicts = []
+        for conf in request.POST.getlist('pc_conflicts[]'):
+            new_pc_conflict = User.objects.get(username=conf)
+            UserPCConflict.objects.create(user=user, pc=new_pc_conflict)
+            pc_conflicts.append(new_pc_conflict)
+    else:
+        pc_conflicts = [uppc.pc for uppc in UserPCConflict.objects.filter(user=user)]
+        print pc_conflicts.l.thn.thn.v.l.v
+
+    return ("profile.html", {
+        "name": profile.name,
+        "affiliation": profile.affiliation,
+        "acm_number": profile.acm_number,
+        "pc_conflicts": pc_conflicts,
+        "pcs": pcs,
+    })
 
 @login_required
 def submit_review_view(request):

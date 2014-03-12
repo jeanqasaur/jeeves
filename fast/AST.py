@@ -677,10 +677,16 @@ class FObject(FExpr):
     self.__dict__['type'] = object
 
   def eval(self, env):
-    return self.v
+    if isinstance(self.v, JeevesLib.JList):
+      return self.v.l.eval(env)
+    else:
+      return self.v
 
   def vars(self):
-    return set()
+    if isinstance(self.v, JeevesLib.JList):
+      return self.v.l.vars()
+    else:
+      return set()
 
   def z3Node(self):
     return id(self)

@@ -1,6 +1,10 @@
 from django.db.models import Model, ManyToManyField, ForeignKey, CharField, TextField, DateTimeField, IntegerField, FileField
 from django.contrib.auth.models import User
 
+#ForeignKey = ForeignKey # Want this to be a normal ForeignKey for User
+from jeevesdb.JeevesModel import JeevesModel as Model
+from jeevesdb.JeevesModel import JeevesForeignKey as ForeignKey
+
 class UserProfile(Model):
     user = ForeignKey(User)
 
@@ -8,24 +12,53 @@ class UserProfile(Model):
     affiliation = CharField(max_length=1024)
     acm_number = CharField(max_length=1024)
 
-    pc_conflicts = ManyToManyField(User, related_name='pc_conflicts_profile')
-
     class Meta:
         db_table = 'user_profiles'
 
-class Paper(Model):
-    authors = ManyToManyField(User, related_name='authors')
-    reviewers = ManyToManyField(User, related_name='reviewers')
-    pc_conflicts = ManyToManyField(User, related_name='pc_conflicts')
+class UserPCConflict(Model):
+    user = ForeignKey(User, null=True, related_name='userpcconflict_user')
+    pc = ForeignKey(User, null=True, related_name='userpcconflict_pc')
 
-    latest_version = ForeignKey('PaperVersion', related_name='latest_version_of', null=True)
+    @staticmethod
+    def jeeves_get_private_user(uppc):
+        return None
+    @staticmethod
+    def jeeves_get_private_pc(uppc):
+        return None
+
+    @staticmethod
+    def jeeves_restrict_user(uppc, ctxt):
+        print 'HEY'
+        print uppc.thn.thn.v.user
+        print ctxt
+        return uppc.user == ctxt
+    @staticmethod
+    def jeeves_restrict_pc(uppc, ctxt):
+        return uppc.user == ctxt
+
+class Paper(Model):
+    #latest_version = ForeignKey('PaperVersion', related_name='latest_version_of', null=True)
+    # add this below because of cyclic dependency; awkward hack
+    # (limitation of JeevesModel not ordinary Model)
 
     class Meta:
         db_table = 'papers'
 
+class PaperPCConflict(Model):
+    paper = ForeignKey(Paper)
+    pc = ForeignKey(User)
+
+class PaperAuthor(Model):
+    paper = ForeignKey(Paper)
+    author = ForeignKey(User)
+
+class PaperReviewer(Model):
+    paper = ForeignKey(Paper)
+    reviewer = ForeignKey(User)
+
 class ReviewAssignment(Model):
-    paper = ForeignKey(Paper, null=False)
-    user = ForeignKey(User, null=False)
+    paper = ForeignKey(Paper)
+    user = ForeignKey(User)
     type = CharField(max_length=8, null=False,
         choices=(('none','none'),
                 ('assigned','assigned'),
@@ -44,6 +77,9 @@ class PaperVersion(Model):
 
     class Meta:
         db_table = 'paper_versions'
+
+# see comment above
+Paper.latest_version = ForeignKey(PaperVersion, related_name='latest_version_of',)
 
 class Tag(Model):
     name = CharField(max_length=32)

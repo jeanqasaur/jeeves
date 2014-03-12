@@ -1,12 +1,9 @@
-'''
-Questions:
-- Can we get what we need by subclassing Model?
-'''
 from django.db import models
 from django.db.models.fields import IntegerField
 from django.db.models.query import QuerySet
 from django.db.models import Manager
-from django.db.models import Field, CharField, ForeignKey, get_model
+from django.db.models import Field, CharField, ForeignKey
+from django.db.models.loading import get_model
 import django.db.models.fields.related
 
 import JeevesLib
@@ -19,15 +16,20 @@ import random
 import itertools
 
 class JeevesQuerySet(QuerySet):
+  @JeevesLib.supports_jeeves
   def get_jiter(self):
     self._fetch_all()
 
     def get_env(obj, fields, env):
-      vs = unserialize_vars(obj.jeeves_vars)
+      if hasattr(obj, "jeeves_vars"):
+        vs = unserialize_vars(obj.jeeves_vars)
+      else:
+        vs = {}
       for var_name, value in vs.iteritems():
         if var_name in env and env[var_name] != value:
           return None
         env[var_name] = value
+        acquire_label_by_name(self.model._meta.app_label, var_name)
       for field, subs in fields.iteritems():
         if field and get_env(getattr(obj, field), subs, env) is None:
           return None
@@ -40,29 +42,32 @@ class JeevesQuerySet(QuerySet):
         results.append((obj, env))
     return results
 
+  @JeevesLib.supports_jeeves
   def get(self, **kwargs):
     l = self.filter(**kwargs).get_jiter()
     if len(l) == 0:
-      raise Exception("wow such error: get() returned no values")
+      return None
+      #raise Exception("wow such error: get() returned no values")
     
     for (o, _) in l:
       if o.jeeves_id != l[0][0].jeeves_id:
         raise Exception("wow such error: get() found rows for more than one jeeves_id")
 
-    cur = Unassigned("")
+    cur = None #Unassigned("")
     for (o, conditions) in l:
       old = cur
       cur = FObject(o)
       for var_name, val in conditions.iteritems():
         if val:
-          cur = Facet(get_var_by_name(var_name), cur, old)
+          cur = Facet(acquire_label_by_name(self.model._meta.app_label, var_name), cur, old)
         else:
-          cur = Facet(get_var_by_name(var_name), old, cur)
+          cur = Facet(acquire_label_by_name(self.model._meta.app_label, var_name), old, cur)
     try:
       return partialEval(cur, JeevesLib.jeevesState.pathenv.conditions)
     except TypeError:
       raise Exception("wow such error: could not find a row for every condition")
 
+  @JeevesLib.supports_jeeves
   def filter(self, **kwargs):
     l = []
     for argname, _ in kwargs.iteritems():
@@ -73,7 +78,39 @@ class JeevesQuerySet(QuerySet):
        return super(JeevesQuerySet, self).filter(**kwargs).select_related(*l)
     else:
        return super(JeevesQuerySet, self).filter(**kwargs)
-      
+
+  @JeevesLib.supports_jeeves
+  def __iter__(self):
+    t = JeevesLib.JList([])
+    for val, cond in self.get_jiter():
+      popcount = 0
+      for vname, vval in cond.iteritems():
+        if vname not in JeevesLib.jeevesState.pathenv.getEnv():
+          v = acquire_label_by_name(self.model._meta.app_label, vname)
+          JeevesLib.jeevesState.pathenv.push(v, vval)
+          popcount += 1
+      t.append(val)
+      for _ in xrange(popcount):
+        JeevesLib.jeevesState.pathenv.pop()
+    return t
+
+  @JeevesLib.supports_jeeves
+  def delete(self):
+    # can obviously be optimized
+    # TODO write tests for this
+    for val, cond in self.get_jiter():
+      popcount = 0
+      for vname, vval in cond.iteritems():
+        if vname not in JeevesLib.jeevesState.pathenv.getEnv():
+          v = acquire_label_by_name(self.model._meta.app_label, vname)
+          JeevesLib.jeevesState.pathenv.push(v, vval)
+          popcount += 1
+      val.delete()
+      for _ in xrange(popcount):
+        JeevesLib.jeevesState.pathenv.pop()
+
+
+  @JeevesLib.supports_jeeves
   def exclude(self, **kwargs):
     raise NotImplementedError
 
@@ -96,6 +133,7 @@ class JeevesQuerySet(QuerySet):
     raise NotImplementedError
 
 class JeevesManager(Manager):
+  @JeevesLib.supports_jeeves
   def get_queryset(self):
     return (super(JeevesManager, self).get_queryset()
               ._clone(klass=JeevesQuerySet)
@@ -137,18 +175,18 @@ def fullEval(val, env):
   p = partialEval(val, env)
   return p.v
 
-def acquire_label_by_name(label_name):
+def acquire_label_by_name(app_label, label_name):
   if JeevesLib.doesLabelExist(label_name):
     return JeevesLib.getLabel(label_name)
   else:
     label = JeevesLib.mkLabel(label_name, uniquify=False)
     model_name, field_name, jeeves_id = label_name.split('__')
-    model = get_model(model_name)
+    model = get_model(app_label, model_name)
     # TODO: optimization: most of the time this obj will be the one we are
     # already fetching
     obj = model.objects.get(jeeves_id=jeeves_id)
     restrictor = getattr(model, 'jeeves_restrict_' + field_name)
-    JeevesLib.restrict(label, restrictor)
+    JeevesLib.restrict(label, lambda ctxt : restrictor(obj, ctxt))
     return label
 
 # Make a Jeeves Model that enhances the vanilla Django model with information
@@ -160,6 +198,7 @@ class JeevesModel(models.Model):
   jeeves_id = CharField(max_length=JEEVES_ID_LEN, null=False)
   jeeves_vars = CharField(max_length=1024, null=False)
 
+  @JeevesLib.supports_jeeves
   def do_delete(self, e):
     if len(e) == 0:
       delete_query = self.__class__._objects_ordinary.filter(jeeves_id=self.jeeves_id)
@@ -186,6 +225,7 @@ class JeevesModel(models.Model):
             addon += '%s=%d;' % (var_name, var_value)
             super(JeevesModel, new_obj).save()
 
+  @JeevesLib.supports_jeeves
   def acquire_label(self, field_name):
     label_name = '%s__%s__%s' % (self.__class__.__name__, field_name, self.jeeves_id)
     if JeevesLib.doesLabelExist(label_name):
@@ -193,9 +233,10 @@ class JeevesModel(models.Model):
     else:
       label = JeevesLib.mkLabel(label_name, uniquify=False)
       restrictor = getattr(self, 'jeeves_restrict_' + field_name)
-      JeevesLib.restrict(label, restrictor)
+      JeevesLib.restrict(label, lambda ctxt : restrictor(self, ctxt))
       return label
 
+  @JeevesLib.supports_jeeves
   def save(self, *args, **kw):
     if not self.jeeves_id:
       self.jeeves_id = get_random_jeeves_id()
@@ -204,11 +245,13 @@ class JeevesModel(models.Model):
       raise NotImplementedError("Partial saves not supported.")
 
     field_names = set()
+    field_names1 = set()
     for field in self._meta.concrete_fields:
       if not field.primary_key and not hasattr(field, 'through'):
         field_names.add(field.attname)
+        field_names1.add(field.name)
 
-    for field_name in field_names:
+    for field_name in field_names1:
       if hasattr(self, 'jeeves_restrict_' + field_name):
         public_field_value = getattr(self, field_name)
         private_field_value = getattr(self, 'jeeves_get_private_' + field_name)(self)
@@ -245,6 +288,7 @@ class JeevesModel(models.Model):
       obj_to_save.jeeves_vars = serialize_vars(e)
       super(JeevesModel, obj_to_save).save(*args, **kw)
 
+  @JeevesLib.supports_jeeves
   def delete(self, *args, **kw):
     if self.jeeves_id is None:
       return
@@ -277,16 +321,27 @@ class JeevesModel(models.Model):
 
   _objects_ordinary = Manager()
 
+  @JeevesLib.supports_jeeves
   def __eq__(self, other):
     if isinstance(other, FExpr):
       return other == self
     return isinstance(other, self.__class__) and self.jeeves_id == other.jeeves_id
 
+from django.contrib.auth.models import User
+@JeevesLib.supports_jeeves
+def evil_hack(self, other):
+  if isinstance(other, FExpr):
+    return other == self
+  return isinstance(other, self.__class__) and self.id == other.id
+User.__eq__ = evil_hack 
+
 class JeevesRelatedObjectDescriptor(property):
+  @JeevesLib.supports_jeeves
   def __init__(self, field):
     self.field = field
     self.cache_name = field.get_cache_name()
 
+  @JeevesLib.supports_jeeves
   def get_cache(self, instance):
     cache_attr_name = self.cache_name
     if hasattr(instance, cache_attr_name):
@@ -301,34 +356,40 @@ class JeevesRelatedObjectDescriptor(property):
       setattr(instance, cache_attr_name, cache)
     return cache
 
+  @JeevesLib.supports_jeeves
   def __get__(self, instance, instance_type):
     if instance is None:
       return self
 
     cache = self.get_cache(instance)
     def getObj(jeeves_id):
+      if jeeves_id is None:
+        return None
       if jeeves_id not in cache:
-        cache[jeeves_id] = self.field.to.objects.get(jeeves_id=jeeves_id)
+        cache[jeeves_id] = self.field.to.objects.get(**{self.field.join_field.name:jeeves_id})
       return cache[jeeves_id]
     if instance is None:
       return self
     return JeevesLib.facetMapper(fexpr_cast(getattr(instance, self.field.get_attname())), getObj)
 
+  @JeevesLib.supports_jeeves
   def __set__(self, instance, value):
     cache = self.get_cache(instance)
     def getID(obj):
       if obj is None:
         return None
-      if obj.jeeves_id is None:
+      obj_jid = getattr(obj, self.field.join_field.name)
+      if obj_jid is None:
         raise Exception("Object must be saved before it can be attached via JeevesForeignKey.")
-      cache[obj.jeeves_id] = obj
-      return obj.jeeves_id
+      cache[obj_jid] = obj
+      return obj_jid
     ids = JeevesLib.facetMapper(fexpr_cast(value), getID)
     setattr(instance, self.field.get_attname(), ids)
 
 from django.db.models.fields.related import ForeignObject
 class JeevesForeignKey(ForeignObject):
   requires_unique_target = False
+  @JeevesLib.supports_jeeves
   def __init__(self, to, *args, **kwargs):
     self.to = to
 
@@ -337,31 +398,39 @@ class JeevesForeignKey(ForeignObject):
         self.join_field = f
         break
     else:
-      raise Exception("Need jeeves_id field")
+      # support non-Jeeves tables
+      self.join_field = to._meta.pk
+      #raise Exception("Need jeeves_id field")
 
     super(JeevesForeignKey, self).__init__(to, [self], [self.join_field], *args, **kwargs)
     self.db_constraint = False
 
+  @JeevesLib.supports_jeeves
   def contribute_to_class(self, cls, name, virtual_only=False):
     super(JeevesForeignKey, self).contribute_to_class(cls, name, virtual_only=virtual_only)
     setattr(cls, self.name, JeevesRelatedObjectDescriptor(self))
 
+  @JeevesLib.supports_jeeves
   def get_attname(self):
     return '%s_id' % self.name
   
+  @JeevesLib.supports_jeeves
   def get_attname_column(self):
     attname = self.get_attname()
     column = self.db_column or attname
     return attname, column
 
+  @JeevesLib.supports_jeeves
   def db_type(self, connection):
     return IntegerField().db_type(connection=connection)
 
+  @JeevesLib.supports_jeeves
   def get_path_info(self):
     opts = self.to._meta
     from_opts = self.model._meta
     return [django.db.models.fields.related.PathInfo(from_opts, opts, (self.join_field,), self, False, True)]
 
+  @JeevesLib.supports_jeeves
   def get_joining_columns(self):
     return ((self.column, self.join_field.column),)
 
@@ -381,8 +450,10 @@ class JeevesForeignKey(ForeignObject):
   def reverse_related_fields(self):
     return ((self.join_field, self),)
 
+  @JeevesLib.supports_jeeves
   def get_extra_restriction(self, where_class, alias, related_alias):
     return None
 
+  @JeevesLib.supports_jeeves
   def get_cache_name(self):
     return '_jfkey_cache_' + self.name

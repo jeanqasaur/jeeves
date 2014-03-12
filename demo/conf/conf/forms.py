@@ -1,6 +1,6 @@
 from django.forms import Form, ModelForm, CharField, FileField, Textarea, ModelForm, HiddenInput, MultipleChoiceField, CheckboxSelectMultiple, BooleanField, ChoiceField
 
-from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment, Comment
+from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment, Comment, UserPCConflict
 from django.contrib.auth.models import User
 import random
 from django.forms.formsets import formset_factory
@@ -80,12 +80,6 @@ class SubmitForm(Form):
             ra.save()
 
         return paper
-
-class ProfileForm(ModelForm):
-    class Meta:
-        model = UserProfile
-        # TODO pc_conflicts should only have PC members
-        fields = ['name', 'affiliation', 'acm_number', 'pc_conflicts']
 
 class SubmitReviewForm(ModelForm):
     class Meta:
