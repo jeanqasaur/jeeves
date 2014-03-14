@@ -10,8 +10,8 @@ class Square:
     self.shipRef = ProtectedRef(NoShip()
       # Policy for updating: must be owner and there can't be a ship there
       # already.
-      , lambda ship: lambda ic: ship == NoShip()
-      , lambda ship: lambda ic: lambda _oc: self.isOwner(ic))
+      , lambda ship: lambda ic: ship == NoShip() and self.isOwner(ic)
+      , None)
     self.hasBombRef = ProtectedRef(None
       , lambda _bomb: lambda ic:
           self.hasTurn(ic) and self.allShipsPlaced(ic) and

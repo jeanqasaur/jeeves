@@ -1,7 +1,5 @@
 import JeevesLib
-from smt.Z3 import *
 import unittest
-from macropy.case_classes import macros, enum
 
 from fast.ProtectedRef import ProtectedRef, UpdateResult
 import JeevesLib
@@ -24,7 +22,7 @@ class TestSanitization(unittest.TestCase):
   # If the input does not do anything bad to our data structure, then we
   # allow it to pass.
   @jeeves
-  def testBehavioralSanitization(self):
+  def testBehavioralSanitizationGood(self):
     touchedBadData = False
     def f(s):
       global touchedBadData
@@ -34,10 +32,23 @@ class TestSanitization(unittest.TestCase):
     x = ProtectedRef("dunno", None
       , lambda _this: lambda ic: lambda oc: not touchedBadData)
     self.assertEqual(JeevesLib.concretize(None, x.v), "dunno")
-    assert x.update(None, None, f("good")) == UpdateResult.Success
+    assert x.update(None, None, f("good")) == UpdateResult.Unknown
     self.assertEqual(JeevesLib.concretize(None, x.v), "good")
-    assert x.update(None, None, f("bad")) == UpdateResult.Failure
-    self.assertEqual(JeevesLib.concretize(None, x.v), "good")
+
+  @jeeves
+  def testBehavioralSanitizationBad(self):
+    touchedBadData = False
+    def f(s):
+      global touchedBadData
+      if s == "bad":
+        touchedBadData = True
+      return s
+    x = ProtectedRef("dunno", None
+      , lambda _this: lambda ic: lambda oc: not touchedBadData)
+    assert x.update(None, None, f("bad")) == UpdateResult.Unknown
+    print touchedBadData
+    self.assertEqual(JeevesLib.concretize(None, x.v), "dunno")
+
 
   def testEndorseSanitizeFunction(self):
     pass

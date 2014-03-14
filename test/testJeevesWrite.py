@@ -26,18 +26,18 @@ class TestJeevesWrite(unittest.TestCase):
 
   def test_write_allowed_for_all_viewers(self):
     x = ProtectedRef(0, None, self.allowUserWrite(self.aliceUser))
-    assert x.update(self.aliceUser, self.aliceUser, 42) == UpdateResult.Success
+    assert x.update(self.aliceUser, self.aliceUser, 42) == UpdateResult.Unknown
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v), 42)
     self.assertEqual(JeevesLib.concretize(self.bobUser, x.v), 42)
     self.assertEqual(JeevesLib.concretize(self.carolUser, x.v), 42)
 
   def test_write_disallowed_for_all_viewers(self):
     x = ProtectedRef(0, None, self.allowUserWrite(self.aliceUser))
-    assert x.update(self.bobUser, self.bobUser, 42) == UpdateResult.Failure
+    assert x.update(self.bobUser, self.bobUser, 42) == UpdateResult.Unknown
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v), 0)
     self.assertEqual(JeevesLib.concretize(self.bobUser, x.v), 0)
     self.assertEqual(JeevesLib.concretize(self.carolUser, x.v), 0)
-  
+
   @jeeves
   def test_write_selectively_allowed(self):
     x = ProtectedRef(0, None
@@ -50,8 +50,8 @@ class TestJeevesWrite(unittest.TestCase):
 
   def test_permitted_writer_overwrite(self):  
     x = ProtectedRef(0, None, self.allowUserWrite(self.bobUser))
-    assert x.update(self.aliceUser, self.aliceUser, 42) == UpdateResult.Failure
-    assert x.update(self.bobUser, self.bobUser, 43) == UpdateResult.Success
+    assert x.update(self.aliceUser, self.aliceUser, 42) == UpdateResult.Unknown
+    assert x.update(self.bobUser, self.bobUser, 43) == UpdateResult.Unknown
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v), 43)
     self.assertEqual(JeevesLib.concretize(self.bobUser, x.v), 43)
     self.assertEqual(JeevesLib.concretize(self.carolUser, x.v), 43)
@@ -83,9 +83,9 @@ class TestJeevesWrite(unittest.TestCase):
   # Alice into y. (That is, without an explicit endorsement...)
   def test_prevent_flow_of_untrusted_writes(self):
     x = ProtectedRef(0, None, self.allowUserWrite(self.aliceUser))
-    assert x.update(self.aliceUser, self.aliceUser, 42) == UpdateResult.Success
+    assert x.update(self.aliceUser, self.aliceUser, 42) == UpdateResult.Unknown
     y = ProtectedRef(1, None, self.allowUserWrite(self.bobUser))
-    assert y.update(self.bobUser, self.bobUser, x.v) == UpdateResult.Success
+    assert y.update(self.bobUser, self.bobUser, x.v) == UpdateResult.Unknown
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v), 42)
     self.assertEqual(JeevesLib.concretize(self.bobUser, x.v), 42)
     self.assertEqual(JeevesLib.concretize(self.aliceUser, y.v), 0)

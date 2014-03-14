@@ -53,6 +53,9 @@ class ProtectedRef:
     else:
       return UpdateResult.Success
 
+  # TODO: Crap. We can only do this if we don't mutate anything. We don't have
+  # the static analyses right now to figure that out!
+  '''
   @JeevesLib.supports_jeeves
   def applyOutputWP(self, writer):
     if self.outputWP:
@@ -73,6 +76,7 @@ class ProtectedRef:
         return UpdateResult.Unknown
     else:
       return UpdateResult.Success
+  '''
 
   @JeevesLib.supports_jeeves
   def addWritePolicy(self, label, writer):
@@ -116,39 +120,27 @@ class ProtectedRef:
         self.v = vNew
         return UpdateResult.Success
       if self.outputWP:
-        success = self.applyOutputWP(writer)
-        if success == UpdateResult.Failure:
-          return UpdateResult.Failure
+        vOld = self.v
+        if isinstance(vNew, FExpr):
+          vNewRemapped = vNew.remapLabels(self.outputWP(vOld), writer)
         else:
-          vOld = self.v
-          if isinstance(vNew, FExpr):
-            vNewRemapped = vNew.remapLabels(self.outputWP(vOld), writer)
-          else:
-            vNewRemapped = vNew
+          vNewRemapped = vNew
  
-          if success == UpdateResult.Success and (not self.trackImplicit):
-            self.v = vNewRemapped
-            return UpdateResult.Success
-          # In this case, success == UpdateResult.Unknown or self.trackImplicit
-          # is True.
-          else:
-            # Create a new label and map it to the resulting confidentiality
-            # policy in the confidentiality policy environment.
-            wvar = JeevesLib.mkLabel() # TODO: Label this?
-            if success == UpdateResult.Unknown:
-              JeevesLib.restrict(wvar
-                , lambda octxt: self.outputWP(vOld)(writer)(octxt))
+        # Create a new label and map it to the resulting confidentiality
+        # policy in the confidentiality policy environment.
+        wvar = JeevesLib.mkLabel() # TODO: Label this?
+        JeevesLib.restrict(wvar, self.outputWP(vOld)(writer))
 
-            # Create a faceted value < wvar ? vNew' : vOld >, where vNew' has
-            # the write-associated labels remapped to take into account the new
-            # writer. Add the path conditions.
-            JeevesLib.jeevesState.pathenv.push(wvar, True)
-            rPC = mkFacetTree(list(JeevesLib.jeevesState.pathenv.conditions)
-                    , vNewRemapped, vOld)
-            JeevesLib.jeevesState.pathenv.pop()
+        # Create a faceted value < wvar ? vNew' : vOld >, where vNew' has
+        # the write-associated labels remapped to take into account the new
+        # writer. Add the path conditions.
+        JeevesLib.jeevesState.pathenv.push(wvar, True)
+        rPC = mkFacetTree(list(JeevesLib.jeevesState.pathenv.conditions)
+                , vNewRemapped, vOld)
+        JeevesLib.jeevesState.pathenv.pop()
 
-            if self.trackImplicit:
-              JeevesLib.jeevesState.writeenv.mapPrimaryContext(wvar, writer)
+        if self.trackImplicit:
+          JeevesLib.jeevesState.writeenv.mapPrimaryContext(wvar, writer)
 
-            self.v = rPC
-            return success
+        self.v = rPC
+        return UpdateResult.Unknown

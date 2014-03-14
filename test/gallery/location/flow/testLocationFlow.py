@@ -38,11 +38,11 @@ class TestLocationFlow(unittest.TestCase):
     # Bob cannot update Alice's location.
     self.assertEqual(
       self.alice.location.update(self.bob, self.bob, self.aliceLoc)
-      , UpdateResult.Failure)
+      , UpdateResult.Unknown)
 
     # Alice updates her location.
     self.assertEqual(self.alice.location.update(self.alice, self.alice
-      , self.aliceLoc), UpdateResult.Success)
+      , self.aliceLoc), UpdateResult.Unknown)
     # Only Alice and her friends can see the high-confidentiality version of
     # her location.
     self.assertEqual(JeevesLib.concretize(self.alice, self.alice.location.v)
@@ -57,9 +57,9 @@ class TestLocationFlow(unittest.TestCase):
 
   def testCountUsersInLocation(self):
     self.assertEqual(self.alice.location.update(self.alice, self.alice
-      , self.aliceLoc), UpdateResult.Success)
-    self.assertEqual(self.bob.location.update(self.bob, self.bob, self.cityCambridge), UpdateResult.Success)
-    self.assertEqual(self.carol.location.update(self.carol, self.carol, self.countryUSA), UpdateResult.Success)
+      , self.aliceLoc), UpdateResult.Unknown)
+    self.assertEqual(self.bob.location.update(self.bob, self.bob, self.cityCambridge), UpdateResult.Unknown)
+    self.assertEqual(self.carol.location.update(self.carol, self.carol, self.countryUSA), UpdateResult.Unknown)
 
     # Only Alice and Bob can see Alice's "high" location of S
     locNetwork = LocationNetwork([self.alice, self.bob, self.carol])
