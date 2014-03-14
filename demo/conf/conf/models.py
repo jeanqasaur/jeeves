@@ -37,6 +37,7 @@ class Paper(Model):
     #latest_version = ForeignKey('PaperVersion', related_name='latest_version_of', null=True)
     # add this below because of cyclic dependency; awkward hack
     # (limitation of JeevesModel not ordinary Model)
+    author = ForeignKey(User)
 
     class Meta:
         db_table = 'papers'
@@ -45,9 +46,9 @@ class PaperPCConflict(Model):
     paper = ForeignKey(Paper)
     pc = ForeignKey(User)
 
-class PaperAuthor(Model):
+class PaperCoauthor(Model):
     paper = ForeignKey(Paper)
-    author = ForeignKey(User)
+    author = CharField(max_length=1024)
 
 class PaperReviewer(Model):
     paper = ForeignKey(Paper)

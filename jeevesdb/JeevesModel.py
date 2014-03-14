@@ -30,7 +30,7 @@ class JeevesQuerySet(QuerySet):
           return None
         env[var_name] = value
         acquire_label_by_name(self.model._meta.app_label, var_name)
-      for field, subs in fields.iteritems():
+      for field, subs in (fields.iteritems() if fields else []):
         if field and get_env(getattr(obj, field), subs, env) is None:
           return None
       return env
@@ -43,11 +43,13 @@ class JeevesQuerySet(QuerySet):
     return results
 
   @JeevesLib.supports_jeeves
+  def all(self):
+    return self.__iter__()
+
   def get(self, **kwargs):
     l = self.filter(**kwargs).get_jiter()
     if len(l) == 0:
       return None
-      #raise Exception("wow such error: get() returned no values")
     
     for (o, _) in l:
       if o.jeeves_id != l[0][0].jeeves_id:
@@ -67,17 +69,16 @@ class JeevesQuerySet(QuerySet):
     except TypeError:
       raise Exception("wow such error: could not find a row for every condition")
 
-  @JeevesLib.supports_jeeves
   def filter(self, **kwargs):
     l = []
     for argname, _ in kwargs.iteritems():
       t = argname.split('__')
-      if len(t) > 0:
+      if len(t) > 1:
         l.append("__".join(t[:-1]))
     if len(l) > 0:
-       return super(JeevesQuerySet, self).filter(**kwargs).select_related(*l)
+      return super(JeevesQuerySet, self).filter(**kwargs).select_related(*l)
     else:
-       return super(JeevesQuerySet, self).filter(**kwargs)
+      return super(JeevesQuerySet, self).filter(**kwargs)
 
   @JeevesLib.supports_jeeves
   def __iter__(self):

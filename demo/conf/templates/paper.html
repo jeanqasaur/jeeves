@@ -1,41 +1,51 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    {% if paper %}
+    {% if paper != None %}
         <div>
             <h3> Authors </h3>
             <ul>
-                {% for author in authors %}
+                <li>
+                    <div> {{concretize(author.name)}} </div>
+                </li>
+                {% for coauthor in concretize(coauthors) %}
                     <li>
-                        <div> {{author.name}} </div>
-                        <div> {{author.email}} </div>
+                        <div> {{concretize(coauthor.author)}} </div>
                     </li>
                 {% endfor %}
             </ul>
         </div>
         <div>
+            <h3> Title </h3>
+            <div>
+                {{concretize(latest_title)}}
+            </div>
+        </div>
+        <div>
             <h3> Versions </h3>
             <ul>
-                {% for paper_version in paper_versions %}
-                    <a href="{{paper_version.contents.url}}">{{paper_version.time}}</a>
+                {% for paper_version in concretize(paper_versions) %}
+                    <a href="{{concretize(paper_version.contents.url)}}">
+                        {{concretize(paper_version.time)}}
+                    </a>
                 {% endfor %}
             </ul>
         </div>
         <div>
             <h3> Abstract </h3>
-            <pre>{{latest_abstract}}</pre>
+            <pre>{{concretize(latest_abstract)}}</pre>
         </div>
         <div>
             <h3> Reviews </h3>
             <ul>
-                {% for review in reviews %}
+                {% for review in concretize(reviews) %}
                     <li>
-                        <div> {{review.reviewer.username}} at {{review.time}} </div>
-                        <div> Comment: <pre>{{review.contents}}</pre> </div>
-                        <div> Novelty: {{review.score_novelty}} </div>
-                        <div> Presentation: {{review.score_presentation}} </div>
-                        <div> Technical: {{review.score_technical}} </div>
-                        <div> Confidence: {{review.score_confidence}} </div>
+                        <div> {{concretize(review.reviewer.username)}} at {{concretize(review.time)}} </div>
+                        <div> Comment: <pre>{{concretize(review.contents)}}</pre> </div>
+                        <div> Novelty: {{concretize(review.score_novelty)}} </div>
+                        <div> Presentation: {{concretize(review.score_presentation)}} </div>
+                        <div> Technical: {{concretize(review.score_technical)}} </div>
+                        <div> Confidence: {{concretize(review.score_confidence)}} </div>
                     </li>
                 {% endfor %}
             </ul>
@@ -43,23 +53,21 @@
         <div>
             <h3> Comments </h3>
             <ul>
-                {% for comment in comments %}
+                {% for comment in concretize(comments) %}
                     <li>
-                        <div> {{comment.user.username}} at {{comment.time}} </div>
-                        <div> Comment: <pre>{{comment.contents}}</pre> </div>
+                        <div> {{concretize(comment.user.username)}} at {{concretize(comment.time)}} </div>
+                        <div> Comment: <pre>{{concretize(comment.contents)}}</pre> </div>
                     </li>
                 {% endfor %}
             </ul>
         </div>
 
-
-
         <div>
-            <a href="/submit_review?id={{paper.id}}">Submit review</a>
+            <a href="/submit_review?id={{concretize(paper.jeeves_id)}}">Submit review</a>
         </div>
 
         <div>
-            <a href="/submit_comment?id={{paper.id}}">Submit comment</a>
+            <a href="/submit_comment?id={{concretize(paper.jeeves_id)}}">Submit comment</a>
         </div>
     {% else %}
         Not found. The planets must not be aligned correctly, or perhaps no paper with the given 'id' exists.

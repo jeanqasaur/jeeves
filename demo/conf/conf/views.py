@@ -6,10 +6,11 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 import urllib
+import random
 
 import forms
 
-from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment, Comment, UserPCConflict
+from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment, Comment, UserPCConflict, PaperCoauthor, PaperPCConflict
 
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
@@ -51,6 +52,11 @@ def request_wrapper(view_fn):
             import traceback
             traceback.print_exc()
             raise
+
+        if template_name == "redirect":
+            path = context_dict
+            return HttpResponseRedirect(path)
+
         template_name = JeevesLib.concretize(request.user, template_name)
         concretize = lambda val : JeevesLib.concretize(request.user, val)
         context_dict['concretize'] = concretize
@@ -63,47 +69,90 @@ def index(request):
     return render_to_response("index.html", RequestContext(request))
 
 @login_required
+@request_wrapper
+@jeeves
 def paper_view(request):
-    try:
-        paper = Paper.objects.filter(id=int(request.GET['id'])).get()
-        paper_versions = list(PaperVersion.objects.filter(paper=paper).order_by('-time').all())
-        authors = paper.authors.all()
-        latest_abstract = paper_versions[-1].abstract if paper_versions else None
-        reviews = list(Review.objects.filter(paper=paper).order_by('-time').all())
-        comments = list(Comment.objects.filter(paper=paper).order_by('-time').all())
-    except Paper.DoesNotExist:
+    paper = Paper.objects.get(jeeves_id=request.GET.get('id', ''))
+    if paper != None:
+        paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
+        coauthors = PaperCoauthor.objects.filter(paper=paper).all()
+        latest_abstract = paper_versions[-1].abstract if len(paper_versions) > 0 else None
+        latest_title = paper_versions[-1].title if len(paper_versions) > 0 else None
+        reviews = Review.objects.filter(paper=paper).order_by('-time').all()
+        comments = Comment.objects.filter(paper=paper).order_by('-time').all()
+        author = UserProfile.objects.get(user=request.user)
+    else:
         paper = None
         paper_versions = []
-        authors = []
+        coauthors = []
         latest_abstract = None
+        latest_title = None
         reviews = []
         comments = []
 
-    return render_to_response("paper.html", RequestContext(request, {
+    return ("paper.html", {
         'paper' : paper,
         'paper_versions' : paper_versions,
-        'authors' : authors,
+        'author' : author,
+        'coauthors' : coauthors,
         'latest_abstract' : latest_abstract,
+        'latest_title' : latest_title,
         'reviews' : reviews,
         'comments' : comments,
-    }))
+    })
+
+def set_random_name(contents):
+    contents.name = '%030x' % random.randrange(16**30) + ".pdf"
 
 @login_required
+@request_wrapper
+@jeeves
 def submit_view(request):
-    possible_reviewers = list(User.objects.all())
-    profile = UserProfile.objects.filter(user=request.user).get()
-    default_conflicts = list(profile.pc_conflicts.all())
-
     if request.method == 'POST':
-        form = forms.SubmitForm(possible_reviewers, default_conflicts,
-            request.POST, request.FILES)
-        if form.is_valid():
-            paper = form.save(request.user)
-            return HttpResponseRedirect("paper?id=%d" % paper.id)
-    else:
-        form = forms.SubmitForm(possible_reviewers, default_conflicts)
+        coauthors = request.POST.getlist('coauthors[]')
+        title = request.POST.get('title', None)
+        abstract = request.POST.get('abstract', None)
+        contents = request.FILES.get('contents', None)
 
-    return render_to_response("submit.html", RequestContext(request, {'form' : form}))
+        if title == None or abstract == None or contents == None:
+            return ("submit.html", {
+                'coauthors' : coauthors,
+                'title' : title,
+                'abstract' : abstract,
+                'contents' : contents.name,
+                'error' : 'Please fill out all fields'
+            })
+
+        paper = Paper.objects.create(author=request.user)
+        for coauthor in coauthors:
+            if coauthor != "":
+                PaperCoauthor.objects.create(paper=paper, author=coauthor)
+        set_random_name(contents)
+        PaperVersion.objects.create(
+            paper=paper,
+            title=title,
+            abstract=abstract,
+            contents=contents
+        )
+
+        for conf in request.POST.getlist('pc_conflicts[]'):
+            new_pc_conflict = User.objects.get(username=conf)
+            PaperPCConflict.objects.create(paper=paper, pc=new_pc_conflict)
+
+        return ("redirect", "paper?id=%s" % paper.jeeves_id)
+
+    pcs = User.objects.all()
+    pc_conflicts = [uppc.pc for uppc in UserPCConflict.objects.filter(user=request.user)]
+    
+    return ("submit.html", {
+        'coauthors' : [],
+        'title' : '',
+        'abstract' : '',
+        'contents' : '',
+        'error' : '',
+        'pcs' : pcs,
+        'pc_conflicts' : pc_conflicts,
+    })
 
 @login_required
 @request_wrapper
@@ -112,7 +161,7 @@ def profile_view(request):
     user = request.user
     profile = UserProfile.objects.get(user=user)
     if profile == None:
-        profile = UserProfile()
+        profile = UserProfile(user=user)
     pcs = User.objects.all()
     
     if request.method == 'POST':
@@ -153,7 +202,7 @@ def submit_review_view(request):
             form = forms.SubmitReviewForm(request.POST, instance=review)
             if form.is_valid():
                 form.save(paper)
-                return HttpResponseRedirect("paper?id=%d" % paper_id)
+                return HttpResponseRedirect("paper?id=%s" % paper_id)
         else:
             form = forms.SubmitReviewForm()
     except (ValueError, KeyError, Paper.DoesNotExist):
@@ -180,7 +229,7 @@ def submit_comment_view(request):
             form = forms.SubmitCommentForm(request.POST, instance=comment)
             if form.is_valid():
                 form.save(paper)
-                return HttpResponseRedirect("paper?id=%d" % paper_id)
+                return HttpResponseRedirect("paper?id=%s" % paper_id)
         else:
             form = forms.SubmitCommentForm()
     except (ValueError, KeyError, Paper.DoesNotExist):
