@@ -140,6 +140,9 @@ class JeevesManager(Manager):
               ._clone(klass=JeevesQuerySet)
               .order_by('jeeves_id')
            )
+  
+  def all(self):
+    return super(JeevesManager, self).all().all()
 
 alphanum = string.digits + string.letters
 sysrand = random.SystemRandom()

@@ -12,6 +12,11 @@ class UserProfile(Model):
     affiliation = CharField(max_length=1024)
     acm_number = CharField(max_length=1024)
 
+    level = CharField(max_length=12,
+                    choices=(('normal', 'normal'),
+                        ('pc', 'pc'),
+                        ('chair', 'chair')))
+
     class Meta:
         db_table = 'user_profiles'
 

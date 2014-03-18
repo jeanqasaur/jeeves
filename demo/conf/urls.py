@@ -30,4 +30,5 @@ urlpatterns = patterns('',
     url(r'^assign_reviews$', views.assign_reviews_view),
     url(r'^search$', views.search_view),
     url(r'^about$', views.about_view),
+    url(r'^users$', views.users_view),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -162,6 +162,7 @@ def profile_view(request):
     profile = UserProfile.objects.get(user=user)
     if profile == None:
         profile = UserProfile(user=user)
+        profile.level = 'normal'
     pcs = User.objects.all()
     
     if request.method == 'POST':
@@ -213,6 +214,25 @@ def submit_review_view(request):
         'form' : form,
         'paper' : paper,
     }))
+
+@login_required
+@request_wrapper
+@jeeves
+def users_view(request):
+    user_profiles = UserProfile.objects.all()
+
+    if request.method == 'POST':
+        for profile in user_profiles:
+            query_param_name = 'level-' + profile.user.username
+            level = request.POST.get(query_param_name, '')
+            if level in ['normal', 'pc', 'chair']:
+                print 'HELLO'
+                profile.level = level
+                profile.save()
+
+    return ("users_view.html", {
+        'user_profiles': user_profiles,
+    })
 
 @login_required
 def submit_comment_view(request):
