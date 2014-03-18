@@ -2,9 +2,11 @@
 Location example for Jeeves with confidentiality policies.
 '''
 from abc import ABCMeta, abstractmethod
+from macropy.case_classes import macros, enum
 
 import JeevesLib
 from sourcetrans.macro_module import macros, jeeves
+
 
 class InternalError(Exception):
   def __init__(self, message):

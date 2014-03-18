@@ -6,9 +6,6 @@ import JeevesLib
 
 class TestLocation(unittest.TestCase):
   def setUp(self):
-    def canSee(owner, ctxt):
-      return owner == ctxt or owner.isFriends(ctxt)
-
     # Need to initialize the JeevesLib environment.
     JeevesLib.init()
 
@@ -17,17 +14,24 @@ class TestLocation(unittest.TestCase):
     self.cityCambridge = City("Cambridge", self.countryUSA)
     self.gpsMIT = GPS(40.589063, -74.159178, self.cityCambridge) 
 
-    # Define some users.
+    # Define some users with their locations.
+    # Alice's location is restricted to Alice and her friends.
     aliceLabel = JeevesLib.mkLabel()
-    JeevesLib.restrict(aliceLabel, lambda oc: canSee(self.alice, oc))
+    JeevesLib.restrict(aliceLabel
+      , lambda oc: owner == oc or owner.isFriends(oc))
     self.alice = User(0
       , JeevesLib.mkSensitive(aliceLabel, self.gpsMIT, self.cityCambridge))
+    
+    # Bob's location has no policies.
     self.bob = User(1, self.cityCambridge)
+
+    
     self.carol = User(2, self.countryUSA)
 
     self.alice.addFriend(self.bob)
     self.bob.addFriend(self.alice)
 
+  # This makes sure the isIn function works properly.
   def testIsin(self):
     self.assertTrue(self.cityCambridge.isIn(self.cityCambridge))
     self.assertTrue(self.cityCambridge.isIn(self.countryUSA))
@@ -37,6 +41,7 @@ class TestLocation(unittest.TestCase):
     self.assertFalse(self.countryUSA.isIn(self.gpsMIT))
     self.assertFalse(self.countryUSA.isIn(self.cityCambridge))
 
+  # This makes sure the isFriends function works properly.
   def testIsFriends(self):
     self.assertTrue(
       JeevesLib.concretize(self.alice, self.alice.isFriends(self.bob)))

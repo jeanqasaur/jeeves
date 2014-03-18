@@ -66,7 +66,10 @@ def request_wrapper(view_fn):
 
 @login_required
 def index(request):
-    return render_to_response("index.html", RequestContext(request))
+    user = request.user
+    return render_to_response("index.html"
+      , {'first_name': user.first_name}
+      , RequestContext(request))
 
 @login_required
 @request_wrapper
