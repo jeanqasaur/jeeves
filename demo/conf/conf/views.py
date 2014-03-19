@@ -29,6 +29,7 @@ def register_account(request):
             UserProfile.objects.create(user=user,
                 name=request.POST.get('name',''),
                 affiliation=request.POST.get('affiliation',''),
+                level='normal',
             )
 
             user = authenticate(username=request.POST['username'],
@@ -174,7 +175,7 @@ def submit_view(request):
 
         return ("redirect", "paper?id=%s" % paper.jeeves_id)
 
-    pcs = User.objects.all()
+    pcs = [up.user for up in UserProfile.objects.filter(level='pc').all()]
     pc_conflicts = [uppc.pc for uppc in UserPCConflict.objects.filter(user=request.user)]
     
     return ("submit.html", {
@@ -196,7 +197,7 @@ def profile_view(request):
     if profile == None:
         profile = UserProfile(user=user)
         profile.level = 'normal'
-    pcs = User.objects.all()
+    pcs = [up.user for up in UserProfile.objects.filter(level='pc').all()]
     
     if request.method == 'POST':
         profile.name = request.POST.get('name', '')
