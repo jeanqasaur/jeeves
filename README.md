@@ -20,6 +20,7 @@ For core Jeeves, we use the following packages:
 
 The Jeeves web framework uses the the following Python packages:
 * We implement our web framework by extending [Django](https://www.djangoproject.com/). Install with ```easy_install``` or ```pip```.
+* For the frontend we use Jinja on top of Django. You can install the ```django-jinja``` package using ```pip```.
 * [Mock](http://www.voidspace.org.uk/python/mock/) for mocking and testing. You will need this to run the database-related tests. Install with ```easy_install``` or ```pip```.
 
 ### Other
