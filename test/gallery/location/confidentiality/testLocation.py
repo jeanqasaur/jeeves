@@ -52,6 +52,8 @@ class TestLocation(unittest.TestCase):
     self.assertFalse(
       JeevesLib.concretize(self.alice, self.carol.isFriends(self.alice)))
 
+  # This makes sure locations can only be viewed if they are supposed to be
+  # viewed.
   def testViewLocation(self):
     # Alice and Bob can see the high-confidentiality version of Alice's
     # location, but Carol cannot.

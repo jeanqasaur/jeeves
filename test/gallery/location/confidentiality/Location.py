@@ -19,6 +19,9 @@ class Location:
   @abstractmethod
   def isIn(self, loc):
     return False
+  @abstractmethod 
+  def isNear(self, loc, radius=50.0):
+    return False
 class GPS(Location):
   def __init__(self, latitude, longitude, city=None):
     self.latitude = latitude

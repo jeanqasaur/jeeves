@@ -71,6 +71,9 @@ def index(request):
       , {'first_name': user.first_name}
       , RequestContext(request))
 
+def test(request):
+  return render_to_response("test.html", RequestContext(request))
+
 @login_required
 @request_wrapper
 @jeeves

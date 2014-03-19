@@ -6,27 +6,34 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta name="description" content="Jeeves demo conferance management system" />
 
-  	<title>Jeeves Unchained</title>
+  	<title>JeevesConf</title>
 
-    <link rel="stylesheet" href="{{ static('default.css') }}" type="text/css" />
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
-
+    <!-- Bootstrap core CSS -->
+    <link href="{{ static('css/bootstrap.min.css') }}" rel="stylesheet">
+    <!-- Bootstrap theme -->
+    <link href="{{ static('css/bootstrap-theme.min.css') }}" rel="stylesheet">
+    <link href="{{ static('css/theme.css') }}" rel="stylesheet">
 </head>
-<body>
-    <div id="wrapper">
-		  {% include 'navbar.html' %}
-      <div id="content">
-			<div id="loginbar">
-				{% if user.is_authenticated %}
-					<p>You are logged in as {{ user }}. <a href="/accounts/logout">Log out</a></p>
-				{% else %}
-                    <p>You are not logged in. <a href="/accounts/login">Log in</a> or <a href="/register">Register</a></p>
-				{% endif %}
-			</div>
-			{% block content %}Content goes here{% endblock %}
-      </div>
-      {% include 'footer.html' %}
+<body role="document">
+  {% include 'navbar.html' %}
+	<div class="container">
+    <div class="alert alert-info">
+	  {% if user.is_authenticated %}
+				<p>You are logged in as {{ user }}. <a href="/accounts/logout">Log out</a></p>
+		{% else %}
+        <p>You are not logged in. <a href="/accounts/login">Log in</a> or <a href="/register">Register</a></p>
+		{% endif %}
     </div>
+		<div class="jumbotron">	
+    {% block content %}Content goes here{% endblock %}
+    </div>
+  </div>
+  {% include 'footer.html' %}
+<!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="{{ static('js/bootstrap.min.js') }}"></script>
 </body>
 
 </html>
