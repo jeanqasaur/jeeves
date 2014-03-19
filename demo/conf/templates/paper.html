@@ -62,13 +62,48 @@
             </ul>
         </div>
 
+        <!--
         <div>
             <a href="/submit_review?id={{concretize(paper.jeeves_id)}}">Submit review</a>
         </div>
+        -->
 
-        <div>
-            <a href="/submit_comment?id={{concretize(paper.jeeves_id)}}">Submit comment</a>
-        </div>
+        <form method="post" action="">
+            {% csrf_token %}
+            Leave a comment: <br />
+            <input type="hidden" name="add_comment" value="true" />
+            <textarea name="comment"></textarea>
+            <input type="submit" value="Submit" />
+        </form>
+
+        <form method="post" action="">
+            {% csrf_token %}
+            Leave a review: <br />
+            <input type="hidden" name="add_review" value="true" />
+            <textarea name="review"></textarea>
+            <input type="submit" value="Submit" />
+
+            Novelty:
+            <select name="score_novelty">
+                <option value="1">1</option> <option value="2">2</option> <option value="3">3</option> <option value="4">4</option> <option value="5">5</option> <option value="6">6</option> <option value="7">7</option> <option value="8">8</option> <option value="9">9</option> <option value="10">10</option>
+            </select><br />
+
+            Presentation:
+            <select name="score_presentation">
+                <option value="1">1</option> <option value="2">2</option> <option value="3">3</option> <option value="4">4</option> <option value="5">5</option> <option value="6">6</option> <option value="7">7</option> <option value="8">8</option> <option value="9">9</option> <option value="10">10</option>
+            </select><br />
+
+            Technical:
+            <select name="score_technical">
+                <option value="1">1</option> <option value="2">2</option> <option value="3">3</option> <option value="4">4</option> <option value="5">5</option> <option value="6">6</option> <option value="7">7</option> <option value="8">8</option> <option value="9">9</option> <option value="10">10</option>
+            </select><br />
+
+            Confidence:
+            <select name="score_confidence">
+                <option value="1">1</option> <option value="2">2</option> <option value="3">3</option> <option value="4">4</option> <option value="5">5</option> <option value="6">6</option> <option value="7">7</option> <option value="8">8</option> <option value="9">9</option> <option value="10">10</option>
+            </select><br />
+        </form>
+
     {% else %}
         Not found. The planets must not be aligned correctly, or perhaps no paper with the given 'id' exists.
     {% endif %}

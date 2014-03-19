@@ -21,14 +21,15 @@ def register_account(request):
 
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
-        profile_form = forms.ProfileForm(request.POST)
-        if form.is_valid() and profile_form.is_valid():
+        if form.is_valid():
             user = form.save()
+            user.email = request.POST.get('email', None)
+            user.save()
 
-            profile = UserProfile()
-            profile.user = user
-            profile_form = forms.ProfileForm(request.POST, instance=profile)
-            profile_form.save()
+            UserProfile.objects.create(user=user,
+                name=request.POST.get('name',''),
+                affiliation=request.POST.get('affiliation',''),
+            )
 
             user = authenticate(username=request.POST['username'],
                          password=request.POST['password1'])
@@ -36,12 +37,10 @@ def register_account(request):
             return HttpResponseRedirect("index")
     else:
         form = UserCreationForm()
-        profile_form = forms.ProfileForm()
 
     return render_to_response("registration/account.html", RequestContext(request,
         {
             'form' : form,
-            'profile_form' : profile_form,
         }))
 
 def request_wrapper(view_fn):
@@ -77,9 +76,37 @@ def test(request):
 @login_required
 @request_wrapper
 @jeeves
+def papers_view(request):
+    papers = Paper.objects.all()
+    for paper in papers:
+        paper.author_profile = UserProfile.objects.get(user=paper.author)
+        paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
+        paper.latest_version = paper_versions[-1] if len(paper_versions) > 0 else None
+
+    return ("papers.html", {
+        'papers' : papers
+    })
+
+@login_required
+@request_wrapper
+@jeeves
 def paper_view(request):
     paper = Paper.objects.get(jeeves_id=request.GET.get('id', ''))
     if paper != None:
+        if request.method == 'POST':
+            if request.POST.get('add_comment', 'false') == 'true':
+                Comment.objects.create(paper=paper, user=request.user,
+                            contents=request.POST.get('comment', ''))
+
+            elif request.POST.get('add_review', 'false') == 'true':
+                Review.objects.create(paper=paper, reviewer=request.user,
+                            contents=request.POST.get('review', ''),
+                            score_novelty=int(request.POST.get('score_novelty', '1')),
+                            score_presentation=int(request.POST.get('score_presentation', '1')),
+                            score_technical=int(request.POST.get('score_technical', '1')),
+                            score_confidence=int(request.POST.get('score_confidence', '1')),
+                          )
+
         paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
         coauthors = PaperCoauthor.objects.filter(paper=paper).all()
         latest_abstract = paper_versions[-1].abstract if len(paper_versions) > 0 else None
