@@ -12,11 +12,20 @@
     <link href="{{ static('css/bootstrap.min.css') }}" rel="stylesheet">
     <!-- Bootstrap theme -->
     <link href="{{ static('css/bootstrap-theme.min.css') }}" rel="stylesheet">
-    <link href="{{ static('css/theme.css') }}" rel="stylesheet">
+
+    <link href="{{ static('css/sticky-footer-navbar.css') }}" rel="stylesheet">
+    <link href="{{ static('css/modal.css') }}" rel="stylesheet">
 </head>
+
 <body role="document">
   {% include 'navbar.html' %}
-	<div class="container">
+
+  <div class="jumbotron">
+    <h1>Jeeves Conf</h1>
+    <p>A conference management system powered by the Jeeves programming language for automatically enforcing privacy policies.</p>
+  </div>
+
+  <div class="container">
     <div class="alert alert-info">
 	  {% if user.is_authenticated %}
 				<p>You are logged in as {{ user }}. <a href="/accounts/logout">Log out</a></p>
@@ -24,16 +33,33 @@
         <p>You are not logged in. <a href="/accounts/login">Log in</a> or <a href="/register">Register</a></p>
 		{% endif %}
     </div>
-		<div class="jumbotron">	
-    {% block content %}Content goes here{% endblock %}
+    
+    <div class="jumbotron">
+      {% block content %}Content goes here{% endblock %}
     </div>
   </div>
+
   {% include 'footer.html' %}
+
 <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="{{ static('js/bootstrap.min.js') }}"></script>
 </body>
+    <script>
+      var myApp;
+myApp = myApp || (function () {
+    var pleaseWaitDiv = $('<div class="modal modal-static fade" id="processing-modal" role="dialog" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-body"><div class="text-center"><img src="http://www.travislayne.com/images/loading.gif" class="icon" /><h4>Processing...</h4></div></div></div></div></div>');
+    return {
+        showPleaseWait: function() {
+            pleaseWaitDiv.modal();
+        },
+        hidePleaseWait: function () {
+            pleaseWaitDiv.modal('hide');
+        },
 
+    };
+})();
+    </script>
 </html>
