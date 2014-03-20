@@ -5,24 +5,32 @@
       <h1>Register.</h1>
     </div>
 
-    <form method="post" action="">
-    	{% csrf_token %}
-    	<table>
-    	    {{ form | safe }}
-
-            <tr>
-                <td> Email address: </td>
-                <td> <input type="text" name="email" value="" /> </td>
-            </tr>
-            <tr>
-                <td> Name: </td>
-                <td> <input type="text" name="name" value="" /> </td>
-            </tr>
-            <tr>
-                <td> Affiliation: </td>
-                <td> <input type="text" name="affiliation" value="" /> </td>
-            </tr>
-        </table>
-        <input type="submit" value="Register" />
+    <form method="post" action="" role="form">{% csrf_token %}
+      {% include 'registration/form.html' %}
+      <div class="form-group">
+        <label for="email" class="control-label">Email address</label>
+        <div class="row">
+          <div class="col-xs-4">
+            <input type="email" class="form-control" id="email" placeholder="Enter email">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="name" class="control-label">Name</label>
+        <div class="row">
+          <div class="col-xs-4">
+            <input type="text" class="form-control" id="name" placeholder="Enter name">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="affiliation" class="control-label">Affiliation</label>
+        <div class="row">
+          <div class="col-xs-4">
+            <input type="text" class="form-control" id="affiliation" placeholder="Enter affiliation">
+          </div>
+        </div>
+      </div>
+      <button type="submit" value="Register" class="btn btn-default">Register</button>
     </form>
 {% endblock %}
