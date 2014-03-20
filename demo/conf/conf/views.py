@@ -62,23 +62,29 @@ def request_wrapper(view_fn):
         concretize = lambda val : JeevesLib.concretize(request.user, val)
         context_dict['concretize'] = concretize
 
-        profile = UserProfile.objects.get(user=request.user)
+        profile = UserProfile.objects.get(username=request.user.username)
         context_dict['is_admin'] = profile != None and profile.level == "chair"
 
         context_dict['is_logged_in'] = (request.user and
-                                        request.user.is_authenticated and
-                                        (not request.user.is_anonymous))
+                                        request.user.is_authenticated() and
+                                        (not request.user.is_anonymous()))
 
         return render_to_response(template_name, RequestContext(request, context_dict))
     real_view_fn.__name__ = view_fn.__name__
     return real_view_fn
 
 @login_required
+@request_wrapper
+@jeeves
 def index(request):
-    user = request.user
-    return render_to_response("index.html"
-      , {'first_name': user.first_name}
-      , RequestContext(request))
+    user = UserProfile.objects.get(username=request.user.username)
+
+    return ("index.html", {'name': user.name})
+
+@request_wrapper
+@jeeves
+def about_view(request):
+  return ("about.html", {})
 
 def test(request):
   return render_to_response("test.html", RequestContext(request))
@@ -273,7 +279,6 @@ def users_view(request):
             query_param_name = 'level-' + profile.username
             level = request.POST.get(query_param_name, '')
             if level in ['normal', 'pc', 'chair']:
-                print 'HELLO'
                 profile.level = level
                 profile.save()
 
@@ -366,5 +371,3 @@ def search_view(request):
         'results' : results,
     }))
 
-def about_view(request):
-  return render_to_response("about.html", RequestContext(request))
