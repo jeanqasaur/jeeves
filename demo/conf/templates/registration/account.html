@@ -5,10 +5,21 @@
     <form method="post" action="">
     	{% csrf_token %}
     	<table>
-            {{ form }}
-            {{ profile_form }}
+    	    {{ form | safe }}
+
+            <tr>
+                <td> Email address: </td>
+                <td> <input type="text" name="email" value="" /> </td>
+            </tr>
+            <tr>
+                <td> Name: </td>
+                <td> <input type="text" name="name" value="" /> </td>
+            </tr>
+            <tr>
+                <td> Affiliation: </td>
+                <td> <input type="text" name="affiliation" value="" /> </td>
+            </tr>
         </table>
         <input type="submit" value="Register" />
-        <a href="/registration/password_reset_form">Forgot password?</a>
     </form>
 {% endblock %}
