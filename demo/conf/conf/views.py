@@ -30,7 +30,7 @@ def register_account(request):
                 name=request.POST.get('name',''),
                 affiliation=request.POST.get('affiliation',''),
                 level='normal',
-                email=request.POST.get('email', None),
+                email=request.POST.get('email', ''),
             )
 
             user = authenticate(username=request.POST['username'],
