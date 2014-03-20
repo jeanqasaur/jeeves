@@ -6,7 +6,32 @@
     </div>
 
     <form method="post" action="" role="form">{% csrf_token %}
-      {% include 'registration/form.html' %}
+      <div class="form-group">
+        <label class="control-label"><a rel="tooltip" title="Visible to everyone."><span class="glyphicon glyphicon-eye-open"></span></a> Username</label> 
+        <div class="row">
+          <div class="col-xs-4">
+            <input class="form-control" id="id_username" maxlength="30" name="username" type="text" required/>
+          </div>
+        </div>
+        <p class="help-inline"><small>Required. 30 characters or fewer. Letters, digits and @/./+/-/_ only.</small></p>                 
+      </div>       
+      <div class="form-group">
+        <label class="control-label"><a rel="tooltip" title="Visible to only you."><span class="glyphicon glyphicon-eye-close"></span></a> Password</label>
+        <div class="row">
+          <div class="col-xs-4">
+            <input class="form-control" id="id_password1" name="password1" type="password" required />
+          </div>
+        </div>
+      </div>       
+      <div class="form-group">
+        <label class="control-label"><a rel="tooltip" title="Visible to only you."><span class="glyphicon glyphicon-eye-close"></span></a> Password confirmation</label>
+        <div class="row">
+          <div class="col-xs-4">
+            <input class="form-control" id="id_password2" name="password2" type="password" required />
+          </div>
+        </div>
+        <p class="help-inline"><small>Enter the same password as above, for verification.</small></p>               
+      </div>       
       <div class="form-group">
         <label for="email" class="control-label"><a rel="tooltip" title="Visible to you and the PC chair."><span class="glyphicon glyphicon-eye-close"></span></a> Email</label>
         <div class="row">
