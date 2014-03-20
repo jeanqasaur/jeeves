@@ -220,6 +220,7 @@ def profile_view(request):
         profile.name = request.POST.get('name', '')
         profile.affiliation = request.POST.get('affiliation', '')
         profile.acm_number = request.POST.get('acm_number', '')
+        profile.email = request.POST.get('email', '')
         profile.save()
 
         UserPCConflict.objects.filter(user=profile).delete()
@@ -236,6 +237,7 @@ def profile_view(request):
         "affiliation": profile.affiliation,
         "acm_number": profile.acm_number,
         "pc_conflicts": pc_conflicts,
+        "email": profile.email,
         "pcs": pcs,
     })
 
