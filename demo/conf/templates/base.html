@@ -28,7 +28,7 @@
 
   <div class="container">
     <div class="alert alert-info">
-	  {% if user.is_authenticated %}
+	  {% if logged_in %}
 				<p>You are logged in as {{ user }}. <a href="/accounts/logout">Log out</a></p>
 		{% else %}
         <p>You are not logged in. <a href="/accounts/login">Log in</a> or <a href="/register">Register</a></p>
