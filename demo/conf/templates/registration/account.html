@@ -8,7 +8,7 @@
     <form method="post" action="" role="form">{% csrf_token %}
       {% include 'registration/form.html' %}
       <div class="form-group">
-        <label for="email" class="control-label">Email</label>
+        <label for="email" class="control-label"><a rel="tooltip" title="Visible to you and the PC chair."><span class="glyphicon glyphicon-eye-close"></span></a> Email</label>
         <div class="row">
           <div class="col-xs-4">
             <input type="email" class="form-control" name="email" id="email" placeholder="Enter email">
@@ -16,7 +16,7 @@
         </div>
       </div>
       <div class="form-group">
-        <label for="name" class="control-label">Name</label>
+        <label for="name" class="control-label"><a rel="tooltip" title="Visible to everyone."><span class="glyphicon glyphicon-eye-open"></span></a> Name</label>
         <div class="row">
           <div class="col-xs-4">
             <input type="text" class="form-control" name="name" id="name" placeholder="Enter name">
@@ -24,7 +24,7 @@
         </div>
       </div>
       <div class="form-group">
-        <label for="affiliation" class="control-label">Affiliation</label>
+        <label for="affiliation" class="control-label"><a rel="tooltip" title="Visible to everyone."><span class="glyphicon glyphicon-eye-open"></span></a> Affiliation</label>
         <div class="row">
           <div class="col-xs-4">
             <input type="text" class="form-control" name="affiliation" id="affiliation" placeholder="Enter affiliation">
