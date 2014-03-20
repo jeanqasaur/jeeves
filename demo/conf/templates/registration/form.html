@@ -1,0 +1,23 @@
+      <fieldset>
+        {% for field in form %}
+            {% if field.errors %}
+                <div class="form-group error">
+                    <label class="control-label">{{ field.label }}</label> 
+                    <div class="controls">{{ field | safe }}
+                        <span class="help-inline">
+                            {% for error in  field.errors %}{{ error }}{% endfor %}
+                        </span>
+                    </div>
+                </div>
+            {% else %}
+                <div class="form-group">
+                    <label class="control-label">{{ field.label }}</label> 
+                    <div class="controls">{{ field | safe }}
+                        {% if field.help_text %}
+                            <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </fieldset>
