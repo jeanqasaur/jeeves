@@ -98,3 +98,6 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
+
+# possible phases are submit, review, final
+CONF_PHASE = 'submit'

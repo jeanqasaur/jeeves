@@ -262,7 +262,7 @@ class JeevesModel(models.Model):
         label = self.acquire_label(field_name)
         faceted_field_value = partialEval(
           JeevesLib.mkSensitive(label, public_field_value, private_field_value),
-          JeevesLib.jeevesState.pathenv.conditions
+          JeevesLib.jeevesState.pathenv.getEnv()
         )
         setattr(self, field_name, faceted_field_value)
 

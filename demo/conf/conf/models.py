@@ -3,6 +3,11 @@ from django.db.models import Model, ManyToManyField, ForeignKey, CharField, Text
 from jeevesdb.JeevesModel import JeevesModel as Model
 from jeevesdb.JeevesModel import JeevesForeignKey as ForeignKey
 
+from sourcetrans.macro_module import macros, jeeves
+import JeevesLib
+
+from settings import CONF_PHASE as phase
+
 class UserProfile(Model):
     username = CharField(max_length=1024)
     email = CharField(max_length=1024)
@@ -15,6 +20,15 @@ class UserProfile(Model):
                     choices=(('normal', 'normal'),
                         ('pc', 'pc'),
                         ('chair', 'chair')))
+
+    @staticmethod
+    @jeeves
+    def jeeves_get_private_email(user):
+        return ""
+    @staticmethod
+    @jeeves
+    def jeeves_restrict_email(user, ctxt):
+        return user == ctxt or ctxt.level == 'chair'
 
     class Meta:
         db_table = 'user_profiles'
@@ -32,18 +46,29 @@ class UserPCConflict(Model):
 
     @staticmethod
     def jeeves_restrict_user(uppc, ctxt):
-        return uppc.user == ctxt
+        return uppc == ctxt
     @staticmethod
     def jeeves_restrict_pc(uppc, ctxt):
-        return uppc.user == ctxt
+        return uppc == ctxt
 
 class Paper(Model):
     #latest_version = ForeignKey('PaperVersion', related_name='latest_version_of', null=True)
     # add this below because of cyclic dependency; awkward hack
     # (limitation of JeevesModel not ordinary Model)
     author = ForeignKey(UserProfile)
-
     accepted = BooleanField()
+
+    @staticmethod
+    @jeeves
+    def jeeves_get_private_author(paper):
+        return None
+    @staticmethod
+    @jeeves
+    def jeeves_restrict_author(paper, ctxt):
+        if phase == 'final':
+            return True
+        else:
+            return author == ctxt or ctxt.level == 'chair'
 
     class Meta:
         db_table = 'papers'
@@ -81,6 +106,38 @@ class PaperVersion(Model):
 
     class Meta:
         db_table = 'paper_versions'
+    
+    @staticmethod
+    def jeeves_get_private_paper(pv):
+        return None
+    @staticmethod
+    @jeeves
+    def jeeves_restrict_paper(pv, ctxt):
+        return pv.paper.author == ctxt or ctxt.level == 'pc' or ctxt.level == 'chair'
+
+    @staticmethod
+    def jeeves_get_private_title(pv):
+        return ""
+    @staticmethod
+    @jeeves
+    def jeeves_restrict_title(pv, ctxt):
+        return pv.paper.author == ctxt or ctxt.level == 'pc' or ctxt.level == 'chair'
+
+    @staticmethod
+    def jeeves_get_private_contents(pv):
+        return ""
+    @staticmethod
+    @jeeves
+    def jeeves_restrict_contents(pv, ctxt):
+        return pv.paper.author == ctxt or ctxt.level == 'pc' or ctxt.level == 'chair'
+
+    @staticmethod
+    def jeeves_get_private_abstract(pv):
+        return ""
+    @staticmethod
+    @jeeves
+    def jeeves_restrict_abstract(pv, ctxt):
+        return pv.paper.author == ctxt or ctxt.level == 'pc' or ctxt.level == 'chair'
 
 # see comment above
 Paper.latest_version = ForeignKey(PaperVersion, related_name='latest_version_of',)
@@ -102,6 +159,40 @@ class Review(Model):
     score_presentation = IntegerField()
     score_technical = IntegerField()
     score_confidence = IntegerField()
+
+    @staticmethod
+    def jeeves_get_private_paper(review):
+        return None
+    @staticmethod
+    def jeeves_get_private_reviewer(review):
+        return None
+    @staticmethod
+    def jeeves_get_private_contents(review):
+        return ""
+    @staticmethod
+    def jeeves_get_private_score_novelty(review):
+        return -1
+    @staticmethod
+    def jeeves_get_private_score_presentation(review):
+        return -1
+    @staticmethod
+    def jeeves_get_private_score_technical(review):
+        return -1
+    @staticmethod
+    def jeeves_get_private_score_confidence(review):
+        return -1
+
+    @staticmethod
+    @jeeves
+    def jeeves_restrict_paper(review, ctxt):
+        return ctxt.level == 'chair' or ctxt.level == 'pc' or \
+                (phase == 'final' and review.paper.author == ctxt)
+    jeeves_restrict_reviewer = jeeves_restrict_paper
+    jeeves_restrict_contents = jeeves_restrict_paper
+    jeeves_restrict_score_novelty = jeeves_restrict_paper
+    jeeves_restrict_score_presentation = jeeves_restrict_paper
+    jeeves_restrict_score_technical = jeeves_restrict_paper
+    jeeves_restrict_score_confidence = jeeves_restrict_paper
 
     class Meta:
         db_table = 'reviews'

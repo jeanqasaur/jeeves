@@ -336,7 +336,7 @@ def jfun3(f, kw, it, key, val, args_concrete, kw_concrete):
       thn = jfun3(f, kw, it, key, val.thn, args_concrete, kw_concrete)
     with NegativeVariable(val.cond):
       els = jfun3(f, kw, it, key, val.els, args_concrete, kw_concrete)
-    return Facet(arg.cond, thn, els)
+    return Facet(val.cond, thn, els)
 
 def evalToConcrete(f):
     g = partialEval(fexpr_cast(f), jeevesState.pathenv.getEnv())

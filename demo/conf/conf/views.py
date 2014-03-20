@@ -45,6 +45,20 @@ def register_account(request):
             'form' : form,
         }))
 
+@jeeves
+def add_to_context(context_dict, request, template_name):
+    profile = UserProfile.objects.get(username=request.user.username)
+
+    template_name = JeevesLib.concretize(profile, template_name)
+    concretize = lambda val : JeevesLib.concretize(profile, val)
+    context_dict['concretize'] = concretize
+
+    context_dict['is_admin'] = profile != None and profile.level == "chair"
+
+    context_dict['is_logged_in'] = (request.user and
+                                    request.user.is_authenticated() and
+                                    (not request.user.is_anonymous()))
+
 def request_wrapper(view_fn):
     def real_view_fn(request):
         try:
@@ -58,16 +72,7 @@ def request_wrapper(view_fn):
             path = context_dict
             return HttpResponseRedirect(path)
 
-        template_name = JeevesLib.concretize(request.user, template_name)
-        concretize = lambda val : JeevesLib.concretize(request.user, val)
-        context_dict['concretize'] = concretize
-
-        profile = UserProfile.objects.get(username=request.user.username)
-        context_dict['is_admin'] = profile != None and profile.level == "chair"
-
-        context_dict['is_logged_in'] = (request.user and
-                                        request.user.is_authenticated() and
-                                        (not request.user.is_anonymous()))
+        add_to_context(context_dict, request, template_name)
 
         return render_to_response(template_name, RequestContext(request, context_dict))
     real_view_fn.__name__ = view_fn.__name__

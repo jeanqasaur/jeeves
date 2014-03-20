@@ -12,12 +12,12 @@
     <div class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li class="active"><a href="/index">Home</a></li>
-        {% if is_logged_in %}
+        {% if concretize and concretize(is_logged_in) %}
         <li><a href="/submit">Submit</a></li>
         <li><a href="/accounts/profile" onClick="myApp.showPleaseWait();">Profile</a></li>
         <li><a href="/papers">Papers</a></li>
         {% endif %}
-        {% if is_admin %}
+        {% if concretize and concretize(is_admin) %}
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Admin<b class="caret"></b></a>
             <ul class="dropdown-menu">
@@ -26,7 +26,7 @@
             </ul>
           </li>
         {% endif %}
-        {% if is_logged_in %}
+        {% if concretize and concretize(is_logged_in) %}
           <li><a href="/accounts/logout">Log Out</a></li>
         {% else %}
           <li><a href="/register">Register</a></li>
