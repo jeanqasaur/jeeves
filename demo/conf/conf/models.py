@@ -62,7 +62,7 @@ class PaperReviewer(Model):
 class ReviewAssignment(Model):
     paper = ForeignKey(Paper)
     user = ForeignKey(User)
-    type = CharField(max_length=8, null=False,
+    assign_type = CharField(max_length=8, null=False,
         choices=(('none','none'),
                 ('assigned','assigned'),
                 ('conflict','conflict')))

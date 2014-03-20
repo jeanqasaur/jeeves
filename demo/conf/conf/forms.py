@@ -94,7 +94,7 @@ class SubmitCommentForm(ModelForm):
 class ReviewAssignmentForm(ModelForm):
     class Meta:
         model = ReviewAssignment
-        fields = ['type', 'user', 'paper']
+        fields = ['assign_type', 'user', 'paper']
         widgets = {
             'user' : HiddenInput(),
             'paper' : HiddenInput(),

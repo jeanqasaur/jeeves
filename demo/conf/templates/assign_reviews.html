@@ -6,23 +6,37 @@
     <form method="get" action="">
         <h4> Select reviewer </h4>
         <select name="reviewer_username">
-            {% for r in possible_reviewers %}
-                <option value="{{r.username}}" {% if r == reviewer %}selected{% endif %}>{{r.username}}</option>
+            {% for r in concretize(possible_reviewers) %}
+                <option value="{{concretize(r.user.username)}}" {% if concretize(r == reviewer) %}selected{% endif %}>{{concretize(r.name)}}</option>
             {% endfor %}
         </select>
         <input type="submit" value="Go" />
     </form>
 
-    <h4> Make assignments </h4>
-    <form method="post" action="">
-    	{% csrf_token %}
-    	{{ formset.management_form }}
-    	<table>
-    	    {% for form in formset.forms %}
-                <tr> <td colspan="2"> {{form.initial.user.username}} </td> </tr>
-    	        {{ form }}
-    	    {% endfor %}
-    	</table>
-        <input type="submit" value="Save" />
-    </form>
+	{% if concretize(reviewer) != None %}
+		<h4> Make assignments </h4>
+		<form method="post" action="">
+			{% csrf_token %}
+			<table>
+				{% for p in concretize(papers_data) %}
+					<tr>
+						<td> {{concretize(p.latest_version.title)}} </td>
+						<td> {{concretize(p.author.name)}} </td>
+						<td>
+							<select name="assignment-{{concretize(p.paper.jeeves_id)}}">
+								<option value="yes" {% if concretize(p.assignment) != None and concretize(p.assignment.assign_type=='assigned') %}selected{% endif %}>Assigned</option>
+								<option value="no" {% if not (concretize(p.assignment) != None and concretize(p.assignment.assign_type=='assigned')) %}selected{% endif %}>Not assigned</option>
+							</select>
+						</td>
+						<td>
+							{% if concretize(p.has_conflict) %}
+								Conflict!
+							{% endif %}
+						</td>
+					</tr>
+				{% endfor %}
+			</table>
+			<input type="submit" value="Save" />
+		</form>
+	{% endif %}
 {% endblock %}
