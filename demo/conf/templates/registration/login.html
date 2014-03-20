@@ -1,13 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="page-header">
-      <h1>Log In.</h1>
-    </div>
-    <form class="form-horizontal" method="post" action="">{% csrf_token %}
-      {% include 'registration/form.html' %}
-    <div class="form-actions">
-        <button type="submit" class="btn btn-primary" >Log In</button>
-    </div>
-    </form>
+    <form role="form" class="form-signin" method="post" action="">{% csrf_token %}
+      <h2 class="form-signin-heading">Log In.</h2>
+      <input type="text" class="form-control" id="id_username" maxlength="254" name="username" placeholder="Username" required autofocus>
+      <input type="password" class="form-control" id="id_password" name="password" placeholder="Password" required>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Let's go!</button>
+     </form>
 {% endblock %}
