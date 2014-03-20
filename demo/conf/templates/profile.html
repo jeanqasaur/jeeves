@@ -4,43 +4,41 @@
     <div class="page-header">
       <h1>Profile.</h1>
     </div>
-    <form method="post" action="">
-    	{% csrf_token %}
-    	<table>
-            <tr>
-                <td> Name: </td>
-                <td> <input type="text" name="name" value="{{ concretize(name) }}" /> </td>
-                <td><a rel="tooltip" title="Visible to everyone."><span class="glyphicon glyphicon-eye-open"></span></td>
-            </tr>
-            <tr>
-                <td> E-mail: </td>
-                <td> <input type="text" name="email" value="{{ concretize(email) }}" /> </td>
-                <td><a rel="tooltip" title="Visible to PC chair."><span class="glyphicon glyphicon-eye-open"></span></td>
-            </tr>
-            <tr>
-                <td> Affiliation: </td>
-                <td> <input type="text" name="affiliation" value="{{concretize(affiliation)}}" /> </td>
-                <td><a rel="tooltip" title="Visible to everyone."><span class="glyphicon glyphicon-eye-open"></span></td>
-            </tr>
-            <!--
-            <tr>
-                <td> ACM Number: </td>
-                <td> <input type="text" name="acm_number" value="{{concretize(acm_number)}}" /> </td>
-                <td><a rel="tooltip" title="Visible to the PC chair."><span class="glyphicon glyphicon-eye-close"></span></td>
-            </tr>
-            -->
-            <tr>
-                <td> PC Conflicts: </td>
-                <td>
-                    {% for pc in concretize(pcs) %}
-                        <input type="checkbox" name="pc_conflicts[]" value="{{concretize(pc.username)}}"
+    <form role="form" method="post" action="">{% csrf_token %}
+      <div class="form-group">
+        <label for="email" class="control-label"><a rel="tooltip" title="Visible to PC chair."><span class="glyphicon glyphicon-eye-close"></span></a> Email</label>
+        <div class="row">
+          <div class="col-xs-4">
+            <input type="email" class="form-control" name="email" id="email" value="{{ concretize(email) }}">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="name" class="control-label"><a rel="tooltip" title="Visible to everyone."><span class="glyphicon glyphicon-eye-open"></span></a> Name</label>
+        <div class="row">
+          <div class="col-xs-4">
+            <input type="text" class="form-control" name="name" id="name" value="{{ concretize(name) }}">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="affiliation" class="control-label"><a rel="tooltip" title="Visible to everyone."><span class="glyphicon glyphicon-eye-open"></span></a> Affiliation</label>
+        <div class="row">
+          <div class="col-xs-4">
+            <input type="text" class="form-control" name="affiliation" id="affiliation" value="{{ concretize(affiliation) }}">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="pc_conflicts[]" class="control-label"><a rel="tooltip" title="Visible to the PC chair."><span class="glyphicon glyphicon-eye-close"></span></a> PC Conflicts</label>
+        {% for pc in concretize(pcs) %}
+          <div class="checkbox">
+            <input type="checkbox" name="pc_conflicts[]" value="{{concretize(pc.username)}}"
                             {% if concretize(pc) in concretize(pc_conflicts) %} checked {% endif %} />
                         <label> {{ concretize(pc.username) }} </label> <br />
-                    {% endfor %}
-                </td>
-                <td><a rel="tooltip" title="Visible to the PC chair."><span class="glyphicon glyphicon-eye-close"></span></td>
-            </tr>
-    	</table>
-        <input type="submit" value="Save" />
+          </div>
+        {% endfor %}
+      </div>
+      <button class="btn btn-default" type="submit" value="Save">Update</button>
     </form>
 {% endblock %}
