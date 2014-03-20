@@ -64,9 +64,9 @@ def request_wrapper(view_fn):
         profile = UserProfile.objects.get(user=request.user)
         context_dict['is_admin'] = profile != None and profile.level == "chair"
 
-        context_dict['logged_in'] = (request.user and
-                                      request.user.is_authenticated and
-                                      (not request.user.is_anonymous))
+        context_dict['is_logged_in'] = (request.user and
+                                        request.user.is_authenticated and
+                                        (not request.user.is_anonymous))
 
         return render_to_response(template_name, RequestContext(request, context_dict))
     real_view_fn.__name__ = view_fn.__name__
