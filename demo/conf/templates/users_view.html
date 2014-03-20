@@ -4,6 +4,11 @@
     <form method="post" action="">
         {% csrf_token %}
         <table>
+            <tr>
+                <th> Name </th>
+                <th> Affiliation </th>
+                <th> E-mail </th>
+                <th> Type </th>
             {% for profile in concretize(user_profiles) %}
                 <tr>
                     <td>
@@ -13,23 +18,18 @@
                         {{concretize(profile.affiliation)}}
                     </td>
                     <td>
-                        {{concretize(profile.user.username)}}
+                        {{concretize(profile.email)}}
                     </td>
                     <td>
-                        {{concretize(profile.user.email)}}
-                    </td>
-                    <td>
-                        <input type="radio" name="level-{{concretize(profile.user.username)}}" value="normal"
+                        <input type="radio" name="level-{{concretize(profile.username)}}" value="normal"
                                 {% if concretize(profile.level) == 'normal' %} checked {% endif %} />
                         Author <br />
-                        <input type="radio" name="level-{{concretize(profile.user.username)}}" value="pc"
+                        <input type="radio" name="level-{{concretize(profile.username)}}" value="pc"
                                 {% if concretize(profile.level) == 'pc' %} checked {% endif %} />
                         PC <br />
-                        <input type="radio" name="level-{{concretize(profile.user.username)}}" value="chair"
+                        <input type="radio" name="level-{{concretize(profile.username)}}" value="chair"
                                 {% if concretize(profile.level) == 'chair' %} checked {% endif %} />
                         Chair <br />
-                    </td>
-                    </td>
                     </td>
                 </tr>
             {% endfor %}

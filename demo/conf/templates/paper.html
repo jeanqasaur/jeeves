@@ -40,7 +40,7 @@
             <ul>
                 {% for review in concretize(reviews) %}
                     <li>
-                        <div> {{concretize(review.reviewer.username)}} at {{concretize(review.time)}} </div>
+                        <div> {{concretize(review.reviewer.name)}} at {{concretize(review.time)}} </div>
                         <div> Comment: <pre>{{concretize(review.contents)}}</pre> </div>
                         <div> Novelty: {{concretize(review.score_novelty)}} </div>
                         <div> Presentation: {{concretize(review.score_presentation)}} </div>
@@ -55,7 +55,7 @@
             <ul>
                 {% for comment in concretize(comments) %}
                     <li>
-                        <div> {{concretize(comment.user.username)}} at {{concretize(comment.time)}} </div>
+                        <div> {{concretize(comment.user.name)}} at {{concretize(comment.time)}} </div>
                         <div> Comment: <pre>{{concretize(comment.contents)}}</pre> </div>
                     </li>
                 {% endfor %}

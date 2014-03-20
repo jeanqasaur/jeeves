@@ -1,12 +1,11 @@
-from django.db.models import Model, ManyToManyField, ForeignKey, CharField, TextField, DateTimeField, IntegerField, FileField
-from django.contrib.auth.models import User
+from django.db.models import Model, ManyToManyField, ForeignKey, CharField, TextField, DateTimeField, IntegerField, FileField, BooleanField
 
-#ForeignKey = ForeignKey # Want this to be a normal ForeignKey for User
 from jeevesdb.JeevesModel import JeevesModel as Model
 from jeevesdb.JeevesModel import JeevesForeignKey as ForeignKey
 
 class UserProfile(Model):
-    user = ForeignKey(User)
+    username = CharField(max_length=1024)
+    email = CharField(max_length=1024)
 
     name = CharField(max_length=1024)
     affiliation = CharField(max_length=1024)
@@ -21,8 +20,8 @@ class UserProfile(Model):
         db_table = 'user_profiles'
 
 class UserPCConflict(Model):
-    user = ForeignKey(User, null=True, related_name='userpcconflict_user')
-    pc = ForeignKey(User, null=True, related_name='userpcconflict_pc')
+    user = ForeignKey(UserProfile, null=True, related_name='userpcconflict_user')
+    pc = ForeignKey(UserProfile, null=True, related_name='userpcconflict_pc')
 
     @staticmethod
     def jeeves_get_private_user(uppc):
@@ -42,14 +41,16 @@ class Paper(Model):
     #latest_version = ForeignKey('PaperVersion', related_name='latest_version_of', null=True)
     # add this below because of cyclic dependency; awkward hack
     # (limitation of JeevesModel not ordinary Model)
-    author = ForeignKey(User)
+    author = ForeignKey(UserProfile)
+
+    accepted = BooleanField()
 
     class Meta:
         db_table = 'papers'
 
 class PaperPCConflict(Model):
     paper = ForeignKey(Paper)
-    pc = ForeignKey(User)
+    pc = ForeignKey(UserProfile)
 
 class PaperCoauthor(Model):
     paper = ForeignKey(Paper)
@@ -57,11 +58,11 @@ class PaperCoauthor(Model):
 
 class PaperReviewer(Model):
     paper = ForeignKey(Paper)
-    reviewer = ForeignKey(User)
+    reviewer = ForeignKey(UserProfile)
 
 class ReviewAssignment(Model):
     paper = ForeignKey(Paper)
-    user = ForeignKey(User)
+    user = ForeignKey(UserProfile)
     assign_type = CharField(max_length=8, null=False,
         choices=(('none','none'),
                 ('assigned','assigned'),
@@ -94,7 +95,7 @@ class Tag(Model):
 class Review(Model):
     time = DateTimeField(auto_now_add=True)
     paper = ForeignKey(Paper)
-    reviewer = ForeignKey(User)
+    reviewer = ForeignKey(UserProfile)
     contents = TextField()
 
     score_novelty = IntegerField()
@@ -108,7 +109,7 @@ class Review(Model):
 class Comment(Model):
     time = DateTimeField(auto_now_add=True)
     paper = ForeignKey(Paper)
-    user = ForeignKey(User)
+    user = ForeignKey(UserProfile)
     contents = TextField()
 
     class Meta:

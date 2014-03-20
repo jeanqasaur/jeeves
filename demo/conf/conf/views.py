@@ -23,13 +23,14 @@ def register_account(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            user.email = request.POST.get('email', None)
             user.save()
 
-            UserProfile.objects.create(user=user,
+            UserProfile.objects.create(
+                username=user.username,
                 name=request.POST.get('name',''),
                 affiliation=request.POST.get('affiliation',''),
                 level='normal',
+                email=request.POST.get('email', None),
             )
 
             user = authenticate(username=request.POST['username'],
@@ -88,7 +89,6 @@ def test(request):
 def papers_view(request):
     papers = Paper.objects.all()
     for paper in papers:
-        paper.author_profile = UserProfile.objects.get(user=paper.author)
         paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
         paper.latest_version = paper_versions[-1] if len(paper_versions) > 0 else None
 
@@ -100,15 +100,17 @@ def papers_view(request):
 @request_wrapper
 @jeeves
 def paper_view(request):
+    user = UserProfile.objects.get(username=request.user.username)
+
     paper = Paper.objects.get(jeeves_id=request.GET.get('id', ''))
     if paper != None:
         if request.method == 'POST':
             if request.POST.get('add_comment', 'false') == 'true':
-                Comment.objects.create(paper=paper, user=request.user,
+                Comment.objects.create(paper=paper, user=user,
                             contents=request.POST.get('comment', ''))
 
             elif request.POST.get('add_review', 'false') == 'true':
-                Review.objects.create(paper=paper, reviewer=request.user,
+                Review.objects.create(paper=paper, reviewer=user,
                             contents=request.POST.get('review', ''),
                             score_novelty=int(request.POST.get('score_novelty', '1')),
                             score_presentation=int(request.POST.get('score_presentation', '1')),
@@ -122,7 +124,7 @@ def paper_view(request):
         latest_title = paper_versions[-1].title if len(paper_versions) > 0 else None
         reviews = Review.objects.filter(paper=paper).order_by('-time').all()
         comments = Comment.objects.filter(paper=paper).order_by('-time').all()
-        author = UserProfile.objects.get(user=request.user)
+        author = user
     else:
         paper = None
         paper_versions = []
@@ -150,6 +152,8 @@ def set_random_name(contents):
 @request_wrapper
 @jeeves
 def submit_view(request):
+    user = UserProfile.objects.get(username=request.user.username)
+
     if request.method == 'POST':
         coauthors = request.POST.getlist('coauthors[]')
         title = request.POST.get('title', None)
@@ -165,7 +169,7 @@ def submit_view(request):
                 'error' : 'Please fill out all fields'
             })
 
-        paper = Paper.objects.create(author=request.user)
+        paper = Paper.objects.create(author=user, accepted=False)
         for coauthor in coauthors:
             if coauthor != "":
                 PaperCoauthor.objects.create(paper=paper, author=coauthor)
@@ -178,13 +182,13 @@ def submit_view(request):
         )
 
         for conf in request.POST.getlist('pc_conflicts[]'):
-            new_pc_conflict = User.objects.get(username=conf)
+            new_pc_conflict = UserProfile.objects.get(username=conf)
             PaperPCConflict.objects.create(paper=paper, pc=new_pc_conflict)
 
         return ("redirect", "paper?id=%s" % paper.jeeves_id)
 
-    pcs = [up.user for up in UserProfile.objects.filter(level='pc').all()]
-    pc_conflicts = [uppc.pc for uppc in UserPCConflict.objects.filter(user=request.user)]
+    pcs = UserProfile.objects.filter(level='pc').all()
+    pc_conflicts = [uppc.pc for uppc in UserPCConflict.objects.filter(user=user)]
     
     return ("submit.html", {
         'coauthors' : [],
@@ -200,12 +204,11 @@ def submit_view(request):
 @request_wrapper
 @jeeves
 def profile_view(request):
-    user = request.user
-    profile = UserProfile.objects.get(user=user)
+    profile = UserProfile.objects.get(username=request.user.username)
     if profile == None:
-        profile = UserProfile(user=user)
+        profile = UserProfile(username=request.user.username)
         profile.level = 'normal'
-    pcs = [up.user for up in UserProfile.objects.filter(level='pc').all()]
+    pcs = UserProfile.objects.filter(level='pc').all()
     
     if request.method == 'POST':
         profile.name = request.POST.get('name', '')
@@ -213,14 +216,14 @@ def profile_view(request):
         profile.acm_number = request.POST.get('acm_number', '')
         profile.save()
 
-        UserPCConflict.objects.filter(user=user).delete()
+        UserPCConflict.objects.filter(user=profile).delete()
         pc_conflicts = []
         for conf in request.POST.getlist('pc_conflicts[]'):
-            new_pc_conflict = User.objects.get(username=conf)
-            UserPCConflict.objects.create(user=user, pc=new_pc_conflict)
+            new_pc_conflict = UserProfile.objects.get(username=conf)
+            UserPCConflict.objects.create(user=profile, pc=new_pc_conflict)
             pc_conflicts.append(new_pc_conflict)
     else:
-        pc_conflicts = [uppc.pc for uppc in UserPCConflict.objects.filter(user=user)]
+        pc_conflicts = [uppc.pc for uppc in UserPCConflict.objects.filter(user=profile)]
 
     return ("profile.html", {
         "name": profile.name,
@@ -232,6 +235,8 @@ def profile_view(request):
 
 @login_required
 def submit_review_view(request):
+    user = UserProfile.objects.get(username=request.user.username)
+
     try:
         if request.method == 'GET':
             paper_id = int(request.GET['id'])
@@ -240,7 +245,7 @@ def submit_review_view(request):
         paper = Paper.objects.filter(id=paper_id).get()
         review = Review()
         review.paper = paper
-        review.reviewer = request.user
+        review.reviewer = user
         if request.method == 'POST':
             form = forms.SubmitReviewForm(request.POST, instance=review)
             if form.is_valid():
@@ -265,7 +270,7 @@ def users_view(request):
 
     if request.method == 'POST':
         for profile in user_profiles:
-            query_param_name = 'level-' + profile.user.username
+            query_param_name = 'level-' + profile.username
             level = request.POST.get(query_param_name, '')
             if level in ['normal', 'pc', 'chair']:
                 print 'HELLO'
@@ -278,6 +283,8 @@ def users_view(request):
 
 @login_required
 def submit_comment_view(request):
+    user = UserProfile.objects.get(username=request.user.username)
+
     try:
         if request.method == 'GET':
             paper_id = int(request.GET['id'])
@@ -286,7 +293,7 @@ def submit_comment_view(request):
         paper = Paper.objects.filter(id=paper_id).get()
         comment = Comment()
         comment.paper = paper
-        comment.user = request.user
+        comment.user = user
         if request.method == 'POST':
             form = forms.SubmitCommentForm(request.POST, instance=comment)
             if form.is_valid():
@@ -303,20 +310,13 @@ def submit_comment_view(request):
         'paper' : paper,
     }))
 
-def get_user(username):
-    try:
-        return User.objects.get(username=username)
-    except User.DoesNotExist:
-        return None
-
 @login_required
 @request_wrapper
 @jeeves
 def assign_reviews_view(request):
     possible_reviewers = UserProfile.objects.filter(level='pc').all()
 
-    reviewer_username = request.GET.get('reviewer_username', '')
-    reviewer = UserProfile.objects.get(user=get_user(reviewer_username)) # might be None
+    reviewer = UserProfile.objects.get(username=request.GET.get('reviewer_username', '')) # might be None
 
     if reviewer != None:
         papers = Paper.objects.all()
@@ -324,9 +324,9 @@ def assign_reviews_view(request):
         if request.method == 'POST':
             for paper in papers:
                 val = request.POST.get('assignment-' + paper.jeeves_id, '')
-                assignment = ReviewAssignment.objects.get(paper=paper, user=reviewer.user)
+                assignment = ReviewAssignment.objects.get(paper=paper, user=reviewer)
                 if assignment == None:
-                    assignment = ReviewAssignment(paper=paper, user=reviewer.user)
+                    assignment = ReviewAssignment(paper=paper, user=reviewer)
                 if val == 'yes':
                     assignment.assign_type = 'assigned'
                     assignment.save()
@@ -337,9 +337,8 @@ def assign_reviews_view(request):
         papers_data = [{
             'paper' : paper,
             'latest_version' : PaperVersion.objects.filter(paper=paper).order_by('-time').all()[-1],
-            'assignment' : ReviewAssignment.objects.get(user=reviewer.user, paper=paper),
-            'has_conflict' : PaperPCConflict.objects.get(pc=reviewer.user, paper=paper) != None,
-            'author' : UserProfile.objects.get(user=paper.author),
+            'assignment' : ReviewAssignment.objects.get(user=reviewer, paper=paper),
+            'has_conflict' : PaperPCConflict.objects.get(pc=reviewer, paper=paper) != None,
         } for paper in papers]
     else:
         papers_data = []
@@ -349,55 +348,6 @@ def assign_reviews_view(request):
         'possible_reviewers' : possible_reviewers,
         'papers_data' : papers_data,
     })
-
-    #possible_reviewers = UserProfile.objects.filter(level='pc').all()
-
-    #reviewer = None
-    #try:
-    #    reviewer_username = request.GET['reviewer_username']
-    #    for r in possible_reviewers:
-    #        if r.username == reviewer_username:
-    #            reviewer = r
-#                break
-#    except KeyError:
-#        pass
-#    if not reviewer:
-#        reviewer = request.user
-#
-#    papers = list(Paper.objects.all())
-#    assignments = list(ReviewAssignment.objects.filter(user=reviewer).all())
-#
-#    # Construct initial_data which is a list of ReviewAssignments for
-#    # the ReviewAssignmentFormset. For the given user, we should have one
-#    # for each paper. If one does not already exist for some paper, create it.
-#    data = {assignment.paper : {
-#        'user' : assignment.user,
-#        'paper' : assignment.paper,
-#        'type' : assignment.type
-#      } for assignment in assignments}
-#    for paper in papers:
-#        if paper not in data:
-#            data[paper] = {
-#                'user' : reviewer,
-#                'paper' : paper,
-#                'type' : 'none'
-#            }
-#    initial_data = data.values()
-#
-#    if request.method == 'POST':
-#        formset = forms.ReviewAssignmentFormset(request.POST, initial=initial_data)
-#        if formset.is_valid():
-#            for form in formset.forms:
-#                form.save()
-#            return HttpResponseRedirect("assign_reviews?reviewer_username=%s" % urllib.quote(reviewer.username))
-#    else:
-#        formset = forms.ReviewAssignmentFormset(initial=initial_data)
-#
-#    return render_to_response("assign_reviews.html", RequestContext(request, {
-#        'reviewer' : reviewer,
-#        'formset' : formset,
-#        'possible_reviewers' : possible_reviewers,
-#    }))
 
 @login_required
 def search_view(request):

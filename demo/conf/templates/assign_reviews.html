@@ -7,7 +7,7 @@
         <h4> Select reviewer </h4>
         <select name="reviewer_username">
             {% for r in concretize(possible_reviewers) %}
-                <option value="{{concretize(r.user.username)}}" {% if concretize(r == reviewer) %}selected{% endif %}>{{concretize(r.name)}}</option>
+                <option value="{{concretize(r.username)}}" {% if concretize(r == reviewer) %}selected{% endif %}>{{concretize(r.name)}}</option>
             {% endfor %}
         </select>
         <input type="submit" value="Go" />
@@ -21,7 +21,7 @@
 				{% for p in concretize(papers_data) %}
 					<tr>
 						<td> {{concretize(p.latest_version.title)}} </td>
-						<td> {{concretize(p.author.name)}} </td>
+						<td> {{concretize(p.paper.author.name)}} </td>
 						<td>
 							<select name="assignment-{{concretize(p.paper.jeeves_id)}}">
 								<option value="yes" {% if concretize(p.assignment) != None and concretize(p.assignment.assign_type=='assigned') %}selected{% endif %}>Assigned</option>
