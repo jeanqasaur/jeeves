@@ -37,6 +37,7 @@
     <div class="jumbotron">
       {% block content %}Content goes here{% endblock %}
     </div>
+  
   </div>
 
   {% include 'footer.html' %}
@@ -61,5 +62,11 @@ myApp = myApp || (function () {
 
     };
 })();
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+        $("[rel='tooltip']").tooltip();
+    });
     </script>
 </html>
