@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>Log In or <a href="/register">make an account.</a></h2>
+    <div class="page-header">
+      <h1>Log In.</h1>
+    </div>
     <form method="post" action="">
     	{% csrf_token %}
     	<table>
