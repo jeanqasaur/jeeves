@@ -1,7 +1,8 @@
 .imagebox {
   float: left;
+  margin-top: 10px;
   margin-right: 15px;
   margin-bottom: 15px;
   text-align: center;
-  font-size: 30%;
+  font-size: small;
 }

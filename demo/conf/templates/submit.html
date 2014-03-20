@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>Submit a paper</h2>
+    <div class="page-header">
+      <h1>Submit a Paper.</h1>
+    </div>
     {% if concretize(error) != "" %}
         <div> {{concretize(error)}} </div>
     {% endif %}

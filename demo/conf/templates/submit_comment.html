@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>Submit a comment</h2>
+    <div class="page-header">
+      <h1>Submit a Comment.</h1>
+    </div>
+
     <form method="post" action="">
     	{% csrf_token %}
     	<input type="hidden" name="id" value="{{paper.id}}" />
