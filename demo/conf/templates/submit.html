@@ -1,14 +1,12 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="page-header">
-      <h1>Submit a Paper.</h1>
-    </div>
     {% if concretize(error) != "" %}
         <div> {{concretize(error)}} </div>
     {% endif %}
     <form role="form" method="post" action="" enctype="multipart/form-data">
     	{% csrf_token %}
+      <h2 class="form-heading">Submit a Paper.</h2>
       <div class="form-group">
         <label for="coauthors[]" class="control-label"><a rel="tooltip" title="Visible to the authors, PC chair, and reviewers after reviews have been submitted."><span class="glyphicon glyphicon-eye-close"></span></a> Coauthors</label>
         {% for coauthor in concretize(coauthors) %}
@@ -53,6 +51,6 @@
           </div>
         {% endfor %}
       </div>
-    <button class="btn btn-default" type="submit" value="Submit">Submit</button>
+    <button class="btn btn-primary" type="submit" value="Submit">Submit</button>
     </form>
 {% endblock %}

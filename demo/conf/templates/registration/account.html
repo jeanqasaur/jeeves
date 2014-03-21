@@ -1,11 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="page-header">
-      <h1>Register.</h1>
-    </div>
-
     <form method="post" action="" role="form">{% csrf_token %}
+      <h2 class="form-heading">Register.</h2>
       <div class="form-group">
         <label class="control-label"><a rel="tooltip" title="Visible to everyone."><span class="glyphicon glyphicon-eye-open"></span></a> Username</label> 
         <div class="row">
@@ -56,6 +53,6 @@
           </div>
         </div>
       </div>
-      <button type="submit" value="Register" class="btn btn-default">Register</button>
+      <button type="submit" value="Register" class="btn btn-primary">Register</button>
     </form>
 {% endblock %}
