@@ -204,11 +204,29 @@ def get_one_differing_var(e1, e2):
       return None
   return ans
 
+#from django.db.models.base import ModelBase
+#class JeevesModelBase(ModelBase):
+
 # Make a Jeeves Model that enhances the vanilla Django model with information
 # about how labels work and that kind of thing. We'll also need to override
 # some methods so that we can create records and make queries appropriately.
 
 class JeevesModel(models.Model):
+  #__metaclass__ = JeevesModelBase
+
+  def __init__(self, *args, **kw):
+    self.jeeves_base_env = JeevesLib.jeevesState.pathenv.getEnv()
+    super(JeevesModel, self).__init__(*args, **kw)
+
+  def __setattr__(self, name, value):
+    field_names = [field.name for field in self._meta.concrete_fields]
+    if name in field_names and name not in ('jeeves_vars', 'jeeves_id', 'id'):
+      old_val = getattr(self, name) if hasattr(self, name) else \
+                  Unassigned("attribute '%s' in %s" % (name, self.__class__.__name__))
+      models.Model.__setattr__(self, name, JeevesLib.jassign(old_val, value, self.jeeves_base_env))
+    else:
+      models.Model.__setattr__(self, name, value)
+
   objects = JeevesManager()
   jeeves_id = CharField(max_length=JEEVES_ID_LEN, null=False)
   jeeves_vars = CharField(max_length=1024, null=False)
