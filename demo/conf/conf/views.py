@@ -59,7 +59,7 @@ def add_to_context(context_dict, request, template_name):
                                     request.user.is_authenticated() and
                                     (not request.user.is_anonymous()))
 
-def request_wrapper(view_fn):
+def request_wrapper(view_fn, which_page):
     def real_view_fn(request):
         try:
             ans = view_fn(request)
@@ -76,6 +76,17 @@ def request_wrapper(view_fn):
 
         add_to_context(context_dict, request, template_name)
 
+        template_name = JeevesLib.concretize(request.user, template_name)
+        concretize = lambda val : JeevesLib.concretize(request.user, val)
+        context_dict['concretize'] = concretize
+
+        profile = UserProfile.objects.get(username=request.user.username)
+        context_dict['is_admin'] = profile != None and profile.level == "chair"
+
+        context_dict['is_logged_in'] = (request.user and
+                                        request.user.is_authenticated() and
+                                        (not request.user.is_anonymous()))
+        context_dict['which_page'] = which_page
         return render_to_response(template_name, RequestContext(request, context_dict))
     real_view_fn.__name__ = view_fn.__name__
     return real_view_fn
