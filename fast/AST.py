@@ -279,6 +279,10 @@ class Facet(FExpr):
 
   # called whenever an attribute that does not exist is accessed
   def __getattr__(self, attribute):
+    if JeevesLib.jeevesState.pathenv.hasPosVar(self.cond):
+      return getattr(self.thn, attribute)
+    elif JeevesLib.jeevesState.pathenv.hasNegVar(self.cond):
+      return getattr(self.els, attribute)
     return Facet(self.cond,
       getattr(self.thn, attribute),
       getattr(self.els, attribute))
@@ -653,6 +657,8 @@ class Unassigned(FExpr):
   def getException(self):
     return Exception("wow such error: %s does not exist." % (self.thing_not_found,))
   def __call__(self, *args, **kwargs):
+    raise self.getException()
+  def __getattr__(self, attr):
     raise self.getException()
 
 # TODO(TJH): figure out the correct implementation of this

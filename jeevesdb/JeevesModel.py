@@ -42,10 +42,6 @@ class JeevesQuerySet(QuerySet):
         results.append((obj, env))
     return results
 
-  @JeevesLib.supports_jeeves
-  def all(self):
-    return self.__iter__()
-
   def get(self, **kwargs):
     l = self.filter(**kwargs).get_jiter()
     if len(l) == 0:
@@ -55,7 +51,7 @@ class JeevesQuerySet(QuerySet):
       if o.jeeves_id != l[0][0].jeeves_id:
         raise Exception("wow such error: get() found rows for more than one jeeves_id")
 
-    cur = None #Unassigned("")
+    cur = None
     for (o, conditions) in l:
       old = cur
       cur = FObject(o)
@@ -81,7 +77,7 @@ class JeevesQuerySet(QuerySet):
       return super(JeevesQuerySet, self).filter(**kwargs)
 
   @JeevesLib.supports_jeeves
-  def __iter__(self):
+  def all(self):
     t = JeevesLib.JList([])
     for val, cond in self.get_jiter():
       popcount = 0
@@ -330,6 +326,12 @@ class JeevesModel(models.Model):
     if isinstance(other, FExpr):
       return other == self
     return isinstance(other, self.__class__) and self.jeeves_id == other.jeeves_id
+
+  @JeevesLib.supports_jeeves
+  def __ne__(self, other):
+    if isinstance(other, FExpr):
+      return other != self
+    return not (isinstance(other, self.__class__) and self.jeeves_id == other.jeeves_id)
 
 from django.contrib.auth.models import User
 @JeevesLib.supports_jeeves

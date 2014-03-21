@@ -239,9 +239,9 @@ def jmap2(iterator, mapper):
       els = jmap2(iterator.els, mapper)
     return Facet(iterator.cond, thn, els)
   elif isinstance(iterator, FObject):
-    return jmap2(iterator.v, mapper)
+    return FObject(jmap2(iterator.v, mapper))
   elif isinstance(iterator, JList):
-    return JList(jmap2(iterator.l, mapper))
+    return jmap2(iterator.l, mapper)
   elif isinstance(iterator, list) or isinstance(iterator, tuple):
     return [mapper(item) for item in iterator]
   else:
@@ -249,13 +249,20 @@ def jmap2(iterator, mapper):
 
 def facetMapper(facet, fn, wrapper=fexpr_cast):
   if isinstance(facet, Facet):
-    return Facet(facet.cond, facetMapper(facet.thn, fn), facetMapper(facet.els, fn))
+    return Facet(facet.cond, facetMapper(facet.thn, fn, wrapper), facetMapper(facet.els, fn, wrapper))
   elif isinstance(facet, Constant) or isinstance(facet, FObject):
     return wrapper(fn(facet.v))
 
 class JList:
+  def validate(self):
+    def foo(x):
+      assert isinstance(x, list), 'thingy is ' + str(x.l.v)
+      return x
+    facetMapper(self.l, foo, lambda x : x)
+
   def __init__(self, l):
     self.l = l if isinstance(l, FExpr) else FObject(l)
+    self.validate()
   def __getitem__(self, i):
     return self.l[i]
   def __setitem__(self, i, val):
@@ -270,6 +277,7 @@ class JList:
     l2 = facetMapper(self.l, list, FObject) #deep copy
     l2.append(val)
     self.l = jassign(self.l, l2)
+    self.validate()
 
   def prettyPrint(self):
     def tryPrint(x):

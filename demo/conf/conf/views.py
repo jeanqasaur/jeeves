@@ -62,7 +62,9 @@ def add_to_context(context_dict, request, template_name):
 def request_wrapper(view_fn):
     def real_view_fn(request):
         try:
-            (template_name, context_dict) = view_fn(request)
+            ans = view_fn(request)
+            template_name = ans[0]
+            context_dict = ans[1]
         except Exception:
             import traceback
             traceback.print_exc()
@@ -199,7 +201,7 @@ def submit_view(request):
         return ("redirect", "paper?id=%s" % paper.jeeves_id)
 
     pcs = UserProfile.objects.filter(level='pc').all()
-    pc_conflicts = [uppc.pc for uppc in UserPCConflict.objects.filter(user=user)]
+    pc_conflicts = [uppc.pc for uppc in UserPCConflict.objects.filter(user=user).all()]
     
     return ("submit.html", {
         'coauthors' : [],
@@ -235,7 +237,7 @@ def profile_view(request):
             UserPCConflict.objects.create(user=profile, pc=new_pc_conflict)
             pc_conflicts.append(new_pc_conflict)
     else:
-        pc_conflicts = [uppc.pc for uppc in UserPCConflict.objects.filter(user=profile)]
+        pc_conflicts = [uppc.pc for uppc in UserPCConflict.objects.filter(user=profile).all()]
 
     return ("profile.html", {
         "name": profile.name,
