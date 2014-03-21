@@ -1,15 +1,13 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="page-header">
-      <h1>Profile.</h1>
-    </div>
     <form role="form" method="post" action="">{% csrf_token %}
+      <h2 class="form-heading">Profile.</h2>
       <div class="form-group">
         <label for="email" class="control-label"><a rel="tooltip" title="Visible to you and the PC chair."><span class="glyphicon glyphicon-eye-close"></span></a> Email</label>
         <div class="row">
           <div class="col-xs-4">
-            <input type="email" class="form-control" name="email" id="email" value="{{ concretize(email) }}">
+            <input type="email" class="form-control" name="email" id="email" value="{{ concretize(email) }}" required>
           </div>
         </div>
       </div>
@@ -17,7 +15,7 @@
         <label for="name" class="control-label"><a rel="tooltip" title="Visible to everyone."><span class="glyphicon glyphicon-eye-open"></span></a> Name</label>
         <div class="row">
           <div class="col-xs-4">
-            <input type="text" class="form-control" name="name" id="name" value="{{ concretize(name) }}">
+            <input type="text" class="form-control" name="name" id="name" value="{{ concretize(name) }}" required>
           </div>
         </div>
       </div>
@@ -25,7 +23,7 @@
         <label for="affiliation" class="control-label"><a rel="tooltip" title="Visible to everyone."><span class="glyphicon glyphicon-eye-open"></span></a> Affiliation</label>
         <div class="row">
           <div class="col-xs-4">
-            <input type="text" class="form-control" name="affiliation" id="affiliation" value="{{ concretize(affiliation) }}">
+            <input type="text" class="form-control" name="affiliation" id="affiliation" value="{{ concretize(affiliation) }}" required>
           </div>
         </div>
       </div>
@@ -39,6 +37,6 @@
           </div>
         {% endfor %}
       </div>
-      <button class="btn btn-default" type="submit" value="Save">Update</button>
+      <button class="btn btn-primary" type="submit" value="Save">Update</button>
     </form>
 {% endblock %}
