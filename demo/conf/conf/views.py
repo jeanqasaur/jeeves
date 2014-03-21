@@ -43,6 +43,7 @@ def register_account(request):
     return render_to_response("registration/account.html", RequestContext(request,
         {
             'form' : form,
+            'which_page' : "register"
         }))
 
 @jeeves
@@ -59,7 +60,7 @@ def add_to_context(context_dict, request, template_name):
                                     request.user.is_authenticated() and
                                     (not request.user.is_anonymous()))
 
-def request_wrapper(view_fn, which_page):
+def request_wrapper(view_fn):
     def real_view_fn(request):
         try:
             ans = view_fn(request)
@@ -86,7 +87,6 @@ def request_wrapper(view_fn, which_page):
         context_dict['is_logged_in'] = (request.user and
                                         request.user.is_authenticated() and
                                         (not request.user.is_anonymous()))
-        context_dict['which_page'] = which_page
         return render_to_response(template_name, RequestContext(request, context_dict))
     real_view_fn.__name__ = view_fn.__name__
     return real_view_fn
@@ -97,15 +97,15 @@ def request_wrapper(view_fn, which_page):
 def index(request):
     user = UserProfile.objects.get(username=request.user.username)
 
-    return ("index.html", {'name': user.name})
+    return (   "index.html"
+           , { 'name' : user.name 
+             , 'which_page': "home" })
 
 @request_wrapper
 @jeeves
 def about_view(request):
-  return ("about.html", {})
-
-def test(request):
-  return render_to_response("test.html", RequestContext(request))
+  return ( "about.html"
+         , { 'which_page' : "about" } )
 
 @login_required
 @request_wrapper
@@ -118,6 +118,7 @@ def papers_view(request):
 
     return ("papers.html", {
         'papers' : papers
+      , 'which_page' : "papers"
     })
 
 @login_required
@@ -167,6 +168,7 @@ def paper_view(request):
         'latest_title' : latest_title,
         'reviews' : reviews,
         'comments' : comments,
+        'which_page' : "paper",
     })
 
 def set_random_name(contents):
@@ -190,7 +192,8 @@ def submit_view(request):
                 'title' : title,
                 'abstract' : abstract,
                 'contents' : contents.name,
-                'error' : 'Please fill out all fields'
+                'error' : 'Please fill out all fields',
+                'which_page' : "submit",
             })
 
         paper = Paper.objects.create(author=user, accepted=False)
@@ -222,6 +225,7 @@ def submit_view(request):
         'error' : '',
         'pcs' : pcs,
         'pc_conflicts' : pc_conflicts,
+        'which_page': "submit",
     })
 
 @login_required
@@ -257,6 +261,7 @@ def profile_view(request):
         "pc_conflicts": pc_conflicts,
         "email": profile.email,
         "pcs": pcs,
+        "which_page": "profile"
     })
 
 @login_required
@@ -286,6 +291,7 @@ def submit_review_view(request):
     return render_to_response("submit_review.html", RequestContext(request, {
         'form' : form,
         'paper' : paper,
+        'which_page' : "submit_review",
     }))
 
 @login_required
@@ -304,6 +310,7 @@ def users_view(request):
 
     return ("users_view.html", {
         'user_profiles': user_profiles,
+        'which_pages' : "users"
     })
 
 @login_required
@@ -333,6 +340,7 @@ def submit_comment_view(request):
     return render_to_response("submit_comment.html", RequestContext(request, {
         'form' : form,
         'paper' : paper,
+        'which_page' : "submit_comment"
     }))
 
 @login_required
@@ -372,6 +380,7 @@ def assign_reviews_view(request):
         'reviewer' : reviewer,
         'possible_reviewers' : possible_reviewers,
         'papers_data' : papers_data,
+        'which_page' : "assign_reviews"
     })
 
 @login_required
@@ -389,5 +398,6 @@ def search_view(request):
     return render_to_response("search.html", RequestContext(request, {
         'form' : form,
         'results' : results,
+        'which_page' : "search"
     }))
 
