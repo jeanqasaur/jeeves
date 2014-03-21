@@ -296,13 +296,19 @@ class Facet(FExpr):
       objs = {}
       get_objs_in_faceted_obj(self, objs, env)
       for _, obj in objs.iteritems():
-        t = replace_obj_attributes(self, obj, getattr(obj, attribute), value, env)
+        if hasattr(obj, attribute):
+          old_val = getattr(obj, attribute)
+        else:
+          old_val = Unassigned("attribute '%s'" % attribute)
+        t = replace_obj_attributes(self, obj, old_val, value, env)
         setattr(obj, attribute, t)
 
   def __getitem__(self, attribute):
-    return Facet(self.cond,
-      self.thn[attribute],
-      self.els[attribute])
+    if JeevesLib.jeevesState.pathenv.hasPosVar(self.cond):
+      return self.thn[attribute]
+    elif JeevesLib.jeevesState.pathenv.hasNegVar(self.cond):
+      return self.els[attribute]
+    return Facet(self.cond, self.thn[attribute], self.els[attribute])
 
   def __setitem__(self, attribute, value):
     env = jeevesState.pathenv.getEnv()
@@ -358,7 +364,9 @@ class Facet(FExpr):
 
   def __len__(self):
     if self.type == object:
-      return JeevesLib.jif(self.cond, self.thn.__len__, self.els.__len__)
+      return JeevesLib.jif(self.cond,
+                lambda : self.thn.__len__(),
+                lambda : self.els.__len__())
     else:
       raise TypeError("cannot take len of non-object; type %s" % self.type.__name__)
 
@@ -659,7 +667,8 @@ class Unassigned(FExpr):
   def __call__(self, *args, **kwargs):
     raise self.getException()
   def __getattr__(self, attr):
-    raise self.getException()
+    #raise self.getException()
+    return Unassigned(self.thing_not_found)
 
 # TODO(TJH): figure out the correct implementation of this
 def is_obj(o):

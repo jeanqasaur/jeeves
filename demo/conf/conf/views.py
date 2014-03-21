@@ -46,9 +46,7 @@ def register_account(request):
         }))
 
 @jeeves
-def add_to_context(context_dict, request, template_name):
-    profile = UserProfile.objects.get(username=request.user.username)
-
+def add_to_context(context_dict, request, template_name, profile):
     template_name = JeevesLib.concretize(profile, template_name)
     concretize = lambda val : JeevesLib.concretize(profile, val)
     context_dict['concretize'] = concretize
@@ -70,11 +68,13 @@ def request_wrapper(view_fn):
             traceback.print_exc()
             raise
 
+        profile = UserProfile.objects.get(username=request.user.username)
+
         if template_name == "redirect":
             path = context_dict
-            return HttpResponseRedirect(path)
+            return HttpResponseRedirect(JeevesLib.concretize(profile, path))
 
-        add_to_context(context_dict, request, template_name)
+        add_to_context(context_dict, request, template_name, profile)
 
         return render_to_response(template_name, RequestContext(request, context_dict))
     real_view_fn.__name__ = view_fn.__name__
@@ -103,7 +103,7 @@ def papers_view(request):
     papers = Paper.objects.all()
     for paper in papers:
         paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
-        paper.latest_version = paper_versions[-1] if len(paper_versions) > 0 else None
+        paper.the_latest_version = paper_versions[-1] if paper_versions.__len__() > 0 else None
 
     return ("papers.html", {
         'papers' : papers
@@ -133,8 +133,8 @@ def paper_view(request):
 
         paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
         coauthors = PaperCoauthor.objects.filter(paper=paper).all()
-        latest_abstract = paper_versions[-1].abstract if len(paper_versions) > 0 else None
-        latest_title = paper_versions[-1].title if len(paper_versions) > 0 else None
+        latest_abstract = paper_versions[-1].abstract if paper_versions.__len__() > 0 else None
+        latest_title = paper_versions[-1].title if paper_versions.__len__() > 0 else None
         reviews = Review.objects.filter(paper=paper).order_by('-time').all()
         comments = Comment.objects.filter(paper=paper).order_by('-time').all()
         author = user
@@ -182,6 +182,7 @@ def submit_view(request):
                 'error' : 'Please fill out all fields'
             })
 
+        print 'CREATING!'
         paper = Paper.objects.create(author=user, accepted=False)
         for coauthor in coauthors:
             if coauthor != "":
@@ -198,7 +199,7 @@ def submit_view(request):
             new_pc_conflict = UserProfile.objects.get(username=conf)
             PaperPCConflict.objects.create(paper=paper, pc=new_pc_conflict)
 
-        return ("redirect", "paper?id=%s" % paper.jeeves_id)
+        return ("redirect", "paper?id=" + paper.jeeves_id)
 
     pcs = UserProfile.objects.filter(level='pc').all()
     pc_conflicts = [uppc.pc for uppc in UserPCConflict.objects.filter(user=user).all()]
