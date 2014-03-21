@@ -30,7 +30,6 @@ def solve(constraints, defaults, desiredVars):
 
   for constraint in constraints:
     if constraint.type != bool:
-      print constraint
       raise ValueError("constraints must be bools")
     solver.boolExprAssert(constraint)
 

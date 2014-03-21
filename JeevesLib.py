@@ -152,7 +152,10 @@ def jassign(old, new, base_env={}):
         res = Facet(var, res, old)
       else:
         res = Facet(var, old, res)
-  return res
+  if isinstance(res, FExpr):
+    return partialEval(res, {}, True)
+  else:
+    return res
 
 '''
 @supports_jeeves

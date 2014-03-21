@@ -231,6 +231,31 @@ class TestJeevesModel(TestCase):
         ({'name':'save_test7', 'sound':'c'}, {self.x.name:False}),
     ]))
 
+  def testSaveCollapse(self):
+    an = Animal.objects.create(name='savec_test', sound='b')
+    an.sound = 'c'
+    with JeevesLib.PositiveVariable(self.x):
+      an.save()
+    with JeevesLib.NegativeVariable(self.x):
+      an.save()
+
+    a = list(Animal._objects_ordinary.filter(name='savec_test').all())
+    self.assertTrue(areRowsEqual(a, [
+        ({'name':'savec_test', 'sound':'c'}, {}),
+    ]))
+
+  def testEnvWrite(self):
+    an = Animal.objects.create(name='save_ew_test', sound='b')
+    with JeevesLib.PositiveVariable(self.x):
+      an.sound = 'c'
+    an.save()
+
+    a = list(Animal._objects_ordinary.filter(name='save_ew_test').all())
+    self.assertTrue(areRowsEqual(a, [
+        ({'name':'save_ew_test', 'sound':'b'}, {self.x.name:False}),
+        ({'name':'save_ew_test', 'sound':'c'}, {self.x.name:True}),
+    ]))
+
   def testGet1(self):
     an = Animal.objects.create(name='get_test1', sound='get_test1_sound_xyz')
 

@@ -45,6 +45,8 @@ class PolicyEnv:
       for label_dep in label_deps:
         constraints.append(fast.AST.Implies(label, label_dep))
 
-    env = smt.SMT.solve(constraints, self.labels[::-1], f.vars())
+    thevars = f.vars()
+    env = smt.SMT.solve(constraints, self.labels[::-1], thevars)
+    ev = f.eval(env)
 
-    return f.eval(env)
+    return ev

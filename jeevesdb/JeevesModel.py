@@ -188,6 +188,21 @@ def acquire_label_by_name(app_label, label_name):
     restrictor = getattr(model, 'jeeves_restrict_' + field_name)
     JeevesLib.restrict(label, lambda ctxt : restrictor(obj, ctxt))
     return label
+ 
+def get_one_differing_var(e1, e2):
+  if len(e1) != len(e2):
+    return None
+  ans = None
+  for v in e1:
+    if v in e2:
+      if e1[v] != e2[v]:
+        if ans is None:
+          ans = v
+        else:
+          return None
+    else:
+      return None
+  return ans
 
 # Make a Jeeves Model that enhances the vanilla Django model with information
 # about how labels work and that kind of thing. We'll also need to override
@@ -285,6 +300,25 @@ class JeevesModel(models.Model):
         field_name : fullEval(field_value, e)
         for field_name, field_value in d.iteritems()
       })
+
+      all_jid_objs = list(klass._objects_ordinary.filter(jeeves_id=obj_to_save.jeeves_id).all())
+      all_relevant_objs = [obj for obj in all_jid_objs if
+            all(field_name == 'jeeves_vars' or 
+                getattr(obj_to_save, field_name) == getattr(obj, field_name)
+                for field_name in d)]
+      while True:
+        # check if we can collapse
+        # if we can, repeat; otherwise, exit
+        for i in xrange(len(all_relevant_objs)):
+          other_obj = all_relevant_objs[i]
+          diff_var = get_one_differing_var(e, unserialize_vars(other_obj.jeeves_vars))
+          if diff_var is not None:
+            super(JeevesModel, other_obj).delete()
+            del e[diff_var]
+            break
+        else:
+          break
+
       obj_to_save.jeeves_vars = serialize_vars(e)
       super(JeevesModel, obj_to_save).save(*args, **kw)
 

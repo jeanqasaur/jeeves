@@ -6,26 +6,26 @@ that in Python.
 
 from fast.AST import *
 
-def partialEval(f, env={}):
+def partialEval(f, env={}, unassignedOkay=False):
   if isinstance(f, BinaryExpr):
-    left = partialEval(f.left, env)
-    right = partialEval(f.right, env)
+    left = partialEval(f.left, env, unassignedOkay)
+    right = partialEval(f.right, env, unassignedOkay)
     return facetJoin(left, right, f.opr)
   elif isinstance(f, UnaryExpr):
-    sub = partialEval(f.sub, env)
+    sub = partialEval(f.sub, env, unassignedOkay)
     return facetApply(sub, f.opr)
   elif isinstance(f, Constant):
     return f
   elif isinstance(f, Facet):
     if f.cond.name in env:
-      return partialEval(f.thn, env) if env[f.cond.name] else partialEval(f.els, env)
+      return partialEval(f.thn, env, unassignedOkay) if env[f.cond.name] else partialEval(f.els, env, unassignedOkay)
     else:
       true_env = dict(env)
       true_env[f.cond.name] = True
       false_env = dict(env)
       false_env[f.cond.name] = False
-      return Facet(f.cond, partialEval(f.thn, true_env),
-                           partialEval(f.els, false_env))
+      return Facet(f.cond, partialEval(f.thn, true_env, unassignedOkay),
+                           partialEval(f.els, false_env, unassignedOkay))
   elif isinstance(f, Var):
     if f.name in env:
       return Constant(env[f.name])
@@ -34,7 +34,10 @@ def partialEval(f, env={}):
   elif isinstance(f, FObject):
     return f
   elif isinstance(f, Unassigned):
-   raise f.getException()
+   if unassignedOkay:
+     return f
+   else:
+     raise f.getException()
   else:
     raise TypeError("partialEval does not support type %s" % f.__class__.__name__)
 
