@@ -101,12 +101,19 @@ def test(request):
 @jeeves
 def papers_view(request):
     papers = Paper.objects.all()
+    paper_data = []
     for paper in papers:
         paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
-        paper.the_latest_version = paper_versions[-1] if paper_versions.__len__() > 0 else None
+        latest_version = paper_versions[-1] if paper_versions.__len__() > 0 else None
+
+        print 'latest_version is', latest_version
+        paper_data.append({
+            'paper' : paper,
+            'latest' : latest_version
+        })
 
     return ("papers.html", {
-        'papers' : papers
+        'paper_data' : paper_data
     })
 
 @login_required
