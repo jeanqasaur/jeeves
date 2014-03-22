@@ -50,6 +50,4 @@ class PolicyEnv:
     env = smt.SMT.solve(constraints, self.labels[::-1], thevars)
     ev = f.eval(env)
 
-    print 'f is', f
-    print 'env is', {v.name:val for v,val in env.iteritems()}, 'ev is', ev
     return ev

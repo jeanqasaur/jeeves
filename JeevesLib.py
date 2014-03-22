@@ -229,7 +229,7 @@ def jgetitem(obj, item):
 @supports_jeeves
 def jmap(iterable, mapper):
   iterable = partialEval(fexpr_cast(iterable))
-  return jmap2(iterable, mapper)
+  return FObject(JList(jmap2(iterable, mapper)))
 def jmap2(iterator, mapper):
   if isinstance(iterator, Facet):
     if jeevesState.pathenv.hasPosVar(iterator.cond):
@@ -242,11 +242,11 @@ def jmap2(iterator, mapper):
       els = jmap2(iterator.els, mapper)
     return Facet(iterator.cond, thn, els)
   elif isinstance(iterator, FObject):
-    return FObject(jmap2(iterator.v, mapper))
+    return jmap2(iterator.v, mapper)
   elif isinstance(iterator, JList):
     return jmap2(iterator.l, mapper)
   elif isinstance(iterator, list) or isinstance(iterator, tuple):
-    return [mapper(item) for item in iterator]
+    return FObject([mapper(item) for item in iterator])
   else:
     return jmap2(iterator.__iter__(), mapper)
 
