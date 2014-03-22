@@ -335,6 +335,12 @@ def submit_comment_view(request):
         'paper' : paper,
     }))
 
+#@jeeves
+#def get_rev_assign(paper, reviewer):
+#    revassigs = ReviewAssignment.objects.filter(paper=paper, user=reviewer).all()
+#    assignment = revassigs[0] if revassigs.__len__() > 0 else None
+#    return assignment
+
 @login_required
 @request_wrapper
 @jeeves
@@ -347,22 +353,16 @@ def assign_reviews_view(request):
         papers = Paper.objects.all()
 
         if request.method == 'POST':
+            ReviewAssignment.objects.filter(user=reviewer).delete()
             for paper in papers:
-                val = request.POST.get('assignment-' + paper.jeeves_id, '')
-                assignment = ReviewAssignment.objects.get(paper=paper, user=reviewer)
-                if assignment == None:
-                    assignment = ReviewAssignment(paper=paper, user=reviewer)
-                if val == 'yes':
-                    assignment.assign_type = 'assigned'
-                    assignment.save()
-                elif val == 'no':
-                    assignment.assign_type = 'none'
-                    assignment.save()
-
+                ReviewAssignment.objects.create(paper=paper, user=reviewer,
+                            assign_type='assigned'
+                                if request.POST.get('assignment-' + paper.jeeves_id, '')=='yes'
+                                else 'none')
         papers_data = [{
             'paper' : paper,
             'latest_version' : PaperVersion.objects.filter(paper=paper).order_by('-time').all()[-1],
-            'assignment' : ReviewAssignment.objects.get(user=reviewer, paper=paper),
+            'assignment' : ReviewAssignment.objects.get(paper=paper, user=reviewer),
             'has_conflict' : PaperPCConflict.objects.get(pc=reviewer, paper=paper) != None,
         } for paper in papers]
     else:

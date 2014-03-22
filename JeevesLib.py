@@ -228,7 +228,7 @@ def jgetitem(obj, item):
 
 @supports_jeeves
 def jmap(iterable, mapper):
-  iterable = partialEval(fexpr_cast(iterable))
+  iterable = partialEval(fexpr_cast(iterable), jeevesState.pathenv.getEnv())
   return FObject(JList(jmap2(iterable, mapper)))
 def jmap2(iterator, mapper):
   if isinstance(iterator, Facet):

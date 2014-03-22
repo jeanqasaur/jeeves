@@ -147,7 +147,7 @@ class ReviewAssignment(Model):
     @label_for('paper', 'user', 'assign_type')
     @jeeves
     def jeeves_restrict_paperreviewerlabel(prv, ctxt):
-        if PaperPCConflict.objects.get(paper=prv.paper, pc=ctxt) != None:
+        if prv != None and PaperPCConflict.objects.get(paper=prv.paper, pc=ctxt) != None:
             return False
         return ctxt.level == 'pc' or ctxt.level == 'chair'
 
