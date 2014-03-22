@@ -55,7 +55,7 @@ def getLabel(varName):
   return jeevesState.all_labels[varName]
 
 @supports_jeeves
-def restrict(varLabel, pred):
+def restrict(varLabel, pred, use_empty_env=False):
   """Associates a policy with a label.
 
   :param varLabel: Label to associate with policy.
@@ -63,7 +63,7 @@ def restrict(varLabel, pred):
   :param pred: Policy: function taking output channel and returning Boolean result.
   :type pred: T -> bool, where T is the type of the output channel
   """
-  jeevesState.policyenv.restrict(varLabel, pred)
+  jeevesState.policyenv.restrict(varLabel, pred, use_empty_env)
 
 @supports_jeeves
 def mkSensitive(varLabel, vHigh, vLow):

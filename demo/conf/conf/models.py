@@ -49,7 +49,7 @@ class UserPCConflict(Model):
     @staticmethod
     @label_for('user', 'pc')
     def jeeves_restrict_userpcconflictlabel(uppc, ctxt):
-        return uppc.user == ctxt
+        return ctxt.level == 'chair' or uppc.user == ctxt
 
 class Paper(Model):
     #latest_version = ForeignKey('PaperVersion', related_name='latest_version_of', null=True)
@@ -102,7 +102,8 @@ class PaperCoauthor(Model):
     @label_for('paper', 'author')
     @jeeves
     def jeeves_restrict_papercoauthorlabel(pco, ctxt):
-        return ctxt.level == 'admin' or (pco.paper != None and pco.paper.author == ctxt)
+        ans = ctxt.level == 'chair' or (pco.paper != None and pco.paper.author == ctxt)
+        return ans
 
 #class PaperReviewer(Model):
 #    paper = ForeignKey(Paper, null=True)

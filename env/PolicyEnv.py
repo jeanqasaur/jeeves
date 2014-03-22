@@ -18,8 +18,8 @@ class PolicyEnv:
 
   # policy is a function from context to bool which returns true
   # if the label is allowed to be HIGH
-  def restrict(self, label, policy):
-    pcFormula = JeevesLib.jeevesState.pathenv.getPathFormula()
+  def restrict(self, label, policy, use_empty_env=False):
+    pcFormula = fast.AST.Constant(True) if use_empty_env else JeevesLib.jeevesState.pathenv.getPathFormula()
     self.policies.append((label, lambda ctxt :
       fast.AST.Implies(
         pcFormula,

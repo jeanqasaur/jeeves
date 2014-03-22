@@ -144,7 +144,6 @@ def paper_view(request):
         reviews = Review.objects.filter(paper=paper).order_by('-time').all()
         comments = Comment.objects.filter(paper=paper).order_by('-time').all()
         author = paper.author
-        print 'author is', author
     else:
         paper = None
         paper_versions = []

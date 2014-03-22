@@ -161,8 +161,13 @@ def powerset(iterable):
         itertools.combinations(s, r) for r in range(len(s)+1))
 
 def clone(old):
-  new_kwargs = dict([(fld.name, getattr(old, fld.name)) for fld in old._meta.fields]);
-  return old.__class__(**new_kwargs)
+  new_kwargs = dict([(fld.name, getattr(old, fld.name)) for fld in old._meta.fields
+            if not isinstance(fld, JeevesForeignKey)]);
+  ans = old.__class__(**new_kwargs)
+  for fld in old._meta.fields:
+    if isinstance(fld, JeevesForeignKey):
+      setattr(ans, fld.attname, getattr(old, fld.attname))
+  return ans
 
 def serialize_vars(e):
   return ';' + ''.join('%s=%d;' % (var_name, var_value)
@@ -192,7 +197,7 @@ def acquire_label_by_name(app_label, label_name):
     # already fetching
     obj = model.objects.get(jeeves_id=jeeves_id)
     restrictor = getattr(model, 'jeeves_restrict_' + field_name)
-    JeevesLib.restrict(label, lambda ctxt : restrictor(obj, ctxt))
+    JeevesLib.restrict(label, lambda ctxt : restrictor(obj, ctxt), True)
     return label
  
 def get_one_differing_var(e1, e2):
@@ -283,6 +288,9 @@ class JeevesModel(models.Model):
               new_obj.id = None # so when we save a new row will be made
             new_obj.jeeves_vars += addon + '%s=%d;' % (var_name, not var_value)
             addon += '%s=%d;' % (var_name, var_value)
+      #      if hasattr(new_obj, 'pc_id') and hasattr(new_obj, 'user_id'):
+      #        print 'attr is', new_obj.user_id
+      #        print 'attr is', new_obj.pc_id
             super(JeevesModel, new_obj).save()
 
   @JeevesLib.supports_jeeves
@@ -293,7 +301,7 @@ class JeevesModel(models.Model):
     else:
       label = JeevesLib.mkLabel(label_name, uniquify=False)
       restrictor = getattr(self, 'jeeves_restrict_' + field_name)
-      JeevesLib.restrict(label, lambda ctxt : restrictor(self, ctxt))
+      JeevesLib.restrict(label, lambda ctxt : restrictor(self, ctxt), True)
       return label
 
   @JeevesLib.supports_jeeves
@@ -328,6 +336,7 @@ class JeevesModel(models.Model):
       f = partialEval(fexpr_cast(value), env)
       all_vars.extend(v.name for v in f.vars())
       d[field_name] = f
+    all_vars = list(set(all_vars))
 
     for p in powerset(all_vars):
       true_vars = list(p)
