@@ -48,8 +48,10 @@ class UserPCConflict(Model):
 
     @staticmethod
     @label_for('user', 'pc')
+    @jeeves
     def jeeves_restrict_userpcconflictlabel(uppc, ctxt):
-        return ctxt.level == 'chair' or uppc.user == ctxt
+        return True
+        #return ctxt.level == 'chair' or uppc.user == ctxt
 
 class Paper(Model):
     #latest_version = ForeignKey('PaperVersion', related_name='latest_version_of', null=True)
@@ -87,7 +89,8 @@ class PaperPCConflict(Model):
     @label_for('paper', 'pc')
     @jeeves
     def jeeves_restrict_paperpcconflictlabel(ppcc, ctxt):
-        return ctxt.level == 'admin' or (ppcc.paper != None and ppcc.paper.author == ctxt)
+        return True
+        #return ctxt.level == 'admin' or (ppcc.paper != None and ppcc.paper.author == ctxt)
 
 class PaperCoauthor(Model):
     paper = ForeignKey(Paper, null=True)
@@ -102,6 +105,8 @@ class PaperCoauthor(Model):
     @label_for('paper', 'author')
     @jeeves
     def jeeves_restrict_papercoauthorlabel(pco, ctxt):
+        if PaperPCConflict.objects.get(paper=pco.paper, pc=ctxt) != None:
+            return False
         ans = ctxt.level == 'chair' or (pco.paper != None and pco.paper.author == ctxt)
         return ans
 
@@ -142,6 +147,8 @@ class ReviewAssignment(Model):
     @label_for('paper', 'user', 'assign_type')
     @jeeves
     def jeeves_restrict_paperreviewerlabel(prv, ctxt):
+        if PaperPCConflict.objects.get(paper=prv.paper, pc=ctxt) != None:
+            return False
         return ctxt.level == 'pc' or ctxt.level == 'chair'
 
 class PaperVersion(Model):
@@ -159,6 +166,8 @@ class PaperVersion(Model):
     @jeeves
     @label_for('paper', 'title', 'contents', 'abstract')
     def jeeves_restrict_paperversionlabel(pv, ctxt):
+        if PaperPCConflict.objects.get(paper=pv.paper, pc=ctxt) != None:
+            return False
         return (pv.paper != None and pv.paper.author == ctxt) or ctxt.level == 'pc' or ctxt.level == 'chair'
     
     @staticmethod
@@ -210,6 +219,8 @@ class Review(Model):
     @label_for('paper', 'reviewer', 'contents', 'score_novelty', 'score_presentation', 'score_technical', 'score_confidence')
     @jeeves
     def jeeves_restrict_reviewlabel(review, ctxt):
+        if review != None and PaperPCConflict.objects.get(paper=review.paper, pc=ctxt) != None:
+            return False
         return ctxt.level == 'chair' or ctxt.level == 'pc' or \
                 (phase == 'final' and review.paper.author == ctxt)
 
@@ -235,7 +246,9 @@ class Comment(Model):
     @staticmethod
     @label_for('paper', 'user', 'contents')
     @jeeves
-    def jeeves_restrict_reviewlabel(review, ctxt):
+    def jeeves_restrict_reviewlabel(comment, ctxt):
+        if comment != None and PaperPCConflict.objects.get(paper=comment.paper, pc=ctxt) != None:
+            return False
         return ctxt.level == 'chair' or ctxt.level == 'pc'
 
 from django.contrib.auth.models import User

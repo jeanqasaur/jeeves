@@ -79,14 +79,18 @@ class JeevesQuerySet(QuerySet):
   @JeevesLib.supports_jeeves
   def all(self):
     t = JeevesLib.JList([])
+    env = JeevesLib.jeevesState.pathenv.getEnv()
     for val, cond in self.get_jiter():
       popcount = 0
       for vname, vval in cond.iteritems():
-        if vname not in JeevesLib.jeevesState.pathenv.getEnv():
+        if vname not in env:
           v = acquire_label_by_name(self.model._meta.app_label, vname)
           JeevesLib.jeevesState.pathenv.push(v, vval)
           popcount += 1
-      t.append(val)
+        elif env[vname] != vval:
+          break
+      else:
+        t.append(val)
       for _ in xrange(popcount):
         JeevesLib.jeevesState.pathenv.pop()
     return t

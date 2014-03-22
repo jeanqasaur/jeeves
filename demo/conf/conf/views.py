@@ -76,6 +76,9 @@ def request_wrapper(view_fn):
 
         add_to_context(context_dict, request, template_name, profile)
 
+        #print context_dict['comments']
+        #print 'concrete is -> ' + str(JeevesLib.concretize(profile, context_dict['comments']))
+
         return render_to_response(template_name, RequestContext(request, context_dict))
     real_view_fn.__name__ = view_fn.__name__
     return real_view_fn
@@ -125,6 +128,7 @@ def paper_view(request):
     if paper != None:
         if request.method == 'POST':
             if request.POST.get('add_comment', 'false') == 'true':
+                print 'saving...'
                 Comment.objects.create(paper=paper, user=user,
                             contents=request.POST.get('comment', ''))
 
@@ -216,7 +220,7 @@ def submit_view(request):
         'abstract' : '',
         'contents' : '',
         'error' : '',
-        'pcs' : pcs,
+        "pcs": [{'pc':pc, 'conflict':pc in pc_conflicts} for pc in pcs],
         'pc_conflicts' : pc_conflicts,
     })
 
@@ -252,7 +256,7 @@ def profile_view(request):
         "acm_number": profile.acm_number,
         "pc_conflicts": pc_conflicts,
         "email": profile.email,
-        "pcs": pcs,
+        "pcs": [{'pc':pc, 'conflict':pc in pc_conflicts} for pc in pcs],
     })
 
 @login_required

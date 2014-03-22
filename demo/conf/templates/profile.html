@@ -31,9 +31,9 @@
         <label for="pc_conflicts[]" class="control-label"><a rel="tooltip" title="Visible to you and the PC chair."><span class="glyphicon glyphicon-eye-close"></span></a> PC Conflicts</label>
         {% for pc in concretize(pcs) %}
           <div class="checkbox">
-            <input type="checkbox" name="pc_conflicts[]" value="{{concretize(pc.username)}}"
-                            {% if concretize(pc) in concretize(pc_conflicts) %} checked {% endif %} />
-                        <label> {{ concretize(pc.username) }} </label> <br />
+            <input type="checkbox" name="pc_conflicts[]" value="{{concretize(pc.pc.username)}}"
+                            {% if concretize(pc.conflict) %} checked {% endif %} />
+                        <label> {{ concretize(pc.pc.name) }} </label> <br />
           </div>
         {% endfor %}
       </div>
