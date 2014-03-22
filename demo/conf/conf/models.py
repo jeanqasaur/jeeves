@@ -59,7 +59,6 @@ class Paper(Model):
     accepted = BooleanField()
 
     @staticmethod
-    @jeeves
     def jeeves_get_private_author(paper):
         return None
 
@@ -113,7 +112,10 @@ class PaperVersion(Model):
     @jeeves
     @label_for('paper', 'title', 'contents', 'abstract')
     def jeeves_restrict_paperversionlabel(pv, ctxt):
-        return (pv.paper != None and pv.paper.author == ctxt) or ctxt.level == 'pc' or ctxt.level == 'chair'
+        ans = (pv.paper != None and pv.paper.author == ctxt) or ctxt.level == 'pc' or ctxt.level == 'chair'
+        print 'ans is', ans
+        return ans
+
     
     @staticmethod
     def jeeves_get_private_paper(pv): return None

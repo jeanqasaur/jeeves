@@ -6,7 +6,13 @@
             <h3> Authors </h3>
             <ul>
                 <li>
-                    <div> {{concretize(author.name)}} </div>
+                    <div>
+                        {% if concretize(author) != None %}
+                            {{concretize(author.name)}}
+                        {% else %}
+                            [Anonymous]
+                        {% endif %}
+                    </div>
                 </li>
                 {% for coauthor in concretize(coauthors) %}
                     <li>

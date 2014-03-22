@@ -786,6 +786,9 @@ class FObject(FExpr):
       return GtE(self, fexpr_cast(other))
     return f(other)
 
+  def prettyPrint(self, indent=""):
+    return 'FObject:%s' % str(self.v)
+
 """
   def __and__(l, r):
   def __rand__(r, l):
