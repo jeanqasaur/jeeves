@@ -49,7 +49,7 @@ class UserPCConflict(Model):
     @staticmethod
     @label_for('user', 'pc')
     def jeeves_restrict_userpcconflictlabel(uppc, ctxt):
-        return uppc == ctxt
+        return uppc.user == ctxt
 
 class Paper(Model):
     #latest_version = ForeignKey('PaperVersion', related_name='latest_version_of', null=True)
@@ -78,24 +78,70 @@ class PaperPCConflict(Model):
     paper = ForeignKey(Paper, null=True)
     pc = ForeignKey(UserProfile, null=True)
 
+    @staticmethod
+    def jeeves_get_private_paper(ppcc): return None
+    @staticmethod
+    def jeeves_get_private_pc(ppcc): return None
+
+    @staticmethod
+    @label_for('paper', 'pc')
+    @jeeves
+    def jeeves_restrict_paperpcconflictlabel(ppcc, ctxt):
+        return ctxt.level == 'admin' or (ppcc.paper != None and ppcc.paper.author == ctxt)
+
 class PaperCoauthor(Model):
     paper = ForeignKey(Paper, null=True)
     author = CharField(max_length=1024)
 
-class PaperReviewer(Model):
-    paper = ForeignKey(Paper, null=True)
-    reviewer = ForeignKey(UserProfile, null=True)
+    @staticmethod
+    def jeeves_get_private_paper(pco): return None
+    @staticmethod
+    def jeeves_get_private_author(pco): return ""
+
+    @staticmethod
+    @label_for('paper', 'author')
+    @jeeves
+    def jeeves_restrict_papercoauthorlabel(pco, ctxt):
+        return ctxt.level == 'admin' or (pco.paper != None and pco.paper.author == ctxt)
+
+#class PaperReviewer(Model):
+#    paper = ForeignKey(Paper, null=True)
+#    reviewer = ForeignKey(UserProfile, null=True)
+
+#    @staticmethod
+#    def jeeves_get_private_paper(pco): return None
+#    @staticmethod
+#    def jeeves_get_private_reviewer(pco): return None
+
+#    @staticmethod
+#    @label_for('paper', 'reviewer')
+#    @jeeves
+#    def jeeves_restrict_paperreviewerlabel(prv, ctxt):
+#        return ctxt.level == 'pc' or ctxt.level == 'chair'
 
 class ReviewAssignment(Model):
     paper = ForeignKey(Paper, null=True)
     user = ForeignKey(UserProfile, null=True)
-    assign_type = CharField(max_length=8, null=False,
+    assign_type = CharField(max_length=8, null=True,
         choices=(('none','none'),
                 ('assigned','assigned'),
                 ('conflict','conflict')))
 
     class Meta:
         db_table = 'review_assignments'
+
+    @staticmethod
+    def jeeves_get_private_paper(rva): return None
+    @staticmethod
+    def jeeves_get_private_user(rva): return None
+    @staticmethod
+    def jeeves_get_private_assign_type(rva): return 'none'
+
+    @staticmethod
+    @label_for('paper', 'user', 'assign_type')
+    @jeeves
+    def jeeves_restrict_paperreviewerlabel(prv, ctxt):
+        return ctxt.level == 'pc' or ctxt.level == 'chair'
 
 class PaperVersion(Model):
     paper = ForeignKey(Paper, null=True)
@@ -112,10 +158,7 @@ class PaperVersion(Model):
     @jeeves
     @label_for('paper', 'title', 'contents', 'abstract')
     def jeeves_restrict_paperversionlabel(pv, ctxt):
-        ans = (pv.paper != None and pv.paper.author == ctxt) or ctxt.level == 'pc' or ctxt.level == 'chair'
-        print 'ans is', ans
-        return ans
-
+        return (pv.paper != None and pv.paper.author == ctxt) or ctxt.level == 'pc' or ctxt.level == 'chair'
     
     @staticmethod
     def jeeves_get_private_paper(pv): return None
@@ -180,6 +223,19 @@ class Comment(Model):
 
     class Meta:
         db_table = 'comments'
+
+    @staticmethod
+    def jeeves_get_private_paper(review): return None
+    @staticmethod
+    def jeeves_get_private_user(review): return None
+    @staticmethod
+    def jeeves_get_private_contents(review): return ""
+
+    @staticmethod
+    @label_for('paper', 'user', 'contents')
+    @jeeves
+    def jeeves_restrict_reviewlabel(review, ctxt):
+        return ctxt.level == 'chair' or ctxt.level == 'pc'
 
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save

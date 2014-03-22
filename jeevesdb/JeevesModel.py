@@ -485,6 +485,7 @@ class JeevesForeignKey(ForeignObject):
       self.join_field = to._meta.pk
       #raise Exception("Need jeeves_id field")
 
+    kwargs['on_delete'] = models.DO_NOTHING
     super(JeevesForeignKey, self).__init__(to, [self], [self.join_field], *args, **kwargs)
     self.db_constraint = False
 

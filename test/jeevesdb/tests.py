@@ -397,6 +397,17 @@ class TestJeevesModel(TestCase):
       ({'name':'fkey_test1_zoo', 'inhabitant_id':bn.jeeves_id}, {self.x.name:False}),
      ]))
 
+  def testFKeyUpdate(self):
+    an = Animal.objects.create(name='fkeyup_test_an', sound='a')
+    zoo = Zoo.objects.create(name='fkeyup_test_zoo', inhabitant=an)
+
+    an.sound = 'b'
+    an.save()
+
+    z = Zoo.objects.get(name='fkeyup_test_zoo')
+    self.assertTrue(z != None)
+    self.assertEqual(z.inhabitant, an)
+
   def testFilterForeignKeys1(self):
     an = Animal.objects.create(name='filterfkey_test1_an', sound='a')
     bn = Animal.objects.create(name='filterfkey_test1_bn', sound='b')
