@@ -23,3 +23,16 @@ class AnimalWithPolicy(JeevesModel.JeevesModel):
   @staticmethod
   def jeeves_restrict_sound(animal, ctxt):
     return ctxt == animal
+
+class AnimalWithPolicy2(JeevesModel.JeevesModel):
+  name = models.CharField(max_length=30)
+  sound = models.CharField(max_length=30)
+
+  @staticmethod
+  def jeeves_get_private_sound(animal):
+    return ""
+
+  @staticmethod
+  @JeevesModel.label_for('sound')
+  def jeeves_restrict_awplabel(animal, ctxt):
+    return ctxt == animal

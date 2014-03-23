@@ -55,7 +55,7 @@ def getLabel(varName):
   return jeevesState.all_labels[varName]
 
 @supports_jeeves
-def restrict(varLabel, pred):
+def restrict(varLabel, pred, use_empty_env=False):
   """Associates a policy with a label.
 
   :param varLabel: Label to associate with policy.
@@ -63,7 +63,7 @@ def restrict(varLabel, pred):
   :param pred: Policy: function taking output channel and returning Boolean result.
   :type pred: T -> bool, where T is the type of the output channel
   """
-  jeevesState.policyenv.restrict(varLabel, pred)
+  jeevesState.policyenv.restrict(varLabel, pred, use_empty_env)
 
 @supports_jeeves
 def mkSensitive(varLabel, vHigh, vLow):
@@ -228,8 +228,8 @@ def jgetitem(obj, item):
 
 @supports_jeeves
 def jmap(iterable, mapper):
-  iterable = partialEval(fexpr_cast(iterable))
-  return jmap2(iterable, mapper)
+  iterable = partialEval(fexpr_cast(iterable), jeevesState.pathenv.getEnv())
+  return FObject(JList(jmap2(iterable, mapper)))
 def jmap2(iterator, mapper):
   if isinstance(iterator, Facet):
     if jeevesState.pathenv.hasPosVar(iterator.cond):
@@ -242,11 +242,11 @@ def jmap2(iterator, mapper):
       els = jmap2(iterator.els, mapper)
     return Facet(iterator.cond, thn, els)
   elif isinstance(iterator, FObject):
-    return FObject(jmap2(iterator.v, mapper))
+    return jmap2(iterator.v, mapper)
   elif isinstance(iterator, JList):
     return jmap2(iterator.l, mapper)
   elif isinstance(iterator, list) or isinstance(iterator, tuple):
-    return [mapper(item) for item in iterator]
+    return FObject([mapper(item) for item in iterator])
   else:
     return jmap2(iterator.__iter__(), mapper)
 

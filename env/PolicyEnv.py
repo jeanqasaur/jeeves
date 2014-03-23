@@ -18,8 +18,8 @@ class PolicyEnv:
 
   # policy is a function from context to bool which returns true
   # if the label is allowed to be HIGH
-  def restrict(self, label, policy):
-    pcFormula = JeevesLib.jeevesState.pathenv.getPathFormula()
+  def restrict(self, label, policy, use_empty_env=False):
+    pcFormula = fast.AST.Constant(True) if use_empty_env else JeevesLib.jeevesState.pathenv.getPathFormula()
     self.policies.append((label, lambda ctxt :
       fast.AST.Implies(
         pcFormula,
@@ -40,13 +40,15 @@ class PolicyEnv:
       dependencies[label] |= predicate_vars
       constraints.append(partialEval(fast.AST.Implies(label, predicate), pathenv))
 
+    # NOTE(TJH): wtf? commenting this out to make stuff work
     # If a depends on b, then we want (b == Low ==> a == Low)
-    for (label, label_deps) in dependencies.iteritems():
-      for label_dep in label_deps:
-        constraints.append(fast.AST.Implies(label, label_dep))
+    #for (label, label_deps) in dependencies.iteritems():
+    #  for label_dep in label_deps:
+    #    constraints.append(fast.AST.Implies(label, label_dep))
 
     thevars = f.vars()
     env = smt.SMT.solve(constraints, self.labels[::-1], thevars)
     ev = f.eval(env)
 
+    #print 'env is', {v.name:val for v, val in env.iteritems()}, 'ev is', ev
     return ev

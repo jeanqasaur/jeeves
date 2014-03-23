@@ -47,9 +47,7 @@ def register_account(request):
         }))
 
 @jeeves
-def add_to_context(context_dict, request, template_name):
-    profile = UserProfile.objects.get(username=request.user.username)
-
+def add_to_context(context_dict, request, template_name, profile):
     template_name = JeevesLib.concretize(profile, template_name)
     concretize = lambda val : JeevesLib.concretize(profile, val)
     context_dict['concretize'] = concretize
@@ -71,11 +69,21 @@ def request_wrapper(view_fn):
             traceback.print_exc()
             raise
 
+        profile = UserProfile.objects.get(username=request.user.username)
+
         if template_name == "redirect":
             path = context_dict
-            return HttpResponseRedirect(path)
+            return HttpResponseRedirect(JeevesLib.concretize(profile, path))
 
+        add_to_context(context_dict, request, template_name, profile)
+
+<<<<<<< HEAD
         add_to_context(context_dict, request, template_name)
+=======
+        #print context_dict['comments']
+        #print 'concrete is -> ' + str(JeevesLib.concretize(profile, context_dict['comments']))
+
+>>>>>>> 2b67f3b39ca1a1c63bc476421d339f565e2ca5dc
         return render_to_response(template_name, RequestContext(request, context_dict))
     real_view_fn.__name__ = view_fn.__name__
     return real_view_fn
@@ -101,13 +109,23 @@ def about_view(request):
 @jeeves
 def papers_view(request):
     papers = Paper.objects.all()
+    paper_data = []
     for paper in papers:
         paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
-        paper.latest_version = paper_versions[-1] if len(paper_versions) > 0 else None
+        latest_version = paper_versions[-1] if paper_versions.__len__() > 0 else None
+
+        paper_data.append({
+            'paper' : paper,
+            'latest' : latest_version
+        })
 
     return ("papers.html", {
+<<<<<<< HEAD
         'papers' : papers
       , 'which_page' : "papers"
+=======
+        'paper_data' : paper_data
+>>>>>>> 2b67f3b39ca1a1c63bc476421d339f565e2ca5dc
     })
 
 @login_required
@@ -120,6 +138,7 @@ def paper_view(request):
     if paper != None:
         if request.method == 'POST':
             if request.POST.get('add_comment', 'false') == 'true':
+                print 'saving...'
                 Comment.objects.create(paper=paper, user=user,
                             contents=request.POST.get('comment', ''))
 
@@ -134,11 +153,11 @@ def paper_view(request):
 
         paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
         coauthors = PaperCoauthor.objects.filter(paper=paper).all()
-        latest_abstract = paper_versions[-1].abstract if len(paper_versions) > 0 else None
-        latest_title = paper_versions[-1].title if len(paper_versions) > 0 else None
+        latest_abstract = paper_versions[-1].abstract if paper_versions.__len__() > 0 else None
+        latest_title = paper_versions[-1].title if paper_versions.__len__() > 0 else None
         reviews = Review.objects.filter(paper=paper).order_by('-time').all()
         comments = Comment.objects.filter(paper=paper).order_by('-time').all()
-        author = user
+        author = paper.author
     else:
         paper = None
         paper_versions = []
@@ -147,6 +166,7 @@ def paper_view(request):
         latest_title = None
         reviews = []
         comments = []
+        author = None
 
     return ("paper.html", {
         'paper' : paper,
@@ -201,7 +221,7 @@ def submit_view(request):
             new_pc_conflict = UserProfile.objects.get(username=conf)
             PaperPCConflict.objects.create(paper=paper, pc=new_pc_conflict)
 
-        return ("redirect", "paper?id=%s" % paper.jeeves_id)
+        return ("redirect", "paper?id=" + paper.jeeves_id)
 
     pcs = UserProfile.objects.filter(level='pc').all()
     pc_conflicts = [uppc.pc for uppc in UserPCConflict.objects.filter(user=user).all()]
@@ -212,7 +232,7 @@ def submit_view(request):
         'abstract' : '',
         'contents' : '',
         'error' : '',
-        'pcs' : pcs,
+        "pcs": [{'pc':pc, 'conflict':pc in pc_conflicts} for pc in pcs],
         'pc_conflicts' : pc_conflicts,
         'which_page': "submit",
     })
@@ -249,8 +269,12 @@ def profile_view(request):
         "acm_number": profile.acm_number,
         "pc_conflicts": pc_conflicts,
         "email": profile.email,
+<<<<<<< HEAD
         "pcs": pcs,
         "which_page": "profile"
+=======
+        "pcs": [{'pc':pc, 'conflict':pc in pc_conflicts} for pc in pcs],
+>>>>>>> 2b67f3b39ca1a1c63bc476421d339f565e2ca5dc
     })
 
 @login_required
@@ -332,6 +356,12 @@ def submit_comment_view(request):
         'which_page' : "submit_comment"
     }))
 
+#@jeeves
+#def get_rev_assign(paper, reviewer):
+#    revassigs = ReviewAssignment.objects.filter(paper=paper, user=reviewer).all()
+#    assignment = revassigs[0] if revassigs.__len__() > 0 else None
+#    return assignment
+
 @login_required
 @request_wrapper
 @jeeves
@@ -344,22 +374,16 @@ def assign_reviews_view(request):
         papers = Paper.objects.all()
 
         if request.method == 'POST':
+            ReviewAssignment.objects.filter(user=reviewer).delete()
             for paper in papers:
-                val = request.POST.get('assignment-' + paper.jeeves_id, '')
-                assignment = ReviewAssignment.objects.get(paper=paper, user=reviewer)
-                if assignment == None:
-                    assignment = ReviewAssignment(paper=paper, user=reviewer)
-                if val == 'yes':
-                    assignment.assign_type = 'assigned'
-                    assignment.save()
-                elif val == 'no':
-                    assignment.assign_type = 'none'
-                    assignment.save()
-
+                ReviewAssignment.objects.create(paper=paper, user=reviewer,
+                            assign_type='assigned'
+                                if request.POST.get('assignment-' + paper.jeeves_id, '')=='yes'
+                                else 'none')
         papers_data = [{
             'paper' : paper,
             'latest_version' : PaperVersion.objects.filter(paper=paper).order_by('-time').all()[-1],
-            'assignment' : ReviewAssignment.objects.get(user=reviewer, paper=paper),
+            'assignment' : ReviewAssignment.objects.get(paper=paper, user=reviewer),
             'has_conflict' : PaperPCConflict.objects.get(pc=reviewer, paper=paper) != None,
         } for paper in papers]
     else:

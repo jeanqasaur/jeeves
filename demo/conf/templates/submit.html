@@ -12,7 +12,7 @@
         {% for coauthor in concretize(coauthors) %}
           <div class="row">
             <div class="col-xs-4">
-              <input class="form-control" type="text" name="coauthors[]" id="coauthors[]" value="{{coauthor}}" />
+              <input class="form-control" type="text" name="coauthors[]" id="coauthors[]" value="{{concretize(coauthor)}}" />
             </div>
           </div>
         {% endfor %}
@@ -28,26 +28,26 @@
         <label for="title" class="control-label"><a rel="tooltip" title="Visible to the authors and program committee."><span class="glyphicon glyphicon-eye-close"></span></a> Title</label>
     	  <div class="row">
           <div class="col-xs-8">
-          <input class="form-control" type="text" name="title" id="title" value="{{title}}" />
+          <input class="form-control" type="text" name="title" id="title" value="{{concretize(title)}}" />
           </div>
         </div>
     	</div>
       <div class="form-group">
     	  <label for="contents" class="control-label"><a rel="tooltip" title="Visible to the authors and program committee."><span class="glyphicon glyphicon-eye-close"></span></a> Paper (pdf)</label>
-    	  <input type="file" name="contents" id="contents" value="{{contents}}" />
+    	  <input type="file" name="contents" id="contents" value="{{concretize(contents)}}" />
       </div>
       <div class="form-group">
         <label for="abstract" class="control-label"><a rel="tooltip" title="Visible to the authors and program commitee."><span class="glyphicon glyphicon-eye-close"></span></a> Abstract</label>
-    	  <textarea class="form-control" name="abstract" id="abstract" rows="10" cols="40">{{abstract}}</textarea>
+    	  <textarea class="form-control" name="abstract" id="abstract" rows="10" cols="40">{{concretize(abstract)}}</textarea>
       </div>
       <div class="form-group">
         <label for="pc_conflicts[]" class="control-label"><a rel="tooltip" title="Visible to you and the PC chair."><span class="glyphicon glyphicon-eye-close"></span></a> PC Conflicts:</label>
         {% for pc in concretize(pcs) %}
           <div class="checkbox">
-            <input type="checkbox" name="pc_conflicts[]" value="{{concretize(pc.username)}}"
-                            {% if concretize(pc) in concretize(pc_conflicts) %} checked {% endif %} />
+            <input type="checkbox" name="pc_conflicts[]" value="{{concretize(pc.pc.username)}}"
+                            {% if concretize(pc.conflict) %} checked {% endif %} />
   
-            <label> {{ concretize(pc.username) }} </label> <br />
+            <label> {{ concretize(pc.pc.name) }} </label> <br />
           </div>
         {% endfor %}
       </div>

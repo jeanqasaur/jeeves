@@ -5,7 +5,7 @@ from django.test import TestCase
 import JeevesLib
 
 from jeevesdb import JeevesModel
-from testdb.models import Animal, Zoo, AnimalWithPolicy
+from testdb.models import Animal, Zoo, AnimalWithPolicy, AnimalWithPolicy2
 
 def parse_vars_row(vs):
   d = {}
@@ -397,6 +397,17 @@ class TestJeevesModel(TestCase):
       ({'name':'fkey_test1_zoo', 'inhabitant_id':bn.jeeves_id}, {self.x.name:False}),
      ]))
 
+  def testFKeyUpdate(self):
+    an = Animal.objects.create(name='fkeyup_test_an', sound='a')
+    zoo = Zoo.objects.create(name='fkeyup_test_zoo', inhabitant=an)
+
+    an.sound = 'b'
+    an.save()
+
+    z = Zoo.objects.get(name='fkeyup_test_zoo')
+    self.assertTrue(z != None)
+    self.assertEqual(z.inhabitant, an)
+
   def testFilterForeignKeys1(self):
     an = Animal.objects.create(name='filterfkey_test1_an', sound='a')
     bn = Animal.objects.create(name='filterfkey_test1_bn', sound='b')
@@ -426,4 +437,14 @@ class TestJeevesModel(TestCase):
     self.assertTrue(areRowsEqual(a, [
       ({'name':'testpolicy1', 'sound':'meow'}, {name:True}),
       ({'name':'testpolicy1', 'sound':''}, {name:False}),
+     ]))
+
+  def testPolicy2(self):
+    awp = AnimalWithPolicy2.objects.create(name='testpolicy2', sound='meow')
+
+    a = list(AnimalWithPolicy2._objects_ordinary.filter(name='testpolicy2').all())
+    name = 'AnimalWithPolicy2__awplabel__' + awp.jeeves_id
+    self.assertTrue(areRowsEqual(a, [
+      ({'name':'testpolicy2', 'sound':'meow'}, {name:True}),
+      ({'name':'testpolicy2', 'sound':''}, {name:False}),
      ]))
