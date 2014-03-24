@@ -554,3 +554,6 @@ class JeevesForeignKey(ForeignObject):
   @JeevesLib.supports_jeeves
   def get_cache_name(self):
     return '_jfkey_cache_' + self.name
+
+  def db_type(self, connection):
+    return "VARCHAR(%d)" % JEEVES_ID_LEN
