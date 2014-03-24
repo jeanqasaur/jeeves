@@ -47,6 +47,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_jinja',
+    'timelog',
     'conf',
 )
 
@@ -57,6 +58,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'timelog.middleware.TimeLogMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
@@ -101,3 +103,31 @@ STATICFILES_DIRS = (
 
 # possible phases are submit, review, final
 CONF_PHASE = 'submit'
+
+LOG_PATH = os.path.join(BASE_DIR, 'logs')
+TIMELOG_LOG = os.path.join(LOG_PATH, 'timelog.log')
+
+LOGGING = {
+  'version': 1,
+  'formatters': {
+    'plain': {
+      'format': '%(asctime)s %(message)s'},
+    },
+  'handlers': {
+    'timelog': {
+      'level': 'DEBUG',
+      'class': 'logging.handlers.RotatingFileHandler',
+      'filename': TIMELOG_LOG,
+      'maxBytes': 1024 * 1024 * 5,  # 5 MB
+      'backupCount': 5,
+      'formatter': 'plain',
+    },
+  },
+  'loggers': {
+    'timelog.middleware': {
+      'handlers': ['timelog'],
+      'level': 'DEBUG',
+      'propogate': False,
+     }
+  }
+}
