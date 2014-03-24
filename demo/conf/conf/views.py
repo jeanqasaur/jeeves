@@ -101,6 +101,8 @@ def about_view(request):
 @request_wrapper
 @jeeves
 def papers_view(request):
+    user = UserProfile.objects.get(username=request.user.username)
+
     papers = Paper.objects.all()
     paper_data = []
     for paper in papers:
@@ -114,8 +116,9 @@ def papers_view(request):
 
     return ("papers.html", {
         'papers' : papers
-      , 'which_page' : "papers"
+      , 'which_page' : "home"
       , 'paper_data' : paper_data
+      , 'name' : user.name
     })
 
 @login_required

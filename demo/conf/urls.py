@@ -21,8 +21,8 @@ urlpatterns = patterns('',
 
     url(r'^register$', views.register_account),
 
-    url(r'^index$', views.index),
-    url(r'^$', views.index),
+    url(r'^index$', views.papers_view),
+    url(r'^$', views.papers_view),
     url(r'^submit$', views.submit_view),
     url(r'^papers$', views.papers_view),
     url(r'^paper$', views.paper_view),
