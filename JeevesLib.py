@@ -76,7 +76,9 @@ def mkSensitive(varLabel, vHigh, vLow):
   :param vLow: Low-confidentiality facet for other viewers.
   :type vLow: T
   """
-  return Facet(varLabel, fexpr_cast(vHigh), fexpr_cast(vLow))
+
+  #return Facet(varLabel, fexpr_cast(vHigh), fexpr_cast(vLow))
+  return JeevesLib.jif(varLabel, lambda:vHigh, lambda:vLow)
 
 @supports_jeeves
 def concretize(ctxt, v):
