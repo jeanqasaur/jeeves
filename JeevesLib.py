@@ -77,8 +77,10 @@ def mkSensitive(varLabel, vHigh, vLow):
   :type vLow: T
   """
 
-  #return Facet(varLabel, fexpr_cast(vHigh), fexpr_cast(vLow))
-  return JeevesLib.jif(varLabel, lambda:vHigh, lambda:vLow)
+  if isinstance(varLabel, Var):
+    return Facet(varLabel, fexpr_cast(vHigh), fexpr_cast(vLow))
+  else:
+    return JeevesLib.jif(varLabel, lambda:vHigh, lambda:vLow)
 
 @supports_jeeves
 def concretize(ctxt, v):
