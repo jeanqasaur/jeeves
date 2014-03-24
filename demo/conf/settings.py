@@ -59,6 +59,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'timelog.middleware.TimeLogMiddleware',
+    'logging_middleware.ConfLoggingMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
@@ -106,6 +107,7 @@ CONF_PHASE = 'submit'
 
 LOG_PATH = os.path.join(BASE_DIR, 'logs')
 TIMELOG_LOG = os.path.join(LOG_PATH, 'timelog.log')
+SQL_LOG = os.path.join(LOG_PATH, 'sqllog.log')
 
 LOGGING = {
   'version': 1,
@@ -122,12 +124,25 @@ LOGGING = {
       'backupCount': 5,
       'formatter': 'plain',
     },
+    'sqllog': {
+      'level': 'DEBUG',
+      'class': 'logging.handlers.RotatingFileHandler',
+      'filename': SQL_LOG,
+      'maxBytes': 1024 * 1024 * 5,  # 5 MB
+      'backupCount': 5,
+      'formatter': 'plain',
+    },
   },
   'loggers': {
     'timelog.middleware': {
       'handlers': ['timelog'],
       'level': 'DEBUG',
       'propogate': False,
-     }
-  }
+     },
+    'logging_middleware': {
+      'handlers': ['sqllog'],
+      'level': 'DEBUG',
+      'propogate': False
+    },
+  },
 }
