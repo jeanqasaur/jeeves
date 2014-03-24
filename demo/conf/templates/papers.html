@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="page-header">
+      <h1>Welcome {{ concretize(name) }}.</h1>
+    </div>
+
+    {% if concretize(paper_data) != [] %}
+        <table>
+            <tr>
+                <th> Author </th>
+                <th> Title </th>
+            </tr>
+            {% for p in concretize(paper_data) %}
+                <tr>
+                    <td>
+                        {% if concretize(p.paper.author) != None %}
+                            {{concretize(p.paper.author.name)}}
+                        {% else %}
+                            [Anonymous]
+                        {% endif %}
+                    </td>
+                    <td> <a href="/paper?id={{concretize(p.paper.jeeves_id)}}">
+                        {% if concretize(p.latest) != None %}
+                            {{concretize(p.latest.title)}}
+                        {% else %}
+                            [Hidden]
+                        {% endif %}
+                    </a> </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        No papers to display.
+    {% endif %}
+{% endblock %}
