@@ -3,6 +3,7 @@
 {% block content %}
     <form method="post" action="" role="form">{% csrf_token %}
       <h2 class="form-heading">Register.</h2>
+      {% if form.errors %}{{ form.errors.__all__ | safe }}{% endif %}
       <div class="form-group">
         <label class="control-label"><a rel="tooltip" title="Visible to everyone."><span class="glyphicon glyphicon-eye-open"></span></a> Username</label> 
         <div class="row">

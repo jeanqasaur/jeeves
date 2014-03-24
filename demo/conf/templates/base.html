@@ -27,7 +27,7 @@
     <div class="toptext">
       <h1>Jeeves Conference Management System</h1>
         <p>A conference management system powered by the Jeeves programming language for automatically enforcing privacy policies.</p>
-        <p><a class="btn btn-primary btn-lg" role="button" href="/about">About This Site &raquo;</a></p>
+        <p><a class="btn btn-primary btn-lg" role="button" href="/about" onClick="myApp.showPleaseWait();">About This Site &raquo;</a></p>
     </div>
   </div>
 
@@ -43,7 +43,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="{{ static('js/bootstrap.min.js') }}"></script>
 </body>
-    <script>
+    <script type="text/javascript">
       var myApp;
 myApp = myApp || (function () {
     var pleaseWaitDiv = $('<div class="modal modal-static fade" id="processing-modal" role="dialog" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-body"><div class="text-center"><img src="http://www.travislayne.com/images/loading.gif" class="icon" /><h4>Processing...</h4></div></div></div></div></div>');

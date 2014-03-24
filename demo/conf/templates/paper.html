@@ -78,7 +78,7 @@
             <input type="hidden" name="add_comment" value="true" />
             <textarea id="comment" class="form-control" name="comment"></textarea>
           </div>
-          <button class="btn btn-primary" type="submit" value="Submit">Submit comment</button>
+          <button class="btn btn-primary" type="submit" value="Submit" onClick="myApp.showPleaseWait();">Submit comment</button>
         </form>
 
         <form method="post" action="" role="form">{% csrf_token %}
@@ -100,7 +100,7 @@
             </div>
           </div>
           {% endfor %}
-          <button class="btn btn-primary" type="submit" value="Submit">Submit comment</button>
+          <button class="btn btn-primary" type="submit" value="Submit" onClick="myApp.showPleaseWait();">Submit comment</button>
         </form>
 
     {% else %}
