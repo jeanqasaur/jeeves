@@ -26,11 +26,11 @@
 }
 
 .errorlist {
+  color: #C80000;
   font-style: italic;
-}
-.errorlist ul {
-  list-style-type: none;
 }
 .errorlist li {
   list-style-type: none;
+  margin-left: -20px;
+  padding-left: 0px;
 }
