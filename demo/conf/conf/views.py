@@ -77,13 +77,6 @@ def request_wrapper(view_fn):
 
         add_to_context(context_dict, request, template_name, profile)
 
-<<<<<<< HEAD
-        add_to_context(context_dict, request, template_name)
-=======
-        #print context_dict['comments']
-        #print 'concrete is -> ' + str(JeevesLib.concretize(profile, context_dict['comments']))
-
->>>>>>> 2b67f3b39ca1a1c63bc476421d339f565e2ca5dc
         return render_to_response(template_name, RequestContext(request, context_dict))
     real_view_fn.__name__ = view_fn.__name__
     return real_view_fn
@@ -120,12 +113,9 @@ def papers_view(request):
         })
 
     return ("papers.html", {
-<<<<<<< HEAD
         'papers' : papers
       , 'which_page' : "papers"
-=======
-        'paper_data' : paper_data
->>>>>>> 2b67f3b39ca1a1c63bc476421d339f565e2ca5dc
+      , 'paper_data' : paper_data
     })
 
 @login_required
@@ -178,7 +168,11 @@ def paper_view(request):
         'reviews' : reviews,
         'comments' : comments,
         'which_page' : "paper",
-    })
+        'review_score_fields': [ ("Novelty", "score_novelty", 10)
+                               , ("Presentation", "score_presentation", 10)
+                               , ("Technical", "score_technical", 10)
+                               , ("Confidence", "score_confidence", 10) ]  
+  })
 
 def set_random_name(contents):
     contents.name = '%030x' % random.randrange(16**30) + ".pdf"
@@ -269,12 +263,9 @@ def profile_view(request):
         "acm_number": profile.acm_number,
         "pc_conflicts": pc_conflicts,
         "email": profile.email,
-<<<<<<< HEAD
         "pcs": pcs,
-        "which_page": "profile"
-=======
+        "which_page": "profile",
         "pcs": [{'pc':pc, 'conflict':pc in pc_conflicts} for pc in pcs],
->>>>>>> 2b67f3b39ca1a1c63bc476421d339f565e2ca5dc
     })
 
 @login_required

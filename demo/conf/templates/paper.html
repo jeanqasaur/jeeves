@@ -2,112 +2,105 @@
 
 {% block content %}
     {% if concretize(paper) != None %}
-        <div>
-            <h3> Authors </h3>
-            <ul>
-                <li>
-                    <div>
-                        {% if concretize(author) != None %}
-                            {{concretize(author.name)}}
-                        {% else %}
-                            [Anonymous]
-                        {% endif %}
-                    </div>
-                </li>
-                {% for coauthor in concretize(coauthors) %}
-                    <li>
-                        <div> {{concretize(coauthor.author)}} </div>
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
-        <div>
-            <h3> Title </h3>
-            <div>
-                {{concretize(latest_title)}}
+      <form role="form">
+        <div class=form-group>
+            <label for="authors[]" class="control-label"><a rel="tooltip" title="Visible to the authors, PC chair, and reviewers after reviews have been submitted."><span class="glyphicon glyphicon-eye-close"></span></a> Authors</label>
+            <div class="row">
+              <div class="col-xs-4">
+                <input class="form-control" type="text" name="coauthors[]" id="coauthors[]" value="{% if concretize(author) != None %} {{concretize(author.name)}} {% else %} [Anonymous] {% endif %}" disabled/>
+              </div>
             </div>
+            {% for coauthor in concretize(coauthors) %}
+            <div class="row">
+              <div class="col-xs-4">
+                <input class="form-control" type="text" name="coauthors[]" id="coauthors[]" value="{{concretize(coauthor.author)}}" disabled/>
+              </div>
+            </div>
+            {% endfor %}
         </div>
-        <div>
-            <h3> Versions </h3>
-            <ul>
+        <div class="form-group">
+          <label for="title" class="control-label"><a rel="tooltip" title="Visible to the authors and program committee."><span class="glyphicon glyphicon-eye-close"></span></a> Title</label>
+          <div class="row">
+            <div class="col-xs-8">
+            <input class="form-control" type="text" name="title" id="title" value="{{concretize(latest_title)}}" disabled/>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="contents" class="control-label"><a rel="tooltip" title="Visible to the authors and program committee."><span class="glyphicon glyphicon-eye-close"></span></a> Versions</label>
+          <div class="row">
+            <div class="col-sm-4">
                 {% for paper_version in concretize(paper_versions) %}
-                    <a href="{{concretize(paper_version.contents.url)}}">
+                    <p class="form-control-static"><a href="{{concretize(paper_version.contents.url)}}">
                         {{concretize(paper_version.time)}}
-                    </a>
+                    </a></p>
                 {% endfor %}
-            </ul>
+            </div>
+          </div>
         </div>
-        <div>
-            <h3> Abstract </h3>
-            <pre>{{concretize(latest_abstract)}}</pre>
+        <div class="form-group">
+          <label for="abstract" class="control-label"><a rel="tooltip" title="Visible to the authors and program commitee."><span class="glyphicon glyphicon-eye-close"></span></a> Abstract</label>
+          <textarea class="form-control" name="abstract" id="abstract" rows="10" cols="40" disabled>{{concretize(latest_abstract)}}</textarea>
         </div>
-        <div>
-            <h3> Reviews </h3>
-            <ul>
-                {% for review in concretize(reviews) %}
-                    <li>
-                        <div> {{concretize(review.reviewer.name)}} at {{concretize(review.time)}} </div>
-                        <div> Comment: <pre>{{concretize(review.contents)}}</pre> </div>
-                        <div> Novelty: {{concretize(review.score_novelty)}} </div>
-                        <div> Presentation: {{concretize(review.score_presentation)}} </div>
-                        <div> Technical: {{concretize(review.score_technical)}} </div>
-                        <div> Confidence: {{concretize(review.score_confidence)}} </div>
-                    </li>
-                {% endfor %}
-            </ul>
+        <div class="form-group">
+          <label for="reviews" class="control-label"><a rel="tooltip" title="Visible to the authors and program commitee."><span class="glyphicon glyphicon-eye-close"></span></a> Reviews</label>
+          {% for review in concretize(reviews) %}
+            <p class="form-control-static">
+                <div> {{concretize(review.reviewer.name)}} at {{concretize(review.time)}} </div>
+                  <div> Comment: <pre>{{concretize(review.contents)}}</pre> </div>
+                  <div> Novelty: {{concretize(review.score_novelty)}} </div>
+                  <div> Presentation: {{concretize(review.score_presentation)}} </div>
+                  <div> Technical: {{concretize(review.score_technical)}} </div>
+                  <div> Confidence: {{concretize(review.score_confidence)}} </div>
+            </p>
+          {% endfor %}
         </div>
-        <div>
-            <h3> Comments </h3>
-            <ul>
-                {% for comment in concretize(comments) %}
-                    <li>
-                        <div> {{concretize(comment.user.name)}} at {{concretize(comment.time)}} </div>
-                        <div> Comment: <pre>{{concretize(comment.contents)}}</pre> </div>
-                    </li>
-                {% endfor %}
-            </ul>
+        <div class="form-group">
+          <label for="comments" class="control-label"><a rel="tooltip" title="Visible to the authors and program commitee."><span class="glyphicon glyphicon-eye-close"></span></a> Comments</label>
+          {% for comment in concretize(comments) %}
+            <p class="form-control-static">
+              <div> {{concretize(comment.user.name)}} at {{concretize(comment.time)}} </div>
+              <div> Comment: <pre>{{concretize(comment.contents)}}</pre> </div>
+            </p>
+          {% endfor %}
         </div>
-
         <!--
         <div>
             <a href="/submit_review?id={{concretize(paper.jeeves_id)}}">Submit review</a>
         </div>
         -->
-
-        <form method="post" action="">
-            {% csrf_token %}
-            Leave a comment: <br />
-            <input type="hidden" name="add_comment" value="true" />
-            <textarea name="comment"></textarea>
-            <input type="submit" value="Submit" />
         </form>
 
-        <form method="post" action="">
-            {% csrf_token %}
-            Leave a review: <br />
+        <form method="post" action="" role="form">{% csrf_token %}
+          <h3 class="form-heading">Leave a comment</h3>
+          <div class="form-group">
+            <label for="comment" class="control-label"><a rel="tooltip" title="Visible to the authors and program commitee."><span class="glyphicon glyphicon-eye-close"></span></a> Leave a comment</label>
+            <input type="hidden" name="add_comment" value="true" />
+            <textarea id="comment" class="form-control" name="comment"></textarea>
+          </div>
+          <button class="btn btn-primary" type="submit" value="Submit">Submit comment</button>
+        </form>
+
+        <form method="post" action="" role="form">{% csrf_token %}
+          <h3 class="form-heading">Leave a review</h3>
+          <div class="formgroup">
+            <label for="review" class="control-label"><a rel="tooltip" title="Visible to the authors and program commitee."><span class="glyphicon glyphicon-eye-close"></span></a> Leave a review</label>
             <input type="hidden" name="add_review" value="true" />
-            <textarea name="review"></textarea>
-            <input type="submit" value="Submit" />
-
-            Novelty:
-            <select name="score_novelty">
-                <option value="1">1</option> <option value="2">2</option> <option value="3">3</option> <option value="4">4</option> <option value="5">5</option> <option value="6">6</option> <option value="7">7</option> <option value="8">8</option> <option value="9">9</option> <option value="10">10</option>
-            </select><br />
-
-            Presentation:
-            <select name="score_presentation">
-                <option value="1">1</option> <option value="2">2</option> <option value="3">3</option> <option value="4">4</option> <option value="5">5</option> <option value="6">6</option> <option value="7">7</option> <option value="8">8</option> <option value="9">9</option> <option value="10">10</option>
-            </select><br />
-
-            Technical:
-            <select name="score_technical">
-                <option value="1">1</option> <option value="2">2</option> <option value="3">3</option> <option value="4">4</option> <option value="5">5</option> <option value="6">6</option> <option value="7">7</option> <option value="8">8</option> <option value="9">9</option> <option value="10">10</option>
-            </select><br />
-
-            Confidence:
-            <select name="score_confidence">
-                <option value="1">1</option> <option value="2">2</option> <option value="3">3</option> <option value="4">4</option> <option value="5">5</option> <option value="6">6</option> <option value="7">7</option> <option value="8">8</option> <option value="9">9</option> <option value="10">10</option>
-            </select><br />
+            <textarea id="review" class="form-control" name="review"></textarea>
+          </div>
+          {% for label, name, maxscore in review_score_fields %}
+          <div class="formgroup">
+            <label for={{ name }} class="control-label"><a rel="tooltip" title="Visible to the authors and program commitee."><span class="glyphicon glyphicon-eye-close"></span></a> {{ label }}</label>
+            <div class="row">
+              <div class="col-xs-2">
+              <select class="form-control" name={{ name }} id={{ name }}>
+                {% for number in range(1, maxscore+1) %}<option value="{{ number }}">{{ number }}</option>{% endfor %}
+              </select>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+          <button class="btn btn-primary" type="submit" value="Submit">Submit comment</button>
         </form>
 
     {% else %}
