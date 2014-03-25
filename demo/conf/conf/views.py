@@ -77,6 +77,8 @@ def request_wrapper(view_fn):
             #concretize = lambda val : JeevesLib.concretize(profile, val)
             add_to_context(context_dict, request, template_name, profile, concretize)
 
+            #print 'concretized is', concretize(context_dict['latest_title'])
+
             return render_to_response(template_name, RequestContext(request, context_dict))
 
         except Exception:
@@ -113,11 +115,11 @@ def papers_view(request):
     paper_data = JeevesLib.JList2()
     for paper in papers:
         paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
-        latest_version = paper_versions[-1] if paper_versions.__len__() > 0 else None
+        latest_version_title = paper_versions[0].title if paper_versions.__len__() > 0 else None
 
         paper_data.append({
             'paper' : paper,
-            'latest' : latest_version
+            'latest' : latest_version_title
         })
 
     return ("papers.html", {
@@ -148,11 +150,20 @@ def paper_view(request):
                             score_technical=int(request.POST.get('score_technical', '1')),
                             score_confidence=int(request.POST.get('score_confidence', '1')),
                           )
+            elif request.POST.get('new_version', 'false') == 'true' and user == paper.author:
+                contents = request.FILES.get('contents', None)
+                if contents != None and paper.author != None:
+                    set_random_name(contents)
+                    PaperVersion.objects.create(paper=paper,
+                        title=request.POST.get('title', ''),
+                        contents=contents,
+                        abstract=request.POST.get('abstract', ''),
+                    )
 
         paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
         coauthors = PaperCoauthor.objects.filter(paper=paper).all()
-        latest_abstract = paper_versions[-1].abstract if paper_versions.__len__() > 0 else None
-        latest_title = paper_versions[-1].title if paper_versions.__len__() > 0 else None
+        latest_abstract = paper_versions[0].abstract if paper_versions.__len__() > 0 else None
+        latest_title = paper_versions[0].title if paper_versions.__len__() > 0 else None
         reviews = Review.objects.filter(paper=paper).order_by('-time').all()
         comments = Comment.objects.filter(paper=paper).order_by('-time').all()
         author = paper.author
