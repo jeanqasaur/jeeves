@@ -22,14 +22,9 @@ def init():
   You should always call this before you do anything Jeeves-y.
 
   """
-  #jeevesState.varenv = VarEnv()
-  #jeevesState.pathenv = PathVars()
-  #jeevesState.policyenv = PolicyEnv()
-  #jeevesState.writeenv = WritePolicyEnv()
   jeevesState.init()
 
   # TODO this needs to be GC'ed somehow
-  jeevesState.all_labels = {}
 
 def supports_jeeves(f):
   f.__jeeves = 0

@@ -8,20 +8,21 @@ from fast.AST import FExpr
 from smt.Z3 import Z3
 
 class SolverState:
-    def __init__(self, policies_iterator, ctxt):
+    def __init__(self, policies, ctxt):
         self.solver = Z3()
         self.result = {}
-        self.policies_iterator = policies_iterator
         self.ctxt = ctxt
+
+        self.policies = policies # NOT a copy
+        self.policies_index = 0
 
     def concretizeExp(self, f, pathenv):
         f = fast.AST.fexpr_cast(f)
 
-        while True:
-            try:
-                label, policy = self.policies_iterator.next()
-            except StopIteration:
-                break
+        while self.policies_index < len(self.policies):
+            label, policy = self.policies[self.policies_index]
+            self.policies_index += 1
+
             predicate = policy(self.ctxt) #predicate should be True if label can be HIGH
             predicate_vars = predicate.vars()
             constraint = partialEval(fast.AST.Implies(label, predicate), pathenv)
@@ -29,7 +30,7 @@ class SolverState:
             if constraint.type != bool:
                 raise ValueError("constraints must be bools")
             self.solver.boolExprAssert(constraint)
-        
+
         if not self.solver.check():
             raise UnsatisfiableException("Constraints not satisfiable")
 
@@ -48,7 +49,7 @@ class SolverState:
         assert self.solver.check()
 
         return f.eval(self.result)
-        
+
 class PolicyEnv:
   def __init__(self):
     self.labels = []
@@ -71,7 +72,7 @@ class PolicyEnv:
     ))
 
   def getNewSolverState(self, ctxt):
-    return SolverState(self.policies.__iter__(), ctxt)
+    return SolverState(self.policies, ctxt)
 
   def concretizeExp(self, ctxt, f, pathenv):
     solver_state = self.getNewSolverState(ctxt)
