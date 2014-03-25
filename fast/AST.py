@@ -727,12 +727,16 @@ class FObject(FExpr):
   def eval(self, env):
     if isinstance(self.v, JeevesLib.JList):
       return self.v.l.eval(env)
+    elif isinstance(self.v, JeevesLib.JList2):
+      return self.v.eval(env)
     else:
       return self.v
 
   def vars(self):
     if isinstance(self.v, JeevesLib.JList):
       return self.v.l.vars()
+    elif isinstance(self.v, JeevesLib.JList2):
+      return self.v.vars()
     else:
       return set()
 

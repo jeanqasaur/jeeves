@@ -233,6 +233,11 @@ def jgetitem(obj, item):
 
 @supports_jeeves
 def jmap(iterable, mapper):
+  if isinstance(iterable, JList2):
+    return jmap_jlist2(iterable, mapper)
+  if isinstance(iterable, FObject) and isinstance(iterable.v, JList2):
+    return jmap_jlist2(iterable.v, mapper)
+
   iterable = partialEval(fexpr_cast(iterable), jeevesState.pathenv.getEnv())
   return FObject(JList(jmap2(iterable, mapper)))
 def jmap2(iterator, mapper):
@@ -250,10 +255,30 @@ def jmap2(iterator, mapper):
     return jmap2(iterator.v, mapper)
   elif isinstance(iterator, JList):
     return jmap2(iterator.l, mapper)
+  elif isinstance(iterator, JList2):
+    return jmap2(iterator.convert_to_jlist1().l, mapper)
   elif isinstance(iterator, list) or isinstance(iterator, tuple):
     return FObject([mapper(item) for item in iterator])
   else:
     return jmap2(iterator.__iter__(), mapper)
+
+def jmap_jlist2(jlist2, mapper):
+  ans = JList2([])
+  env = jeevesState.pathenv.getEnv()
+  for i, e in jlist2.l:
+    popcount = 0
+    for vname, vval in e.iteritems():
+      if vname not in env:
+        v = getLabel(vname)
+        jeevesState.pathenv.push(v, vval)
+        popcount += 1
+      elif env[vname] != vval:
+        break
+    else:
+      ans.l.append((mapper(i), e))
+    for _ in xrange(popcount):
+      jeevesState.pathenv.pop()
+  return FObject(ans)
 
 def facetMapper(facet, fn, wrapper=fexpr_cast):
   if isinstance(facet, Facet):
@@ -297,6 +322,48 @@ class JList:
         return str(x)
       '''
     return str(len(self.l)) #''.join(map(tryPrint, self.l))
+
+class JList2:
+  def __init__(self, l=[]):
+    if isinstance(l, list):
+      self.l = [(i, {}) for i in l]
+    else:
+      raise NotImplementedError
+  
+  def append(self, val):
+    self.l.append((val, jeevesState.pathenv.getEnv()))
+
+  def eval(self, env):
+    return [i for i,e in self.l if all(env[getLabel(v)] == e[v] for v in e)]
+
+  def vars(self):
+    all_vars = set()
+    for _, e in self.l:
+      all_vars.update(set(e.keys()))
+    return {getLabel(v) for v in all_vars}
+
+  def convert_to_jlist1(self):
+    all_vars = [v.name for v in self.vars()]
+    def rec(cur_e, i):
+      if i == len(all_vars):
+        return FObject([i for i,e in self.l if all(cur_e[v] == e[v] for v in e)])
+      else:
+        cur_e1 = dict(cur_e)
+        cur_e2 = dict(cur_e)
+        cur_e1[all_vars[i]] = True
+        cur_e2[all_vars[i]] = False
+        return Facet(getLabel(all_vars[i]),
+            rec(cur_e1, i+1), rec(cur_e2, i+1))
+    return JList(rec({}, 0))
+
+  def __getitem__(self, i):
+    return self.convert_to_jlist1().__getitem__(i)
+
+  def __setitem__(self, i, val):
+    raise NotImplementedError
+
+  def __len__(self):
+    return self.convert_to_jlist1().__len__()
 
 class JIterator:
   def __init__(self, l):

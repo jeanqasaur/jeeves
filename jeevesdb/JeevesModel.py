@@ -78,7 +78,7 @@ class JeevesQuerySet(QuerySet):
 
   @JeevesLib.supports_jeeves
   def all(self):
-    t = JeevesLib.JList([])
+    t = JeevesLib.JList2([])
     env = JeevesLib.jeevesState.pathenv.getEnv()
     for val, cond in self.get_jiter():
       popcount = 0
@@ -292,9 +292,6 @@ class JeevesModel(models.Model):
               new_obj.id = None # so when we save a new row will be made
             new_obj.jeeves_vars += addon + '%s=%d;' % (var_name, not var_value)
             addon += '%s=%d;' % (var_name, var_value)
-      #      if hasattr(new_obj, 'pc_id') and hasattr(new_obj, 'user_id'):
-      #        print 'attr is', new_obj.user_id
-      #        print 'attr is', new_obj.pc_id
             super(JeevesModel, new_obj).save()
 
   @JeevesLib.supports_jeeves
