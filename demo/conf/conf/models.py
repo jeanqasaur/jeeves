@@ -105,6 +105,8 @@ class PaperCoauthor(Model):
     @label_for('paper', 'author')
     @jeeves
     def jeeves_restrict_papercoauthorlabel(pco, ctxt):
+        if pco.paper == None:
+            return False
         if PaperPCConflict.objects.get(paper=pco.paper, pc=ctxt) != None:
             return False
         ans = ctxt.level == 'chair' or (pco.paper != None and pco.paper.author == ctxt)

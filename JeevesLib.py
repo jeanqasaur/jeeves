@@ -399,6 +399,7 @@ def jfun2(f, args, kw, i, arg, args_concrete):
       els = jfun2(f, args, kw, i, arg.els, args_concrete)
     return Facet(arg.cond, thn, els)
 
+from itertools import tee
 def jfun3(f, kw, it, key, val, args_concrete, kw_concrete):
   if isinstance(val, Constant) or isinstance(val, FObject):
     kw_c = dict(kw_concrete)
@@ -410,10 +411,11 @@ def jfun3(f, kw, it, key, val, args_concrete, kw_concrete):
     env = jeevesState.pathenv.getEnv()
     return jfun3(f, kw, it, next_key, partialEval(fexpr_cast(kw[next_key]), env), args_concrete, kw_c)
   else:
+    it1, it2 = tee(it)
     with PositiveVariable(val.cond):
-      thn = jfun3(f, kw, it, key, val.thn, args_concrete, kw_concrete)
+      thn = jfun3(f, kw, it1, key, val.thn, args_concrete, kw_concrete)
     with NegativeVariable(val.cond):
-      els = jfun3(f, kw, it, key, val.els, args_concrete, kw_concrete)
+      els = jfun3(f, kw, it2, key, val.els, args_concrete, kw_concrete)
     return Facet(val.cond, thn, els)
 
 def evalToConcrete(f):

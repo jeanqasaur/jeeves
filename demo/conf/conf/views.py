@@ -64,24 +64,26 @@ def request_wrapper(view_fn):
             ans = view_fn(request)
             template_name = ans[0]
             context_dict = ans[1]
+
+            profile = UserProfile.objects.get(username=request.user.username)
+
+            if template_name == "redirect":
+                path = context_dict
+                return HttpResponseRedirect(JeevesLib.concretize(profile, path))
+
+            concretizeState = JeevesLib.jeevesState.policyenv.getNewSolverState(profile)
+            def concretize(val):
+                return concretizeState.concretizeExp(val, JeevesLib.jeevesState.pathenv.getEnv())
+            #concretize = lambda val : JeevesLib.concretize(profile, val)
+            add_to_context(context_dict, request, template_name, profile, concretize)
+
+            return render_to_response(template_name, RequestContext(request, context_dict))
+
         except Exception:
             import traceback
             traceback.print_exc()
             raise
 
-        profile = UserProfile.objects.get(username=request.user.username)
-
-        if template_name == "redirect":
-            path = context_dict
-            return HttpResponseRedirect(JeevesLib.concretize(profile, path))
-
-        concretizeState = JeevesLib.jeevesState.policyenv.getNewSolverState(profile)
-        def concretize(val):
-            return concretizeState.concretizeExp(val, JeevesLib.jeevesState.pathenv.getEnv())
-        #concretize = lambda val : JeevesLib.concretize(profile, val)
-        add_to_context(context_dict, request, template_name, profile, concretize)
-
-        return render_to_response(template_name, RequestContext(request, context_dict))
     real_view_fn.__name__ = view_fn.__name__
     return real_view_fn
 
