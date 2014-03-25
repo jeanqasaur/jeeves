@@ -47,9 +47,8 @@ def register_account(request):
         }))
 
 @jeeves
-def add_to_context(context_dict, request, template_name, profile):
+def add_to_context(context_dict, request, template_name, profile, concretize):
     template_name = JeevesLib.concretize(profile, template_name)
-    concretize = lambda val : JeevesLib.concretize(profile, val)
     context_dict['concretize'] = concretize
 
     context_dict['is_admin'] = profile != None and profile.level == "chair"
@@ -76,7 +75,11 @@ def request_wrapper(view_fn):
             path = context_dict
             return HttpResponseRedirect(JeevesLib.concretize(profile, path))
 
-        add_to_context(context_dict, request, template_name, profile)
+        concretizeState = JeevesLib.jeevesState.policyenv.getNewSolverState(profile)
+        def concretize(val):
+            return concretizeState.concretizeExp(val, JeevesLib.jeevesState.pathenv.getEnv())
+        concretize = lambda val : JeevesLib.concretize(profile, val)
+        add_to_context(context_dict, request, template_name, profile, concretize)
 
         return render_to_response(template_name, RequestContext(request, context_dict))
     real_view_fn.__name__ = view_fn.__name__
@@ -306,6 +309,10 @@ def submit_review_view(request):
 @request_wrapper
 @jeeves
 def users_view(request):
+    user = UserProfile.objects.get(username=request.user.username)
+    if user.level != 'chair':
+        return (   "redirect", "/index")
+
     user_profiles = UserProfile.objects.all()
 
     if request.method == 'POST':
