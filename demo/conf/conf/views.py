@@ -107,6 +107,16 @@ def about_view(request):
 def papers_view(request):
     user = UserProfile.objects.get(username=request.user.username)
 
+    # If the user has withdrawn a paper, then we need to take care of that.
+    if request.method == 'POST':
+      withdraw = request.POST.get('withdraw', None)
+      if withdraw != None:
+        print "withdrawing"
+        paper_id = request.POST.get('paper_id', None)
+        print paper_id.v
+        if paper_id != None:
+          Paper.objects.filter(jeeves_id=paper_id, author=user).delete()
+
     papers = Paper.objects.all()
     paper_data = []
     for paper in papers:

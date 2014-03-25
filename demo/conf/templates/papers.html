@@ -10,6 +10,7 @@
             <tr>
                 <th> Author </th>
                 <th> Title </th>
+                <th> Withdraw </th>
             </tr>
             {% for p in concretize(paper_data) %}
                 {% if concretize(p.paper.author) != None %}
@@ -24,6 +25,12 @@
                             [Hidden]
                         {% endif %}
                     </a> </td>
+                    <td>
+                      <form method="post" action="">{% csrf_token %}
+                        <input type="hidden" name="paper_id" value="{{ p.paper.jeeves_id }}">
+                        <button type="submit" class="btn btn-default btn-sm" name="withdraw">Withdraw</button>
+                      </form>
+                    </td>
                 </tr>
                 {% endif %}
             {% endfor %}
