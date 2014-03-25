@@ -5,7 +5,9 @@
       <form role="form">
         <div class=form-group>
             <label for="authors[]" class="control-label"><a rel="tooltip" title="Visible to the authors, PC chair, and reviewers after reviews have been submitted."><span class="glyphicon glyphicon-eye-close"></span></a> Authors</label>
-            <input class="form-control-static" type="text" name="coauthors[]" id="coauthors[]" value="{% if concretize(author) != None %} {{concretize(author.name)}} {% else %} [Anonymous] {% endif %}" disabled/>
+            <div class="row">
+              <div class="col-xs-4">
+                <input class="form-control" type="text" name="coauthors[]" id="coauthors[]" value="{% if concretize(author) != None %} {{concretize(author.name)}} {% else %} [Anonymous] {% endif %}" disabled/>
               </div>
             </div>
             {% for coauthor in concretize(coauthors) %}
