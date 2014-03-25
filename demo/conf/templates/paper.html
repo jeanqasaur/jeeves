@@ -77,7 +77,7 @@
           <div class="form-group">
             <label for="comment" class="control-label"><a rel="tooltip" title="Visible to the authors and program commitee."><span class="glyphicon glyphicon-eye-close"></span></a> Leave a comment</label>
             <input type="hidden" name="add_comment" value="true" />
-            <textarea id="comment" class="form-control" name="comment"></textarea>
+            <textarea id="comment" class="form-control" name="comment" required></textarea>
           </div>
           <button class="btn btn-primary" type="submit" value="Submit" onClick="myApp.showPleaseWait();">Submit comment</button>
         </form>
@@ -87,7 +87,7 @@
           <div class="formgroup">
             <label for="review" class="control-label"><a rel="tooltip" title="Visible to the authors and program commitee."><span class="glyphicon glyphicon-eye-close"></span></a> Leave a review</label>
             <input type="hidden" name="add_review" value="true" />
-            <textarea id="review" class="form-control" name="review"></textarea>
+            <textarea id="review" class="form-control" name="review" required></textarea>
           </div>
           {% for label, name, maxscore in review_score_fields %}
           <div class="formgroup">
