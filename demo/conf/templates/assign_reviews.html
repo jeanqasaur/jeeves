@@ -1,23 +1,27 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>Profile</h2>
-
-    <form method="get" action="">
-        <h4> Select reviewer </h4>
-        <select name="reviewer_username">
-            {% for r in concretize(possible_reviewers) %}
-                <option value="{{concretize(r.username)}}" {% if concretize(r == reviewer) %}selected{% endif %}>{{concretize(r.name)}}</option>
-            {% endfor %}
-        </select>
-        <input type="submit" value="Go" />
+    <h2>Assign Reviews</h2>
+    <form method="get" action="" role="form">
+        <h4>Select reviewer</h4>
+        <div class="form-group">
+          <div class="row">
+            <div class="col-md-4">
+              <select class="form-control" name="reviewer_username">
+                {% for r in concretize(possible_reviewers) %}
+                  <option value="{{concretize(r.username)}}" {% if concretize(r == reviewer) %}selected{% endif %}>{{concretize(r.name)}}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" value="Go">Go</button>
     </form>
 
 	{% if concretize(reviewer) != None %}
 		<h4> Make assignments </h4>
-		<form method="post" action="">
-			{% csrf_token %}
-			<table>
+		<form method="post" action="" role="form">{% csrf_token %}
+			<table class="table">
 				{% for p in concretize(papers_data) %}
 					<tr>
 						<td> {{concretize(p.latest_version.title)}} </td>
@@ -36,7 +40,7 @@
 					</tr>
 				{% endfor %}
 			</table>
-			<input type="submit" value="Save" />
+      <button type="submit" class="btn btn-primary" value="Save">Save</button>
 		</form>
 	{% endif %}
 {% endblock %}
