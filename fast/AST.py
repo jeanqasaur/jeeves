@@ -11,8 +11,40 @@ import z3
 import JeevesLib
 import traceback
 
+import env.VarEnv
+import env.PolicyEnv
+import env.PathVars
+import env.WritePolicyEnv
+import threading
+from collections import defaultdict
+
 class JeevesState:
-  pass
+  def __init__(self):
+    pass
+
+  def init(self):
+    self._varenv = defaultdict(env.VarEnv.VarEnv)
+    self._pathenv = defaultdict(env.PathVars.PathVars)
+    self._policyenv = defaultdict(env.PolicyEnv.PolicyEnv)
+    self._writeenv = defaultdict(env.WritePolicyEnv.WritePolicyEnv)
+    self._all_labels = defaultdict(dict)
+
+  @property
+  def varenv(self):
+    return self._varenv[threading.current_thread()]
+  @property
+  def pathenv(self):
+    return self._pathenv[threading.current_thread()]
+  @property
+  def policyenv(self):
+    return self._policyenv[threading.current_thread()]
+  @property
+  def writeenv(self):
+    return self._writeenv[threading.current_thread()]
+  @property
+  def all_labels(self):
+    return self._all_labels[threading.current_thread()]
+
 jeevesState = JeevesState()
 
 '''
@@ -695,12 +727,16 @@ class FObject(FExpr):
   def eval(self, env):
     if isinstance(self.v, JeevesLib.JList):
       return self.v.l.eval(env)
+    elif isinstance(self.v, JeevesLib.JList2):
+      return self.v.eval(env)
     else:
       return self.v
 
   def vars(self):
     if isinstance(self.v, JeevesLib.JList):
       return self.v.l.vars()
+    elif isinstance(self.v, JeevesLib.JList2):
+      return self.v.vars()
     else:
       return set()
 

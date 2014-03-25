@@ -118,7 +118,7 @@ def papers_view(request):
           Paper.objects.filter(jeeves_id=paper_id, author=user).delete()
 
     papers = Paper.objects.all()
-    paper_data = []
+    paper_data = JeevesLib.JList2()
     for paper in papers:
         paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
         latest_version = paper_versions[-1] if paper_versions.__len__() > 0 else None
@@ -145,7 +145,6 @@ def paper_view(request):
     if paper != None:
         if request.method == 'POST':
             if request.POST.get('add_comment', 'false') == 'true':
-                print 'saving...'
                 Comment.objects.create(paper=paper, user=user,
                             contents=request.POST.get('comment', ''))
 
