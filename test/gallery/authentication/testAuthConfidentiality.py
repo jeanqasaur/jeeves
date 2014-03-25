@@ -1,4 +1,3 @@
-import macropy.activate
 from smt.Z3 import *
 import unittest
 from AuthConfidentiality import Authentication, Principal
@@ -14,18 +13,21 @@ class TestAuthConfidentiality(unittest.TestCase):
 
   def testUserCanSeeOwnPassword(self):  
     alicePwdToAlice = JeevesLib.concretize(
-        self.aliceUser, self.aliceUser.getPwd())
+        self.aliceUser, self.aliceUser.pwd)
     self.assertEqual(alicePwdToAlice, self.alicePwd)
 
   def testUserCannotSeeOtherPassword(self):
     bobPwdToAlice = JeevesLib.concretize(
-        self.aliceUser, self.bobUser.getPwd())
+        self.aliceUser, self.bobUser.pwd)
     self.assertEqual(bobPwdToAlice, "")
 
   def testLogin(self):
-    aliceLogin = JeevesLib.concretize(
-          Authentication.login(self.aliceUser, self.alicePwd), self.aliceUser)
-    self.assertEqual(aliceLogin, self.aliceUser)
+    self.assertEqual( JeevesLib.concretize(self.aliceUser
+                        , Authentication.login(self.aliceUser, self.alicePwd))
+                    , self.aliceUser)
+    self.assertEqual( JeevesLib.concretize(self.aliceUser
+                        , Authentication.login(self.aliceUser, "otherPwd"))
+                      , Principal.NullUser())
 
   def testSensitiveUserPassword(self):
     # Make a sensitive user that is either Alice or Bob. Make sure it shows the
