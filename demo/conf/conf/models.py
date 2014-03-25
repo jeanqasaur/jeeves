@@ -30,7 +30,7 @@ class UserProfile(Model):
     @label_for('email')
     @jeeves
     def jeeves_restrict_userprofilelabel(user, ctxt):
-        return user == ctxt or ctxt.level == 'chair'
+        return user == ctxt or (ctxt != None and ctxt.level == 'chair')
 
     class Meta:
         db_table = 'user_profiles'
