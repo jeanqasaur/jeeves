@@ -71,7 +71,7 @@
         -->
         </form>
 
-		{% if concretize(profile.level) != 'normal' %}
+		{% if concretize(profile.level) != 'normal' and concretize(profile != author) %}
         <form method="post" action="" role="form">{% csrf_token %}
           <h3 class="form-heading">Leave a comment</h3>
           <div class="form-group">

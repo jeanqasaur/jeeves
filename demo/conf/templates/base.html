@@ -25,8 +25,9 @@
 
   <div class="jumbotron">
     <div class="toptext">
-      <h1>Jeeves Conference Management System</h1>
-        <p>A conference management system powered by the Jeeves programming language for automatically enforcing privacy policies.</p>
+      <h2>2nd Workshop on Programming Languages and Technology for Massive Open Online Courses (PLOOC 2014)</h2>
+      <h3>June 13 2014, Co-Located With PLDI 2014 in Edinburgh, UK</h3>
+        <p>This submission site is powered by the Jeeves programming language for automatically enforcing privacy policies.</p>
         <p><a class="btn btn-primary btn-lg" role="button" href="/about" onClick="myApp.showPleaseWait();">About This Site &raquo;</a></p>
     </div>
   </div>
@@ -46,7 +47,7 @@
     <script type="text/javascript">
       var myApp;
 myApp = myApp || (function () {
-    var pleaseWaitDiv = $('<div class="modal modal-static fade" id="processing-modal" role="dialog" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-body"><div class="text-center"><img src="http://www.travislayne.com/images/loading.gif" class="icon" /><h4>Processing...</h4></div></div></div></div></div>');
+    var pleaseWaitDiv = $('<div class="modal modal-static fade" id="processing-modal" role="dialog" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-body"><div class="text-center"><img src="http://www.travislayne.com/images/loading.gif" class="icon" /><h4>Processing... <button type="button" class="close" style="float: none;" data-dismiss="modal" aria-hidden="true">×</button></h4></div></div></div></div></div>');
     return {
         showPleaseWait: function() {
             pleaseWaitDiv.modal();

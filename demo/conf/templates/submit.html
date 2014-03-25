@@ -28,7 +28,7 @@
         <label for="title" class="control-label"><a rel="tooltip" title="Visible to the authors and program committee."><span class="glyphicon glyphicon-eye-close"></span></a> Title</label>
     	  <div class="row">
           <div class="col-xs-8">
-          <input class="form-control" type="text" name="title" id="title" value="{{concretize(title)}}" />
+          <input class="form-control" type="text" name="title" id="title" value="{{concretize(title)}}" required/>
           </div>
         </div>
     	</div>
@@ -38,7 +38,7 @@
       </div>
       <div class="form-group">
         <label for="abstract" class="control-label"><a rel="tooltip" title="Visible to the authors and program commitee."><span class="glyphicon glyphicon-eye-close"></span></a> Abstract</label>
-    	  <textarea class="form-control" name="abstract" id="abstract" rows="10" cols="40">{{concretize(abstract)}}</textarea>
+    	  <textarea class="form-control" name="abstract" id="abstract" rows="10" cols="40" required>{{concretize(abstract)}}</textarea>
       </div>
       <div class="form-group">
         <label for="pc_conflicts[]" class="control-label"><a rel="tooltip" title="Visible to you and the PC chair."><span class="glyphicon glyphicon-eye-close"></span></a> PC Conflicts:</label>

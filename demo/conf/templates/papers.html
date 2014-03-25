@@ -12,13 +12,10 @@
                 <th> Title </th>
             </tr>
             {% for p in concretize(paper_data) %}
+                {% if concretize(p.paper.author) != None %}
                 <tr>
                     <td>
-                        {% if concretize(p.paper.author) != None %}
-                            {{concretize(p.paper.author.name)}}
-                        {% else %}
-                            [Anonymous]
-                        {% endif %}
+                        {{concretize(p.paper.author.name)}}
                     </td>
                     <td> <a href="/paper?id={{concretize(p.paper.jeeves_id)}}">
                         {% if concretize(p.latest) != None %}
@@ -28,6 +25,7 @@
                         {% endif %}
                     </a> </td>
                 </tr>
+                {% endif %}
             {% endfor %}
         </table>
     {% else %}
