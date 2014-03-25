@@ -53,6 +53,7 @@ def add_to_context(context_dict, request, template_name, profile):
     context_dict['concretize'] = concretize
 
     context_dict['is_admin'] = profile != None and profile.level == "chair"
+    context_dict['profile'] = profile
 
     context_dict['is_logged_in'] = (request.user and
                                     request.user.is_authenticated() and

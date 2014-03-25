@@ -71,6 +71,7 @@
         -->
         </form>
 
+		{% if concretize(profile.level) != 'normal' %}
         <form method="post" action="" role="form">{% csrf_token %}
           <h3 class="form-heading">Leave a comment</h3>
           <div class="form-group">
@@ -102,6 +103,7 @@
           {% endfor %}
           <button class="btn btn-primary" type="submit" value="Submit" onClick="myApp.showPleaseWait();">Submit review</button>
         </form>
+		{% endif %}
 
     {% else %}
         Not found. The planets must not be aligned correctly, or perhaps no paper with the given 'id' exists.
