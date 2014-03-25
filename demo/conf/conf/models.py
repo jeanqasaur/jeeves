@@ -163,8 +163,8 @@ class PaperVersion(Model):
         db_table = 'paper_versions'
 
     @staticmethod
-    @jeeves
     @label_for('paper', 'title', 'contents', 'abstract')
+    @jeeves
     def jeeves_restrict_paperversionlabel(pv, ctxt):
         if pv.paper == None or PaperPCConflict.objects.get(paper=pv.paper, pc=ctxt) != None:
             return False
