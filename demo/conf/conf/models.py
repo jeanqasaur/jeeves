@@ -168,7 +168,7 @@ class PaperVersion(Model):
     @label_for('paper', 'title', 'contents', 'abstract')
     @jeeves
     def jeeves_restrict_paperversionlabel(pv, ctxt):
-        if pv.paper == None or PaperPCConflict.objects.get(paper=pv.paper, pc=ctxt) != None:
+        if pv == None or pv.paper == None or PaperPCConflict.objects.get(paper=pv.paper, pc=ctxt) != None:
             return False
         return (pv.paper != None and pv.paper.author == ctxt) or ctxt.level == 'pc' or ctxt.level == 'chair'
     

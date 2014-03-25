@@ -24,7 +24,7 @@ def partialEval(f, env={}, unassignedOkay=False):
       true_env[f.cond.name] = True
       false_env = dict(env)
       false_env[f.cond.name] = False
-      return Facet(f.cond, partialEval(f.thn, true_env, unassignedOkay),
+      return create_facet(f.cond, partialEval(f.thn, true_env, unassignedOkay),
                            partialEval(f.els, false_env, unassignedOkay))
   elif isinstance(f, Var):
     if f.name in env:
@@ -41,9 +41,16 @@ def partialEval(f, env={}, unassignedOkay=False):
   else:
     raise TypeError("partialEval does not support type %s" % f.__class__.__name__)
 
+def create_facet(cond, left, right):
+  if isinstance(left, Constant) and isinstance(right, Constant) and left.v == right.v:
+    return left
+  if isinstance(left, FObject) and isinstance(right, FObject) and left.v is right.v:
+    return left
+  return Facet(cond, left, right)
+
 def facetApply(f, opr):
   if isinstance(f, Facet):
-    return Facet(f.cond, facetApply(f.thn, opr), facetApply(f.els, opr))
+    return create_facet(f.cond, facetApply(f.thn, opr), facetApply(f.els, opr))
   elif isinstance(f, Constant):
     return Constant(opr(f.v))
   elif isinstance(f, FObject):
@@ -60,10 +67,10 @@ def facetJoin(f0, f1, opr):
   if isinstance(f0, Facet):
     thn = facetJoin(f0.thn, f1, opr)
     els = facetJoin(f0.els, f1, opr)
-    return Facet(f0.cond, thn, els)
+    return create_facet(f0.cond, thn, els)
   elif isinstance(f1, Facet):
     thn = facetJoin(f0, f1.thn, opr)
     els = facetJoin(f0, f1.els, opr)
-    return Facet(f1.cond, thn, els)
+    return create_facet(f1.cond, thn, els)
   else:
     return Constant(opr(f0.v, f1.v))

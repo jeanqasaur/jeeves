@@ -2,18 +2,19 @@
 
 {% block content %}
     {% if concretize(paper) != None %}
-      <form role="form">
+      <form role="form" enctype="multipart/form-data" method="post">
+        {% csrf_token %}
         <div class=form-group>
             <label for="authors[]" class="control-label"><a rel="tooltip" title="Visible to the authors, PC chair, and reviewers after reviews have been submitted."><span class="glyphicon glyphicon-eye-close"></span></a> Authors</label>
             <div class="row">
               <div class="col-xs-4">
-                <input class="form-control" type="text" name="coauthors[]" id="coauthors[]" value="{% if concretize(author) != None %} {{concretize(author.name)}} {% else %} [Anonymous] {% endif %}" disabled/>
+                <input class="form-control" type="text" name="coauthors[]" id="coauthors[]" value="{% if concretize(author) != None %} {{concretize(author.name)}} {% else %} [Anonymous] {% endif %}" disabled />
               </div>
             </div>
             {% for coauthor in concretize(coauthors) %}
             <div class="row">
               <div class="col-xs-4">
-                <input class="form-control" type="text" name="coauthors[]" id="coauthors[]" value="{{concretize(coauthor.author)}}" disabled/>
+                <input class="form-control" type="text" name="coauthors[]" id="coauthors[]" value="{{concretize(coauthor.author)}}" disabled />
               </div>
             </div>
             {% endfor %}
@@ -22,7 +23,7 @@
           <label for="title" class="control-label"><a rel="tooltip" title="Visible to the authors and program committee."><span class="glyphicon glyphicon-eye-close"></span></a> Title</label>
           <div class="row">
             <div class="col-xs-8">
-            <input class="form-control" type="text" name="title" id="title" value="{{concretize(latest_title)}}" disabled/>
+            <input class="form-control" type="text" name="title" id="title" value="{{concretize(latest_title)}}" {% if concretize(author != profile) %}disabled{% endif %}/>
             </div>
           </div>
         </div>
@@ -40,10 +41,16 @@
         </div>
         <div class="form-group">
           <label for="abstract" class="control-label"><a rel="tooltip" title="Visible to the authors and program commitee."><span class="glyphicon glyphicon-eye-close"></span></a> Abstract</label>
-          <textarea class="form-control" name="abstract" id="abstract" rows="10" cols="40" disabled>{{concretize(latest_abstract)}}</textarea>
+          <textarea class="form-control" name="abstract" id="abstract" rows="10" cols="40" {% if concretize(author != profile) %}disabled{% endif %}>{{concretize(latest_abstract)}}</textarea>
         </div>
+
+    	<input type="hidden" name="new_version" value="true" />
+    	<input type="file" name="contents" id="contents" value="{{concretize(contents)}}" required/>
+    	<input type="submit" value="Update!" />
+
         <div class="form-group">
           <label for="reviews" class="control-label"><a rel="tooltip" title="Visible to the authors and program commitee."><span class="glyphicon glyphicon-eye-close"></span></a> Reviews</label>
+
           {% for review in concretize(reviews) %}
             <p class="form-control-static">
                 <div> {{concretize(review.reviewer.name)}} at {{concretize(review.time)}} </div>

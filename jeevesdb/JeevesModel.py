@@ -42,7 +42,7 @@ class JeevesQuerySet(QuerySet):
         results.append((obj, env))
     return results
 
-  def get(self, **kwargs):
+  def get(self, use_base_env=False, **kwargs):
     l = self.filter(**kwargs).get_jiter()
     if len(l) == 0:
       return None
@@ -61,7 +61,7 @@ class JeevesQuerySet(QuerySet):
         else:
           cur = Facet(acquire_label_by_name(self.model._meta.app_label, var_name), old, cur)
     try:
-      return partialEval(cur, JeevesLib.jeevesState.pathenv.getEnv())
+      return partialEval(cur, {} if use_base_env else JeevesLib.jeevesState.pathenv.getEnv())
     except TypeError:
       raise Exception("wow such error: could not find a row for every condition")
 
@@ -199,7 +199,7 @@ def acquire_label_by_name(app_label, label_name):
     model = get_model(app_label, model_name)
     # TODO: optimization: most of the time this obj will be the one we are
     # already fetching
-    obj = model.objects.get(jeeves_id=jeeves_id)
+    obj = model.objects.get(use_base_env=True, jeeves_id=jeeves_id)
     restrictor = getattr(model, 'jeeves_restrict_' + field_name)
     JeevesLib.restrict(label, lambda ctxt : restrictor(obj, ctxt), True)
     return label
