@@ -306,6 +306,10 @@ def submit_review_view(request):
 @request_wrapper
 @jeeves
 def users_view(request):
+    user = UserProfile.objects.get(username=request.user.username)
+    if user.level != 'chair':
+        return (   "redirect", "/index")
+
     user_profiles = UserProfile.objects.all()
 
     if request.method == 'POST':
