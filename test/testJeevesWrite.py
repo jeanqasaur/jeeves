@@ -254,8 +254,10 @@ class TestJeevesWrite(unittest.TestCase):
           , lambda v: lambda ictxt: lambda _:
               v == 0 and ictxt == self.aliceUser)
     x.update(self.aliceUser, self.aliceUser, 1)
+    print x.v.prettyPrint()
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v), 1)
     x.update(self.aliceUser, self.aliceUser, 3)
+    print x.v.prettyPrint()
     self.assertEqual(JeevesLib.concretize(self.aliceUser, x.v), 1)
 
   def test_not_tracking_implicit_flows(self):

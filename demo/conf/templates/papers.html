@@ -9,8 +9,8 @@
         <p>Please e-mail Jean Yang (jeanyang [at] mit [dot] edu) to withdraw a paper.</p>
         <table class="table">
             <tr>
-                <th> Author </th>
-                <th> Title </th>
+                <th><a rel="tooltip" title="Visible to the authors, PC chair, and reviewers after reviews have been submitted."><span class="glyphicon glyphicon-eye-close"></span></a> Author </th>
+                <th><a rel="tooltip" title="Visible to the authors and program committee."><span class="glyphicon glyphicon-eye-close"></span></a> Title </th>
             </tr>
             {% for p in concretize(paper_data) %}
                 {% if concretize(p.paper.author) != None %}
