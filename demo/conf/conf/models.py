@@ -71,7 +71,7 @@ class Paper(Model):
         if phase == 'final':
             return True
         else:
-            return (paper != None and paper.author == ctxt) or ctxt.level == 'chair'
+            return (paper != None and paper.author == ctxt) or (ctxt != None and ctxt.level == 'chair')
 
     class Meta:
         db_table = 'papers'
