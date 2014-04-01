@@ -22,6 +22,7 @@ The Jeeves web framework uses the the following Python packages:
 * We implement our web framework by extending [Django](https://www.djangoproject.com/). Install with ```easy_install``` or ```pip```.
 * For the frontend we use Jinja on top of Django. You can install the ```django-jinja``` package using ```pip```.
 * [Mock](http://www.voidspace.org.uk/python/mock/) for mocking and testing. You will need this to run the database-related tests. Install with ```easy_install``` or ```pip```.
+* We also use logging from the ```django-timelog``` package.
 
 ### Other
 We also use the [Z3 SMT Solver](http://z3.codeplex.com/releases) for helping resolve label values. You will need to build from source so that our code can use the Python Z3 library for interfacing with Z3.
