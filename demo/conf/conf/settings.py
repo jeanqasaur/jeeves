@@ -72,11 +72,8 @@ WSGI_APPLICATION = 'wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'JeevesConfDB',
-        'USER': 'jeanyang',
-        'PASSWORD': 'L0veSQL',
-        'HOST': 'mysql.csail.mit.edu',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(PROJECT_DIR, 'jconf.db'),
     }
 }
 
