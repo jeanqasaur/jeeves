@@ -23,13 +23,13 @@ DEBUG = True
 TEMPLATE_DEBUG = True
 
 TEMPLATE_DIRS = (
-    os.path.join(BASE_DIR, 'templates/'),
+    os.path.join(BASE_DIR, '..', 'templates/'),
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
 )
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 TEMPLATE_LOADERS = (
     'django_jinja.loaders.AppLoader',
@@ -72,8 +72,11 @@ WSGI_APPLICATION = 'wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'JeevesConfDB',
+        'USER': 'jeanyang',
+        'PASSWORD': 'L0veSQL',
+        'HOST': 'mysql.csail.mit.edu',
     }
 }
 
@@ -96,7 +99,6 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
-
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
@@ -105,7 +107,7 @@ STATICFILES_DIRS = (
 # possible phases are submit, review, final
 CONF_PHASE = 'submit'
 
-LOG_PATH = os.path.join(BASE_DIR, 'logs')
+LOG_PATH = os.path.join(BASE_DIR, '..', 'logs/')
 TIMELOG_LOG = os.path.join(LOG_PATH, 'timelog.log')
 SQL_LOG = os.path.join(LOG_PATH, 'sqllog.log')
 

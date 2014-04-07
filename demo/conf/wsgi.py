@@ -8,7 +8,16 @@ https://docs.djangoproject.com/en/1.6/howto/deployment/wsgi/
 """
 
 import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "conf.settings")
+import logging, sys
+logging.basicConfig(stream=sys.stderr)
+sys.path.append(os.path.dirname(__file__))
+sys.path.append(os.path.join(os.path.dirname(__file__), 'conf/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
+os.environ["DJANGO_SETTINGS_MODULE"] = "conf.settings"
+
+import os
+import sys
+print >>sys.stderr, sys.path
 
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
