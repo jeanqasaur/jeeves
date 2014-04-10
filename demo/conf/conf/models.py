@@ -71,7 +71,12 @@ class Paper(Model):
         if phase == 'final':
             return True
         else:
-            return (paper != None and paper.author == ctxt) or (ctxt != None and ctxt.level == 'chair')
+            if paper == None:
+                return False
+            if PaperPCConflict.objects.get(paper=paper, pc=ctxt) != None:
+                return False
+
+            return (paper != None and paper.author == ctxt) or (ctxt != None and (ctxt.level == 'chair' or ctxt.level == 'pc'))
 
     class Meta:
         db_table = 'papers'
@@ -109,7 +114,7 @@ class PaperCoauthor(Model):
             return False
         if PaperPCConflict.objects.get(paper=pco.paper, pc=ctxt) != None:
             return False
-        ans = ctxt.level == 'chair' or (pco.paper != None and pco.paper.author == ctxt)
+        ans = ctxt.level == 'pc' or ctxt.level == 'chair' or (pco.paper != None and pco.paper.author == ctxt)
         return ans
 
 #class PaperReviewer(Model):
@@ -168,7 +173,9 @@ class PaperVersion(Model):
     @label_for('paper', 'title', 'contents', 'abstract')
     @jeeves
     def jeeves_restrict_paperversionlabel(pv, ctxt):
-        if pv == None or pv.paper == None or PaperPCConflict.objects.get(paper=pv.paper, pc=ctxt) != None:
+        if pv == None or pv.paper == None:
+            return False
+        if PaperPCConflict.objects.get(paper=pv.paper, pc=ctxt) != None:
             return False
         return (pv.paper != None and pv.paper.author == ctxt) or ctxt.level == 'pc' or ctxt.level == 'chair'
     
