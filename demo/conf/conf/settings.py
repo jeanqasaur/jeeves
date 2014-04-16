@@ -138,6 +138,11 @@ LOGGING = {
       'level': 'DEBUG',
       'propogate': False,
      },
+    'timing_logging': {
+      'handlers': ['timelog'],
+      'level': 'DEBUG',
+      'propogate': False,
+     },
     'logging_middleware': {
       'handlers': ['sqllog'],
       'level': 'DEBUG',

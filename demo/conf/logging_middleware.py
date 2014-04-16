@@ -22,5 +22,6 @@ class ConfLoggingMiddleware(object):
                 total_time = total_time + float(query['time'])
                 logger.info("%s%s\n" % (" "*indentation, sql))
             replace_tuple = (" "*indentation, str(total_time))
+            logger.info("%s[TOTAL QUERIES: %d]" % (" "*indentation, len(connection.queries)))
             logger.info("%s[TOTAL TIME: %s seconds]" % replace_tuple)
         return response

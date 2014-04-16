@@ -14,6 +14,7 @@ from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment, C
 
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
+import logging
 
 def register_account(request):
     if request.user.is_authenticated():
@@ -59,9 +60,14 @@ def add_to_context(context_dict, request, template_name, profile, concretize):
                                     (not request.user.is_anonymous()))
 
 def request_wrapper(view_fn):
+    logger = logging.getLogger('timing_logging')
+    import time
+
     def real_view_fn(request):
         try:
+            t1 = time.time()
             ans = view_fn(request)
+            t2 = time.time()
             template_name = ans[0]
             context_dict = ans[1]
 
@@ -79,7 +85,14 @@ def request_wrapper(view_fn):
 
             #print 'concretized is', concretize(context_dict['latest_title'])
 
-            return render_to_response(template_name, RequestContext(request, context_dict))
+            r = render_to_response(template_name, RequestContext(request, context_dict))
+
+            t3 = time.time()
+
+            logger.info("Jeeves time: %f" % (t2 - t1))
+            logger.info("Concre time: %f" % (t3 - t2))
+
+            return r
 
         except Exception:
             import traceback
