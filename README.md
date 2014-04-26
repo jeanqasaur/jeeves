@@ -12,33 +12,53 @@ This separation of policy and core functionality relieves programmer burden in k
 Go ahead, try it out! Feel free to write to the [Jeeves user group](https://groups.google.com/forum/#!forum/jeeves-programmers) with questions.
 
 ## Installing Jeeves.
+First, you will need Python.
+
+    $ python --version
+    Python 2.7.6
+
 
 ### Python libraries
-For core Jeeves, we use the following packages:
-* [MacroPy](https://github.com/lihaoyi/macropy) Python library for data types and pattern matching and to implement our ```@jeeves``` macro.
-* For unit testing, we use [unittest](http://docs.python.org/2/library/unittest.html) and [nose](https://nose.readthedocs.org/en/latest/). Install with ```easy_install``` or ```pip```.
+For core Jeeves, we use [MacroPy](https://github.com/lihaoyi/macropy), [Nose](https://nose.readthedocs.org/en/latest/), Django, and [Mock](http://www.voidspace.org.uk/python/mock/). You can install with ```pip``` as follows:
 
-The Jeeves web framework uses the the following Python packages:
-* We implement our web framework by extending [Django](https://www.djangoproject.com/). Install with ```easy_install``` or ```pip```.
-* For the frontend we use Jinja on top of Django. You can install the ```django-jinja``` package using ```pip```.
-* [Mock](http://www.voidspace.org.uk/python/mock/) for mocking and testing. You will need this to run the database-related tests. Install with ```easy_install``` or ```pip```.
-* We also use logging from the ```django-timelog``` package.
+    $ pip install macropy nose django mock
+    
+For logging in our web demos, we also use Django timelog:
+
+    $ pip install django-timelog
+
 
 ### Other
-We also use the [Z3 SMT Solver](http://z3.codeplex.com/releases) for helping resolve label values. You will need to build from source so that our code can use the Python Z3 library for interfacing with Z3.
+We also use the [Z3 SMT Solver](http://z3.codeplex.com/releases) for helping resolve label values. Installing the Z3 binaries for your platform *should* install the Python Z3 package. You can test that it works by opening a Python interpreter:
+
+    >>> from z3 import *
+    >>> solve(x > 2, y < 10, x + 2*y == 7)
+    [y = 0, x = 7]
+    >>> print simplify(x + y + 2*x + 3)
+    3 + 3*x + y
+
+You may need to build from source so that our code can use the Python Z3 library for interfacing with Z3.
+
+On OSX, if you're familiar homebrew, this is easy with ```homebrew```:
+
+    $ brew tap homebrew/science
+    $ brew install z3
+
+You can also build manually or use nightly build package for OSX(64bit).
+
 
 ## Running Tests.
-Once you have installed everything, you should run the tests to make sure everything is working together. To use ```nose```, first make sure your ```PYTHONPATH``` environment variable is set to your current working directory. One easy way to do that is with:
+Once you have installed everything, you should run the tests to make sure everything is working together. To use ```nose```, first make sure your ```PYTHONPATH``` environment variable is set to your current working directory. Then you can run the tests:
 
-    export PYTHONPATH='.'
-    
-You should be able to run the general tests with the following command:
 
-    nosetests
+    $ cd /to/jeeves
+    $ export PYTHONPATH=.
+    $ nosetests
     
 You can also use ```nose``` to run specific tests. For instance:
 
     nosetests tests/gallery/authentication
+
     
 ## Using Jeeves
 There is documentation for the JeevesLib API [here](http://projects.csail.mit.edu/jeeves/doc/jeeveslib.html). There is more documentation on our [Wiki](https://github.com/jeanqasaur/jeeves/wiki). We have a [Quick Introduction to Jeeves](https://github.com/jeanqasaur/jeeves/wiki/A-Quick-Introduction-to-Jeeves). (Happy to take suggestions on how to make it more useful!)
