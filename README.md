@@ -39,7 +39,7 @@ We also use the [Z3 SMT Solver](http://z3.codeplex.com/releases) for helping res
 
 You may need to build from source so that our code can use the Python Z3 library for interfacing with Z3.
 
-On OSX, if you're familiar homebrew, this is easy with ```homebrew```:
+On OSX, if you're familiar with [Homebrew](http://brew.sh/), this is easy:
 
     $ brew tap homebrew/science
     $ brew install z3
