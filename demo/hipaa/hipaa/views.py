@@ -5,6 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
+from django.views import generic
+from datetime import date
 import urllib
 import random
 
@@ -427,4 +429,31 @@ def search_view(request):
         'results' : results,
         'which_page' : "search"
     }))
-
+def patients_view(request):
+    return render_to_response("patients.html", RequestContext(request, {"treatments":
+    [
+        {
+            "Service" : "021009W",
+            "DatePerformed" : date(2012,4,12),
+            "PrescribingEntity" : "West Health",
+            "PerformingEntity" : "Enlit Surgical"
+        },
+        {
+            "Service" : "ADA:D4211",
+            "DatePerformed" : date(2012,6,26),
+            "PrescribingEntity" : "Cooper Base Dental",
+            "PerformingEntity" : "Cooper Base Dental"
+        },
+        {
+            "Service" : "D7287",
+            "DatePerformed" : date(2013,1,3),
+            "PrescribingEntity" : "Beautiful Smile",
+            "PerformingEntity" : "Mary Orman, DDS"
+        },
+        {
+            "Service" : "D2970",
+            "DatePerformed" : date(2013,3,2),
+            "PrescribingEntity" : "Samuel Borndi, DMD",
+            "PerformingEntity" : "Enlit Surgical"
+        }
+    ]}))
