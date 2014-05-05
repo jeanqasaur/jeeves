@@ -32,5 +32,6 @@ urlpatterns = patterns('',
     url(r'^search$', views.search_view),
     url(r'^about$', views.about_view),
     url(r'^users$', views.users_view),
-    url(r'^patients$', views.patients_view),
+    url(r'^treatments$', views.treatments_view),
+    url(r'^diagnoses$', views.diagnoses_view),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

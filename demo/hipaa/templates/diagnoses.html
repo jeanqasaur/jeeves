@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}
+Diagnoses
+{% endblock %}
+{% block top %}
+	<h2>Doctors' diagnoses about an individual.</h2>
+{% endblock %}
+{% block content %}
+<div class="container">
+<div class="page-header">
+	<h2>
+		John Doe
+	</h2>
+</div>
+<ul class="nav nav-tabs" data-tabs="tabs">
+	<li><a href="info">Information</a></li>
+	<li><a href="treatments">Treatment, Drugs, & Services</a></li>
+	<li class="active"><a href="diagnoses">Diagnoses</a></li>
+</ul>
+
+<table class="table table-striped table-hover">
+	<thead>
+		<th>
+			Date
+		</th>
+		<th>
+			Code
+		</th>
+		<th>
+			Diagnosis
+		</th>
+		<th>
+			Recognized By
+		</th>
+	</thead>
+	{% for diagnosis in diagnoses %}
+		<tr>
+			<td>
+				{{ diagnosis.DateRecognized }}
+			</td>
+			<td>
+				{{ diagnosis.Manifestation }}
+			</td>
+			<td>
+				{{ diagnosis.Diagnosis }}
+			</td>
+			<td>
+				{{ diagnosis.RecognizingEntity }}
+			</td>
+		</tr>
+	{% endfor %}
+</table>
+{% endblock %}

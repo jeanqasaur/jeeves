@@ -5,9 +5,11 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta name="description" content="Jeeves demo conferance management system" />
-
-  	<title>JeevesConf</title>
-
+	<title>
+		{% block title %}
+			JeevesConf
+		{% endblock %}
+	</title>
     <!-- Bootstrap core CSS -->
     <link href="{{ static('css/bootstrap.min.css') }}" rel="stylesheet">
     <!-- Bootstrap theme -->
@@ -25,10 +27,12 @@
 
   <div class="jumbotron">
     <div class="toptext">
+		{% block top %}
       <h2>2nd Workshop on Programming Languages and Technology for Massive Open Online Courses (PLOOC 2014)</h2>
       <h3>June 13 2014, Co-Located With PLDI 2014 in Edinburgh, UK</h3>
         <p>This submission site is powered by the Jeeves programming language for automatically enforcing privacy policies. Mouse over <a rel="tooltip" title="Visible to everyone."><span class="glyphicon glyphicon-eye-open"></span></a> and <a rel="tooltip" title="Selectively visible."><span class="glyphicon glyphicon-eye-close"></span></a> for more information about policies!</p>
         <p><a class="btn btn-primary btn-lg" role="button" href="/about" onClick="myApp.showPleaseWait();">About This Site &raquo;</a></p>
+		{% endblock %}
     </div>
   </div>
 

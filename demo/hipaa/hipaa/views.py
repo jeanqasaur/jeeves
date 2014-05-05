@@ -429,9 +429,8 @@ def search_view(request):
         'results' : results,
         'which_page' : "search"
     }))
-def patients_view(request):
-    return render_to_response("patients.html", RequestContext(request, {"treatments":
-    [
+def treatments_view(request):
+    treatments=[
         {
             "Service" : "021009W",
             "DatePerformed" : date(2012,4,12),
@@ -456,4 +455,34 @@ def patients_view(request):
             "PrescribingEntity" : "Samuel Borndi, DMD",
             "PerformingEntity" : "Enlit Surgical"
         }
-    ]}))
+    ]
+    return render_to_response("treatments.html", RequestContext(request, {"treatments":treatments}))
+
+def diagnoses_view(request):
+    diagnoses=[
+        {
+            "Manifestation" : "A38.8",
+            "DateRecognized" : date(2012,10,17),
+            "RecognizingEntity" : "Solomon Health",
+            "Diagnosis" : "Negative"
+        },
+        {
+            "Manifestation" : "E54",
+            "DateRecognized" : date(2012,11,24),
+            "RecognizingEntity" : "Cragley Medical National",
+            "Diagnosis" : "Negative"
+        },
+        {
+            "Manifestation" : "B01.0",
+            "DateRecognized" : date(2013,2,1),
+            "RecognizingEntity" : "Southwest Hospital",
+            "Diagnosis" : "Negative"
+        },
+        {
+            "Manifestation" : "T84.012",
+            "DateRecognized" : date(2013,10,17),
+            "RecognizingEntity" : "Dr. Wragley Medical Center",
+            "Diagnosis" : "Positive"
+        }
+    ]
+    return render_to_response("diagnoses.html", RequestContext(request, {"diagnoses":diagnoses}))
