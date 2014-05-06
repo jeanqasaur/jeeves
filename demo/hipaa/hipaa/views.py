@@ -486,3 +486,5 @@ def diagnoses_view(request):
         }
     ]
     return render_to_response("diagnoses.html", RequestContext(request, {"diagnoses":diagnoses}))
+def info_view(request):
+    return render_to_response("info.html", RequestContext(request, {"patient":{"age":24}}))
