@@ -1,0 +1,80 @@
+﻿{% extends "base.html" %}
+
+{% block title %}
+	Hospital directory
+{% endblock %}
+
+{% block top %}
+	<h2>
+		Directory of current patients.
+	</h2>
+{% endblock %}
+
+{% block content %}
+	<div class="container">
+		<div class="page-header">
+			<h2>
+				Cloven Intl.
+			</h2>
+		</div>
+		<ul class="nav nav-tabs" data-tabs="tabs">
+			<li class="active">
+				<a href=".">
+					Directory
+				</a>
+			</li>
+			<li>
+				<a href="transactions">
+					Transactions
+				</a>
+			</li>
+			<li>
+				<a href="associates">
+					Business Associates
+				</a>
+			</li>
+		</ul>
+		<br>
+		<input type="text" class="form-control" placeholder="Search">
+		<table class="table table-striped table-hover">
+			<thead>
+				<th>
+					Name {% include "invisible.html" %}
+				</th>
+				<th>
+					Date Admitted {% include "invisible.html" %}
+				</th>
+				<th>
+					Location {% include "invisible.html" %}
+				</th>
+				<th>
+					Condition {% include "invisible.html" %}
+				</th>
+				<th>
+					Religious Affiliation {% include "invisible.html" %}
+				</th>
+
+			</thead>
+			{% for patient in patients %}
+				<tr>
+					<td>
+						{{ patient.Name }}
+					</td>
+					<td>
+						{{ patient.DateAdmitted }}
+					</td>
+					<td>
+						{{ patient.Location }}
+					</td>
+					<td>
+						{{ patient.Condition }}
+					</td>
+					<td>
+						{{ patient.ReligiousAffiliation }}
+					</td>
+
+				</tr>
+			{% endfor %}
+		</table>
+	</div>
+{% endblock %}

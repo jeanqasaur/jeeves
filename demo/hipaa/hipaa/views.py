@@ -16,7 +16,58 @@ from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment, C
 
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
-
+informationSet = {
+	"preview" : [
+		{
+			"Patient" : "Joe McGray",
+			"Service" : "ADA:D4211",
+			"DatePerformed" : date(2012,6,26),
+			"PrescribingEntity" : "Cooper Base Dental",
+			"PerformingEntity" : "Cooper Base Dental"
+		}
+	],
+	"treatments" : [
+		{
+			"Patient" : "Joe McGray",
+			"Service" : "ADA:D4211",
+			"DatePerformed" : date(2012,6,26),
+			"PrescribingEntity" : "Cooper Base Dental",
+			"PerformingEntity" : "Cooper Base Dental"
+		},
+		{
+			"Patient" : "Joe McGray",
+			"Service" : "D7287",
+			"DatePerformed" : date(2013,1,3),
+			"PrescribingEntity" : "Beautiful Smile",
+			"PerformingEntity" : "Mary Orman, DDS"
+		}
+	],
+	"diagnoses" : [
+		{
+			"Patient" : "Joe McGray",
+			"Manifestation" : "B01.0",
+			"DateRecognized" : date(2013,2,1),
+			"RecognizingEntity" : "Southwest Hospital",
+			"Diagnosis" : "Negative"
+		},
+		{
+			"Patient" : "Joe McGray",
+			"Manifestation" : "T84.012",
+			"DateRecognized" : date(2013,10,17),
+			"RecognizingEntity" : "Dr. Wragley Medical Center",
+			"Diagnosis" : "Positive"
+		}
+	],
+	"hospitalVisits" : [
+		{
+			"Patient" : "Joe McGray",
+			"DateAdmitted" : date(2014,5,25),
+			"Location" : "113B",
+			"Condition" : "Recovering",
+			"ReligiousAffiliation" : "None"
+		}
+	]
+}
 def register_account(request):
     if request.user.is_authenticated():
         return HttpResponseRedirect("index")
@@ -430,7 +481,7 @@ def search_view(request):
         'which_page' : "search"
     }))
 def treatments_view(request, patient):
-	treatments=[
+	treatments = [
 		{
 			"Service" : "021009W",
 			"DatePerformed" : date(2012,4,12),
@@ -459,7 +510,7 @@ def treatments_view(request, patient):
 	return render_to_response("treatments.html", RequestContext(request, {"treatments":treatments}))
 
 def diagnoses_view(request, patient):
-	diagnoses=[
+	diagnoses = [
 		{
 			"Manifestation" : "A38.8",
 			"DateRecognized" : date(2012,10,17),
@@ -489,15 +540,74 @@ def diagnoses_view(request, patient):
 
 def info_view(request, patient):
 	dataset = [
-		("Name","John H. Doe"),
-		("Gender","Male"),
-		("Birth Date", date(1986,4,3)),
-		("Address","42 Granite Way, Vineville, MI, 42459"),
-		("Telephone Number","729-555-4708"),
-		("Fax Number","939-555-1439"),
-		("Social Security Number","219-09-9999"),
-		("Driver's License Number","2549305480"),
-		("Email","jdoe8643@example.org"),
-		("Employer","Macro Creations Inc."),
+		("Name","John H. Doe", True),
+		("Gender","Male", False),
+		("Birth Date", date(1986,4,3), False),
+		("Address","42 Granite Way, Vineville, MI, 42459", False),
+		("Telephone Number","729-555-4708", False),
+		("Fax Number","939-555-1439", False),
+		("Social Security Number","219-09-9999", False),
+		("Driver's License Number","2549305480", False),
+		("Email","jdoe8643@example.org", False),
+		("Employer","Macro Creations Inc.", False),
 	]
+	print patient
 	return render_to_response("info.html", RequestContext(request, {"dataset":dataset}))
+def directory_view(request, entity):
+	patients = [
+		{
+			"Name" : "Joe McGray",
+			"DateAdmitted" : date(2014,5,25),
+			"Location" : "113B",
+			"Condition" : "Recovering",
+			"ReligiousAffiliation" : "None"
+		},
+		{
+			"Name" : "Briann Terack",
+			"DateAdmitted" : date(2014,3,30),
+			"Location" : "416",
+			"Condition" : "Severe",
+			"ReligiousAffiliation" : "Catholic"
+		},
+		{
+			"Name" : "Henry Bion",
+			"DateAdmitted" : date(2014,5,12),
+			"Location" : "134K",
+			"Condition" : "Stable",
+			"ReligiousAffiliation" : "Christian"
+		},
+		{
+			"Name" : "Gill Hansen",
+			"DateAdmitted" : date(2014,5,19),
+			"Location" : "228",
+			"Condition" : "Unknown",
+			"ReligiousAffiliation" : "Christian"
+		}
+    ]
+	return render_to_response("directory.html", RequestContext(request, {"patients":patients}))
+def transactions_view(request, entity):
+	transactions = [
+		{
+		}
+	]
+	return render_to_response("transactions.html", RequestContext(request, {"transactions":transactions}))
+def associates_view(request, entity):
+	associates = [
+		{
+			"Entity":"Cooper United",
+			"InformationShared":informationSet,
+			"Purpose" : "Files paperwork regarding hospital transfers."
+		},
+		{
+			"Entity":"Sand Way",
+			"InformationShared":informationSet,
+			"Purpose":"Billing",
+			"EntityID":42
+		},
+		{
+			"Entity":"Handerson",
+			"InformationShared":informationSet,
+			"Purpose":"Keeps records for HIPAA audit"
+		}
+	]
+	return render_to_response("associates.html", RequestContext(request, {"associates":associates}))
