@@ -13,24 +13,24 @@ Diagnoses
 	</h2>
 </div>
 <ul class="nav nav-tabs" data-tabs="tabs">
-	<li><a href="info">Information</a></li>
-	<li><a href="treatments">Treatment, Drugs, & Services</a></li>
+	<li><a href=".">Information</a></li>
+	<li><a href="treatments">Treatments, Drugs, &amp; Services</a></li>
 	<li class="active"><a href="diagnoses">Diagnoses</a></li>
 </ul>
 
 <table class="table table-striped table-hover">
 	<thead>
 		<th>
-			Date
+			Date {% include "invisible.html" %}
 		</th>
 		<th>
-			Code
+			Code {% include "invisible.html" %}
 		</th>
 		<th>
-			Diagnosis
+			Diagnosis {% include "invisible.html" %}
 		</th>
 		<th>
-			Recognized By
+			Recognized By {% include "invisible.html" %}
 		</th>
 	</thead>
 	{% for diagnosis in diagnoses %}

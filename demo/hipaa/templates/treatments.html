@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block title %}
-Treatmments, Drugs, and Services
+Treatment, Drugs, &amp; Services
 {% endblock %}
 {% block top %}
-	<h2>User's treatments, and services provided by medical professionals.</h2>
+	<h2>Treatments provided to patient.</h2>
 {% endblock %}
 {% block content %}
 <div class="container">
@@ -13,8 +13,8 @@ Treatmments, Drugs, and Services
 	</h2>
 </div>
 <ul class="nav nav-tabs" data-tabs="tabs">
-	<li><a href="info">Information</a></li>
-	<li class="active"><a href="treatments">Treatment, Drugs, & Services</a></li>
+	<li><a href=".">Information</a></li>
+	<li class="active"><a href="treatments">Treatments, Drugs, &amp; Services</a></li>
 	<li><a href="diagnoses">Diagnoses</a></li>
 </ul>
 
@@ -27,10 +27,10 @@ Treatmments, Drugs, and Services
 			Code
 		</th>
 		<th>
-			Performed By
+			Prescribed By
 		</th>
 		<th>
-			Prescribed By
+			Performed/Provided By
 		</th>
 	</thead>
 	{% for treatment in treatments %}
@@ -42,10 +42,10 @@ Treatmments, Drugs, and Services
 				{{ treatment.Service }}
 			</td>
 			<td>
-				{{ treatment.PerformingEntity }}
+				{{ treatment.PrescribingEntity }}
 			</td>
 			<td>
-				{{ treatment.PrescribingEntity }}
+				{{ treatment.PerformingEntity}}
 			</td>
 		</tr>
 	{% endfor %}

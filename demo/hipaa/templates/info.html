@@ -1,21 +1,36 @@
 {% extends "base.html" %}
 {% block title %}
-Patient Data
+	Patient Data
 {% endblock %}
 {% block top %}
-	<h2>Patient data</h2>
+	<h2>
+		General patient data
+	</h2>
 {% endblock %}
 {% block content %}
-<div class="container">
-<div class="page-header">
-	<h2>
-		John Doe
-	</h2>
-</div>
-<ul class="nav nav-tabs" data-tabs="tabs">
-	<li class="active"><a href="info">Information</a></li>
-	<li><a href="treatments">Treatment, Drugs, & Services</a></li>
-	<li><a href="diagnoses">Diagnoses</a></li>
-</ul>
-
+	<div class="container">
+		<div class="page-header">
+			<h2>
+				John Doe
+			</h2>
+		</div>
+		<ul class="nav nav-tabs" data-tabs="tabs">
+			<li class="active"><a href=".">Information</a></li>
+			<li><a href="treatments">Treatments, Drugs, &amp; Services</a></li>
+			<li><a href="diagnoses">Diagnoses</a></li>
+		</ul>
+		<br>
+		<ul class="list-group table-striped">
+			{% for data in dataset %}
+				<li class="list-group-item">
+					<h4 class="list-group-item-heading">
+						{{data[0]}}
+					</h4>
+					<p class="list-group-item-text">
+						{{data[1]}}
+					</p>
+				</li>
+			{% endfor %}
+		</ul>
+	</div>
 {% endblock %}

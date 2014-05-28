@@ -23,13 +23,13 @@ class Individual(Model):
     Address = ForeignKey(Address)
     BirthDate = DateField()
     Sex = CharField(max_length=6)
-    Parent = ForeignKey(Individual)
+    Parent = ForeignKey("self",blank=True,null=True)
     LastName = CharField(max_length=1024)
     UID=IntegerField(primary_key=True)
     SSN = CharField(max_length=9)
     TelephoneNumber = CharField(max_length=10)
     FaxNumber = CharField(max_length=10)
-    PersonalRepresentative = ForeignKey(Individual)
+    PersonalRepresentative = ForeignKey("self",blank=True,null=True)
     ReligiousAffiliation = CharField(max_length=100)
     class Meta:
         db_table = 'Individual'

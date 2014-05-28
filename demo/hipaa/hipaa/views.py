@@ -429,62 +429,75 @@ def search_view(request):
         'results' : results,
         'which_page' : "search"
     }))
-def treatments_view(request):
-    treatments=[
-        {
-            "Service" : "021009W",
-            "DatePerformed" : date(2012,4,12),
-            "PrescribingEntity" : "West Health",
-            "PerformingEntity" : "Enlit Surgical"
-        },
-        {
-            "Service" : "ADA:D4211",
-            "DatePerformed" : date(2012,6,26),
-            "PrescribingEntity" : "Cooper Base Dental",
-            "PerformingEntity" : "Cooper Base Dental"
-        },
-        {
-            "Service" : "D7287",
-            "DatePerformed" : date(2013,1,3),
-            "PrescribingEntity" : "Beautiful Smile",
-            "PerformingEntity" : "Mary Orman, DDS"
-        },
-        {
-            "Service" : "D2970",
-            "DatePerformed" : date(2013,3,2),
-            "PrescribingEntity" : "Samuel Borndi, DMD",
-            "PerformingEntity" : "Enlit Surgical"
-        }
-    ]
-    return render_to_response("treatments.html", RequestContext(request, {"treatments":treatments}))
+def treatments_view(request, patient):
+	treatments=[
+		{
+			"Service" : "021009W",
+			"DatePerformed" : date(2012,4,12),
+			"PrescribingEntity" : "West Health",
+			"PerformingEntity" : "Enlit Surgical"
+		},
+		{
+			"Service" : "ADA:D4211",
+			"DatePerformed" : date(2012,6,26),
+			"PrescribingEntity" : "Cooper Base Dental",
+			"PerformingEntity" : "Cooper Base Dental"
+		},
+		{
+			"Service" : "D7287",
+			"DatePerformed" : date(2013,1,3),
+			"PrescribingEntity" : "Beautiful Smile",
+			"PerformingEntity" : "Mary Orman, DDS"
+		},
+		{
+			"Service" : "D2970",
+			"DatePerformed" : date(2013,3,2),
+			"PrescribingEntity" : "Samuel Borndi, DMD",
+			"PerformingEntity" : "Enlit Surgical"
+		}
+	]
+	return render_to_response("treatments.html", RequestContext(request, {"treatments":treatments}))
 
-def diagnoses_view(request):
-    diagnoses=[
-        {
-            "Manifestation" : "A38.8",
-            "DateRecognized" : date(2012,10,17),
-            "RecognizingEntity" : "Solomon Health",
-            "Diagnosis" : "Negative"
-        },
-        {
-            "Manifestation" : "E54",
-            "DateRecognized" : date(2012,11,24),
-            "RecognizingEntity" : "Cragley Medical National",
-            "Diagnosis" : "Negative"
-        },
-        {
-            "Manifestation" : "B01.0",
-            "DateRecognized" : date(2013,2,1),
-            "RecognizingEntity" : "Southwest Hospital",
-            "Diagnosis" : "Negative"
-        },
-        {
-            "Manifestation" : "T84.012",
-            "DateRecognized" : date(2013,10,17),
-            "RecognizingEntity" : "Dr. Wragley Medical Center",
-            "Diagnosis" : "Positive"
-        }
+def diagnoses_view(request, patient):
+	diagnoses=[
+		{
+			"Manifestation" : "A38.8",
+			"DateRecognized" : date(2012,10,17),
+			"RecognizingEntity" : "Solomon Health",
+			"Diagnosis" : "Negative"
+		},
+		{
+			"Manifestation" : "E54",
+			"DateRecognized" : date(2012,11,24),
+			"RecognizingEntity" : "Cragley Medical National",
+			"Diagnosis" : "Negative"
+		},
+		{
+			"Manifestation" : "B01.0",
+			"DateRecognized" : date(2013,2,1),
+			"RecognizingEntity" : "Southwest Hospital",
+			"Diagnosis" : "Negative"
+		},
+		{
+			"Manifestation" : "T84.012",
+			"DateRecognized" : date(2013,10,17),
+			"RecognizingEntity" : "Dr. Wragley Medical Center",
+			"Diagnosis" : "Positive"
+		}
     ]
-    return render_to_response("diagnoses.html", RequestContext(request, {"diagnoses":diagnoses}))
-def info_view(request):
-    return render_to_response("info.html", RequestContext(request, {"patient":{"age":24}}))
+	return render_to_response("diagnoses.html", RequestContext(request, {"diagnoses":diagnoses}))
+
+def info_view(request, patient):
+	dataset = [
+		("Name","John H. Doe"),
+		("Gender","Male"),
+		("Birth Date", date(1986,4,3)),
+		("Address","42 Granite Way, Vineville, MI, 42459"),
+		("Telephone Number","729-555-4708"),
+		("Fax Number","939-555-1439"),
+		("Social Security Number","219-09-9999"),
+		("Driver's License Number","2549305480"),
+		("Email","jdoe8643@example.org"),
+		("Employer","Macro Creations Inc."),
+	]
+	return render_to_response("info.html", RequestContext(request, {"dataset":dataset}))
