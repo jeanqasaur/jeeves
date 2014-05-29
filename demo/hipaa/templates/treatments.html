@@ -20,18 +20,20 @@ Treatment, Drugs, &amp; Services
 
 <table class="table table-striped table-hover">
 	<thead>
-		<th>
-			Date {% include "invisible.html" %}
-		</th>
-		<th>
-			Code {% include "invisible.html" %}
-		</th>
-		<th>
-			Prescribed By {% include "invisible.html" %}
-		</th>
-		<th>
-			Performed/Provided By {% include "invisible.html" %}
-		</th>
+		<tr>
+			<td>
+				Date {% include "invisible.html" %}
+			</td>
+			<td>
+				Code {% include "invisible.html" %}
+			</td>
+			<td>
+				Prescribed By {% include "invisible.html" %}
+			</td>
+			<td>
+				Performed/Provided By {% include "invisible.html" %}
+			</td>
+		</tr>
 	</thead>
 	{% for treatment in treatments %}
 		<tr>

@@ -17,15 +17,7 @@ from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment, C
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
 informationSet = {
-	"preview" : [
-		{
-			"Patient" : "Joe McGray",
-			"Service" : "ADA:D4211",
-			"DatePerformed" : date(2012,6,26),
-			"PrescribingEntity" : "Cooper Base Dental",
-			"PerformingEntity" : "Cooper Base Dental"
-		}
-	],
+	"preview" : "5 regarding Joe McGray",
 	"treatments" : [
 		{
 			"Patient" : "Joe McGray",
@@ -588,14 +580,28 @@ def directory_view(request, entity):
 def transactions_view(request, entity):
 	transactions = [
 		{
+			"Standard" : "ASC X12N 837",
+			"OtherEntity" : "Green America Professional",
+			"InformationShared" : informationSet,
+			"DateRequested" : date(2014, 4, 3),
+			"DateResponded" : date(2014, 4, 8),
+			"Purpose" : "Claims for medical procedures"
+		},
+		{
+			"Standard" : "ASC X12N 270",
+			"OtherEntity" : "Green America Professional",
+			"InformationShared" : informationSet,
+			"DateRequested" : date(2014, 4, 10),
+			"DateResponded" : date(2014, 4, 18),
+			"Purpose" : "Benefit information inquiry"
 		}
 	]
 	return render_to_response("transactions.html", RequestContext(request, {"transactions":transactions}))
 def associates_view(request, entity):
 	associates = [
 		{
-			"Entity":"Cooper United",
-			"InformationShared":informationSet,
+			"Entity" : "Cooper United",
+			"InformationShared" : informationSet,
 			"Purpose" : "Files paperwork regarding hospital transfers."
 		},
 		{

@@ -36,8 +36,8 @@ urlpatterns = patterns('',
     url(r'^patients/(?P<patient>[0-9]+)/diagnoses$', views.diagnoses_view),
     url(r'^patients/(?P<patient>[0-9]+)/info$', views.info_view),
     url(r'^patients/(?P<patient>[0-9]+)/$', views.info_view),
-    url(r'^entity/(?P<entity>[0-9]+)/transactions$', views.transactions_view),
-    url(r'^entity/(?P<entity>[0-9]+)/associates$', views.associates_view),
-    url(r'^entity/(?P<entity>[0-9]+)/directory$', views.directory_view),
-    url(r'^entity/(?P<entity>[0-9]+)/$', views.directory_view)
+    url(r'^entities/(?P<entity>[0-9]+)/transactions$', views.transactions_view),
+    url(r'^entities/(?P<entity>[0-9]+)/associates$', views.associates_view),
+    url(r'^entities/(?P<entity>[0-9]+)/directory$', views.directory_view),
+    url(r'^entities/(?P<entity>[0-9]+)/$', views.directory_view)
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

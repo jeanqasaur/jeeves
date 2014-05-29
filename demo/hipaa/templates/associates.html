@@ -54,7 +54,10 @@
 						{{ associate.Entity }}
 					</td>
 					<td>
-						{{ associate.InformationShared.preview }} <a href="#">&hellip;</a>
+						{% with info=associate.InformationShared %}
+						{{ info.preview }} <a href="#myModal{{ loop.index }}" data-toggle="modal">&hellip;</a>
+						{% include "informationModal.html" %}
+						{% endwith %}
 					</td>
 					<td>
 						{{ associate.Purpose }}

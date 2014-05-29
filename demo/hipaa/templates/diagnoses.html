@@ -20,18 +20,20 @@ Diagnoses
 
 <table class="table table-striped table-hover">
 	<thead>
-		<th>
-			Date {% include "invisible.html" %}
-		</th>
-		<th>
-			Code {% include "invisible.html" %}
-		</th>
-		<th>
-			Diagnosis {% include "invisible.html" %}
-		</th>
-		<th>
-			Recognized By {% include "invisible.html" %}
-		</th>
+		<tr>
+			<td>
+				Date {% include "invisible.html" %}
+			</td>
+			<td>
+				Code {% include "invisible.html" %}
+			</td>
+			<td>
+				Diagnosis {% include "invisible.html" %}
+			</td>
+			<td>
+				Recognized By {% include "invisible.html" %}
+			</td>
+		</tr>
 	</thead>
 	{% for diagnosis in diagnoses %}
 		<tr>
