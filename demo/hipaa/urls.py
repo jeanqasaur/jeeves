@@ -21,8 +21,8 @@ urlpatterns = patterns('',
 
     url(r'^register$', views.register_account),
 
-    url(r'^index$', views.papers_view),
-    url(r'^$', views.papers_view),
+    url(r'^index$', views.index),
+    url(r'^$', views.index),
     url(r'^submit$', views.submit_view),
     url(r'^papers$', views.papers_view),
     url(r'^paper$', views.paper_view),
@@ -35,9 +35,9 @@ urlpatterns = patterns('',
     url(r'^patients/(?P<patient>[0-9]+)/treatments$', views.treatments_view),
     url(r'^patients/(?P<patient>[0-9]+)/diagnoses$', views.diagnoses_view),
     url(r'^patients/(?P<patient>[0-9]+)/info$', views.info_view),
-    url(r'^patients/(?P<patient>[0-9]+)/$', views.info_view),
+    url(r'^patients/(?P<patient>[0-9]+)/$', views.info_view, name='patient'),
     url(r'^entities/(?P<entity>[0-9]+)/transactions$', views.transactions_view),
     url(r'^entities/(?P<entity>[0-9]+)/associates$', views.associates_view),
     url(r'^entities/(?P<entity>[0-9]+)/directory$', views.directory_view),
-    url(r'^entities/(?P<entity>[0-9]+)/$', views.directory_view)
+    url(r'^entities/(?P<entity>[0-9]+)/$', views.directory_view, name='entity')
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

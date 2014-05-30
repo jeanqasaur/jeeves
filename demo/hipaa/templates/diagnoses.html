@@ -1,55 +1,67 @@
+<html><body>
 {% extends "base.html" %}
+
 {% block title %}
-Diagnoses
+	Diagnoses
 {% endblock %}
+
 {% block top %}
 	<h2>Doctors' diagnoses about an individual.</h2>
 {% endblock %}
-{% block content %}
-<div class="container">
-<div class="page-header">
-	<h2>
-		John Doe
-	</h2>
-</div>
-<ul class="nav nav-tabs" data-tabs="tabs">
-	<li><a href=".">Information</a></li>
-	<li><a href="treatments">Treatments, Drugs, &amp; Services</a></li>
-	<li class="active"><a href="diagnoses">Diagnoses</a></li>
-</ul>
 
-<table class="table table-striped table-hover">
-	<thead>
-		<tr>
-			<td>
-				Date {% include "invisible.html" %}
-			</td>
-			<td>
-				Code {% include "invisible.html" %}
-			</td>
-			<td>
-				Diagnosis {% include "invisible.html" %}
-			</td>
-			<td>
-				Recognized By {% include "invisible.html" %}
-			</td>
-		</tr>
-	</thead>
-	{% for diagnosis in diagnoses %}
-		<tr>
-			<td>
-				{{ diagnosis.DateRecognized }}
-			</td>
-			<td>
-				{{ diagnosis.Manifestation }}
-			</td>
-			<td>
-				{{ diagnosis.Diagnosis }}
-			</td>
-			<td>
-				{{ diagnosis.RecognizingEntity }}
-			</td>
-		</tr>
-	{% endfor %}
-</table>
+{% block content %}
+	<div class="container">
+		<div class="page-header">
+			<h2>
+				John Doe
+			</h2>
+		</div>
+		<ul class="nav nav-tabs">
+			<li><a href=".">Information</a></li>
+			<li><a href="treatments">Treatments, Drugs, &amp; Services</a></li>
+			<li class="active"><a href="diagnoses">Diagnoses</a></li>
+		</ul>
+	
+		<table class="table table-striped table-hover">
+			<thead>
+				<tr>
+					<td>
+						Date {% include "invisible.html" %}
+					</td>
+					<td>
+						Code {% include "invisible.html" %}
+					</td>
+					<td>
+						Diagnosis {% include "invisible.html" %}
+					</td>
+					<td>
+						Recognized By {% include "invisible.html" %}
+					</td>
+				</tr>
+			</thead>
+			{% for diagnosis in diagnoses %}
+				<tr>
+					<td>
+						{{ diagnosis.DateRecognized }}
+					</td>
+					<td>
+						{{ diagnosis.Manifestation }}
+					</td>
+					<td>
+						{{ diagnosis.Diagnosis }}
+					</td>
+					<td>
+						<a href='{{ url("entity", diagnosis.RecognizingEntity.ID) }}'>
+							{{ diagnosis.RecognizingEntity.Name }}
+						</a>
+					</td>
+				</tr>
+			{% endfor %}
+		</table>
+	</div>
 {% endblock %}
+</body></html>
+
+
+
+

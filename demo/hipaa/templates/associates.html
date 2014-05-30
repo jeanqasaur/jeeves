@@ -51,7 +51,13 @@
 			{% for associate in associates %}
 				<tr>
 					<td>
-						{{ associate.Entity }}
+						{% if associate.Entity.ID %}
+							<a href='{{ url("entity", associate.Entity.ID) }}'>
+								{{ associate.Entity.Name }}
+							</a>
+						{% else %}
+							{{ associate.Entity.Name }}
+						{% endif %}
 					</td>
 					<td>
 						{% with info=associate.InformationShared %}

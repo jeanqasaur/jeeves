@@ -58,7 +58,9 @@
 			{% for patient in patients %}
 				<tr>
 					<td>
-						{{ patient.Name }}
+						<a href='{{ url("patient", patient.Patient.ID) }}'>
+							{{ patient.Patient.Name }}
+						</a>
 					</td>
 					<td>
 						{{ patient.DateAdmitted }}

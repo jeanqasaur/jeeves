@@ -1,55 +1,65 @@
+<html><body>
 {% extends "base.html" %}
+
 {% block title %}
-Treatment, Drugs, &amp; Services
+	Treatment, Drugs, &amp; Services
 {% endblock %}
+
 {% block top %}
 	<h2>Treatments provided to patient.</h2>
 {% endblock %}
-{% block content %}
-<div class="container">
-<div class="page-header">
-	<h2>
-		John Doe
-	</h2>
-</div>
-<ul class="nav nav-tabs" data-tabs="tabs">
-	<li><a href=".">Information</a></li>
-	<li class="active"><a href="treatments">Treatments, Drugs, &amp; Services</a></li>
-	<li><a href="diagnoses">Diagnoses</a></li>
-</ul>
 
-<table class="table table-striped table-hover">
-	<thead>
-		<tr>
-			<td>
-				Date {% include "invisible.html" %}
-			</td>
-			<td>
-				Code {% include "invisible.html" %}
-			</td>
-			<td>
-				Prescribed By {% include "invisible.html" %}
-			</td>
-			<td>
-				Performed/Provided By {% include "invisible.html" %}
-			</td>
-		</tr>
-	</thead>
-	{% for treatment in treatments %}
-		<tr>
-			<td>
-				{{ treatment.DatePerformed }}
-			</td>
-			<td>
-				{{ treatment.Service }}
-			</td>
-			<td>
-				{{ treatment.PrescribingEntity }}
-			</td>
-			<td>
-				{{ treatment.PerformingEntity}}
-			</td>
-		</tr>
-	{% endfor %}
-</table>
+{% block content %}
+	<div class="container">
+		<div class="page-header">
+			<h2>
+				John Doe
+			</h2>
+		</div>
+		<ul class="nav nav-tabs">
+			<li><a href=".">Information</a></li>
+			<li class="active"><a href="treatments">Treatments, Drugs, &amp; Services</a></li>
+			<li><a href="diagnoses">Diagnoses</a></li>
+		</ul>
+	
+		<table class="table table-striped table-hover">
+			<thead>
+				<tr>
+					<td>
+						Date {% include "invisible.html" %}
+					</td>
+					<td>
+						Code {% include "invisible.html" %}
+					</td>
+					<td>
+						Prescribed By {% include "invisible.html" %}
+					</td>
+					<td>
+						Performed/Provided By {% include "invisible.html" %}
+					</td>
+				</tr>
+			</thead>
+			{% for treatment in treatments %}
+				<tr>
+					<td>
+						{{ treatment.DatePerformed }}
+					</td>
+					<td>
+						{{ treatment.Service }}
+					</td>
+					<td>
+						<a href='{{ url("entity", treatment.PrescribingEntity.ID) }}'>
+							{{ treatment.PrescribingEntity.Name }}
+						</a>
+					</td>
+					<td>
+						<a href='{{ url("entity", treatment.PerformingEntity.ID) }}'>
+							{{ treatment.PerformingEntity.Name }}
+						</a>
+					</td>
+				</tr>
+			{% endfor %}
+		</table>
+	</div>
 {% endblock %}
+</body></html>

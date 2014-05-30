@@ -1,6 +1,5 @@
 ﻿<html><body>
 {% extends "base.html" %}
-
 {% block title %}
 	Transactions
 {% endblock %}
@@ -64,7 +63,9 @@
 						{{ transaction.Standard }}
 					</td>
 					<td>
-						{{ transaction.OtherEntity }}
+						<a href='{{ url("entity", transaction.OtherEntity.ID) }}'>
+							{{ transaction.OtherEntity.Name }}
+						</a>
 					</td>
 					<td>
 						{% with info=transaction.InformationShared %}

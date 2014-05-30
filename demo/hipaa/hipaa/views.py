@@ -20,39 +20,83 @@ informationSet = {
 	"preview" : "5 regarding Joe McGray",
 	"treatments" : [
 		{
-			"Patient" : "Joe McGray",
+			"Patient" : 
+			{
+				"Name" : "Joe McGray",
+				"ID" : 5
+			},
 			"Service" : "ADA:D4211",
 			"DatePerformed" : date(2012,6,26),
-			"PrescribingEntity" : "Cooper Base Dental",
-			"PerformingEntity" : "Cooper Base Dental"
+			"PrescribingEntity" : 
+			{
+				"Name" : "Cooper Base Dental",
+				"ID" : 5
+			},
+			"PerformingEntity" : 
+			{
+				"Name" : "Cooper Base Dental",
+				"ID" : 5
+			},
 		},
 		{
-			"Patient" : "Joe McGray",
+			"Patient" : 
+			{
+				"Name" : "Joe McGray",
+				"ID" : 5
+			},
 			"Service" : "D7287",
 			"DatePerformed" : date(2013,1,3),
-			"PrescribingEntity" : "Beautiful Smile",
-			"PerformingEntity" : "Mary Orman, DDS"
+			"PrescribingEntity" : 
+			{
+				"Name" : "Beautiful Smile",
+				"ID" : 23
+			},
+			"PerformingEntity" : 
+			{
+				"Name" : "Mary Orman, DDS",
+				"ID" : 942
+			},
 		}
 	],
 	"diagnoses" : [
 		{
-			"Patient" : "Joe McGray",
+			"Patient" : 
+			{
+				"Name" : "Joe McGray",
+				"ID" : 5
+			},
 			"Manifestation" : "B01.0",
 			"DateRecognized" : date(2013,2,1),
-			"RecognizingEntity" : "Southwest Hospital",
+			"RecognizingEntity" : 
+			{
+				"Name" : "Solomon Health",
+				"ID" : 7
+			},
 			"Diagnosis" : "Negative"
 		},
 		{
-			"Patient" : "Joe McGray",
+			"Patient" : 
+			{
+				"Name" : "Joe McGray",
+				"ID" : 5
+			},
 			"Manifestation" : "T84.012",
 			"DateRecognized" : date(2013,10,17),
-			"RecognizingEntity" : "Dr. Wragley Medical Center",
+			"RecognizingEntity" : 
+			{
+				"Name" : "Dr. Wragley Medical Center",
+				"ID" : 130
+			},
 			"Diagnosis" : "Positive"
 		}
 	],
 	"hospitalVisits" : [
 		{
-			"Patient" : "Joe McGray",
+			"Patient" : 
+			{
+				"Name" : "Joe McGray",
+				"ID" : 5
+			},
 			"DateAdmitted" : date(2014,5,25),
 			"Location" : "113B",
 			"Condition" : "Recovering",
@@ -138,11 +182,57 @@ def request_wrapper(view_fn):
 @request_wrapper
 @jeeves
 def index(request):
-    user = UserProfile.objects.get(username=request.user.username)
-
-    return (   "index.html"
-           , { 'name' : user.name 
-             , 'which_page': "home" })
+	user = UserProfile.objects.get(username=request.user.username)
+	data = {
+		"patients":
+		[
+			{
+				"Name" : "Joe McGray",
+				"ID" : 5 
+			},
+			{
+				"Name" : "Leo Vanes",
+				"ID" : 41
+			},
+			{
+				"Name" : "Briann Terack",
+				"ID" : 52
+			},
+			{
+				"Name" : "Henry Bion",
+				"ID" : 95
+			},
+			{
+				"Name" : "Gill Hansen",
+				"ID" : 13
+			},
+		],
+		"entities":
+		[
+			{
+				"Name" : "Cooper Base Dental",
+				"ID" : 5
+			},
+			{
+				"Name" : "Solomon Health",
+				"ID" : 7
+			},
+			{
+				"Name" : "Dr. Wragley Medical Center",
+				"ID" : 130
+			},
+			{
+				"Name" : "Mary Orman, DDS",
+				"ID" : 942
+			},
+			{
+				"Name" : "Beautiful Smile",
+				"ID" : 23
+			},
+		],
+		'name' : user.name,
+	}
+	return (   "index.html" , data)
 
 @request_wrapper
 @jeeves
@@ -477,26 +567,58 @@ def treatments_view(request, patient):
 		{
 			"Service" : "021009W",
 			"DatePerformed" : date(2012,4,12),
-			"PrescribingEntity" : "West Health",
-			"PerformingEntity" : "Enlit Surgical"
+			"PrescribingEntity" : 
+			{
+				"Name" : "West Health",
+				"ID" : 710
+			},
+			"PerformingEntity" : 
+			{
+				"Name" : "Enlit Surgical",
+				"ID" : 84
+			},
 		},
 		{
 			"Service" : "ADA:D4211",
 			"DatePerformed" : date(2012,6,26),
-			"PrescribingEntity" : "Cooper Base Dental",
-			"PerformingEntity" : "Cooper Base Dental"
+			"PrescribingEntity" : 
+			{
+				"Name" : "Cooper Base Dental",
+				"ID" : 5
+			},
+			"PerformingEntity" : 
+			{
+				"Name" : "Cooper Base Dental",
+				"ID" : 5
+			},
 		},
 		{
 			"Service" : "D7287",
 			"DatePerformed" : date(2013,1,3),
-			"PrescribingEntity" : "Beautiful Smile",
-			"PerformingEntity" : "Mary Orman, DDS"
+			"PrescribingEntity" : 
+			{
+				"Name" : "Beautiful Smile",
+				"ID" : 23
+			},
+			"PerformingEntity" : 
+			{
+				"Name" : "Mary Orman, DDS",
+				"ID" : 942
+			},
 		},
 		{
 			"Service" : "D2970",
 			"DatePerformed" : date(2013,3,2),
-			"PrescribingEntity" : "Samuel Borndi, DMD",
-			"PerformingEntity" : "Enlit Surgical"
+			"PrescribingEntity" : 
+			{
+				"Name" : "Samuel Borndi, DMD",
+				"ID" : 29
+			},
+			"PerformingEntity" : 
+			{
+				"Name" : "Enlit Surgical",
+				"ID" : 84
+			},
 		}
 	]
 	return render_to_response("treatments.html", RequestContext(request, {"treatments":treatments}))
@@ -506,25 +628,41 @@ def diagnoses_view(request, patient):
 		{
 			"Manifestation" : "A38.8",
 			"DateRecognized" : date(2012,10,17),
-			"RecognizingEntity" : "Solomon Health",
+			"RecognizingEntity" : 
+			{
+				"Name" : "Solomon Health",
+				"ID" : 7
+			},
 			"Diagnosis" : "Negative"
 		},
 		{
 			"Manifestation" : "E54",
 			"DateRecognized" : date(2012,11,24),
-			"RecognizingEntity" : "Cragley Medical National",
+			"RecognizingEntity" : 
+			{
+				"Name" : "Cragley Medical National",
+				"ID" : 98
+			},
 			"Diagnosis" : "Negative"
 		},
 		{
 			"Manifestation" : "B01.0",
 			"DateRecognized" : date(2013,2,1),
-			"RecognizingEntity" : "Southwest Hospital",
+			"RecognizingEntity" : 
+			{
+				"Name" : "Southwest Hospital",
+				"ID" : 1
+			},
 			"Diagnosis" : "Negative"
 		},
 		{
 			"Manifestation" : "T84.012",
 			"DateRecognized" : date(2013,10,17),
-			"RecognizingEntity" : "Dr. Wragley Medical Center",
+			"RecognizingEntity" : 
+			{
+				"Name" : "Dr. Wragley Medical Center",
+				"ID" : 130
+			},
 			"Diagnosis" : "Positive"
 		}
     ]
@@ -548,28 +686,44 @@ def info_view(request, patient):
 def directory_view(request, entity):
 	patients = [
 		{
-			"Name" : "Joe McGray",
+			"Patient" :
+			{
+				"Name" : "Joe McGray",
+				"ID" : 5
+			},
 			"DateAdmitted" : date(2014,5,25),
 			"Location" : "113B",
 			"Condition" : "Recovering",
 			"ReligiousAffiliation" : "None"
 		},
 		{
-			"Name" : "Briann Terack",
+			"Patient" :
+			{
+				"Name" : "Briann Terack",
+				"ID" : 52
+			},
 			"DateAdmitted" : date(2014,3,30),
 			"Location" : "416",
 			"Condition" : "Severe",
 			"ReligiousAffiliation" : "Catholic"
 		},
 		{
-			"Name" : "Henry Bion",
+			"Patient" :
+			{
+				"Name" : "Henry Bion",
+				"ID" : 95
+			},
 			"DateAdmitted" : date(2014,5,12),
 			"Location" : "134K",
 			"Condition" : "Stable",
 			"ReligiousAffiliation" : "Christian"
 		},
 		{
-			"Name" : "Gill Hansen",
+			"Patient" :
+			{
+				"Name" : "Gill Hansen",
+				"ID" : 13
+			},
 			"DateAdmitted" : date(2014,5,19),
 			"Location" : "228",
 			"Condition" : "Unknown",
@@ -581,7 +735,11 @@ def transactions_view(request, entity):
 	transactions = [
 		{
 			"Standard" : "ASC X12N 837",
-			"OtherEntity" : "Green America Professional",
+			"OtherEntity" : 
+			{
+				"Name" : "Green America Professional",
+				"ID" : 49
+			},
 			"InformationShared" : informationSet,
 			"DateRequested" : date(2014, 4, 3),
 			"DateResponded" : date(2014, 4, 8),
@@ -589,7 +747,11 @@ def transactions_view(request, entity):
 		},
 		{
 			"Standard" : "ASC X12N 270",
-			"OtherEntity" : "Green America Professional",
+			"OtherEntity" : 
+			{
+				"Name" : "Green America Professional",
+				"ID" : 49
+			},
 			"InformationShared" : informationSet,
 			"DateRequested" : date(2014, 4, 10),
 			"DateResponded" : date(2014, 4, 18),
@@ -600,18 +762,27 @@ def transactions_view(request, entity):
 def associates_view(request, entity):
 	associates = [
 		{
-			"Entity" : "Cooper United",
+			"Entity" : 
+			{
+				"Name" : "Cooper United",
+			},
 			"InformationShared" : informationSet,
 			"Purpose" : "Files paperwork regarding hospital transfers."
 		},
 		{
-			"Entity":"Sand Way",
+			"Entity" : 
+			{
+				"Name" : "Sand Way",
+				"ID" : 901
+			},
 			"InformationShared":informationSet,
 			"Purpose":"Billing",
-			"EntityID":42
 		},
 		{
-			"Entity":"Handerson",
+			"Entity" : 
+			{
+				"Name" : "Handerson"
+			},
 			"InformationShared":informationSet,
 			"Purpose":"Keeps records for HIPAA audit"
 		}
