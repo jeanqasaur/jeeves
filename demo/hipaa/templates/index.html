@@ -1,8 +1,48 @@
+<html><body>
 {% extends 'base.html' %}
 
-{% block content %}
-    <div class="page-header">
-      <h1>Welcome {{ concretize(name) }}.</h1>
-    </div>
-    <p>[TODO: Add list of current papers.]</p>
+{% block title %}
+	Home
 {% endblock %}
+
+{% block top %}
+	<h2>
+		All data
+	</h2>
+{% endblock %}
+
+{% block content %}
+	<div class="page-header">
+		<h1>Welcome {{ concretize(name) }}.</h1>
+	</div>
+	<ul class="col-md-6">
+		<lh  class="list-group-item">
+			<h3 class="list-group-item-heading">
+				Patients
+			</h3>
+		</lh>
+		{% for patient in patients %}
+			<li class="list-group-item">
+				<a href='{{ url("patient", patient.ID) }}'>
+					{{ patient.Name }}
+				</a>
+
+			</li>
+		{% endfor %}
+	</ul>
+	<ul class="col-md-6">
+		<lh  class="list-group-item">
+			<h3 class="list-group-item-heading">
+				Entities
+			</h3>
+		</lh>
+		{% for entity in entities %}
+			<li class="list-group-item">
+				<a href='{{ url("entity", entity.ID) }}'>
+					{{ entity.Name }}
+				</a>
+			</li>
+		{% endfor %}
+	</ul>
+{% endblock %}
+</body></html>
