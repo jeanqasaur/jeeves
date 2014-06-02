@@ -1,4 +1,4 @@
-from django.db.models import Model, ManyToManyField, ForeignKey, CharField, TextField, DateTimeField, IntegerField, FileField, BooleanField
+from django.db.models import Model, ManyToManyField, ForeignKey, OneToOneField, CharField, TextField, DateField, DateTimeField, IntegerField, FileField, BooleanField
 
 from jeevesdb.JeevesModel import JeevesModel as Model
 from jeevesdb.JeevesModel import JeevesForeignKey as ForeignKey
@@ -9,259 +9,124 @@ import JeevesLib
 
 from settings import CONF_PHASE as phase
 
-class UserProfile(Model):
-    username = CharField(max_length=1024)
-    email = CharField(max_length=1024)
-
-    name = CharField(max_length=1024)
-    affiliation = CharField(max_length=1024)
-    acm_number = CharField(max_length=1024)
-
-    level = CharField(max_length=12,
-                    choices=(('normal', 'normal'),
-                        ('pc', 'pc'),
-                        ('chair', 'chair')))
-
-    @staticmethod
-    def jeeves_get_private_email(user):
-        return ""
-
-    @staticmethod
-    @label_for('email')
-    @jeeves
-    def jeeves_restrict_userprofilelabel(user, ctxt):
-        return user == ctxt or (ctxt != None and ctxt.level == 'chair')
-
+class Address(Model):
+    Street=CharField(max_length=100)
+    City=CharField(max_length=30)
+    State=CharField(max_length=20)
+    ZipCode=CharField(max_length=5)
     class Meta:
-        db_table = 'user_profiles'
-
-class UserPCConflict(Model):
-    user = ForeignKey(UserProfile, null=True, related_name='userpcconflict_user')
-    pc = ForeignKey(UserProfile, null=True, related_name='userpcconflict_pc')
-
-    @staticmethod
-    def jeeves_get_private_user(uppc):
-        return None
-    @staticmethod
-    def jeeves_get_private_pc(uppc):
-        return None
-
-    @staticmethod
-    @label_for('user', 'pc')
-    @jeeves
-    def jeeves_restrict_userpcconflictlabel(uppc, ctxt):
-        return True
-        #return ctxt.level == 'chair' or uppc.user == ctxt
-
-class Paper(Model):
-    #latest_version = ForeignKey('PaperVersion', related_name='latest_version_of', null=True)
-    # add this below because of cyclic dependency; awkward hack
-    # (limitation of JeevesModel not ordinary Model)
-    author = ForeignKey(UserProfile, null=True)
-    accepted = BooleanField()
-
-    @staticmethod
-    def jeeves_get_private_author(paper):
-        return None
-
-    @staticmethod
-    @label_for('author')
-    @jeeves
-    def jeeves_restrict_paperlabel(paper, ctxt):
-        if phase == 'final':
-            return True
-        else:
-            return (paper != None and paper.author == ctxt) or (ctxt != None and ctxt.level == 'chair')
-
+        db_table = 'Address'
+        
+class Individual(Model):
+    FirstName = CharField(max_length=1024)
+    Email = CharField(max_length=1024)
+    Address = ForeignKey(Address)
+    BirthDate = DateField()
+    Sex = CharField(max_length=6)
+    #Parent = ForeignKey("self",blank=True,null=True)
+    LastName = CharField(max_length=1024)
+    UID=IntegerField(primary_key=True)
+    SSN = CharField(max_length=9)
+    TelephoneNumber = CharField(max_length=10)
+    FaxNumber = CharField(max_length=10)
+    #PersonalRepresentative = ForeignKey("self",blank=True,null=True)
+    ReligiousAffiliation = CharField(max_length=100)
     class Meta:
-        db_table = 'papers'
+        db_table = 'Individual'
 
-class PaperPCConflict(Model):
-    paper = ForeignKey(Paper, null=True)
-    pc = ForeignKey(UserProfile, null=True)
-
-    @staticmethod
-    def jeeves_get_private_paper(ppcc): return None
-    @staticmethod
-    def jeeves_get_private_pc(ppcc): return None
-
-    @staticmethod
-    @label_for('paper', 'pc')
-    @jeeves
-    def jeeves_restrict_paperpcconflictlabel(ppcc, ctxt):
-        return True
-        #return ctxt.level == 'admin' or (ppcc.paper != None and ppcc.paper.author == ctxt)
-
-class PaperCoauthor(Model):
-    paper = ForeignKey(Paper, null=True)
-    author = CharField(max_length=1024)
-
-    @staticmethod
-    def jeeves_get_private_paper(pco): return None
-    @staticmethod
-    def jeeves_get_private_author(pco): return ""
-
-    @staticmethod
-    @label_for('paper', 'author')
-    @jeeves
-    def jeeves_restrict_papercoauthorlabel(pco, ctxt):
-        if pco.paper == None:
-            return False
-        if PaperPCConflict.objects.get(paper=pco.paper, pc=ctxt) != None:
-            return False
-        ans = ctxt.level == 'chair' or (pco.paper != None and pco.paper.author == ctxt)
-        return ans
-
-#class PaperReviewer(Model):
-#    paper = ForeignKey(Paper, null=True)
-#    reviewer = ForeignKey(UserProfile, null=True)
-
-#    @staticmethod
-#    def jeeves_get_private_paper(pco): return None
-#    @staticmethod
-#    def jeeves_get_private_reviewer(pco): return None
-
-#    @staticmethod
-#    @label_for('paper', 'reviewer')
-#    @jeeves
-#    def jeeves_restrict_paperreviewerlabel(prv, ctxt):
-#        return ctxt.level == 'pc' or ctxt.level == 'chair'
-
-class ReviewAssignment(Model):
-    paper = ForeignKey(Paper, null=True)
-    user = ForeignKey(UserProfile, null=True)
-    assign_type = CharField(max_length=8, null=True,
-        choices=(('none','none'),
-                ('assigned','assigned'),
-                ('conflict','conflict')))
-
-    class Meta:
-        db_table = 'review_assignments'
-
-    @staticmethod
-    def jeeves_get_private_paper(rva): return None
-    @staticmethod
-    def jeeves_get_private_user(rva): return None
-    @staticmethod
-    def jeeves_get_private_assign_type(rva): return 'none'
-
-    @staticmethod
-    @label_for('paper', 'user', 'assign_type')
-    @jeeves
-    def jeeves_restrict_paperreviewerlabel(prv, ctxt):
-        if prv != None and PaperPCConflict.objects.get(paper=prv.paper, pc=ctxt) != None:
-            return False
-        return ctxt.level == 'pc' or ctxt.level == 'chair'
-
-class PaperVersion(Model):
-    paper = ForeignKey(Paper, null=True)
-
-    title = CharField(max_length=1024)
-    contents = FileField(upload_to='papers')
-    abstract = TextField()
-    time = DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = 'paper_versions'
-
-    @staticmethod
-    @label_for('paper', 'title', 'contents', 'abstract')
-    @jeeves
-    def jeeves_restrict_paperversionlabel(pv, ctxt):
-        if pv == None or pv.paper == None or PaperPCConflict.objects.get(paper=pv.paper, pc=ctxt) != None:
-            return False
-        return (pv.paper != None and pv.paper.author == ctxt) or ctxt.level == 'pc' or ctxt.level == 'chair'
+class BusinessAssociate(Model):
     
-    @staticmethod
-    def jeeves_get_private_paper(pv): return None
-    @staticmethod
-    def jeeves_get_private_title(pv): return ""
-    @staticmethod
-    def jeeves_get_private_contents(pv): return ""
-    @staticmethod
-    def jeeves_get_private_abstract(pv): return ""
-
-# see comment above
-Paper.latest_version = ForeignKey(PaperVersion, related_name='latest_version_of', null=True)
-
-class Tag(Model):
-    name = CharField(max_length=32)
-    paper = ForeignKey(Paper, null=True)
-
+    '''
+    Persons or corporations that perform services for covered entities. They may
+    or may not be covered entities themselves.
+    '''
+    
+    Name = CharField(max_length=1024)
+    #CoveredIdentity = ForeignKey(CoveredEntity, null=True, blank=True)
     class Meta:
-        db_table = 'tags'
+        db_table = 'BusinessAssociate'
 
-class Review(Model):
-    time = DateTimeField(auto_now_add=True)
-    paper = ForeignKey(Paper, null=True)
-    reviewer = ForeignKey(UserProfile, null=True)
-    contents = TextField()
-
-    score_novelty = IntegerField()
-    score_presentation = IntegerField()
-    score_technical = IntegerField()
-    score_confidence = IntegerField()
-
-    @staticmethod
-    def jeeves_get_private_paper(review): return None
-    @staticmethod
-    def jeeves_get_private_reviewer(review): return None
-    @staticmethod
-    def jeeves_get_private_contents(review): return ""
-    @staticmethod
-    def jeeves_get_private_score_novelty(review): return -1
-    @staticmethod
-    def jeeves_get_private_score_presentation(review): return -1
-    @staticmethod
-    def jeeves_get_private_score_technical(review): return -1
-    @staticmethod
-    def jeeves_get_private_score_confidence(review): return -1
-
-    @staticmethod
-    @label_for('paper', 'reviewer', 'contents', 'score_novelty', 'score_presentation', 'score_technical', 'score_confidence')
-    @jeeves
-    def jeeves_restrict_reviewlabel(review, ctxt):
-        if review != None and PaperPCConflict.objects.get(paper=review.paper, pc=ctxt) != None:
-            return False
-        return ctxt.level == 'chair' or ctxt.level == 'pc' or \
-                (phase == 'final' and review.paper.author == ctxt)
-
+class CoveredEntity(Model):
+    
+    '''
+    Health plan, health clearinghouse,
+    or health care provider making sensitive transactions. This includes hospitals.
+    '''
+    
+    Name = CharField(max_length=1024)
+    Directory = ManyToManyField(Individual,through="HospitalVisit")
+    Associates = ManyToManyField(BusinessAssociate,through="BusinessAssociateAgreement")
     class Meta:
-        db_table = 'reviews'
+        db_table = 'CoveredEntity'
 
-class Comment(Model):
-    time = DateTimeField(auto_now_add=True)
-    paper = ForeignKey(Paper, null=True)
-    user = ForeignKey(UserProfile, null=True)
-    contents = TextField()
-
+class HospitalVisit(Model):
+    Patient = ForeignKey(Individual)
+    Hospital = ForeignKey(CoveredEntity)
+    DateAdmitted = DateField()
+    Location = TextField()
+    Condition = TextField()
+    Active = BooleanField(default=True) #If the patient is still at the hospital.
     class Meta:
-        db_table = 'comments'
+        db_table = 'HospitalVisit'
 
-    @staticmethod
-    def jeeves_get_private_paper(review): return None
-    @staticmethod
-    def jeeves_get_private_user(review): return None
-    @staticmethod
-    def jeeves_get_private_contents(review): return ""
+class Treatment(Model):
+    '''
+    Provided medical treatment, medication, or service.
+    '''
+    Service = CharField(max_length=100)
+    DatePerformed = DateField()
+    PrescribingEntity = ForeignKey(CoveredEntity, related_name="Prescriptions")
+    PerformingEntity = ForeignKey(CoveredEntity)
+    Patient = ForeignKey(Individual)
+    class Meta:
+        db_table = 'Treatment'
 
-    @staticmethod
-    @label_for('paper', 'user', 'contents')
-    @jeeves
-    def jeeves_restrict_reviewlabel(comment, ctxt):
-        if comment != None and PaperPCConflict.objects.get(paper=comment.paper, pc=ctxt) != None:
-            return False
-        return ctxt.level == 'chair' or ctxt.level == 'pc'
+class Diagnosis(Model): 
+    '''
+    Recognition of health condition or situation by a medical professional.
+    '''
+    Manifestation = CharField(max_length=100)
+    DateRecognized = DateField()
+    RecognizedEntity = ForeignKey(CoveredEntity)
+    Patient = ForeignKey(Individual)
+    class Meta:
+        db_table = 'Diagnosis'
 
-from django.contrib.auth.models import User
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+class InformationTransferSet(Model):
+    
+    '''
+    Collection of private information that can be shared
+    '''
+    Treatments = ManyToManyField(Treatment)
+    Diagnoses = ManyToManyField(Diagnosis)
+    HospitalVisits = ManyToManyField(HospitalVisit)
+    class Meta:
+        db_table = 'InformationTransferSet'
 
-@receiver(post_save, sender=User)
-def create_profile(sender, instance, created, **kwargs):
-    if created and instance.is_superuser: 
-        UserProfile.objects.create(
-            username=instance.username,
-            email=instance.email,
-            level='chair',
-        )
+class BusinessAssociateAgreement(Model):
+    BusinessAssociate = ForeignKey(BusinessAssociate)
+    CoveredEntity = ForeignKey(CoveredEntity)
+    SharedInformation = OneToOneField(InformationTransferSet)
+    class Meta:
+        db_table = 'BusinessAssociateAgreement'
+
+class Transaction(Model):
+
+    '''
+    A defined standard transaction between covered entitities.
+
+    Attributes:
+    Standard - Transaction Code: ICS-10-PCS, HCPCS, e.g.
+    FirstParty, SecondParty - Covered entities performing the transaction
+    SharedInformation - Information transferred between the parties to fulfill the transaction.
+    '''
+
+    Standard = CharField(max_length=100)
+    FirstParty = ForeignKey(CoveredEntity, related_name = "SomeTransactions")
+    SecondParty = ForeignKey(CoveredEntity, related_name = "MoreTransactions")
+    SharedInformation = OneToOneField(InformationTransferSet)
+    DateRequested = DateField()
+    DateResponded = DateField()
+    Purpose = TextField()
+    class Meta:
+        db_table = 'Transaction'
