@@ -13,7 +13,7 @@
 	<div class="container">
 		<div class="page-header">
 			<h2>
-				Cloven Intl.
+				{{ entity.Name }}
 			</h2>
 		</div>
 		<ul class="nav nav-tabs" data-tabs="tabs">
@@ -57,33 +57,41 @@
 					</td>
 				</tr>
 			</thead>
-			{% for transaction in transactions %}
-				<tr>
-					<td>
-						{{ transaction.Standard }}
-					</td>
-					<td>
-						<a href='{{ url("entity", transaction.OtherEntity.ID) }}'>
-							{{ transaction.OtherEntity.Name }}
-						</a>
-					</td>
-					<td>
-						{% with info=transaction.InformationShared %}
-						{{ info.preview }} <a href="#myModal{{ loop.index }}" data-toggle="modal">&hellip;</a>
-						{% include "informationModal.html" %}
-						{% endwith %}
-					</td>
-					<td>
-						{{ transaction.DateRequested }}
-					</td>
-					<td>
-						{{ transaction.DateResponded }}
-					</td>
-					<td>
-						{{ transaction.Purpose }}
-					</td>
+            {% for t_indx in range(transactions|length) %}
+                {% with transaction=transactions[t_indx] %}
+				    <tr>
+					    <td>
+						    {{ transaction.Standard }}
+					    </td>
+					    <td>
+                            {% if transaction.SecondParty == entity %}
+						        <a href='{{ url("entity", transaction.FirstParty.EIN) }}'>
+							        {{ transaction.FirstParty.Name }}
+						        </a>
+                            {% else %}
+                                <a href='{{ url("entity", transaction.SecondParty.EIN) }}'>
+                                    {{ transaction.SecondParty.Name }}
+                                </a>
+                            {% endif %}
+					    </td>
+					    <td>
+                            {% with data=transaction.SharedInformation %}
+                                <a href="#myModal{{ loop.index }}" data-toggle="modal">&hellip;</a>
+                                {% include "informationModal.html" %}
+                            {% endwith %}
+					    </td>
+					    <td>
+						    {{ transaction.DateRequested }}
+					    </td>
+					    <td>
+						    {{ transaction.DateResponded }}
+					    </td>
+					    <td>
+						    {{ transaction.Purpose }}
+					    </td>
 
-				</tr>
+				    </tr>
+                {% endwith %}
 			{% endfor %}
 		</table>
 	</div>

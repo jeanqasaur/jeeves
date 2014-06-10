@@ -14,7 +14,7 @@
 	<div class="container">
 		<div class="page-header">
 			<h2>
-				Cloven Intl.
+				{{ entity.Name }}
 			</h2>
 		</div>
 		<ul class="nav nav-tabs" data-tabs="tabs">
@@ -55,24 +55,24 @@
 				</th>
 
 			</thead>
-			{% for patient in patients %}
+			{% for visit in visits %}
 				<tr>
 					<td>
-						<a href='{{ url("patient", patient.Patient.ID) }}'>
-							{{ patient.Patient.Name }}
+						<a href='{{ url("patient", visit.Patient.UID) }}'>
+							{{ visit.Patient.Name() }}
 						</a>
 					</td>
 					<td>
-						{{ patient.DateAdmitted }}
+						{{ visit.DateAdmitted }}
 					</td>
 					<td>
-						{{ patient.Location }}
+						{{ visit.Location }}
 					</td>
 					<td>
-						{{ patient.Condition }}
+						{{ visit.Condition }}
 					</td>
 					<td>
-						{{ patient.ReligiousAffiliation }}
+						{{ visit.Patient.ReligiousAffiliation }}
 					</td>
 
 				</tr>

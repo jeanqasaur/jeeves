@@ -12,7 +12,7 @@ import random
 
 import forms
 
-from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment, Comment, UserPCConflict, PaperCoauthor, PaperPCConflict
+from models import Individual, CoveredEntity, UserProfile, Transaction
 
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
@@ -183,53 +183,11 @@ def request_wrapper(view_fn):
 @jeeves
 def index(request):
 	user = UserProfile.objects.get(username=request.user.username)
+	patients = Individual.objects.all()
+	entities = CoveredEntity.objects.all()
 	data = {
-		"patients":
-		[
-			{
-				"Name" : "Joe McGray",
-				"ID" : 5 
-			},
-			{
-				"Name" : "Leo Vanes",
-				"ID" : 41
-			},
-			{
-				"Name" : "Briann Terack",
-				"ID" : 52
-			},
-			{
-				"Name" : "Henry Bion",
-				"ID" : 95
-			},
-			{
-				"Name" : "Gill Hansen",
-				"ID" : 13
-			},
-		],
-		"entities":
-		[
-			{
-				"Name" : "Cooper Base Dental",
-				"ID" : 5
-			},
-			{
-				"Name" : "Solomon Health",
-				"ID" : 7
-			},
-			{
-				"Name" : "Dr. Wragley Medical Center",
-				"ID" : 130
-			},
-			{
-				"Name" : "Mary Orman, DDS",
-				"ID" : 942
-			},
-			{
-				"Name" : "Beautiful Smile",
-				"ID" : 23
-			},
-		],
+		"patients": patients,
+		"entities": entities,
 		'name' : user.name,
 	}
 	return (   "index.html" , data)
@@ -323,67 +281,14 @@ def search_view(request):
     }))
 
 def treatments_view(request, patient):
-	treatments = [
-		{
-			"Service" : "021009W",
-			"DatePerformed" : date(2012,4,12),
-			"PrescribingEntity" : 
-			{
-				"Name" : "West Health",
-				"ID" : 710
-			},
-			"PerformingEntity" : 
-			{
-				"Name" : "Enlit Surgical",
-				"ID" : 84
-			},
-		},
-		{
-			"Service" : "ADA:D4211",
-			"DatePerformed" : date(2012,6,26),
-			"PrescribingEntity" : 
-			{
-				"Name" : "Cooper Base Dental",
-				"ID" : 5
-			},
-			"PerformingEntity" : 
-			{
-				"Name" : "Cooper Base Dental",
-				"ID" : 5
-			},
-		},
-		{
-			"Service" : "D7287",
-			"DatePerformed" : date(2013,1,3),
-			"PrescribingEntity" : 
-			{
-				"Name" : "Beautiful Smile",
-				"ID" : 23
-			},
-			"PerformingEntity" : 
-			{
-				"Name" : "Mary Orman, DDS",
-				"ID" : 942
-			},
-		},
-		{
-			"Service" : "D2970",
-			"DatePerformed" : date(2013,3,2),
-			"PrescribingEntity" : 
-			{
-				"Name" : "Samuel Borndi, DMD",
-				"ID" : 29
-			},
-			"PerformingEntity" : 
-			{
-				"Name" : "Enlit Surgical",
-				"ID" : 84
-			},
-		}
-	]
-	return render_to_response("treatments.html", RequestContext(request, {"treatments":treatments}))
+	p = Individual.objects.get(UID=patient)
+	treatments = p.treatment_set.all()
+	return render_to_response("treatments.html", RequestContext(request, {"name" : p.Name(),"treatments" : treatments}))
 
 def diagnoses_view(request, patient):
+	p = Individual.objects.get(UID=patient)
+	newDiagnoses = p.diagnosis_set.all()
+	print len(newDiagnoses)
 	diagnoses = [
 		{
 			"Manifestation" : "A38.8",
@@ -426,25 +331,36 @@ def diagnoses_view(request, patient):
 			"Diagnosis" : "Positive"
 		}
     ]
-	return render_to_response("diagnoses.html", RequestContext(request, {"diagnoses":diagnoses}))
+	return render_to_response("diagnoses.html", RequestContext(request, {"name":p.Name() , "diagnoses":newDiagnoses}))
 
 def info_view(request, patient):
-	dataset = [
-		("Name","John H. Doe", True),
-		("Gender","Male", False),
-		("Birth Date", date(1986,4,3), False),
-		("Address","42 Granite Way, Vineville, MI, 42459", False),
-		("Telephone Number","729-555-4708", False),
-		("Fax Number","939-555-1439", False),
-		("Social Security Number","219-09-9999", False),
-		("Driver's License Number","2549305480", False),
-		("Email","jdoe8643@example.org", False),
-		("Employer","Macro Creations Inc.", False),
-	]
-	print patient
-	return render_to_response("info.html", RequestContext(request, {"dataset":dataset}))
+	p = Individual.objects.get(UID=patient)
+	dataset = []
+	if(p.Sex):
+		dataset.append(("Sex",p.Sex, False))
+	if(p.BirthDate):
+		dataset.append(("Birth Date", p.BirthDate))
+	if(p.Address!=None):
+		dataset.append(("Address",p.Address.String(), False))
+	if(p.TelephoneNumber):
+		dataset.append(("Telephone Number",p.TelephoneNumber, False))
+	if(p.FaxNumber):
+		dataset.append(("Fax Number",p.FaxNumber, False))
+	if(p.SSN):
+		dataset.append(("Social Security Number",p.SSN, False))
+	if(p.DriversLicenseNumber):
+		dataset.append(("Driver's License Number",p.DriversLicenseNumber, False))
+	if(p.Email):
+		dataset.append(("Email",p.Email, False))
+	if(p.Employer):
+		dataset.append(("Employer",p.Employer, False))
+	if(p.ReligiousAffiliation):
+		dataset.append(("Religious Affiliation",p.ReligiousAffiliation, False))
+	return render_to_response("info.html", RequestContext(request, {"name":p.Name(),"dataset":dataset}))
 def directory_view(request, entity):
-	patients = [
+	entity = CoveredEntity.objects.get(EIN=entity)
+	visits = entity.Patients.filter(DateReleased=None)
+	oldVisits = [
 		{
 			"Patient" :
 			{
@@ -490,37 +406,20 @@ def directory_view(request, entity):
 			"ReligiousAffiliation" : "Christian"
 		}
     ]
-	return render_to_response("directory.html", RequestContext(request, {"patients":patients}))
+	return render_to_response("directory.html", RequestContext(request, {"entity":entity, "visits":visits}))
 def transactions_view(request, entity):
-	transactions = [
-		{
-			"Standard" : "ASC X12N 837",
-			"OtherEntity" : 
-			{
-				"Name" : "Green America Professional",
-				"ID" : 49
-			},
-			"InformationShared" : informationSet,
-			"DateRequested" : date(2014, 4, 3),
-			"DateResponded" : date(2014, 4, 8),
-			"Purpose" : "Claims for medical procedures"
-		},
-		{
-			"Standard" : "ASC X12N 270",
-			"OtherEntity" : 
-			{
-				"Name" : "Green America Professional",
-				"ID" : 49
-			},
-			"InformationShared" : informationSet,
-			"DateRequested" : date(2014, 4, 10),
-			"DateResponded" : date(2014, 4, 18),
-			"Purpose" : "Benefit information inquiry"
-		}
-	]
-	return render_to_response("transactions.html", RequestContext(request, {"transactions":transactions}))
+	entity = CoveredEntity.objects.get(EIN=entity)
+	transactions = entity.SomeTransactions.all()
+	for i in range(entity.MoreTransactions.count()):			#This is really bad code, (I'm not sure if we can assume all() will return the same
+		transactions.append(entity.MoreTransactions.all()[i])	#ordering each call), but I can't see any other way with Jeeves.
+	#for i in range(len(transactions)):
+	#	transactions[i].TreatmentsShared = Transaction.SharedInformation.Treatments	
+	return render_to_response("transactions.html", RequestContext(request, {"entity":entity, "transactions":transactions}))
 def associates_view(request, entity):
-	associates = [
+	entity = CoveredEntity.objects.get(EIN=entity)
+	associates = entity.Associations
+
+	oldAssociates = [
 		{
 			"Entity" : 
 			{
@@ -547,4 +446,4 @@ def associates_view(request, entity):
 			"Purpose":"Keeps records for HIPAA audit"
 		}
 	]
-	return render_to_response("associates.html", RequestContext(request, {"associates":associates}))
+	return render_to_response("associates.html", RequestContext(request, {"entity":entity, "associates":associates}))

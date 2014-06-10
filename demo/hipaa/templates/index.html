@@ -21,14 +21,14 @@
 				Patients
 			</h3>
 		</lh>
-		{% for patient in patients %}
+		{% for patient in range(patients|length) %}
 			<li class="list-group-item">
-				<a href='{{ url("patient", patient.ID) }}'>
-					{{ patient.Name }}
+				<a href='{{ url("patient", patients[patient].UID) }}'>
+					{{ patients[patient].Name() }}
 				</a>
-
 			</li>
 		{% endfor %}
+
 	</ul>
 	<ul class="col-md-6">
 		<lh  class="list-group-item">
@@ -36,10 +36,10 @@
 				Entities
 			</h3>
 		</lh>
-		{% for entity in entities %}
+		{% for entity in range(entities|length) %}
 			<li class="list-group-item">
-				<a href='{{ url("entity", entity.ID) }}'>
-					{{ entity.Name }}
+				<a href='{{ url("entity", entities[entity].EIN) }}'>
+					{{ entities[entity].Name }}
 				</a>
 			</li>
 		{% endfor %}

@@ -14,7 +14,7 @@
 	<div class="container">
 		<div class="page-header">
 			<h2>
-				Cloven Intl.
+				{{ entity.Name }}
 			</h2>
 		</div>
 		<ul class="nav nav-tabs" data-tabs="tabs">
@@ -37,39 +37,42 @@
 		<br>
 		<table class="table table-striped table-hover">
 			<thead>
-				<th>
-					Entity {% include "invisible.html" %}
-				</th>
-				<th>
-					Information Shared {% include "invisible.html" %}
-				</th>
-				<th>
-					Purpose {% include "invisible.html" %}
-				</th>
-
+                <tr>
+                    <td>
+                        Entity {% include "invisible.html" %}
+                    </td>
+                    <td>
+                        Information Shared {% include "invisible.html" %}
+                    </td>
+                    <td>
+                        Purpose {% include "invisible.html" %}
+                    </td>
+                </tr>
 			</thead>
-			{% for associate in associates %}
-				<tr>
-					<td>
-						{% if associate.Entity.ID %}
-							<a href='{{ url("entity", associate.Entity.ID) }}'>
-								{{ associate.Entity.Name }}
-							</a>
-						{% else %}
-							{{ associate.Entity.Name }}
-						{% endif %}
-					</td>
-					<td>
-						{% with info=associate.InformationShared %}
-						{{ info.preview }} <a href="#myModal{{ loop.index }}" data-toggle="modal">&hellip;</a>
-						{% include "informationModal.html" %}
-						{% endwith %}
-					</td>
-					<td>
-						{{ associate.Purpose }}
-					</td>
+            {% for a_indx in range(associates.count()) %}
+                {% with association=associates.all()[a_indx] %}
+				    <tr>
+					    <td>
+						    {% if association.BusinessAssociate.Covered %}
+                            <a href='{{ url("entity", 3) }}'>
+                                {{ association.BusinessAssociate.Name }}
+                            </a>
+						    {% else %}
+							    {{ association.BusinessAssociate.Name }}
+						    {% endif %}
+					    </td>
+					    <td>
+                            {% with data=association.SharedInformation %}
+                            <a href="#myModal{{ loop.index }}" data-toggle="modal">&hellip;</a>
+                            {% include "informationModal.html" %}
+                            {% endwith %}
+					    </td>
+					    <td>
+						    {{ association.Purpose }}
+					    </td>
 
-				</tr>
+				    </tr>
+                {% endwith %}
 			{% endfor %}
 		</table>
 	</div>

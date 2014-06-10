@@ -13,7 +13,7 @@
 	<div class="container">
 		<div class="page-header">
 			<h2>
-				John Doe
+				{{ name }}
 			</h2>
 		</div>
 		<ul class="nav nav-tabs">
@@ -39,23 +39,25 @@
 					</td>
 				</tr>
 			</thead>
-			{% for diagnosis in diagnoses %}
-				<tr>
-					<td>
-						{{ diagnosis.DateRecognized }}
-					</td>
-					<td>
-						{{ diagnosis.Manifestation }}
-					</td>
-					<td>
-						{{ diagnosis.Diagnosis }}
-					</td>
-					<td>
-						<a href='{{ url("entity", diagnosis.RecognizingEntity.ID) }}'>
-							{{ diagnosis.RecognizingEntity.Name }}
-						</a>
-					</td>
-				</tr>
+			{% for d_indx in range(diagnoses|length) %}
+				{% with diagnosis=diagnoses[d_indx] %}
+					<tr>
+						<td>
+							{{ diagnosis.DateRecognized }}
+						</td>
+						<td>
+							{{ diagnosis.Manifestation }}
+						</td>
+						<td>
+							{{ diagnosis.Diagnosis }}
+						</td>
+						<td>
+							<a href='{{ url("entity", diagnosis.RecognizingEntity.EIN) }}'>
+								{{ diagnosis.RecognizingEntity.Name }}
+							</a>
+						</td>
+					</tr>
+				{% endwith %}
 			{% endfor %}
 		</table>
 	</div>
