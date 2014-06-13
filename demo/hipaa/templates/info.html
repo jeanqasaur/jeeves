@@ -15,7 +15,7 @@
 	<div class="container">
 		<div class="page-header">
 			<h2>
-				{{ name }}
+				{{ patient.Name() }}
 			</h2>
 		</div>
 		<ul class="nav nav-tabs">
@@ -40,7 +40,7 @@
 			{% for data in dataset %}
 				<li class="list-group-item">
 					<h4 class="list-group-item-heading">
-						{{data[0]}}
+						{{ data[0] }}
 						{% if data[2] %}
 							{% include "visible.html" %}
 						{% else %}
@@ -48,7 +48,7 @@
 						{% endif %}
 					</h4>
 					<p class="list-group-item-text">
-						{{ data[1] }}
+						{{ concretize(data[1]) }}
 					</p>
 				</li>
 			{% endfor %}

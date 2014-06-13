@@ -18,6 +18,14 @@ class Address(Model):
 		return self.Street+"\n"+self.ZipCode+" "+self.City+", "+self.State
 	class Meta:
 		db_table = 'Address'
+	@staticmethod
+	def jeeves_get_private_Street(user):
+		return ""
+	@staticmethod
+	@label_for('Street')
+	@jeeves
+	def jeeves_restrict_Addresslabel(user, ctxt):
+		return False
 
 class Individual(Model):
 	FirstName = CharField(max_length=1024)
@@ -39,6 +47,14 @@ class Individual(Model):
 		db_table = 'Individual'
 	def Name(self):
 		return self.FirstName +" "+self.LastName
+	@staticmethod
+	def jeeves_get_private_SSN(user):
+		return ""
+	@staticmethod
+	@label_for('SSN')
+	@jeeves
+	def jeeves_restrict_Individuallabel(user, ctxt):
+		return False
 
 class UserProfile(Model):
     username = CharField(max_length=1024)

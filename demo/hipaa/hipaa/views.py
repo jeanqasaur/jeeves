@@ -148,9 +148,9 @@ def add_to_context(context_dict, request, template_name, profile, concretize):
                                     (not request.user.is_anonymous()))
 
 def request_wrapper(view_fn):
-    def real_view_fn(request):
+    def real_view_fn(request, **kwargs):
         try:
-            ans = view_fn(request)
+            ans = view_fn(request,**kwargs)
             template_name = ans[0]
             context_dict = ans[1]
 
@@ -333,30 +333,33 @@ def diagnoses_view(request, patient):
     ]
 	return render_to_response("diagnoses.html", RequestContext(request, {"name":p.Name() , "diagnoses":newDiagnoses}))
 
+@login_required
+@request_wrapper
+@jeeves
 def info_view(request, patient):
 	p = Individual.objects.get(UID=patient)
 	dataset = []
-	if(p.Sex):
+	if(p.Sex!=None):
 		dataset.append(("Sex",p.Sex, False))
-	if(p.BirthDate):
+	if(p.BirthDate!=None):
 		dataset.append(("Birth Date", p.BirthDate))
 	if(p.Address!=None):
 		dataset.append(("Address",p.Address.String(), False))
-	if(p.TelephoneNumber):
+	if(p.TelephoneNumber!=None):
 		dataset.append(("Telephone Number",p.TelephoneNumber, False))
-	if(p.FaxNumber):
+	if(p.FaxNumber!=None):
 		dataset.append(("Fax Number",p.FaxNumber, False))
-	if(p.SSN):
+	if(p.SSN!=None):
 		dataset.append(("Social Security Number",p.SSN, False))
-	if(p.DriversLicenseNumber):
+	if(p.DriversLicenseNumber!=None):
 		dataset.append(("Driver's License Number",p.DriversLicenseNumber, False))
-	if(p.Email):
+	if(p.Email!=None):
 		dataset.append(("Email",p.Email, False))
-	if(p.Employer):
+	if(p.Employer!=None):
 		dataset.append(("Employer",p.Employer, False))
-	if(p.ReligiousAffiliation):
+	if(p.ReligiousAffiliation!=None):
 		dataset.append(("Religious Affiliation",p.ReligiousAffiliation, False))
-	return render_to_response("info.html", RequestContext(request, {"name":p.Name(),"dataset":dataset}))
+	return ("info.html", {"patient":p,"dataset":dataset})
 def directory_view(request, entity):
 	entity = CoveredEntity.objects.get(EIN=entity)
 	visits = entity.Patients.filter(DateReleased=None)

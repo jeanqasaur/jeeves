@@ -1,6 +1,6 @@
 from django.forms import Form, ModelForm, CharField, FileField, Textarea, ModelForm, HiddenInput, MultipleChoiceField, CheckboxSelectMultiple, BooleanField, ChoiceField
 
-from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment, Comment, UserPCConflict
+from models import UserProfile, UserPCConflict
 from django.contrib.auth.models import User
 import random
 from django.forms.formsets import formset_factory
@@ -81,26 +81,7 @@ class SubmitForm(Form):
 
         return paper
 
-class SubmitReviewForm(ModelForm):
-    class Meta:
-        model = Review
-        fields = ['contents', 'score_novelty', 'score_presentation', 'score_technical', 'score_confidence']
 
-class SubmitCommentForm(ModelForm):
-    class Meta:
-        model = Comment
-        fields = ['contents']
-
-class ReviewAssignmentForm(ModelForm):
-    class Meta:
-        model = ReviewAssignment
-        fields = ['assign_type', 'user', 'paper']
-        widgets = {
-            'user' : HiddenInput(),
-            'paper' : HiddenInput(),
-        }
-
-ReviewAssignmentFormset = formset_factory(ReviewAssignmentForm, extra=0)
 
 class SearchForm(Form):
     # should only show accepted papers
