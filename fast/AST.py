@@ -70,18 +70,12 @@ class JeevesState:
 jeevesState = JeevesState()
 
 '''
-Abstract class for sensitive expressions.
+Sensitive expressions.
 '''
 class FExpr(object):
   def vars(self):
     return NotImplemented
 
-  # TODO: Need to figure out a way to thread the environment through eval so
-  # we don't have to pass the argument explicitly. We also want to make sure
-  # that we're using the correct environment though... Do we have to use some
-  # sort of global? :(
-  # TJH: going to just assume it's a global for now, so we don't have to
-  # pass it through
   def eval(self, env):
     return NotImplemented
 
@@ -103,10 +97,7 @@ class FExpr(object):
 
   '''
   Sensitive Boolean expressions.
-  NOTE(JY): I'm making the change Formula-> BoolExpr so that everything matches
-  better.
   '''
-
   def __eq__(l, r):
     return Eq(l, fexpr_cast(r))
 
@@ -124,13 +115,6 @@ class FExpr(object):
     return Or(l, fexpr_cast(r))
   def __ror__(r, l):
     return Or(fexpr_cast(l), r)
-
-  #def constant(v): BoolVal(v)
-  #def default(): return NotImplemented
-  ## TODO: Make this infix?
-  #def implies(self, other): Not(self) or other
-  #def iff(self, other): self == other
-  #def facet(self, thn, els): Facet(self, thn, els)
 
   '''
   Integer expressions.
