@@ -13,7 +13,6 @@ from env.PathVars import PathVars
 from env.WritePolicyEnv import WritePolicyEnv
 from smt.Z3 import Z3
 from fast.AST import Facet, fexpr_cast, Constant, Var, Not, FExpr, Unassigned, FObject, jeevesState
-from eval.Eval import partialEval
 import copy
 
 def init():
@@ -92,7 +91,7 @@ def concretize(ctxt, v):
 
 @supports_jeeves
 def jif(cond, thn_fn, els_fn):
-  condTrans = partialEval(fexpr_cast(cond), jeevesState.pathenv.getEnv())
+  condTrans = fexpr_cast(cond).partialEval(jeevesState.pathenv.getEnv())
   if condTrans.type != bool:
     raise TypeError("jif must take a boolean as a condition")
   return jif2(condTrans, thn_fn, els_fn)
@@ -153,7 +152,7 @@ def jassign(old, new, base_env={}):
       else:
         res = Facet(var, old, res)
   if isinstance(res, FExpr):
-    return partialEval(res, {}, True)
+    return res.partialEval({}, True)
   else:
     return res
 
@@ -233,7 +232,7 @@ def jmap(iterable, mapper):
   if isinstance(iterable, FObject) and isinstance(iterable.v, JList2):
     return jmap_jlist2(iterable.v, mapper)
 
-  iterable = partialEval(fexpr_cast(iterable), jeevesState.pathenv.getEnv())
+  iterable = fexpr_cast(iterable).partialEval(jeevesState.pathenv.getEnv())
   return FObject(JList(jmap2(iterable, mapper)))
 def jmap2(iterator, mapper):
   if isinstance(iterator, Facet):
@@ -371,27 +370,27 @@ def jfun(f, *args, **kw):
   else:
     env = jeevesState.pathenv.getEnv()
     if len(args) > 0:
-      return jfun2(f, args, kw, 0, partialEval(fexpr_cast(args[0]), env), [])
+      return jfun2(f, args, kw, 0, fexpr_cast(args[0]).partialEval(env), [])
     else:
       it = kw.__iter__()
       try:
         fst = next(it)
       except StopIteration:
         return fexpr_cast(f())
-      return jfun3(f, kw, it, fst, partialEval(fexpr_cast(kw[fst]), env), (), {})
+      return jfun3(f, kw, it, fst, fexpr_cast(kw[fst]).partialEval(env), (), {})
 
 def jfun2(f, args, kw, i, arg, args_concrete):
   if isinstance(arg, Constant) or isinstance(arg, FObject):
     env = jeevesState.pathenv.getEnv()
     if i < len(args) - 1:
-      return jfun2(f, args, kw, i+1, partialEval(fexpr_cast(args[i+1]), env), tuple(list(args_concrete) + [arg.v]))
+      return jfun2(f, args, kw, i+1, fexpr_cast(args[i+1]).partialEval(env), tuple(list(args_concrete) + [arg.v]))
     else:
       it = kw.__iter__()
       try:
         fst = next(it)
       except StopIteration:
         return fexpr_cast(f(*tuple(list(args_concrete) + [arg.v])))
-      return jfun3(f, kw, it, fst, partialEval(fexpr_cast(kw[fst]), env), tuple(list(args_concrete) + [arg.v]), {})
+      return jfun3(f, kw, it, fst, fexpr_cast(kw[fst]).partialEval(env), tuple(list(args_concrete) + [arg.v]), {})
   else:
     with PositiveVariable(arg.cond):
       thn = jfun2(f, args, kw, i, arg.thn, args_concrete)
@@ -409,7 +408,7 @@ def jfun3(f, kw, it, key, val, args_concrete, kw_concrete):
     except StopIteration:
       return fexpr_cast(f(*args_concrete, **kw_c))
     env = jeevesState.pathenv.getEnv()
-    return jfun3(f, kw, it, next_key, partialEval(fexpr_cast(kw[next_key]), env), args_concrete, kw_c)
+    return jfun3(f, kw, it, next_key, fexpr_cast(kw[next_key]).partialEval(env), args_concrete, kw_c)
   else:
     it1, it2 = tee(it)
     with PositiveVariable(val.cond):
@@ -419,7 +418,7 @@ def jfun3(f, kw, it, key, val, args_concrete, kw_concrete):
     return Facet(val.cond, thn, els)
 
 def evalToConcrete(f):
-    g = partialEval(fexpr_cast(f), jeevesState.pathenv.getEnv())
+    g = fexpr_cast(f).partialEval(jeevesState.pathenv.getEnv())
     if isinstance(g, Constant):
       return g.v
     elif isinstance(g, FObject):

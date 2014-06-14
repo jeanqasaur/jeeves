@@ -3,7 +3,6 @@
 from macropy.case_classes import macros, enum
 import JeevesLib
 from AST import And, Facet, FExpr, FObject
-from eval.Eval import partialEval
 
 @enum
 class UpdateResult:
@@ -45,7 +44,7 @@ class ProtectedRef:
     if self.inputWP:
       r = self.inputWP(self.v)(writer)
       if isinstance(r, FExpr):
-        r = JeevesLib.concretize(writeCtxt, partialEval(r, JeevesLib.jeevesState.pathenv.getEnv()))
+        r = JeevesLib.concretize(writeCtxt, r.partialEval(JeevesLib.jeevesState.pathenv.getEnv()))
       if r:
         return UpdateResult.Success
       else:

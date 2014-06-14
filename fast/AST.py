@@ -13,6 +13,33 @@ import env.WritePolicyEnv
 import threading
 from collections import defaultdict
 
+def facetApply(f, opr):
+  if isinstance(f, Facet):
+    return create_facet(f.cond, facetApply(f.thn, opr), facetApply(f.els, opr))
+  elif isinstance(f, Constant):
+    return Constant(opr(f.v))
+  elif isinstance(f, FObject):
+    return FObject(opr(f.v))
+
+def create_facet(cond, left, right):
+  if isinstance(left, Constant) and isinstance(right, Constant) and left.v == right.v:
+    return left
+  if isinstance(left, FObject) and isinstance(right, FObject) and left.v is right.v:
+    return left
+  return Facet(cond, left, right)
+
+def facetJoin(f0, f1, opr):
+  if isinstance(f0, Facet):
+    thn = facetJoin(f0.thn, f1, opr)
+    els = facetJoin(f0.els, f1, opr)
+    return create_facet(f0.cond, thn, els)
+  elif isinstance(f1, Facet):
+    thn = facetJoin(f0, f1.thn, opr)
+    els = facetJoin(f0, f1.els, opr)
+    return create_facet(f1.cond, thn, els)
+  else:
+    return Constant(opr(f0.v, f1.v))
+
 class JeevesState:
   def __init__(self):
     pass
@@ -195,6 +222,12 @@ class Var(FExpr):
   def getChildren(self):
     return []
 
+  def partialEval(self, env={}, unassignedOkay=False):
+    if self.name in env:
+      return Constant(env[self.name])
+    else:
+      return Facet(self, Constant(True), Constant(False))
+
   def prettyPrint(self, indent=""):
     return indent + self.name
 
@@ -233,10 +266,6 @@ def replace_obj_attributes(f, obj, oldvalue, newvalue, env):
 
 '''
 Facets.
-NOTE(JY): I think we don't have to have specialized facets anymore because we
-don't have to deal with such a strict type system. One reason we might not be
-able to do this is if we have to specialize execution of facets by checking
-the type of the facet...
 '''
 class Facet(FExpr):
   def __init__(self, cond, thn, els):
@@ -286,6 +315,17 @@ class Facet(FExpr):
     return Facet(newCond
       , self.thn.remapLabels(policy, writer)
       , self.els.remapLabels(policy, writer))
+
+  def partialEval(self, env={}, unassignedOkay=False):
+    if self.cond.name in env:
+      return self.thn.partialEval(env, unassignedOkay) if env[self.cond.name] else self.els.partialEval(env, unassignedOkay)
+    else:
+      true_env = dict(env)
+      true_env[self.cond.name] = True
+      false_env = dict(env)
+      false_env[self.cond.name] = False
+      return create_facet(self.cond, self.thn.partialEval(true_env, unassignedOkay),
+                           self.els.partialEval(false_env, unassignedOkay))
 
   def prettyPrint(self, indent=""):
     return "< " + self.cond.prettyPrint() + " ? " + self.thn.prettyPrint() + " : " + self.els.prettyPrint() + " >"
@@ -411,6 +451,9 @@ class Constant(FExpr):
   def remapLabels(self, policy, writer):
     return self
 
+  def partialEval(self, env={}, unassignedOkay=False):
+    return self
+
   def prettyPrint(self, indent=""):
     return indent + "const:" + repr(self.v)
 
@@ -432,6 +475,11 @@ class BinaryExpr(FExpr):
   def getChildren(self):
     return [self.left, self.right]
 
+  def partialEval(self, env={}, unassignedOkay=False):
+    left = self.left.partialEval(env, unassignedOkay)
+    right = self.right.partialEval(env, unassignedOkay)
+    return facetJoin(left, right, self.opr)
+
 class UnaryExpr(FExpr):
   def __init__(self, sub):
     self.sub = sub
@@ -442,6 +490,10 @@ class UnaryExpr(FExpr):
 
   def getChildren(self):
     return [self.sub]
+
+  def partialEval(self, env={}, unassignedOkay=False):
+    sub = self.sub.partialEval(env, unassignedOkay)
+    return facetApply(sub, self.opr)
 
 '''
 Operators.
@@ -682,6 +734,13 @@ class Unassigned(FExpr):
     return set()
   def remapLabels(self, policy, writer):
     return self
+
+  def partialEval(self, env={}, unassignedOkay=False):
+    if unassignedOkay:
+      return self
+    else:
+      raise self.getException()
+
   def getException(self):
     return Exception("wow such error: %s does not exist." % (self.thing_not_found,))
   def __call__(self, *args, **kwargs):
@@ -740,6 +799,9 @@ class FObject(FExpr):
       return FObject(self.v.remapLabels(policy, writer))
     else:
       return self
+
+  def partialEval(self, env={}, unassignedOkay=False):
+    return self
 
   def __call__(self, *args, **kw):
     return self.v.__call__(*args, **kw)
