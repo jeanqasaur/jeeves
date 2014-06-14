@@ -1,11 +1,6 @@
 '''
 This defines the abstract syntax tree for sensitive expressions.
-
-Note(JY): An interesting thing is that we no longer need to define polymorphism
-in types explicitly. We might be able to have a much cleaner implementation than
-the Scala one!
 '''
-from abc import ABCMeta, abstractmethod
 import operator
 import z3
 import JeevesLib
@@ -50,10 +45,7 @@ jeevesState = JeevesState()
 '''
 Abstract class for sensitive expressions.
 '''
-class FExpr:
-  __metaclass__ = ABCMeta
-  
-  @abstractmethod
+class FExpr(object):
   def vars(self):
     return NotImplemented
 
@@ -63,21 +55,17 @@ class FExpr:
   # sort of global? :(
   # TJH: going to just assume it's a global for now, so we don't have to
   # pass it through
-  @abstractmethod
   def eval(self, env):
     return NotImplemented
 
-  @abstractmethod
   def z3Node(self):
     return NotImplemented
 
-  @abstractmethod
   def getChildren(self):
     return NotImplemented
 
   # Return a version of yourself with the write-associated labels remapped to
   # point to the new policy in addition to the previous policies.
-  @abstractmethod
   def remapLabels(self, policy, writer):
     return NotImplemented
 
