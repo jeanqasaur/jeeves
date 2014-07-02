@@ -8,7 +8,6 @@ import django.db.models.fields.related
 
 import JeevesLib
 from JeevesLib import fexpr_cast
-from eval.Eval import partialEval
 from fast.AST import Facet, FObject, Unassigned, get_var_by_name, FExpr
 
 import string
@@ -61,7 +60,7 @@ class JeevesQuerySet(QuerySet):
         else:
           cur = Facet(acquire_label_by_name(self.model._meta.app_label, var_name), old, cur)
     try:
-      return partialEval(cur, {} if use_base_env else JeevesLib.jeevesState.pathenv.getEnv())
+      return cur.partialEval({} if use_base_env else JeevesLib.jeevesState.pathenv.getEnv())
     except TypeError:
       raise Exception("wow such error: could not find a row for every condition")
 
@@ -187,7 +186,7 @@ def unserialize_vars(s):
   return e
 
 def fullEval(val, env):
-  p = partialEval(val, env)
+  p = val.partialEval(env)
   return p.v
 
 def acquire_label_by_name(app_label, label_name):
@@ -323,10 +322,7 @@ class JeevesModel(models.Model):
       for field_name in field_name_list:
         public_field_value = getattr(self, field_name)
         private_field_value = getattr(self, 'jeeves_get_private_' + field_name)(self)
-        faceted_field_value = partialEval(
-          JeevesLib.mkSensitive(label, public_field_value, private_field_value),
-          JeevesLib.jeevesState.pathenv.getEnv()
-        )
+        faceted_field_value = JeevesLib.mkSensitive(label, public_field_value, private_field_value).partialEval(JeevesLib.jeevesState.pathenv.getEnv())
         setattr(self, field_name, faceted_field_value)
 
     all_vars = []
@@ -334,7 +330,7 @@ class JeevesModel(models.Model):
     env = JeevesLib.jeevesState.pathenv.getEnv()
     for field_name in field_names:
       value = getattr(self, field_name)
-      f = partialEval(fexpr_cast(value), env)
+      f = fexpr_cast(value).partialEval(env)
       all_vars.extend(v.name for v in f.vars())
       d[field_name] = f
     all_vars = list(set(all_vars))
@@ -390,7 +386,7 @@ class JeevesModel(models.Model):
     env = JeevesLib.jeevesState.pathenv.getEnv()
     for field_name in field_names:
       value = getattr(self, field_name)
-      f = partialEval(fexpr_cast(value), env)
+      f = fexpr_cast(value).partialEval(env)
       all_vars.extend(v.name for v in f.vars())
       d[field_name] = f
 

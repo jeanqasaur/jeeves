@@ -2,7 +2,6 @@ import JeevesLib
 
 import fast.AST
 from collections import defaultdict
-from eval.Eval import partialEval
 from fast.AST import FExpr
 
 from smt.Z3 import Z3
@@ -25,7 +24,7 @@ class SolverState:
 
             predicate = policy(self.ctxt) #predicate should be True if label can be HIGH
             predicate_vars = predicate.vars()
-            constraint = partialEval(fast.AST.Implies(label, predicate), pathenv)
+            constraint = fast.AST.Implies(label, predicate).partialEval(pathenv)
 
             if constraint.type != bool:
                 raise ValueError("constraints must be bools")

@@ -3,7 +3,6 @@ import macropy.activate
 
 import JeevesLib
 from fast.AST import *
-from eval.Eval import partialEval
 from JeevesLib import PositiveVariable, NegativeVariable
 
 def isPureFacetTree(f):
@@ -197,13 +196,13 @@ class TestAST(unittest.TestCase):
         l = Var("l")
 
         a = Facet(l, Constant(1), Constant(2))
-        ap = partialEval(a)
+        ap = a.partialEval()
         self.assertTrue(isPureFacetTree(ap))
         self.assertEqual(ap.eval({l:True}), 1)
         self.assertEqual(ap.eval({l:False}), 2)
 
         a = Facet(l, Add(Constant(1), Constant(-1)), Constant(2))
-        ap = partialEval(a)
+        ap = a.partialEval()
         self.assertTrue(isPureFacetTree(ap))
         self.assertEqual(ap.eval({l:True}), 0)
         self.assertEqual(ap.eval({l:False}), 2)
@@ -212,7 +211,7 @@ class TestAST(unittest.TestCase):
             Facet(l, Constant(1), Constant(10)),
             Facet(l, Constant(100), Constant(1000))
         )
-        ap = partialEval(a)
+        ap = a.partialEval()
         self.assertTrue(isPureFacetTree(ap))
         self.assertEqual(ap.eval({l:True}), 101)
         self.assertEqual(ap.eval({l:False}), 1010)
@@ -223,7 +222,7 @@ class TestAST(unittest.TestCase):
             Facet(l1, Constant(1), Constant(10)),
             Facet(l2, Constant(100), Constant(1000))
         )
-        ap = partialEval(a)
+        ap = a.partialEval()
         self.assertTrue(isPureFacetTree(ap))
         self.assertEqual(ap.eval({l1:True, l2:True}), 101)
         self.assertEqual(ap.eval({l1:True, l2:False}), 1001)
