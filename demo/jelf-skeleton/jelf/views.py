@@ -1,3 +1,5 @@
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login, authenticate
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
@@ -17,6 +19,18 @@ import JeevesLib
 # HttpResponse that can be faceted. Such an object would need to support Jeeves,
 # of course. And the concretized rendering should be moved to a library function
 # (like render_to_response).
+@jeeves
+def add_to_context(context_dict, request, template_name, profile, concretize):
+    template_name = concretize(template_name)
+    context_dict['concretize'] = concretize
+
+    context_dict['is_admin'] = profile != None and profile.level == "chair"
+    context_dict['profile'] = profile
+
+    context_dict['is_logged_in'] = (request.user and
+                                    request.user.is_authenticated() and
+                                    (not request.user.is_anonymous()))
+
 def request_wrapper(view_fn):
     def real_view_fn(request):
         try:
