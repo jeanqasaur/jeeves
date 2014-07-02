@@ -49,9 +49,57 @@ def request_wrapper(view_fn):
 # The argument `user_profile` is a UserProfile object (defined in models.py).
 # Use this instead of `request.user` (which is the ordinary django User model).
 # You can access request.POST and request.GET as normal.
+
 @login_required
 @request_wrapper
 @jeeves
 def index(request, user_profile):
     return (   "index.html"
            , { 'name' : user_profile.email } )
+
+
+@login_required
+@request_wrapper
+@jeeves
+def profile_view(request):
+    profile = UserProfile.objects.get(username=request.user.username)
+    if profile == None:
+        profile = UserProfile(username=request.user.username)
+    
+    if request.method == 'POST':
+        profile.email = request.POST.get('email', '')
+        profile.save()
+
+    return ("profile.html", {
+        "email": profile.email,
+        "which_page": "profile",
+    })
+
+
+def register_account(request):
+    if request.user.is_authenticated():
+        return HttpResponseRedirect("index")
+
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            user.save()
+
+            UserProfile.objects.create(
+                username=user.username,
+                email=request.POST.get('email', ''),
+            )
+
+            user = authenticate(username=request.POST['username'],
+                         password=request.POST['password1'])
+            login(request, user)
+            return HttpResponseRedirect("index")
+    else:
+        form = UserCreationForm()
+
+    return render_to_response("registration/account.html", RequestContext(request,
+        {
+            'form' : form,
+            'which_page' : "register"
+        }))

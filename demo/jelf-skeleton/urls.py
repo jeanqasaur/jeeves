@@ -1,10 +1,10 @@
-from django.jelf.urls import patterns, include, url
+from django.conf.urls import patterns, include, url
 
 from django.contrib import admin
 admin.autodiscover()
 
-from django.jelf.urls.static import static
-from django.jelf import settings
+from django.conf.urls.static import static
+from django.conf import settings
 
 from jelf import views
 
@@ -21,15 +21,6 @@ urlpatterns = patterns('',
 
     url(r'^register$', views.register_account),
 
-    url(r'^index$', views.papers_view),
-    url(r'^$', views.papers_view),
-    url(r'^submit$', views.submit_view),
-    url(r'^papers$', views.papers_view),
-    url(r'^paper$', views.paper_view),
-    url(r'^submit_review$', views.submit_review_view),
-    url(r'^submit_comment$', views.submit_comment_view),
-    url(r'^assign_reviews$', views.assign_reviews_view),
-    url(r'^search$', views.search_view),
-    url(r'^about$', views.about_view),
-    url(r'^users$', views.users_view),
+    url(r'^index$', views.index),
+    url(r'^$', views.index),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

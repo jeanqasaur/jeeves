@@ -8,8 +8,7 @@ https://docs.djangoproject.com/en/1.6/howto/deployment/wsgi/
 """
 
 import os
-import logging, sys
-logging.basicConfig(stream=sys.stderr)
+import sys
 sys.path.append(os.path.dirname(__file__))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'jelf/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
