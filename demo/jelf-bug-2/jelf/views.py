@@ -6,7 +6,7 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
 
-from models import UserProfile
+from models import UserProfile, Individual
 
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
@@ -31,8 +31,8 @@ def add_to_context(context_dict, request, template_name, profile, concretize):
                                     request.user.is_authenticated() and
                                     (not request.user.is_anonymous()))
 
-def request_wrapper(view_fn, *args, **kwargs):
-    def real_view_fn(request):
+def request_wrapper(view_fn):
+    def real_view_fn(request, *args, **kwargs):
         try:
             profile = UserProfile.objects.get(username=request.user.username)
 
@@ -71,6 +71,16 @@ def index(request, user_profile):
     return (   "index.html"
            , { 'name' : user_profile.email } )
 
+
+@login_required
+@request_wrapper
+@jeeves
+def patients(request, user_profile, patient):
+	p=Individual.objects.get(pk=patient)
+	print p.SSN
+	dataset={"Address":p.address}
+	return (   "patient.html"
+		, { 'patient' : p } )
 
 @login_required
 @request_wrapper

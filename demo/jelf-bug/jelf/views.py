@@ -6,7 +6,7 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
 
-from models import UserProfile
+from models import UserProfile, Address, Individual
 
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
@@ -31,8 +31,8 @@ def add_to_context(context_dict, request, template_name, profile, concretize):
                                     request.user.is_authenticated() and
                                     (not request.user.is_anonymous()))
 
-def request_wrapper(view_fn, *args, **kwargs):
-    def real_view_fn(request):
+def request_wrapper(view_fn):
+    def real_view_fn(request,*args, **kwargs):
         try:
             profile = UserProfile.objects.get(username=request.user.username)
 
@@ -47,7 +47,10 @@ def request_wrapper(view_fn, *args, **kwargs):
             concretizeState = JeevesLib.jeevesState.policyenv.getNewSolverState(profile)
             def concretize(val):
                 return concretizeState.concretizeExp(val, JeevesLib.jeevesState.pathenv.getEnv())
+            #concretize = lambda val : JeevesLib.concretize(profile, val)
             add_to_context(context_dict, request, template_name, profile, concretize)
+
+            #print 'concretized is', concretize(context_dict['latest_title'])
 
             return render_to_response(template_name, RequestContext(request, context_dict))
 
@@ -58,6 +61,7 @@ def request_wrapper(view_fn, *args, **kwargs):
 
     real_view_fn.__name__ = view_fn.__name__
     return real_view_fn
+
 
 # An example of a really simple view.
 # The argument `user_profile` is a UserProfile object (defined in models.py).
@@ -71,6 +75,14 @@ def index(request, user_profile):
     return (   "index.html"
            , { 'name' : user_profile.email } )
 
+@login_required
+@request_wrapper
+@jeeves
+def patient(request, patient):
+    p=Individual.objects.get(pk=patient)
+    dataset={"Address":p.address}
+    return (   "patient.html"
+           , { 'dataset' : dataset } )
 
 @login_required
 @request_wrapper

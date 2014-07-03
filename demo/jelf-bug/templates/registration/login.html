@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <form role="form" class="form-signin" method="post" action="">{% csrf_token %}
+      <h2 class="form-signin-heading">Log In.</h2>
+      {% if form.errors %}{{ form.errors.__all__ | safe }}{% endif %}
+      <input type="text" class="form-control" id="id_username" maxlength="254" name="username" placeholder="Username" required>
+      <input type="password" class="form-control" id="id_password" name="password" placeholder="Password" required>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Let's go!</button>
+     </form>
+{% endblock %}
