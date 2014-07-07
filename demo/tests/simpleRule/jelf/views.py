@@ -6,7 +6,7 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
 
-from models import UserProfile, Individual
+from models import UserProfile, individual
 
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
@@ -59,6 +59,23 @@ def request_wrapper(view_fn):
     real_view_fn.__name__ = view_fn.__name__
     return real_view_fn
 
+@login_required
+@request_wrapper
+@jeeves
+def profile_view(request, user_profile):
+    profile = UserProfile.objects.get(username=request.user.username)
+    if profile == None:
+        profile = UserProfile(username=request.user.username)
+    
+    if request.method == 'POST':
+        profile.email = request.POST.get('email', '')
+        profile.save()
+
+    return ("profile.html", {
+        "email": profile.email,
+        "which_page": "profile",
+    })
+
 # An example of a really simple view.
 # The argument `user_profile` is a UserProfile object (defined in models.py).
 # Use this instead of `request.user` (which is the ordinary django User model).
@@ -76,28 +93,11 @@ def index(request, user_profile):
 @request_wrapper
 @jeeves
 def patients(request, user_profile, patient):
-	p=Individual.objects.get(pk=patient)
-	print p.SSN
+	p=individual.objects.get(pk=patient)
+	print p.ssn
 	dataset={"Address":p.address}
 	return (   "patient.html"
 		, { 'patient' : p } )
-
-@login_required
-@request_wrapper
-@jeeves
-def profile_view(request):
-    profile = UserProfile.objects.get(username=request.user.username)
-    if profile == None:
-        profile = UserProfile(username=request.user.username)
-    
-    if request.method == 'POST':
-        profile.email = request.POST.get('email', '')
-        profile.save()
-
-    return ("profile.html", {
-        "email": profile.email,
-        "which_page": "profile",
-    })
 
 
 def register_account(request):
