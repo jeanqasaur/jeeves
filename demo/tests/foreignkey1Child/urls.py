@@ -23,5 +23,5 @@ urlpatterns = patterns('',
 
     url(r'^index$', views.index),
     url(r'^$', views.index),
-    url(r'^patients/(?P<patient>[0-9]+)/$', views.patient, name='patient'),
+    url(r'^patients/(?P<id>[0-9]+)/$', views.patient, name='patient'),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

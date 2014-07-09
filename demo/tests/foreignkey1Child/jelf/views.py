@@ -3,7 +3,7 @@ from django.contrib.auth import login, authenticate
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.contrib.auth.models import User
 
 from models import UserProfile, Address, Individual
@@ -35,7 +35,6 @@ def request_wrapper(view_fn):
     def real_view_fn(request,*args, **kwargs):
         try:
             profile = UserProfile.objects.get(username=request.user.username)
-
             ans = view_fn(request, profile, *args, **kwargs)
             template_name = ans[0]
             context_dict = ans[1]
@@ -78,10 +77,13 @@ def index(request, user_profile):
 @login_required
 @request_wrapper
 @jeeves
-def patient(request, patient):
-    p=Individual.objects.get(pk=patient)
-    dataset={"Address":p.address}
-    return (   "patient.html"
+def patient(request, profile, id):
+	p=Individual.objects.get(pk=id)
+	if p==None:
+		raise Http404
+	print "Person",p
+	dataset={"Address":p.address}
+	return (   "patient.html"
            , { 'dataset' : dataset } )
 
 @login_required
