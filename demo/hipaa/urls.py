@@ -6,7 +6,7 @@ admin.autodiscover()
 from django.conf.urls.static import static
 from django.conf import settings
 
-from hipaa import views
+from jelf import views
 
 urlpatterns = patterns('',
     # Examples:
@@ -23,7 +23,6 @@ urlpatterns = patterns('',
 
     url(r'^index$', views.index),
     url(r'^$', views.index),
-    url(r'^search$', views.search_view),
     url(r'^about$', views.about_view),
     url(r'^users$', views.users_view),
     url(r'^patients/(?P<patient>[0-9]+)/treatments$', views.treatments_view),

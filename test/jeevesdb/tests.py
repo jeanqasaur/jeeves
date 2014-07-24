@@ -448,3 +448,11 @@ class TestJeevesModel(TestCase):
       ({'name':'testpolicy2', 'sound':'meow'}, {name:True}),
       ({'name':'testpolicy2', 'sound':''}, {name:False}),
      ]))
+  def testObjectModel(self):
+     AnimalWithPolicy.objects.create(name="dog",sound="bark")
+     AnimalWithPolicy.objects.create(name="cat",sound="meow")
+     AnimalWithPolicy.objects.create(name="gorilla",sound="aaaaah")
+     animal=AnimalWithPolicy.objects.get(name="cat")
+     dataset={"sound":animal.sound}
+     self.assertIn(dataset.sound,["meow",""])
+     self.assertTrue(False)

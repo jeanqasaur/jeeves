@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <form method="post" action="" role="form">{% csrf_token %}
+      <h2 class="form-heading">Register.</h2>
+      {% if form.errors %}{{ form.errors.__all__ | safe }}{% endif %}
+      <div class="form-group">
+        <label class="control-label"><a rel="tooltip" title="Visible to everyone."><span class="glyphicon glyphicon-eye-open"></span></a> Username</label>
+        {% if form.username.errors %}{{ form.username.errors | safe }}{% endif %}
+        <div class="row">
+          <div class="col-xs-4">
+            <input class="form-control" id="id_username" maxlength="30" name="username" type="text" required/>
+          </div>
+        </div>
+        <p class="help-inline"><small>Required. 30 characters or fewer. Letters, digits and @/./+/-/_ only.</small></p>                 
+      </div>       
+      <div class="form-group">
+        <label class="control-label"><a rel="tooltip" title="Visible to only you."><span class="glyphicon glyphicon-eye-close"></span></a> Password</label>
+        {% if form.password1.errors %}{{ form.password1.errors | safe }}{% endif %}
+        <div class="row">
+          <div class="col-xs-4">
+            <input class="form-control" id="id_password1" name="password1" type="password" required />
+          </div>
+        </div>
+      </div>       
+      <div class="form-group">
+        <label class="control-label"><a rel="tooltip" title="Visible to only you."><span class="glyphicon glyphicon-eye-close"></span></a> Password confirmation</label>
+        {% if form.password2.errors %}{{ form.password2.errors | safe }}{% endif %}
+        <div class="row">
+          <div class="col-xs-4">
+            <input class="form-control" id="id_password2" name="password2" type="password" required />
+          </div>
+        </div>
+        <p class="help-inline"><small>Enter the same password as above, for verification.</small></p>               
+      </div>       
+      <div class="form-group">
+        <label for="email" class="control-label"><a rel="tooltip" title="Visible to you and the PC chair."><span class="glyphicon glyphicon-eye-close"></span></a> Email</label>
+        <div class="row">
+          <div class="col-xs-4">
+            <input type="email" class="form-control" name="email" id="email" placeholder="Enter email">
+          </div>
+        </div>
+      </div>
+      <button type="submit" value="Register" class="btn btn-primary">Register</button>
+    </form>
+{% endblock %}
