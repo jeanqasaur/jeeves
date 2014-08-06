@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	    	<button type="button" class="btn btn-primary" id="edit-button">Edit</button>
+	    	<div style="clear: both;"></div>
+
+			<div class="panel panel-default submissionPanel">
+			      <!-- Default panel contents -->
+			      <div class="panel-heading">
+			      	<b> Submission for GR1 - Analysis </b>
+			      </div>
+
+			      <table class="table submissionDetails">
+			        <tbody>
+			          <tr>
+			            <td><b>Submitter</b></td>
+			            <td>Mark</td>
+			          </tr>
+			          <tr>
+			            <td><b>Assignment</b></td>
+			            <td> GR1 - Analysis</td>
+			          </tr>
+  			          <tr>
+			            <td><b>Submitted</b></td>
+			            <td>3/8/14</td>
+			          </tr>
+			          <tr>
+			            <td><b>File Link</b></td>
+			            <td><a href='#'>GR1-mark.pdf</a></td>
+			          </tr>
+			          <tr>
+			            <td><b>Grade</b></td>
+			            <td>N/A</td>
+			          </tr>
+			        </tbody>
+			      </table>
+			    </div>
+			</div>
+			<div style="clear: both;"></div>
+
+			<div class="commentSection">
+				<div id="commentsTitle"><b> Comments (2) </b></div>
+				<div class="commentBoxContainer">
+					<textarea class="commentBox"></textarea><br />
+					<!-- Split button -->
+					<div class="btn-group submit-button">
+					  <button type="button" class="btn btn-default">Submit</button>
+					  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+					    <span class="caret"></span>
+					    <span class="sr-only">Toggle Dropdown</span>
+					  </button>
+					  <ul class="dropdown-menu" role="menu">
+					    <li><a href="#">Publicly</a></li>
+					 	<li class="divider"></li>
+					    <li><a href="#">To Collaborators</a></li>
+					    <li><a href="#">To Instructors</a></li>
+					  </ul>
+					</div>
+					<div style="clear: both;"></div>
+				</div>
+				<div class="comments">
+					<span>
+						<i>Instructor (only visible to you)</i>, 3/10/14
+						<div class="well comment"> Interesting algorithm. Are you sure you used the ones we recommended?</div>
+					</span>
+					<span>
+						<i>Mark (only visible to Instructors)</i>, 3/11/14
+						<div class="well comment"> Wow, sorry professor I think I accidentally submitted a custom version I made to show my friends. Would it be OK if I resubmitted?</div>
+					</span>
+				</div>
+			</div>
+{% endblock %}

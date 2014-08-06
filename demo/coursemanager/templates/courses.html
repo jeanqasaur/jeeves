@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	    	<h1 class="container-title">Student A Profile</h1>
+
+	    	<h2> Registered Courses </h2>
+		    <table class="table" id="classesTable">
+		      <thead>
+		        <tr>
+		          <th>Course Number</th>
+		          <th>Course Name</th>
+		          <th>Instructor</th>
+		          <th>Current Grade Estimate<th>
+		        </tr>
+		      </thead>
+		      <tbody>
+		        <tr>
+		          <td><a href="#">6.803</a></td>
+		          <td>Human Intellgience Enterprise</td>
+		          <td>Patrick Henry Winston</td>
+		          <td>B+</td>
+		        </tr>
+		        <tr>
+		         <td> <a href="#">6.813</a></td>
+		          <td>User Interface Design</td>
+		          <td>Rob Miller, Daniel Jackson, Karger</td>
+		          <td>A</td>
+		        </tr>
+		        <tr>
+		          <td><a href="#">18.440</a></td>
+		          <td>Probability and Random Variables</td>
+		          <td>Shepfield</td>
+		          <td>A</td>
+		        </tr>
+		      </tbody>
+	    	</table>
+
+	    	<br/>
+	    	<h2> Recent Assignments </h2>
+	    	<table class="table" id="recent-submissions-table">
+		      <thead>
+		        <tr>
+		          <th>Assignment Name</th>
+		          <th>Course<th>
+		          <th>Submission Date</th>
+		          <th>Grade</th>
+		        </tr>
+		      </thead>
+		      <tbody>
+		        <tr>
+		        	<td><a href="#">Semantics Paper</a></td>
+		        	<td>6.803<td>
+		        	<td>3/3/2014</td>
+		        	<td>B</td>
+		        </tr>
+		        <tr>
+		        	<td><a href="#">Problem Set 4</a></td>
+		        	<td>18.440<td>
+		        	<td>3/4/2014</td>
+		        	<td>N/A</td>
+		        </tr>
+		      </tbody>
+	    	</table>
+
+{% endblock %}

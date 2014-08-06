@@ -22,7 +22,7 @@ urlpatterns = patterns('',
     url(r'^register$', views.register_account),
 
     url(r'^index$', views.index),
-    url(r'^courses$', views.courses), #TODO
-    url(r'^submissions$', views.submissions),
+    url(r'^courses$', views.courses_view), #TODO
+    url(r'^submissions$', views.submissions_view),
     url(r'^$', views.index),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

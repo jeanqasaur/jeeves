@@ -68,9 +68,21 @@ def request_wrapper(view_fn, *args, **kwargs):
 @request_wrapper
 @jeeves
 def index(request, user_profile):
-    return (   "index.html"
-           , { 'name' : "" } ) #user_profile.username } )
+  return (   "index.html"
+         , { 'name' : "" } ) #user_profile.username } )
 
+
+@login_required
+@request_wrapper
+def courses_view(request, user_profile):
+  return ( "courses.html"
+         , { "which_page": "courses" } )
+
+@login_required
+@request_wrapper
+def submissions_view(request, user_profile):
+  return ( "submissions.html"
+         , { "which_page": "submissions" } )
 
 @login_required
 @request_wrapper
