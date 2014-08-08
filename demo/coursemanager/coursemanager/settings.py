@@ -20,6 +20,8 @@ SECRET_KEY = '!$e(y9&5ol=#s7wex!xhv=f&5f2@ufjez3ee9kdifw=41p_+%*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+USE_TZ = True
+
 TEMPLATE_DEBUG = True
 
 TEMPLATE_DIRS = (
@@ -28,6 +30,10 @@ TEMPLATE_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
 )
+
+#FIXTURE_DIRS = (
+#   os.path.join(BASE_DIR, '..', 'fixtures/'),
+#)
 
 ALLOWED_HOSTS = ['*']
 

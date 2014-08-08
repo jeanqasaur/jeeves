@@ -26,6 +26,9 @@
 	                  <li><a href="#">One more separated link</a></li>
 	                </ul>
               	</li>
+              {% if concretize and concretize(is_logged_in) %}
+                <li><a href="/accounts/logout">Log Out</a></li>
+              {% endif %}
 	          </ul>
 	        </div><!--/.nav-collapse -->
 	      </div>
