@@ -60,17 +60,19 @@ def request_wrapper(view_fn, *args, **kwargs):
     return real_view_fn
 
 # An example of a really simple view.
-# The argument `user_profile` is a UserProfile object (defined in models.py).
+# The argument `user_profile` is a User object (defined in models.py).
 # Use this instead of `request.user` (which is the ordinary django User model).
 # You can access request.POST and request.GET as normal.
 
 @login_required
 @request_wrapper
 @jeeves
-def index(request, user_profile):
+def index(request, user):
+  user = UserProfile.objects.get(username=user.username)
+  print user
+  print user.name
   return (   "index.html"
-         , { 'name' : "" } ) #user_profile.username } )
-
+         , { 'name' : user.name } )
 
 @login_required
 @request_wrapper
@@ -112,9 +114,11 @@ def register_account(request):
             user = form.save()
             user.save()
 
-            UserProfile.objects.create(
-                username=user.username,
-                email=request.POST.get('email', ''),
+            User.objects.create(
+                username=user.username
+              , email=request.POST.get('email', '')
+              , firstName=request.POST.get('firstName', '')
+              , lastName=request.POST.get('lastName', '')
             )
 
             user = authenticate(username=request.POST['username'],
