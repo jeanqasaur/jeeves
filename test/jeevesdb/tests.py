@@ -7,6 +7,8 @@ import JeevesLib
 from jeevesdb import JeevesModel
 from testdb.models import Animal, Zoo, AnimalWithPolicy, AnimalWithPolicy2
 
+import nose.tools as nt
+
 def parse_vars_row(vs):
   d = {}
   for entry in vs.split(';')[1:-1]:

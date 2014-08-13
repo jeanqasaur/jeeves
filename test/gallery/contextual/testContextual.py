@@ -1,14 +1,15 @@
-import JeevesLib
-from smt.Z3 import *
 import unittest
-from macropy.case_classes import macros, enum
 
-import JeevesLib
 from sourcetrans.macro_module import macros, jeeves
+import JeevesLib
 
-@enum
 class Location:
-  Home, Work, Other
+  class Home:
+    pass
+  class Work:
+    pass
+  class Other:
+    pass
 
 class User:
   def __init__(self, userId):
