@@ -31,6 +31,29 @@
 
       {% include 'footer.html' %}
   	</body>
-</html>
 
-<!-- These Elements are defaults that can be incorporated into any page much like Rails partials -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="{{ static('js/bootstrap.min.js') }}"></script>
+</body>
+    <script type="text/javascript">
+      var myApp;
+myApp = myApp || (function () {
+    var pleaseWaitDiv = $('<div class="modal modal-static fade" id="processing-modal" role="dialog" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-body"><div class="text-center"><img src="http://www.travislayne.com/images/loading.gif" class="icon" /><h4>Processing... <button type="button" class="close" style="float: none;" data-dismiss="modal" aria-hidden="true">×</button></h4></div></div></div></div></div>');
+    return {
+        showPleaseWait: function() {
+            pleaseWaitDiv.modal();
+        },
+        hidePleaseWait: function () {
+            pleaseWaitDiv.modal('hide');
+        },
+
+    };
+})();
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+        $("[rel='tooltip']").tooltip();
+    });
+    </script>
+</html>

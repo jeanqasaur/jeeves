@@ -34,6 +34,9 @@ def areRowsEqual(rows, expected):
       return False
   return True
 
+'''
+This tests Django monkey-patching to support Jeeves.
+'''
 class TestJeevesModel(TestCase):
   def setUp(self):
     JeevesLib.init()
@@ -55,6 +58,8 @@ class TestJeevesModel(TestCase):
             JeevesLib.mkSensitive(self.y, 'b', 'c'),
             JeevesLib.mkSensitive(self.y, 'd', 'e')))
 
+  # Tests that writes create the appropriate rows with associated Jeeves
+  # bookkeeping.
   def testWrite(self):
     lion = Animal._objects_ordinary.get(name='lion')
     self.assertEquals(lion.name, 'lion')
@@ -74,6 +79,7 @@ class TestJeevesModel(TestCase):
       ({'name':'a', 'sound':'e'}, {self.x.name:False, self.y.name:False}),
      ]))
 
+  # Test that delete removes all rows.
   def testQueryDelete(self):
     Animal.objects.create(name='delete_test1',
         sound=JeevesLib.mkSensitive(self.x,
@@ -139,6 +145,7 @@ class TestJeevesModel(TestCase):
       ({'name':'delete_test6', 'sound':'c'}, {self.x.name:False,self.y.name:False}),
     ]))
 
+  # Test that saving does the correct bookkeping.
   def testSave(self):
     an = Animal.objects.create(name='save_test1', sound='b')
     an.sound = 'c'

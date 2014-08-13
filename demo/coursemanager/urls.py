@@ -17,12 +17,12 @@ urlpatterns = patterns('',
 
     url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
     url(r'^accounts/logout/$', 'django.contrib.auth.views.logout_then_login'),
-    url(r'^accounts/profile/$', views.profile_view),
 
     url(r'^register$', views.register_account),
 
     url(r'^index$', views.index),
     url(r'^courses$', views.courses_view), #TODO
+    url(r'^profile$', views.profile_view),
     url(r'^submissions$', views.submissions_view),
     url(r'^$', views.index),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

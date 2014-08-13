@@ -81,4 +81,6 @@ rishabhAssignment=coursemanager.Assignment.objects.create(
   , maxPoints=100
   , prompt="Do this assignment."
   , owner=rishabhUser
+  , course=course813
   )
+

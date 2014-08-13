@@ -110,19 +110,28 @@ def submissions_view(request, user_profile):
 @request_wrapper
 @jeeves
 def profile_view(request, user_profile):
-    profile = UserProfile.objects.get(username=request.user.username)
+    username = request.POST.get('username', '')
+    if (username == ''):
+      profile = user_profile
+    else:
+      profile = UserProfile.objects.get(username=username)
+    
     if profile == None:
-        profile = UserProfile(username=request.user.username)
+      profile = UserProfile(username=request.user.username)
     
     if request.method == 'POST':
-#        profile.email = request.POST.get('email', '')
-        profile.save()
+      print "POST"
+      assert (username == user_profile.username)
+      user_profile.email = request.POST.get('email', '')
+      user_profile.name = request.POST.get('name', '')
+      user_profile.role = request.POST.get('role', '')
+      user_profile.save()
 
     return ("profile.html", {
-#        "email": profile.email,
-        "which_page": "profile",
+        "user_profile": profile
+      , "name": profile.name
+      , "which_page": "profile"
     })
-
 
 def register_account(request):
     if request.user.is_authenticated():
@@ -138,6 +147,7 @@ def register_account(request):
                 username=user.username
               , email=request.POST.get('email', '')
               , name=request.POST.get('name', '')
+              , role=request.POST.get('role', '')
             )
 
             user = authenticate(username=request.POST['username'],

@@ -9,6 +9,7 @@ import django.db.models.fields.related
 import JeevesLib
 from JeevesLib import fexpr_cast
 from fast.AST import Facet, FObject, Unassigned, get_var_by_name, FExpr
+# from sourcetrans.macro_module import macros, jeeves
 
 import string
 import random
