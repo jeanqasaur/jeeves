@@ -456,5 +456,5 @@ class TestJeevesModel(TestCase):
      AnimalWithPolicy.objects.create(name="gorilla",sound="aaaaah")
      animal=AnimalWithPolicy.objects.get(name="cat")
      dataset={"sound":animal.sound}
-     self.assertIn(dataset.sound,["meow",""])
-     self.assertTrue(False)
+     self.assertIn(dataset['sound'],["meow",""])
+     # self.assertTrue(False)
