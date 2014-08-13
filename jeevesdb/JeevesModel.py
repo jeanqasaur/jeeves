@@ -14,6 +14,9 @@ import string
 import random
 import itertools
 
+'''
+Monkey-patching QuerySet with Jeeves functionality.
+'''
 class JeevesQuerySet(QuerySet):
   @JeevesLib.supports_jeeves
   def get_jiter(self):
@@ -64,12 +67,17 @@ class JeevesQuerySet(QuerySet):
     except TypeError:
       raise Exception("wow such error: could not find a row for every condition")
 
+  # TODO: Does this need to support Jeeves as well?
   def filter(self, **kwargs):
     l = []
+    # Figure out what the special fields are.
+    # TODO: Um, what are the possible special fields?
     for argname, _ in kwargs.iteritems():
       t = argname.split('__')
       if len(t) > 1:
         l.append("__".join(t[:-1]))
+    # If we had special fields, then get the ones related to the special fields.
+    # TODO: BUT WHAT ARE THESE SPECIAL FIELDS??!!
     if len(l) > 0:
       return super(JeevesQuerySet, self).filter(**kwargs).select_related(*l)
     else:

@@ -6,7 +6,7 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
 
-from models import UserProfile
+from models import Assignment, Course, CourseInstructor, StudentCourse, StudentSubmission, UserProfile
 
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
@@ -31,6 +31,10 @@ def add_to_context(context_dict, request, template_name, profile, concretize):
                                     request.user.is_authenticated() and
                                     (not request.user.is_anonymous()))
 
+'''
+Wraps around a request by getting the user and defining functions like
+concretize.
+'''
 def request_wrapper(view_fn, *args, **kwargs):
     def real_view_fn(request):
         try:
@@ -67,18 +71,34 @@ def request_wrapper(view_fn, *args, **kwargs):
 @login_required
 @request_wrapper
 @jeeves
-def index(request, user):
-  user = UserProfile.objects.get(username=user.username)
-  print user
-  print user.name
+def index(request, user_profile):
   return (   "index.html"
-         , { 'name' : user.name } )
+         , { 'name' : user_profile.name } )
 
 @login_required
 @request_wrapper
 def courses_view(request, user_profile):
+  # TODO: Figure out this business about filtering on FObjects.
+  randomuser = UserProfile.objects.all()[0]
+  print user_profile.v
+  print randomuser
+
+  studentcourses = StudentCourse.objects.filter(student=user_profile.v)
+  courses = []
+  for sc in studentcourses:
+    print sc
+    c = sc.course
+    c.grade = sc.grade
+    c.instructors = []
+    courseInstructors = list(CourseInstructor.objects.filter(course=c.v))
+    for ci in courseInstructors:
+      c.instructors.append(ci.instructor)
+    courses.append(c)
+
   return ( "courses.html"
-         , { "which_page": "courses" } )
+         , {  'name' : user_profile.name
+            , 'courses' : courses
+            , 'which_page' : "courses" } )
 
 @login_required
 @request_wrapper
@@ -89,7 +109,7 @@ def submissions_view(request, user_profile):
 @login_required
 @request_wrapper
 @jeeves
-def profile_view(request):
+def profile_view(request, user_profile):
     profile = UserProfile.objects.get(username=request.user.username)
     if profile == None:
         profile = UserProfile(username=request.user.username)
@@ -117,8 +137,7 @@ def register_account(request):
             User.objects.create(
                 username=user.username
               , email=request.POST.get('email', '')
-              , firstName=request.POST.get('firstName', '')
-              , lastName=request.POST.get('lastName', '')
+              , name=request.POST.get('name', '')
             )
 
             user = authenticate(username=request.POST['username'],

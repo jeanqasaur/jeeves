@@ -60,8 +60,16 @@ coursemanager.CourseInstructor.objects.create(
   , instructor=rishabhUser)
 
 '''
-UserProfiles and courses.
+Students and courses.
 '''
+StudentCourse.objects.create(
+    student=benUser
+  , course=course803
+  , grade='A')
+StudentCourse.objects.create(
+    student=benUser
+  , course=course813
+  , grade='B')
 
 '''
 Assignments.

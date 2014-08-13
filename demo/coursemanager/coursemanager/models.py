@@ -23,7 +23,7 @@ class UserProfile(Model):
   username = CharField(max_length=1024)
   email = CharField(max_length=1024)
   name = CharField(max_length=256)
-  role = CharField(max_length=1, choices=ROLE)
+  role = CharField(max_length=1) #, choices=ROLE)
 
 class Course(Model):
   name = CharField(max_length=1024)
@@ -37,7 +37,7 @@ class CourseInstructor(Model):
 class StudentCourse(Model):
   student = ForeignKey(UserProfile, null=True, related_name='studentcourse_student')
   course = ForeignKey(Course, null=True, related_name='studentcourse_course')
-  grade = CharField(max_length=1, choices=GRADE)
+  grade = CharField(max_length=1) #, choices=GRADE)
 
 class Assignment(Model):
   name = CharField(max_length=1024)
