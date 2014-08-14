@@ -77,20 +77,21 @@ def index(request, user_profile):
 
 @login_required
 @request_wrapper
+@jeeves
 def courses_view(request, user_profile):
   # TODO: Figure out this business about filtering on FObjects.
   randomuser = UserProfile.objects.all()[0]
   print user_profile.v
   print randomuser
 
-  studentcourses = StudentCourse.objects.filter(student=user_profile.v)
+  studentcourses = StudentCourse.objects.filter(student=user_profile).all()
   courses = []
   for sc in studentcourses:
     print sc
     c = sc.course
     c.grade = sc.grade
     c.instructors = []
-    courseInstructors = list(CourseInstructor.objects.filter(course=c.v))
+    courseInstructors = list(CourseInstructor.objects.filter(course=c))
     for ci in courseInstructors:
       c.instructors.append(ci.instructor)
     courses.append(c)
