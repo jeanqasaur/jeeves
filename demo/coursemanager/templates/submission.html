@@ -1,37 +1,29 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    {% for s in concretize(submissions) %}
 	    	<button type="button" class="btn btn-primary" id="edit-button">Edit</button>
 	    	<div style="clear: both;"></div>
 
 			<div class="panel panel-default submissionPanel">
 			      <!-- Default panel contents -->
 			      <div class="panel-heading">
-			      	<b> Summary for <a href="submission?submission_id={{ s.jeeves_id }}">{{ s.assignment.name }}</a></b>
+			      	<b>{{ submission.author.name }}: {{ submission.assignment.name }}</b>
 			      </div>
 
 			      <table class="table submissionDetails">
 			        <tbody>
-			          <tr>
-			            <td><b>Submitter</b></td>
-			            <td>{{ s.author.name }}</td>
-			          </tr>
-			          <tr>
-			            <td><b>Assignment</b></td>
-			            <td>{{ s.assignment.name }}</td>
 			          </tr>
   			          <tr>
 			            <td><b>Submitted</b></td>
-			            <td>{{ s.submitDate }}</td>
+			            <td>{{ submission.submitDate }}</td>
 			          </tr>
 			          <tr>
 			            <td><b>File Link</b></td>
-			            <td><a href='#'>{{ s.uploadFile }}</a></td>
+			            <td><a href='#'>{{ submission.uploadFile }}</a></td>
 			          </tr>
 			          <tr>
 			            <td><b>Grade</b></td>
-			            <td>{{ s.grade }}</td>
+			            <td>{{ submission.grade }}</td>
 			          </tr>
 			        </tbody>
 			      </table>
@@ -40,7 +32,7 @@
 			<div style="clear: both;"></div>
 
 			<div class="commentSection">
-				<div id="commentsTitle"><b> Comments (2) </b></div>
+				<div id="commentsTitle"><b> Comments ({{ concretize(comments_length) }}) </b></div>
 				<div class="commentBoxContainer">
 					<textarea class="commentBox"></textarea><br />
 					<!-- Split button -->
@@ -60,15 +52,12 @@
 					<div style="clear: both;"></div>
 				</div>
 				<div class="comments">
+          {% for comment in concretize(comments) %}
 					<span>
-						<i>Instructor (only visible to you)</i>, 3/10/14
-						<div class="well comment"> Interesting algorithm. Are you sure you used the ones we recommended?</div>
+						<i>{{ comment.author.name }} {% if comment.commentPermissions=='U' %}(only visible to you){% elif comment.commentPermissions=='I'%}(visible to you and instructors){% elif comment.commentPermissions=='E' %}(visible to everyone){% endif %}</i>, {{ comment.submitDate }}
+						<div class="well comment">{{ comment.body }}</div>
 					</span>
-					<span>
-						<i>Mark (only visible to Instructors)</i>, 3/11/14
-						<div class="well comment"> Wow, sorry professor I think I accidentally submitted a custom version I made to show my friends. Would it be OK if I resubmitted?</div>
-					</span>
+          {% endfor %}
 				</div>
 			</div>
-  {% endfor %}
 {% endblock %}

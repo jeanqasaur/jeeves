@@ -75,7 +75,7 @@ StudentCourse.objects.create(
 Assignments.
 '''
 # TODO: Fix this naive datetime business.
-rishabhAssignment=coursemanager.Assignment.objects.create(
+assignment813_1=coursemanager.Assignment.objects.create(
     name="Assignment 1"
   , dueDate=datetime.strptime('2012-12-30 19:00', "%Y-%m-%d %H:%M")
   , maxPoints=100
@@ -84,3 +84,18 @@ rishabhAssignment=coursemanager.Assignment.objects.create(
   , course=course813
   )
 
+'''
+Submissions.
+'''
+ben813_1=coursemanager.Submission.objects.create(
+    assignment=assignment813_1
+  , author=benUser
+  , grade='A'
+  )
+# And some comments.
+ben813_1_comment0=coursemanager.SubmissionComment.objects.create(
+    submission=ben813_1
+  , author=rishabhUser
+  , body="What a great assignment!"
+  , commentPermissions='U'
+  )

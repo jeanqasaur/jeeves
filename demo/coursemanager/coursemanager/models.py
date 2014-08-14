@@ -23,7 +23,7 @@ class UserProfile(Model):
   username = CharField(max_length=1024)
   email = CharField(max_length=1024)
   name = CharField(max_length=256)
-  role = CharField(max_length=1) #, choices=ROLE)
+  role = CharField(max_length=1, choices=ROLE)
 
 class Course(Model):
   name = CharField(max_length=1024)
@@ -37,7 +37,7 @@ class CourseInstructor(Model):
 class StudentCourse(Model):
   student = ForeignKey(UserProfile, null=True, related_name='studentcourse_student')
   course = ForeignKey(Course, null=True, related_name='studentcourse_course')
-  grade = CharField(max_length=1) #, choices=GRADE)
+  grade = CharField(max_length=1, choices=GRADE)
 
 class Assignment(Model):
   name = CharField(max_length=1024)
@@ -50,21 +50,23 @@ class Assignment(Model):
   # TODO: Policies
 
 class Submission(Model):
-  title = CharField(max_length=1024)
-  assignment = ForeignKey(Assignment, null=True)
+  assignment = ForeignKey(Assignment, null=True, related_name='submission_assignment')
   author = ForeignKey(UserProfile, null=True)
   uploadFile = FileField(upload_to='submissions')
   submitDate = DateTimeField(auto_now=True)
   grade = CharField(max_length=1, choices=GRADE)
 
-class StudentSubmission(Model):
-  user = ForeignKey(UserProfile, null=True, related_name='studentsubmission_student')
-  submission = ForeignKey(Submission, null=True, related_name='studentsubmission_submission')
-
-class Comment(Model):
+COMMENT_PERMISSION = (
+    ('U', "Only visible to user")
+  , ('I', "Only visible to instructors")
+  , ('E', "Visible to everyone")
+  )
+class SubmissionComment(Model):
+  submission = ForeignKey(Submission, null=True, related_name='submissioncomment_submission')
   author = ForeignKey(UserProfile, null=True)
   submitDate = DateTimeField(auto_now=True)
   body = TextField()
+  commentPermissions = CharField(max_length=1, choices=COMMENT_PERMISSION)
 
 from django.dispatch import receiver
 from django.db.models.signals import post_syncdb

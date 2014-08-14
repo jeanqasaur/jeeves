@@ -11,9 +11,9 @@
 	        </div>
 	        <div class="collapse navbar-collapse">
 	          <ul class="nav navbar-nav">
-	            <li><a href="courses" {% if concretize(which_page)=="courses" %}class="active"{% endif %}>Courses</a></li>
-              <li><a href="profile" {% if concretize(which_page)=="profile" %}class="active"{% endif %}>Profile</a></li>
-	           	<li><a href="submissions" {% if concretize(which_page)=="submission" %}class="active"{% endif %}>Submissions</a></li>
+	            <li><a href="courses" {% if concretize and concretize(which_page)=="courses" %}class="active"{% endif %}>Courses</a></li>
+              <li><a href="profile" {% if concretize and concretize(which_page)=="profile" %}class="active"{% endif %}>Profile</a></li>
+	           	<li><a href="submissions" {% if concretize and concretize(which_page)=="submission" %}class="active"{% endif %}>Submissions</a></li>
               {% if concretize and concretize(is_logged_in) %}
                 <li><a href="/accounts/logout">Log Out</a></li>
               {% endif %}

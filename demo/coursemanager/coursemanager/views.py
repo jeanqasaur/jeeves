@@ -6,7 +6,7 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
 
-from models import Assignment, Course, CourseInstructor, StudentCourse, StudentSubmission, UserProfile
+from models import Assignment, Course, CourseInstructor, StudentCourse, Submission, SubmissionComment, UserProfile
 
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
@@ -72,22 +72,33 @@ def request_wrapper(view_fn, *args, **kwargs):
 @request_wrapper
 @jeeves
 def index(request, user_profile):
+  # TODO: Do some more things with the index here...
+
   return (   "index.html"
          , { 'name' : user_profile.name } )
+
+'''
+Looking at an assignment. Different users have different policies.
+'''
+@login_required
+@request_wrapper
+@jeeves
+def assignment_view(request, user_profile):
+  assignment_index = request.GET.get('jeeves_id', '')
+  if assignmentIndex:
+    assignment = Assignment.objects.get(jeeves_id=assignment_index)
+    # TODO: Get more information about the assignment and return it.
+
+  return ( "assignment.html"
+          , {} )
 
 @login_required
 @request_wrapper
 @jeeves
 def courses_view(request, user_profile):
-  # TODO: Figure out this business about filtering on FObjects.
-  randomuser = UserProfile.objects.all()[0]
-  print user_profile.v
-  print randomuser
-
   studentcourses = StudentCourse.objects.filter(student=user_profile).all()
   courses = []
   for sc in studentcourses:
-    print sc
     c = sc.course
     c.grade = sc.grade
     c.instructors = []
@@ -103,25 +114,45 @@ def courses_view(request, user_profile):
 
 @login_required
 @request_wrapper
+@jeeves
+def submission_view(request, user_profile):
+  # TODO: Does this require there to be a submission id?
+  submission_id = request.GET.get('submission_id')
+  submission = Submission.objects.get(jeeves_id=submission_id)
+
+  # Now get the comments.
+  comments = SubmissionComment.objects.filter(submission=submission)
+
+  return ( "submission.html"
+          , { "submission" : submission
+            , "comments" : comments
+            , "comments_length" : len(comments) } )
+
+@login_required
+@request_wrapper
+@jeeves
 def submissions_view(request, user_profile):
+  # Get submissions associated with the current user.
+  user_submissions = Submission.objects.filter(author=user_profile).all()
+
   return ( "submissions.html"
-         , { "which_page": "submissions" } )
+         , { "submissions" : user_submissions
+           , "which_page" : "submissions" } )
 
 @login_required
 @request_wrapper
 @jeeves
 def profile_view(request, user_profile):
-    username = request.POST.get('username', '')
-    if (username == ''):
-      profile = user_profile
+    if request.method == 'GET':
+      username = request.GET.get('username', '')
+      if (username != ''):
+        profile = UserProfile.objects.get(username=username)
+      else:
+        profile = user_profile
     else:
-      profile = UserProfile.objects.get(username=username)
-    
-    if profile == None:
-      profile = UserProfile(username=request.user.username)
-    
+      profile = user_profile
+ 
     if request.method == 'POST':
-      print "POST"
       assert (username == user_profile.username)
       user_profile.email = request.POST.get('email', '')
       user_profile.name = request.POST.get('name', '')
