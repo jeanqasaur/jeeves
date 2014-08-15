@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	    	<button type="button" class="btn btn-primary" id="edit-button">Edit</button>
+	    	<div style="clear: both;"></div>
+
+			<div class="panel panel-default submissionPanel">
+			      <!-- Default panel contents -->
+			      <div class="panel-heading">
+			      	<b>{{ submission.author.name }}: {{ submission.assignment.name }}</b>
+			      </div>
+
+			      <table class="table submissionDetails">
+			        <tbody>
+			          </tr>
+  			          <tr>
+			            <td><b>Submitted</b></td>
+			            <td>{{ submission.submitDate }}</td>
+			          </tr>
+			          <tr>
+			            <td><b>File Link</b></td>
+			            <td><a href='#'>{{ submission.uploadFile }}</a></td>
+			          </tr>
+			          <tr>
+			            <td><b>Grade</b></td>
+			            <td>{{ submission.grade }}</td>
+			          </tr>
+			        </tbody>
+			      </table>
+			    </div>
+			</div>
+			<div style="clear: both;"></div>
+
+			<div class="commentSection">
+				<div id="commentsTitle"><b> Comments ({{ concretize(comments_length) }}) </b></div>
+				<div class="commentBoxContainer">
+					<textarea class="commentBox"></textarea><br />
+					<!-- Split button -->
+					<div class="btn-group submit-button">
+					  <button type="button" class="btn btn-default">Submit</button>
+					  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+					    <span class="caret"></span>
+					    <span class="sr-only">Toggle Dropdown</span>
+					  </button>
+					  <ul class="dropdown-menu" role="menu">
+					    <li><a href="#">Publicly</a></li>
+					 	<li class="divider"></li>
+					    <li><a href="#">To Collaborators</a></li>
+					    <li><a href="#">To Instructors</a></li>
+					  </ul>
+					</div>
+					<div style="clear: both;"></div>
+				</div>
+				<div class="comments">
+          {% for comment in concretize(comments) %}
+					<span>
+						<i>{{ comment.author.name }} {% if comment.commentPermissions=='U' %}(only visible to you){% elif comment.commentPermissions=='I'%}(visible to you and instructors){% elif comment.commentPermissions=='E' %}(visible to everyone){% endif %}</i>, {{ comment.submitDate }}
+						<div class="well comment">{{ comment.body }}</div>
+					</span>
+          {% endfor %}
+				</div>
+			</div>
+{% endblock %}

@@ -1,13 +1,11 @@
 """
-Django settings for conf project.  
+Django settings for jelf project.  
 For more information on this file, see
 https://docs.djangoproject.com/en/1.6/topics/settings/
 
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.6/ref/settings/
 """
-
-import sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
@@ -22,17 +20,28 @@ SECRET_KEY = '!$e(y9&5ol=#s7wex!xhv=f&5f2@ufjez3ee9kdifw=41p_+%*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+USE_TZ = True
+
 TEMPLATE_DEBUG = True
 
 TEMPLATE_DIRS = (
-    os.path.join(BASE_DIR, 'templates/'),
+    os.path.join(BASE_DIR, '..', 'templates/'),
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
 )
 
-ALLOWED_HOSTS = []
+#FIXTURE_DIRS = (
+#   os.path.join(BASE_DIR, '..', 'fixtures/'),
+#)
 
+ALLOWED_HOSTS = ['*']
+
+TEMPLATE_LOADERS = (
+    'django_jinja.loaders.AppLoader',
+    'django_jinja.loaders.FileSystemLoader',
+)
+DEFAULT_JINJA2_TEMPLATE_EXTENSION = '.html'
 
 # Application definition
 
@@ -43,11 +52,10 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_nose',
-    'testdb',
+    'django_jinja',
+    'timelog',
+    'coursemanager',
 )
-
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -66,24 +74,14 @@ WSGI_APPLICATION = 'wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 
-if 'test' in sys.argv:
-  DATABASES = {
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'test.db'),
-        'TEST_NAME': os.path.join(os.path.dirname(__file__), 'test.db'),
+        'NAME': os.path.join(BASE_DIR, 'jelf.db'),
     }
-  }
-else:
-  DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-  }
+}
 
-
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_ROOT = os.path.join(BASE_DIR, '..', "media")
 MEDIA_URL = "/media/"
 
 # Internationalization
@@ -102,8 +100,12 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
-
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, "static"),
+    os.path.join(BASE_DIR, '..', "static"),
 )
+
+# possible phases are submit, review, final
+CONF_PHASE = 'submit'
+
+

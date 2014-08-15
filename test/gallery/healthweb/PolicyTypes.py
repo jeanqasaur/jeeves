@@ -1,9 +1,20 @@
-from macropy.case_classes import macros, enum
-
-@enum
 class RoleType:
-  Patient, Doctor, Psychiatrist, Nurse, Pharmacist, Nurse, Pharmacist
-  InsuranceProvider
+  class Patient:
+    pass
+  class Doctor:
+    pass
+  class Psychiatrist:
+    pass
+  class Nurse:
+    pass
+  class Pharmacist:
+    pass
+  class Nurse:
+    pass
+  class Pharmacist:
+    pass
+  class InsuranceProvider:
+    pass
 
 class Action:
   class Read:

@@ -7,6 +7,8 @@ import JeevesLib
 from jeevesdb import JeevesModel
 from testdb.models import Animal, Zoo, AnimalWithPolicy, AnimalWithPolicy2
 
+import nose.tools as nt
+
 def parse_vars_row(vs):
   d = {}
   for entry in vs.split(';')[1:-1]:
@@ -32,6 +34,9 @@ def areRowsEqual(rows, expected):
       return False
   return True
 
+'''
+This tests Django monkey-patching to support Jeeves.
+'''
 class TestJeevesModel(TestCase):
   def setUp(self):
     JeevesLib.init()
@@ -53,6 +58,8 @@ class TestJeevesModel(TestCase):
             JeevesLib.mkSensitive(self.y, 'b', 'c'),
             JeevesLib.mkSensitive(self.y, 'd', 'e')))
 
+  # Tests that writes create the appropriate rows with associated Jeeves
+  # bookkeeping.
   def testWrite(self):
     lion = Animal._objects_ordinary.get(name='lion')
     self.assertEquals(lion.name, 'lion')
@@ -72,6 +79,7 @@ class TestJeevesModel(TestCase):
       ({'name':'a', 'sound':'e'}, {self.x.name:False, self.y.name:False}),
      ]))
 
+  # Test that delete removes all rows.
   def testQueryDelete(self):
     Animal.objects.create(name='delete_test1',
         sound=JeevesLib.mkSensitive(self.x,
@@ -137,6 +145,7 @@ class TestJeevesModel(TestCase):
       ({'name':'delete_test6', 'sound':'c'}, {self.x.name:False,self.y.name:False}),
     ]))
 
+  # Test that saving does the correct bookkeping.
   def testSave(self):
     an = Animal.objects.create(name='save_test1', sound='b')
     an.sound = 'c'
@@ -458,6 +467,8 @@ class TestJeevesModel(TestCase):
      cat=AnimalWithPolicy.objects.get(name="cat")
      dog=AnimalWithPolicy.objects.get(name="dog")
      dataset={"sound":animal.sound}
+     self.assertIn(dataset['sound'],["meow",""])
+     # self.assertTrue(False)
      self.assertEquals(dogWithPolicy,dog)
      allAnimals=AnimalWithPolicy.objects.filter
      self.assertEquals(
