@@ -449,10 +449,17 @@ class TestJeevesModel(TestCase):
       ({'name':'testpolicy2', 'sound':''}, {name:False}),
      ]))
   def testObjectModel(self):
+     dogWithPolicy = AnimalWithPolicy()
+     dogWithPolicy.name="dog"
+     dogWithPolicy.sound="bark"
      AnimalWithPolicy.objects.create(name="dog",sound="bark")
      AnimalWithPolicy.objects.create(name="cat",sound="meow")
      AnimalWithPolicy.objects.create(name="gorilla",sound="aaaaah")
-     animal=AnimalWithPolicy.objects.get(name="cat")
+     cat=AnimalWithPolicy.objects.get(name="cat")
+     dog=AnimalWithPolicy.objects.get(name="dog")
      dataset={"sound":animal.sound}
+     self.assertEquals(dogWithPolicy,dog)
+     allAnimals=AnimalWithPolicy.objects.filter
+     self.assertEquals(
      self.assertIn(dataset.sound,["meow",""])
-     self.assertTrue(False)
+     self.assertTrue(False,"This should fail")
