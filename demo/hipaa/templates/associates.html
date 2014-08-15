@@ -1,4 +1,13 @@
-﻿{% extends "base.html" %}
+﻿{{ comment }}
+	This page is for showing the business associates
+	that an entity has an agreement with. If an associate is also a covered
+	entity, it has a link to more information regarding it. Each agreement with
+	a busines associate has information that the entity and business associate
+	share so the business associate can fulfill the agreement.
+	If information access is restricted to the accessor, the information
+	shared cell can contain the reason the information is being restricted.
+{{ endcomment }}
+{% extends "base.html" %}
 
 {% block title %}
 	Business Associates

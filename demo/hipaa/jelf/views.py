@@ -370,14 +370,17 @@ def directory_view(request, entity):
 		}
     ]
 	return render_to_response("directory.html", RequestContext(request, {"entity":entity, "visits":visits}))
+
+@login_required
+@request_wrapper
+@jeeves
 def transactions_view(request, entity):
 	entity = CoveredEntity.objects.get(EIN=entity)
-	transactions = entity.SomeTransactions.all()
-	for i in range(entity.MoreTransactions.count()):			#This is really bad code, (I'm not sure if we can assume all() will return the same
-		transactions.append(entity.MoreTransactions.all()[i])	#ordering each call), but I can't see any other way with Jeeves.
-	#for i in range(len(transactions)):
-	#	transactions[i].TreatmentsShared = Transaction.SharedInformation.Treatments	
-	return render_to_response("transactions.html", RequestContext(request, {"entity":entity, "transactions":transactions}))
+	transactions = Transaction.objects.filter(FirstParty=entity)
+	otherTransactions=Transaction.objects.filter(SecondParty=entity)
+	for i in range(otherTransactions.count()):			#This is really bad code, (I'm not sure if we can assume all() will return the same
+		transactions.append(otherTransactions.all()[i])	#ordering each call), but I can't see any other way with Jeeves.
+	return ("transactions.html", {"entity":entity, "transactions":transactions})
 def associates_view(request, entity):
 	entity = CoveredEntity.objects.get(EIN=entity)
 	associates = entity.Associations

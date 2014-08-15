@@ -1,3 +1,7 @@
+{{ comment }}
+	This page is the front page of the site, giving an overview of all patients
+	and all covered entities the user knows about.
+{{ endcomment }}
 <html><body>
 {% extends 'base.html' %}
 
@@ -21,7 +25,7 @@
 				Patients
 			</h3>
 		</lh>
-		{% for patient in range(patients|length) %}
+		{% for patient in range(0) %}
 			<li class="list-group-item">
 				<a href='{{ url("patient", patients[patient].UID) }}'>
 					{{ patients[patient].Name() }}
@@ -36,7 +40,7 @@
 				Entities
 			</h3>
 		</lh>
-		{% for entity in range(entities|length) %}
+		{% for entity in range(0) %}
 			<li class="list-group-item">
 				<a href='{{ url("entity", entities[entity].EIN) }}'>
 					{{ entities[entity].Name }}

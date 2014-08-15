@@ -50,6 +50,8 @@ class Individual(Model):
 	class Meta:
 		db_table = 'Individual'
 	def Name(self):
+		if self.FirstName=="" and self.LastName=="":
+			return "Unknown"
 		return self.FirstName +" "+self.LastName
 	#We are using the Safe Harbor method, as the statistical approach would be unautomizable.
 	@staticmethod
@@ -151,7 +153,7 @@ class HospitalVisit(Model):
 	DateReleased = DateField(blank=True, null=True, help_text="Date patient checked out of hospital. Blank if patient still in hospital")
 	class Meta:
 		db_table = 'HospitalVisit'
-	@label_for('Location')
+	'''@label_for('Location')
 	@jeeves
 	def jeeves_restrict_HospitalVisitlabel(visit, ctxt):
 		if ctxt.type==1:
@@ -165,7 +167,7 @@ class HospitalVisit(Model):
 		return ""
 	@staticmethod
 	def jeeves_get_private_Location(individual):
-		return ""
+		return ""'''
 
 class Treatment(Model):
 	"""
@@ -178,7 +180,7 @@ class Treatment(Model):
 	Patient = ForeignKey(Individual, null=True, help_text="Patient whom received this service")
 	class Meta:
 		db_table = 'Treatment'
-	@label_for('Patient')
+	'''@label_for('Patient')
 	@jeeves
 	def jeeves_restrict_Treatmentlabel(treatment, ctxt):
 		if ctxt.type==1:
@@ -187,7 +189,7 @@ class Treatment(Model):
 			return treatment.PrescribingEntity==ctxt.entity or treatment.PrescribingEntity==ctxt.entity
 	@staticmethod
 	def jeeves_get_private_Patient(individual):
-		return None
+		return None'''
 
 class Diagnosis(Model): 
 	""""
@@ -200,7 +202,7 @@ class Diagnosis(Model):
 	Patient = ForeignKey(Individual, related_name="Diagnoses", null=True, help_text="Person to whom the diagnosis applies")
 	class Meta:
 		db_table = 'Diagnosis'
-	@label_for('Patient')
+	'''@label_for('Patient')
 	@jeeves
 	def jeeves_restrict_Diagnosislabel(diagnosis, ctxt):
 		if ctxt.type==1:
@@ -209,7 +211,7 @@ class Diagnosis(Model):
 			return diagnosis.RecognizingEntity==ctxt.entity
 	@staticmethod
 	def jeeves_get_private_Patient(individual):
-		return None
+		return None'''
 
 class InformationTransferSet(Model):
 	"""
@@ -279,7 +281,7 @@ class Transaction(Model):
 	Standard = CharField(max_length=100, help_text="Standard that the transaction abides by")
 	FirstParty = ForeignKey(CoveredEntity, related_name = "SomeTransactions", help_text="First Covered Entity transferring data")
 	SecondParty = ForeignKey(CoveredEntity, related_name = "MoreTransactions", help_text="Second Covered Entity transferring data")
-	SharedInformation = OneToOneField(InformationTransferSet, help_text="Data shared from one entity to another")
+	SharedInformation = ForeignKey(InformationTransferSet, help_text="Data shared from one entity to another")
 	DateRequested = DateField(help_text="Date the data transfer was requested")
 	DateResponded = DateField(help_text="Date the data transfer was responded to")
 	Purpose = TextField(blank=True, null = True, help_text="Purpose for the data transfer")
@@ -292,8 +294,9 @@ class Transaction(Model):
 	@jeeves
 	def jeeves_restrict_Transactionlabel(transaction, ctxt):
 		if ctxt.type==2:
+			return True
 			return transaction.FirstParty==ctxt.entity or transactionn.SecondParty==ctxt.entity
-		return False
+		return True
 	@staticmethod
 	def jeeves_get_private_Standard(transaction):
 		return ""
@@ -364,8 +367,7 @@ from django.dispatch import receiver
 from django.db.models.signals import post_syncdb
 import sys
 current_module = sys.modules[__name__]
-'''
+
 @receiver(post_syncdb, sender=current_module)
 def dbSynced(sender, **kwargs):
 	execfile("sampleData.py")
-'''

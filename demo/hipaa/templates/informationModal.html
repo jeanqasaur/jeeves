@@ -1,4 +1,10 @@
-﻿<div class="modal fade" id="myModal{{ loop.index }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+﻿{{ comment }}
+	This page is the popup when viewing an information set, either that an
+	entity used in a transaction, or the entity gave to a business associate.
+	All individuals referenced are linked to a page with their own information,
+	as are all entities and business associates that are connected with an entity.
+{{ endcomment }}
+<div class="modal fade" id="myModal{{ loop.index }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -35,8 +41,8 @@
                         {% with transfer=data.Visits.all()[t_indx] %}
                         <tr>
                             <td>
-                                <a href='{{ url("patient", transfer.Visit.Patient.UID) }}'>
-                                    {{ transfer.Visit.Patient.Name() }}
+                                <a href='{{ url("patient", concretize(transfer.Visit.Patient.UID)) }}'>
+                                    {{ concretize(transfer.Visit.Patient).Name() }}
                                 </a>
                             </td>
                             <td>
@@ -52,7 +58,7 @@
                                 {{ transfer.Visit.Condition }}
                             </td>
                             <td>
-                                {{ transfer.Visit.Patient.ReligiousAffiliation }}
+                                {{ concretize(transfer.Visit.Patient).ReligiousAffiliation }}
                             </td>
                         </tr>
                         {% endwith %}
@@ -85,8 +91,8 @@
                         {% with transfer=data.Diagnoses.all()[t_indx] %}
                         <tr>
                             <td>
-                                <a href='{{ url("patient", transfer.Diagnosis.Patient.UID) }}'>
-                                    {{ transfer.Diagnosis.Patient.Name() }}
+                                <a href='{{ url("patient", concretize(transfer.Diagnosis.Patient).UID) }}'>
+                                    {{ concretize(transfer.Diagnosis.Patient).Name() }}
                                 </a>
                             </td>
                             <td>
@@ -134,8 +140,8 @@
                     {% with transfer=data.Treatments.all()[t_indx] %}
                     <tr>
                         <td>
-                            <a href='{{ url("patient", transfer.Treatment.Patient.UID) }}'>
-                                {{ transfer.Treatment.Patient.Name() }}
+                            <a href='{{ url("patient", concretize(transfer.Treatment.Patient).UID) }}'>
+                                {{ concretize(transfer.Treatment.Patient).Name() }}
                             </a>
                         </td>
                         <td>

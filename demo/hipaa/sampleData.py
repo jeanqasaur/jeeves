@@ -109,7 +109,7 @@ vision= CoveredEntity.objects.create(EIN = "01GBS253DV",
 
 health = CoveredEntity.objects.create(EIN = "0424D3294N", Name = "Covered Health")
 
-visit1 = HospitalVisit.objects.create(Patient=ariel,
+visit1 = HospitalVisit.objects.create(Patient=joe,
     DateAdmitted=date(2003,4,1),
     DateReleased=date(2003,9,13),
     Condition="Good",
@@ -132,11 +132,8 @@ diag1 = Diagnosis.objects.create(
     Patient = ariel,
 )
 
-print ariel.__dict__
 
-'''
-InformationTransferSet.objects.create()
-data = InformationTransferSet.objects.all()[0]
+data = InformationTransferSet.objects.create()
 data.save()
 
 dataVisit = HospitalVisitTransfer.objects.create(Set=data, Visit=visit1)
@@ -148,16 +145,17 @@ dataTreatment.save()
 dataDiagnosis = DiagnosisTransfer.objects.create(Set=data, Diagnosis=diag1)
 dataDiagnosis.save()
 
-trans1 = Transaction()
-trans1.Standard = "H-78F2"
-trans1.SharedInformation = data
-trans1.FirstParty = vision
-trans1.SecondParty = health
-trans1.DateRequested = date(2014,3,4)
-trans1.DateResponded = date(2014,4,1)
-trans1.Purpose = "Synthesis of records"
-trans1.save()
 
+trans1 = Transaction.objects.create(
+	Standard = "H-78F2",
+	SharedInformation = data,
+	FirstParty = vision,
+	SecondParty = health,
+	DateRequested = date(2014,3,4),
+	DateResponded = date(2014,4,1),
+	Purpose = "Synthesis of records")
+
+'''
 assoc = BusinessAssociate()
 assoc.Covered=False
 assoc.Name="The Best Tax Filers"

@@ -1,4 +1,10 @@
-﻿<html><body>
+﻿{{ comment }}
+	This page shows all transactions a covered entity has with other
+	covered entities. Each transaction contains shard data, that is the information
+	that was needed to complete the transaction standard. Every transaction should
+	have a standard. (I think.)
+{{ endcomment }}
+<html><body>
 {% extends "base.html" %}
 {% block title %}
 	Transactions
@@ -57,41 +63,42 @@
 					</td>
 				</tr>
 			</thead>
+			{{ transactions|length }}
             {% for t_indx in range(transactions|length) %}
-                {% with transaction=transactions[t_indx] %}
-				    <tr>
-					    <td>
-						    {{ transaction.Standard }}
-					    </td>
-					    <td>
-                            {% if transaction.SecondParty == entity %}
-						        <a href='{{ url("entity", transaction.FirstParty.EIN) }}'>
-							        {{ transaction.FirstParty.Name }}
-						        </a>
-                            {% else %}
-                                <a href='{{ url("entity", transaction.SecondParty.EIN) }}'>
-                                    {{ transaction.SecondParty.Name }}
-                                </a>
-                            {% endif %}
-					    </td>
-					    <td>
-                            {% with data=transaction.SharedInformation %}
-                                <a href="#myModal{{ loop.index }}" data-toggle="modal">&hellip;</a>
-                                {% include "informationModal.html" %}
-                            {% endwith %}
-					    </td>
-					    <td>
-						    {{ transaction.DateRequested }}
-					    </td>
-					    <td>
-						    {{ transaction.DateResponded }}
-					    </td>
-					    <td>
-						    {{ transaction.Purpose }}
-					    </td>
+			{% with transaction=transactions[t_indx] %}
+			<tr>
+				<td>
+					{{ transaction.Standard }}
+				</td>
+				<td>
+					{% if transaction.SecondParty == entity %}
+					<a href='{{ url("entity", transaction.FirstParty.EIN) }}'>
+						{{ transaction.FirstParty.Name }}
+					</a>
+					{% else %}
+					<a href='{{ url("entity", transaction.SecondParty.EIN) }}'>
+						{{ transaction.SecondParty.Name }}
+					</a>
+					{% endif %}
+				</td>
+				<td>
+					{% with data=transaction.SharedInformation %}
+					<a href="#myModal{{ loop.index }}" data-toggle="modal">&hellip;</a>
+					{% include "informationModal.html" %}
+					{% endwith %}
+				</td>
+				<td>
+					{{ transaction.DateRequested }}
+				</td>
+				<td>
+					{{ transaction.DateResponded }}
+				</td>
+				<td>
+					{{ transaction.Purpose }}
+				</td>
 
-				    </tr>
-                {% endwith %}
+			</tr>
+			{% endwith %}
 			{% endfor %}
 		</table>
 	</div>
