@@ -17,9 +17,9 @@
 		      <tbody>
             {% for c in concretize(courses) %}
 		        <tr>
-		          <td><a href="#">{{ concretize(c.courseId) }}</a></td>
+		          <td><a href="assignments?course_id={{ c.jeeves_id }}">{{ concretize(c.courseId) }}</a></td>
 		          <td>{{ concretize(c.name) }}</td>
-		          <td>{% for instructor in c.instructors %}
+		          <td>{% for instructor in concretize(c.instructors) %}
                     {{ instructor.name }}<br>{% endfor %}</td>
 		          <td>{{ concretize(c.grade) }}</td>
 		        </tr>

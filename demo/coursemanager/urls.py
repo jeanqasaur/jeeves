@@ -23,6 +23,7 @@ urlpatterns = patterns('',
     url(r'^index$', views.index),
     url(r'^courses$', views.courses_view), #TODO
     url(r'^profile$', views.profile_view),
+    url(r'^assignments$', views.assignments_view),
     url(r'^submission$', views.submission_view),
     url(r'^submissions$', views.submissions_view),
     url(r'^$', views.index),

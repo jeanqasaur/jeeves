@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="panel-group" id="accordion">
+  {% for assignment in concretize(assignments) %}
+  <div class="panel panel-default">
+    <div class="panel-heading">
+	    <h4 class="panel-title">
+			  <a data-toggle="collapse" href="#{{ concretize(assignment.label) }}" data-target="#{{ concretize(assignment.label) }}">
+			    {{ assignment.name }}
+			  </a>
+		  </h4>
+	  </div>
+		<div id="{{ concretize(assignment.label) }}" class="panel-collapse collapse {% if loop.index==1 %}in{% endif %}">
+	    <div class="panel-body">
+			  <b> Due Date:</b> {{ assignment.dueDate }}<br />
+			  <b> Average:</b> TODO: get average<br />
+			  <b> Your submission:</b> TODO: put link here<br />
+			  <a href="#"><b>View Solutions</b></a>
+			</div>
+		</div>
+	</div>
+  {% endfor %}
+</div>
+<h2>Registered Students</h2>
+{% if concretize(scs) != [] %}
+<table class="table" id="classesTable">
+  <thead>
+    <tr>
+      <th>Student Name</th>
+      <th>Current Grade Estimate<th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for sc in concretize(scs) %}
+    <tr>
+      <td><a href="/profile?username={{ concretize(sc.student.username) }}">{{ concretize(sc.student.name) }}</a></td>
+      <td>{{ concretize(sc.grade) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

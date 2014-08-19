@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.db.models import CharField, DateTimeField, FileField, IntegerField, TextField
 from jeevesdb.JeevesModel import JeevesModel as Model, JeevesForeignKey as ForeignKey
+from jeevesdb.JeevesModel import label_for
+
 import os
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
@@ -22,8 +24,21 @@ GRADE = (
 class UserProfile(Model):
   username = CharField(max_length=1024)
   email = CharField(max_length=1024)
-  name = CharField(max_length=256)
+  name = CharField(max_length=1024)
   role = CharField(max_length=1, choices=ROLE)
+
+  @staticmethod
+  def jeeves_get_private_email(user):
+    return "[redacted]"
+
+  @staticmethod
+  @label_for('email')
+  @jeeves
+  def jeeves_restrict_userprofilelabel(user, ctxt):
+    return user == ctxt
+
+  class Meta:
+    db_table='coursemanager_userprofile'
 
 class Course(Model):
   name = CharField(max_length=1024)
@@ -35,7 +50,7 @@ class CourseInstructor(Model):
   instructor = ForeignKey(UserProfile, null=True, related_name='courseinstructor_instructor')
 
 class StudentCourse(Model):
-  student = ForeignKey(UserProfile, null=True, related_name='studentcourse_student')
+  student = ForeignKey(UserProfile, null=True, related_name='students')
   course = ForeignKey(Course, null=True, related_name='studentcourse_course')
   grade = CharField(max_length=1, choices=GRADE)
 
@@ -51,7 +66,7 @@ class Assignment(Model):
 
 class Submission(Model):
   assignment = ForeignKey(Assignment, null=True, related_name='submission_assignment')
-  author = ForeignKey(UserProfile, null=True)
+  author = ForeignKey(UserProfile, null=True, related_name='submission_author')
   uploadFile = FileField(upload_to='submissions')
   submitDate = DateTimeField(auto_now=True)
   grade = CharField(max_length=1, choices=GRADE)

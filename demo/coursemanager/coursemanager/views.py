@@ -83,14 +83,24 @@ Looking at an assignment. Different users have different policies.
 @login_required
 @request_wrapper
 @jeeves
-def assignment_view(request, user_profile):
-  assignment_index = request.GET.get('jeeves_id', '')
-  if assignmentIndex:
-    assignment = Assignment.objects.get(jeeves_id=assignment_index)
-    # TODO: Get more information about the assignment and return it.
+def assignments_view(request, user_profile):
+  course_id = request.GET.get('course_id')
+  course = Course.objects.get(jeeves_id=course_id)
 
-  return ( "assignment.html"
-          , {} )
+  # TODO: Use a join to get the submissions associated with the assignment.
+  assignments = Assignment.objects.filter(course=course).all()
+  # TODO: Add field that links to the student submission.
+  idx = 0
+  for a in assignments:
+    a.label = "collapse" + str(idx)
+    idx += 1
+
+  scs = StudentCourse.objects.filter(course=course).all()
+  # TODO: Remove the current student.
+
+  return ( "course_assignments.html"
+          , { "assignments" : assignments
+            , "scs": scs } )
 
 @login_required
 @request_wrapper

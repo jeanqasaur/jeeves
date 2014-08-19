@@ -18,6 +18,12 @@ benUser=coursemanager.UserProfile.objects.create(
   , name="Ben Shaibu"
   , role='s')
 User.objects.create_user('ben', 'ben@mit.edu', 'ben')
+janeUser=coursemanager.UserProfile.objects.create(
+    username="jane"
+  , email="janedoe@mit.edu"
+  , name="Jane Doe"
+  , role='s')
+User.objects.create_user('jane', 'janedoe@mit.edu', 'jane')
 
 rishabhUser=coursemanager.UserProfile.objects.create(
     username="rishabh"
@@ -70,6 +76,10 @@ StudentCourse.objects.create(
     student=benUser
   , course=course813
   , grade='B')
+StudentCourse.objects.create(
+    student=janeUser
+  , course=course813
+  , grade='A')
 
 '''
 Assignments.
@@ -83,6 +93,14 @@ assignment813_1=coursemanager.Assignment.objects.create(
   , owner=rishabhUser
   , course=course813
   )
+assignment813_2=coursemanager.Assignment.objects.create(
+    name="Assignment 2"
+  , dueDate=datetime.strptime('2012-12-30 19:00', "%Y-%m-%d %H:%M")
+  , maxPoints=100
+  , prompt="Do this assignment too."
+  , owner=rishabhUser
+  , course=course813
+  )
 
 '''
 Submissions.
@@ -91,6 +109,11 @@ ben813_1=coursemanager.Submission.objects.create(
     assignment=assignment813_1
   , author=benUser
   , grade='A'
+  )
+ben813_2=coursemanager.Submission.objects.create(
+    assignment=assignment813_2
+  , author=benUser
+  , grade='B'
   )
 # And some comments.
 ben813_1_comment0=coursemanager.SubmissionComment.objects.create(

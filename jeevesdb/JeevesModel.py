@@ -313,6 +313,7 @@ class JeevesModel(models.Model):
       JeevesLib.restrict(label, lambda ctxt : restrictor(self, ctxt), True)
       return label
 
+  # Saves elements with the appropriate faceted labels.
   @JeevesLib.supports_jeeves
   def save(self, *args, **kw):
     if not self.jeeves_id:
@@ -321,11 +322,13 @@ class JeevesModel(models.Model):
     if kw.get("update_field", None) is not None:
       raise NotImplementedError("Partial saves not supported.")
 
+    # Go through fields and do something. TODO: Figure out what.
     field_names = set()
     for field in self._meta.concrete_fields:
       if not field.primary_key and not hasattr(field, 'through'):
         field_names.add(field.attname)
 
+    # Go through labels and create facets.
     for label_name, field_name_list in self._jeeves_labels.iteritems():
       label = self.acquire_label(label_name)
       for field_name in field_name_list:
@@ -364,6 +367,7 @@ class JeevesModel(models.Model):
             all(field_name == 'jeeves_vars' or 
                 getattr(obj_to_save, field_name) == getattr(obj, field_name)
                 for field_name in d)]
+      # Optimization.
       while True:
         # check if we can collapse
         # if we can, repeat; otherwise, exit

@@ -105,7 +105,49 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, '..', "static"),
 )
 
-# possible phases are submit, review, final
-CONF_PHASE = 'submit'
+LOG_PATH = os.path.join(BASE_DIR, '..', 'logs/')
+TIMELOG_LOG = os.path.join(LOG_PATH, 'timelog.log')
+SQL_LOG = os.path.join(LOG_PATH, 'sqllog.log')
 
-
+LOGGING = {
+  'version': 1,
+  'formatters': {
+    'plain': {
+      'format': '%(asctime)s %(message)s'},
+    },
+  'handlers': {
+    'timelog': {
+      'level': 'DEBUG',
+      'class': 'logging.handlers.RotatingFileHandler',
+      'filename': TIMELOG_LOG,
+      'maxBytes': 1024 * 1024 * 5,  # 5 MB
+      'backupCount': 5,
+      'formatter': 'plain',
+    },
+    'sqllog': {
+      'level': 'DEBUG',
+      'class': 'logging.handlers.RotatingFileHandler',
+      'filename': SQL_LOG,
+      'maxBytes': 1024 * 1024 * 5,  # 5 MB
+      'backupCount': 5,
+      'formatter': 'plain',
+    },
+  },
+  'loggers': {
+    'timelog.middleware': {
+      'handlers': ['timelog'],
+      'level': 'DEBUG',
+      'propogate': False,
+     },
+    'timing_logging': {
+      'handlers': ['timelog'],
+      'level': 'DEBUG',
+      'propogate': False,
+     },
+    'logging_middleware': {
+      'handlers': ['sqllog'],
+      'level': 'DEBUG',
+      'propogate': False
+    },
+  },
+}
