@@ -7,6 +7,7 @@
 
 """
 
+from env.ConcreteCache import ConcreteCache
 from env.VarEnv import VarEnv
 from env.PolicyEnv import PolicyEnv
 from env.PathVars import PathVars
@@ -79,41 +80,48 @@ def mkSensitive(varLabel, vHigh, vLow):
 
 @supports_jeeves
 def concretize(ctxt, v):
-  """Projects out a single value to the viewer.
+    """Projects out a single value to the viewer.
 
-  :param ctxt: Output channel (viewer).
-  :type ctxt: T, where policies have type T -> bool
-  :param v: Value to concretize.
-  :type v: FExpr
-  :returns: The concrete (non-faceted) version of T under the policies in the environment.
-  """
-  return jeevesState.policyenv.concretizeExp(ctxt, v, jeevesState.pathenv.getEnv())
+    :param ctxt: Output channel (viewer).
+    :type ctxt: T, where policies have type T -> bool
+    :param v: Value to concretize.
+    :type v: FExpr
+    :returns: The concrete (non-faceted) version of T under the policies in the environment.
+    """
+    pathvars = jeevesState.pathenv.getEnv()
+    # Check to see if the value is in the cache.
+    cval = cache_lookup(ctxt, v, pathvars)
+    if cval is None:
+        # If not, then concretize anew and cache the value.
+        cval = jeevesState.policyenv.concretizeExp(ctxt, v, pathvars)
+        cache_value(ctxt, v, pathvars, cval)
+    return cval
 
 @supports_jeeves
 def jif(cond, thn_fn, els_fn):
-  condTrans = fexpr_cast(cond).partialEval(jeevesState.pathenv.getEnv())
-  if condTrans.type != bool:
-    raise TypeError("jif must take a boolean as a condition")
-  return jif2(condTrans, thn_fn, els_fn)
+    condTrans = fexpr_cast(cond).partialEval(jeevesState.pathenv.getEnv())
+    if condTrans.type != bool:
+        raise TypeError("jif must take a boolean as a condition")
+    return jif2(condTrans, thn_fn, els_fn)
 
 def jif2(cond, thn_fn, els_fn):
-  if isinstance(cond, Constant):
-    return thn_fn() if cond.v else els_fn()
+    if isinstance(cond, Constant):
+        return thn_fn() if cond.v else els_fn()
 
-  elif isinstance(cond, Facet):
-    if not isinstance(cond.cond, Var):
-      raise TypeError("facet conditional is of type %s"
+    elif isinstance(cond, Facet):
+        if not isinstance(cond.cond, Var):
+            raise TypeError("facet conditional is of type %s"
                       % cond.cond.__class__.__name__)
 
-    with PositiveVariable(cond.cond):
-      thn = jif2(cond.thn, thn_fn, els_fn)
-    with NegativeVariable(cond.cond):
-      els = jif2(cond.els, thn_fn, els_fn)
+        with PositiveVariable(cond.cond):
+            thn = jif2(cond.thn, thn_fn, els_fn)
+        with NegativeVariable(cond.cond):
+            els = jif2(cond.els, thn_fn, els_fn)
 
-    return Facet(cond.cond, thn, els)
+        return Facet(cond.cond, thn, els)
 
-  else:
-    raise TypeError("jif condition must be a constant or a var")
+    else:
+        raise TypeError("jif condition must be a constant or a var")
 
 # supports short-circuiting
 # without short-circuiting jif is unnecessary
@@ -157,23 +165,23 @@ def jassign(old, new, base_env={}):
     return res
 
 '''
-@supports_jeeves
-def jhasElt(lst, f):
-  acc = False
-  # Short circuits.
-  for elt in lst:
-    isElt = f(elt) # TODO: This should eventually be japply of f to elt.
-    if isinstance(isElt, FExpr):
-      acc = jor(lambda: isElt, lambda: acc)
-    else:
-      if isElt:
-        return True
-  return acc 
-
-@supports_jeeves
-def jhas(lst, v):
-  return jhasElt(lst, lambda x: x == v)
+Caching.
 '''
+def start_caching():
+    jeevesState.concretecache.start_caching()
+def stop_caching():
+    jeevesState.concretecache.stop_caching()
+def cache_size():
+    return jeevesState.concretecache.cache_size()
+def clear_cache():
+    return jeevesState.concretecache.clear_cache()
+def cache_value(ctxt, val, pathvars, cache_value):
+    return jeevesState.concretecache.cache_value(
+        ctxt, val, pathvars, cache_value)
+def cache_lookup(ctxt, val, pathvars):
+    return jeevesState.concretecache.cache_lookup(ctxt, val, pathvars)
+def get_cache():
+    return jeevesState.concretecache.cache
 
 class PositiveVariable:
   def __init__(self, var):

@@ -45,11 +45,19 @@ class JeevesState:
     pass
 
   def init(self):
+    # Cache of concretized values.
+    self._concretecache = defaultdict(env.ConcreteCache.ConcreteCache)
+
+    # Regular environments.
     self._varenv = defaultdict(env.VarEnv.VarEnv)
     self._pathenv = defaultdict(env.PathVars.PathVars)
     self._policyenv = defaultdict(env.PolicyEnv.PolicyEnv)
     self._writeenv = defaultdict(env.WritePolicyEnv.WritePolicyEnv)
     self._all_labels = defaultdict(dict)
+
+  @property
+  def concretecache(self):
+    return self._concretecache[threading.current_thread()]
 
   @property
   def varenv(self):
@@ -214,6 +222,9 @@ class Var(FExpr):
 
   def prettyPrint(self, indent=""):
     return indent + self.name
+
+  def __getstate__(self):
+    return self.name
 
 # helper methods for faceted __setattr__
 def get_objs_in_faceted_obj(f, d, env):
@@ -414,6 +425,11 @@ class Facet(FExpr):
     else:
       raise TypeError("cannot take len of non-object; type %s" % self.type.__name__)
 
+  def __getstate__(self):
+    return "<%s:%s?%s>" % \
+      (self.cond.__getstate__(), self.thn.__getstate__(),
+       self.els.__getstate__())
+
 class Constant(FExpr):
   def __init__(self, v):
     assert not isinstance(v, FExpr)
@@ -443,6 +459,9 @@ class Constant(FExpr):
 
   def __call__(self, *args, **kw):
     return self.v(*args, **kw)
+
+  def __getstate__(self):
+    "const:%s" + repr(self.v)
 
 '''
 Binary expressions.
@@ -653,6 +672,9 @@ class Eq(BinaryExpr):
     return Eq(
         self.left.remapLabels(policy, writer)
       , self.right.remapLabels(policy, writer))
+  def __getstate__(self):
+    return "(=(%s)(%s))" % \
+      (self.left.__getstate__(), self.right.__getstate__())
 
 class Lt(BinaryExpr):
   opr = staticmethod(operator.lt)
@@ -859,6 +881,9 @@ class FObject(FExpr):
 
   def prettyPrint(self, indent=""):
     return 'FObject:%s' % str(self.v)
+
+  def __getstate__(self):
+    return "FObject:%s" % self.v.__getstate__()
 
 """
   def __and__(l, r):
