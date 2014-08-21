@@ -249,88 +249,118 @@ class TestSourceTransform(unittest.TestCase):
         self.assertEquals(jl.concretize((True, True), value), 0)
         self.assertEquals(jl.concretize((True, False), value), 1)
 
+    @jeeves
+    def test_function_facets(self):
+        def add1(a):
+            return a+1
+        def add2(a):
+            return a+2
+
+        jl = JeevesLib
+        jl.clear_cache()
+
+        x = jl.mkLabel('x')
+        jl.restrict(x, lambda ctxt : ctxt == 42)
+
+        fun = jl.mkSensitive(x, add1, add2)
+        value = fun(15)
+        self.assertEquals(jl.concretize(42, value), 16)
+        self.assertEquals(jl.concretize(41, value), 17)
+        self.assertEquals(jl.concretize(42, value), 16)
+        self.assertEquals(jl.concretize(41, value), 17)
+
+    @jeeves
+    def test_objects_faceted(self):
+        jl = JeevesLib
+        jl.clear_cache()
+
+        x = jl.mkLabel('x')
+        jl.restrict(x, lambda ctxt : ctxt)
+
+        y = jl.mkSensitive(x,
+            TestClass(1, 2),
+            TestClass(3, 4))
+
+        self.assertEquals(jl.concretize(True, y.a), 1)
+        self.assertEquals(jl.concretize(True, y.b), 2)
+        self.assertEquals(jl.concretize(False, y.a), 3)
+        self.assertEquals(jl.concretize(False, y.b), 4)
+        self.assertEquals(jl.concretize(True, y.a), 1)
+        self.assertEquals(jl.concretize(True, y.b), 2)
+        self.assertEquals(jl.concretize(False, y.a), 3)
+        self.assertEquals(jl.concretize(False, y.b), 4)
+
+    @jeeves
+    def test_objects_mutate(self):
+        jl = JeevesLib
+        jl.clear_cache()
+
+        x = jl.mkLabel('x')
+        jl.restrict(x, lambda ctxt : ctxt)
+
+        s = TestClass(1, None)
+        t = TestClass(3, None)
+        y = jl.mkSensitive(x, s, t)
+
+        if y.a == 1:
+            y.a = y.a + 100
+
+        self.assertEquals(jl.concretize(True, y.a), 101)
+        self.assertEquals(jl.concretize(True, s.a), 101)
+        self.assertEquals(jl.concretize(True, t.a), 3)
+        self.assertEquals(jl.concretize(False, y.a), 3)
+        self.assertEquals(jl.concretize(False, s.a), 1)
+        self.assertEquals(jl.concretize(False, t.a), 3)
+        self.assertEquals(jl.concretize(True, y.a), 101)
+        self.assertEquals(jl.concretize(True, s.a), 101)
+        self.assertEquals(jl.concretize(True, t.a), 3)
+        self.assertEquals(jl.concretize(False, y.a), 3)
+        self.assertEquals(jl.concretize(False, s.a), 1)
+        self.assertEquals(jl.concretize(False, t.a), 3)
+
+    def test_objects_methodcall(self):
+        jl = JeevesLib
+        jl.clear_cache()
+
+        x = jl.mkLabel('x')
+        jl.restrict(x, lambda ctxt : ctxt)
+
+        s = TestClassMethod(1, 10)
+        t = TestClassMethod(100, 1000)
+        y = jl.mkSensitive(x, s, t)
+
+        self.assertEquals(jl.concretize(True, y.return_sum()), 11)
+        self.assertEquals(jl.concretize(False, y.return_sum()), 1100)
+        self.assertEquals(jl.concretize(True, y.return_sum()), 11)
+        self.assertEquals(jl.concretize(False, y.return_sum()), 1100)
+
+        y.add_a_to_b()
+        self.assertEquals(jl.concretize(True, s.a), 1)
+        self.assertEquals(jl.concretize(True, s.b), 11)
+        self.assertEquals(jl.concretize(True, t.a), 100)
+        self.assertEquals(jl.concretize(True, t.b), 1000)
+        self.assertEquals(jl.concretize(True, y.a), 1)
+        self.assertEquals(jl.concretize(True, y.b), 11)
+        self.assertEquals(jl.concretize(False, s.a), 1)
+        self.assertEquals(jl.concretize(False, s.b), 10)
+        self.assertEquals(jl.concretize(False, t.a), 100)
+        self.assertEquals(jl.concretize(False, t.b), 1100)
+        self.assertEquals(jl.concretize(False, y.a), 100)
+        self.assertEquals(jl.concretize(False, y.b), 1100)
+        self.assertEquals(jl.concretize(True, s.a), 1)
+        self.assertEquals(jl.concretize(True, s.b), 11)
+        self.assertEquals(jl.concretize(True, t.a), 100)
+        self.assertEquals(jl.concretize(True, t.b), 1000)
+        self.assertEquals(jl.concretize(True, y.a), 1)
+        self.assertEquals(jl.concretize(True, y.b), 11)
+        self.assertEquals(jl.concretize(False, s.a), 1)
+        self.assertEquals(jl.concretize(False, s.b), 10)
+        self.assertEquals(jl.concretize(False, t.a), 100)
+        self.assertEquals(jl.concretize(False, t.b), 1100)
+        self.assertEquals(jl.concretize(False, y.a), 100)
+        self.assertEquals(jl.concretize(False, y.b), 1100)
+ 
     '''
-  @jeeves
-  def test_function_facets(self):
-    def add1(a):
-        return a+1
-    def add2(a):
-        return a+2
-
-    jl = JeevesLib
-
-    x = jl.mkLabel('x')
-    jl.restrict(x, lambda ctxt : ctxt == 42)
-
-    fun = jl.mkSensitive(x, add1, add2)
-    value = fun(15)
-    self.assertEquals(jl.concretize(42, value), 16)
-    self.assertEquals(jl.concretize(41, value), 17)
-
-  @jeeves
-  def test_objects_faceted(self):
-    jl = JeevesLib
-
-    x = jl.mkLabel('x')
-    jl.restrict(x, lambda ctxt : ctxt)
-
-    y = jl.mkSensitive(x,
-      TestClass(1, 2),
-      TestClass(3, 4))
-
-    self.assertEquals(jl.concretize(True, y.a), 1)
-    self.assertEquals(jl.concretize(True, y.b), 2)
-    self.assertEquals(jl.concretize(False, y.a), 3)
-    self.assertEquals(jl.concretize(False, y.b), 4)
-
-  @jeeves
-  def test_objects_mutate(self):
-    jl = JeevesLib
-
-    x = jl.mkLabel('x')
-    jl.restrict(x, lambda ctxt : ctxt)
-
-    s = TestClass(1, None)
-    t = TestClass(3, None)
-    y = jl.mkSensitive(x, s, t)
-
-    if y.a == 1:
-      y.a = y.a + 100
-
-    self.assertEquals(jl.concretize(True, y.a), 101)
-    self.assertEquals(jl.concretize(True, s.a), 101)
-    self.assertEquals(jl.concretize(True, t.a), 3)
-    self.assertEquals(jl.concretize(False, y.a), 3)
-    self.assertEquals(jl.concretize(False, s.a), 1)
-    self.assertEquals(jl.concretize(False, t.a), 3)
-
-  def test_objects_methodcall(self):
-    jl = JeevesLib
-
-    x = jl.mkLabel('x')
-    jl.restrict(x, lambda ctxt : ctxt)
-
-    s = TestClassMethod(1, 10)
-    t = TestClassMethod(100, 1000)
-    y = jl.mkSensitive(x, s, t)
-
-    self.assertEquals(jl.concretize(True, y.return_sum()), 11)
-    self.assertEquals(jl.concretize(False, y.return_sum()), 1100)
-
-    y.add_a_to_b()
-    self.assertEquals(jl.concretize(True, s.a), 1)
-    self.assertEquals(jl.concretize(True, s.b), 11)
-    self.assertEquals(jl.concretize(True, t.a), 100)
-    self.assertEquals(jl.concretize(True, t.b), 1000)
-    self.assertEquals(jl.concretize(True, y.a), 1)
-    self.assertEquals(jl.concretize(True, y.b), 11)
-    self.assertEquals(jl.concretize(False, s.a), 1)
-    self.assertEquals(jl.concretize(False, s.b), 10)
-    self.assertEquals(jl.concretize(False, t.a), 100)
-    self.assertEquals(jl.concretize(False, t.b), 1100)
-    self.assertEquals(jl.concretize(False, y.a), 100)
-    self.assertEquals(jl.concretize(False, y.b), 1100)
-
   @jeeves
   def test_objects_eq_is(self):
     jl = JeevesLib
