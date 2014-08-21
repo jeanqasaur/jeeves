@@ -461,7 +461,7 @@ class Constant(FExpr):
     return self.v(*args, **kw)
 
   def __getstate__(self):
-    "const:%s" + repr(self.v)
+    return "const:%s" + repr(self.v)
 
 '''
 Binary expressions.
