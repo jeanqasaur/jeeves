@@ -146,104 +146,110 @@ class TestSourceTransform(unittest.TestCase):
         self.assertEquals(JeevesLib.concretize(1, value), 43)
         self.assertEquals(JeevesLib.concretize(1, value), 43)
 
+    @jeeves
+    def test_jbool_functions_fexprs(self):
+        jl = JeevesLib
+        jl.clear_cache()
+
+        x = jl.mkLabel('x')
+        jl.restrict(x, lambda (a,_) : a == 42)
+
+        for lh in (True, False):
+            for ll in (True, False):
+                for rh in (True, False):
+                    for rl in (True, False):
+                        l = jl.mkSensitive(x, lh, ll)
+                        r = jl.mkSensitive(x, rh, rl)
+                        self.assertEquals(
+                              jl.concretize((42,0), l and r)
+                            , operator.and_(lh, rh))
+                        self.assertEquals(
+                              jl.concretize((42,0), l and r)
+                            , operator.and_(lh, rh))
+                        self.assertEquals(
+                              jl.concretize((10,0), l and r)
+                            , operator.and_(ll, rl))
+                        self.assertEquals(
+                              jl.concretize((10,0), l and r)
+                            , operator.and_(ll, rl))
+      
+    @jeeves
+    def test_jif_with_assign(self):
+        jl = JeevesLib
+        jl.clear_cache()
+
+        y = jl.mkLabel('y')
+        jl.restrict(y, lambda ctxt : ctxt == 42)
+
+        value0 = jl.mkSensitive(y, 0, 1)
+        value2 = jl.mkSensitive(y, 2, 3)
+
+        value = value0
+        value = value2
+        self.assertEquals(jl.concretize(42, value), 2)
+        self.assertEquals(jl.concretize(10, value), 3)
+        self.assertEquals(jl.concretize(42, value), 2)
+        self.assertEquals(jl.concretize(10, value), 3)
+
+        value = 100
+        value = value2
+        self.assertEquals(jl.concretize(42, value), 2)
+        self.assertEquals(jl.concretize(10, value), 3)
+        self.assertEquals(jl.concretize(42, value), 2)
+        self.assertEquals(jl.concretize(10, value), 3)
+
+        value = value0
+        value = 200
+        self.assertEquals(jl.concretize(42, value), 200)
+        self.assertEquals(jl.concretize(10, value), 200)
+        self.assertEquals(jl.concretize(42, value), 200)
+        self.assertEquals(jl.concretize(10, value), 200)
+
+        value = 100
+        value = 200
+        self.assertEquals(jl.concretize(42, value), 200)
+        self.assertEquals(jl.concretize(10, value), 200)
+        self.assertEquals(jl.concretize(42, value), 200)
+        self.assertEquals(jl.concretize(10, value), 200)
+
+    @jeeves
+    def test_jif_with_assign_with_pathvars(self):
+        jl = JeevesLib
+        jl.clear_cache()
+
+        x = jl.mkLabel('x')
+        y = jl.mkLabel('y')
+        jl.restrict(x, lambda (a,_) : a)
+        jl.restrict(y, lambda (_,b) : b)
+
+        value0 = jl.mkSensitive(y, 0, 1)
+        value2 = jl.mkSensitive(y, 2, 3)
+
+        value = value0
+        if x:
+            value = value2
+        self.assertEquals(jl.concretize((True, True), value), 2)
+        self.assertEquals(jl.concretize((True, False), value), 3)
+        self.assertEquals(jl.concretize((False, True), value), 0)
+        self.assertEquals(jl.concretize((False, False), value), 1)
+        self.assertEquals(jl.concretize((True, True), value), 2)
+        self.assertEquals(jl.concretize((True, False), value), 3)
+        self.assertEquals(jl.concretize((False, True), value), 0)
+        self.assertEquals(jl.concretize((False, False), value), 1)
+
+        value = value0
+        if not x:
+            value = value2
+        self.assertEquals(jl.concretize((False, True), value), 2)
+        self.assertEquals(jl.concretize((False, False), value), 3)
+        self.assertEquals(jl.concretize((True, True), value), 0)
+        self.assertEquals(jl.concretize((True, False), value), 1)
+        self.assertEquals(jl.concretize((False, True), value), 2)
+        self.assertEquals(jl.concretize((False, False), value), 3)
+        self.assertEquals(jl.concretize((True, True), value), 0)
+        self.assertEquals(jl.concretize((True, False), value), 1)
+
     '''
-  @jeeves
-  def test_jbool_functions_fexprs(self):
-    jl = JeevesLib
-    jl.show_cache()
-    x = jl.mkLabel('x')
-    jl.restrict(x, lambda (a,_) : a == 42)
-
-    for lh in (True, False):
-      for ll in (True, False):
-        for rh in (True, False):
-          for rl in (True, False):
-            l = jl.mkSensitive(x, lh, ll)
-            r = jl.mkSensitive(x, rh, rl)
-            self.assertEquals(jl.concretize((42,0), l and r), operator.and_(lh, rh))
-            self.assertEquals(jl.concretize((10,0), l and r), operator.and_(ll, rl))
-            self.assertEquals(jl.concretize((42,0), l or r), operator.or_(lh, rh))
-            self.assertEquals(jl.concretize((10,0), l or r), operator.or_(ll, rl))
-            self.assertEquals(jl.concretize((42,0), not l), operator.not_(lh))
-            self.assertEquals(jl.concretize((10,0), not l), operator.not_(ll))
-
-    y = jl.mkLabel('y')
-    jl.restrict(y, lambda (_,b) : b == 42)
-
-    for lh in (True, False):
-      for ll in (True, False):
-        for rh in (True, False):
-          for rl in (True, False):
-            l = jl.mkSensitive(x, lh, ll)
-            r = jl.mkSensitive(y, rh, rl)
-            self.assertEquals(jl.concretize((42,0), l and r), operator.and_(lh, rl))
-            self.assertEquals(jl.concretize((10,0), l and r), operator.and_(ll, rl))
-            self.assertEquals(jl.concretize((42,42), l and r), operator.and_(lh, rh))
-            self.assertEquals(jl.concretize((10,42), l and r), operator.and_(ll, rh))
-
-            self.assertEquals(jl.concretize((42,0), l or r), operator.or_(lh, rl))
-            self.assertEquals(jl.concretize((10,0), l or r), operator.or_(ll, rl))
-            self.assertEquals(jl.concretize((42,42), l or r), operator.or_(lh, rh))
-            self.assertEquals(jl.concretize((10,42), l or r), operator.or_(ll, rh))
-  
-  @jeeves
-  def test_jif_with_assign(self):
-    jl = JeevesLib
-
-    y = jl.mkLabel('y')
-    jl.restrict(y, lambda ctxt : ctxt == 42)
-
-    value0 = jl.mkSensitive(y, 0, 1)
-    value2 = jl.mkSensitive(y, 2, 3)
-
-    value = value0
-    value = value2
-    self.assertEquals(jl.concretize(42, value), 2)
-    self.assertEquals(jl.concretize(10, value), 3)
-
-    value = 100
-    value = value2
-    self.assertEquals(jl.concretize(42, value), 2)
-    self.assertEquals(jl.concretize(10, value), 3)
-
-    value = value0
-    value = 200
-    self.assertEquals(jl.concretize(42, value), 200)
-    self.assertEquals(jl.concretize(10, value), 200)
-
-    value = 100
-    value = 200
-    self.assertEquals(jl.concretize(42, value), 200)
-    self.assertEquals(jl.concretize(10, value), 200)
-
-  @jeeves
-  def test_jif_with_assign_with_pathvars(self):
-    jl = JeevesLib
-
-    x = jl.mkLabel('x')
-    y = jl.mkLabel('y')
-    jl.restrict(x, lambda (a,_) : a)
-    jl.restrict(y, lambda (_,b) : b)
-
-    value0 = jl.mkSensitive(y, 0, 1)
-    value2 = jl.mkSensitive(y, 2, 3)
-
-    value = value0
-    if x:
-      value = value2
-    self.assertEquals(jl.concretize((True, True), value), 2)
-    self.assertEquals(jl.concretize((True, False), value), 3)
-    self.assertEquals(jl.concretize((False, True), value), 0)
-    self.assertEquals(jl.concretize((False, False), value), 1)
-
-    value = value0
-    if not x:
-      value = value2
-    self.assertEquals(jl.concretize((False, True), value), 2)
-    self.assertEquals(jl.concretize((False, False), value), 3)
-    self.assertEquals(jl.concretize((True, True), value), 0)
-    self.assertEquals(jl.concretize((True, False), value), 1)
-
   @jeeves
   def test_function_facets(self):
     def add1(a):
@@ -626,21 +632,30 @@ class TestSourceTransform(unittest.TestCase):
 
     self.assertEqual(JeevesLib.concretize(True, z), 60)
     self.assertEqual(JeevesLib.concretize(False, z), 81)
-
-  @jeeves
-  def test_jfun(self):
-    x = JeevesLib.mkLabel('x')
-    JeevesLib.restrict(x, lambda ctxt : ctxt)
- 
-    y = JeevesLib.mkSensitive(x, [1,2,3], [4,5,6,7])
-
-    z = [x*x for x in y]
-
-    self.assertEqual(JeevesLib.concretize(True, z[0]), 1)
-    self.assertEqual(JeevesLib.concretize(True, z[1]), 4)
-    self.assertEqual(JeevesLib.concretize(True, z[2]), 9)
-    self.assertEqual(JeevesLib.concretize(False, z[0]), 16)
-    self.assertEqual(JeevesLib.concretize(False, z[1]), 25)
-    self.assertEqual(JeevesLib.concretize(False, z[2]), 36)
-    self.assertEqual(JeevesLib.concretize(False, z[3]), 49)
     '''
+
+    @jeeves
+    def test_jfun(self):
+        JeevesLib.clear_cache()
+
+        x = JeevesLib.mkLabel('x')
+        JeevesLib.restrict(x, lambda ctxt : ctxt)
+ 
+        y = JeevesLib.mkSensitive(x, [1,2,3], [4,5,6,7])
+
+        z = [x*x for x in y]
+
+        self.assertEqual(JeevesLib.concretize(True, z[0]), 1)
+        self.assertEqual(JeevesLib.concretize(True, z[1]), 4)
+        self.assertEqual(JeevesLib.concretize(True, z[2]), 9)
+        self.assertEqual(JeevesLib.concretize(False, z[0]), 16)
+        self.assertEqual(JeevesLib.concretize(False, z[1]), 25)
+        self.assertEqual(JeevesLib.concretize(False, z[2]), 36)
+        self.assertEqual(JeevesLib.concretize(False, z[3]), 49)
+        self.assertEqual(JeevesLib.concretize(True, z[0]), 1)
+        self.assertEqual(JeevesLib.concretize(True, z[1]), 4)
+        self.assertEqual(JeevesLib.concretize(True, z[2]), 9)
+        self.assertEqual(JeevesLib.concretize(False, z[0]), 16)
+        self.assertEqual(JeevesLib.concretize(False, z[1]), 25)
+        self.assertEqual(JeevesLib.concretize(False, z[2]), 36)
+        self.assertEqual(JeevesLib.concretize(False, z[3]), 49)

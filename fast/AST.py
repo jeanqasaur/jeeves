@@ -426,6 +426,8 @@ class Facet(FExpr):
       raise TypeError("cannot take len of non-object; type %s" % self.type.__name__)
 
   def __getstate__(self):
+    print self.thn
+    print self.els
     return "<%s:%s?%s>" % \
       (self.cond.__getstate__(), self.thn.__getstate__(),
        self.els.__getstate__())
@@ -754,6 +756,8 @@ class Unassigned(FExpr):
   def __getattr__(self, attr):
     #raise self.getException()
     return Unassigned(self.thing_not_found)
+  def __getstate__(self):
+    return repr(self)
 
 # TODO(TJH): figure out the correct implementation of this
 def is_obj(o):
