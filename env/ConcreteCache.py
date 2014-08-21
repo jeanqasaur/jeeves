@@ -31,8 +31,7 @@ class ConcreteCache(object):
         """
         return len(self.cache)
 
-    @staticmethod
-    def get_cache_key(ctxt, val, pathvars):
+    def get_cache_key(self, ctxt, val, pathvars):
         """Makes a cache key string by hashing the state of the context, value,
         and path variables involved in the concretization.
 
@@ -45,9 +44,12 @@ class ConcreteCache(object):
         :returns: The concrete (non-faceted) version of T under the policies
         in the environment.
         """
-        return str(hash(pickle.dumps(ctxt))) + "__" + \
-            str(hash(pickle.dumps(val))) + "__" + \
-            str(hash(pickle.dumps(pathvars)))
+        if self._should_cache:
+            return str(hash(pickle.dumps(ctxt))) + "__" + \
+                str(hash(pickle.dumps(val))) + "__" + \
+                str(hash(pickle.dumps(pathvars)))
+        else:
+            return ""
 
     def cache_value(self, cache_key, cache_value):
         """Caches the value if caching is turned on.

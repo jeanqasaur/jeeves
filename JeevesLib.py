@@ -90,7 +90,7 @@ def concretize(ctxt, v):
     """
     pathvars = jeevesState.pathenv.getEnv()
     # Check to see if the value is in the cache.
-    cache_key = ConcreteCache.get_cache_key(ctxt, v, pathvars)
+    cache_key = jeevesState.concretecache.get_cache_key(ctxt, v, pathvars)
     cval = jeevesState.concretecache.cache_lookup(cache_key)
     if cval is None:
         # If not, then concretize anew and cache the value.
