@@ -673,9 +673,8 @@ class Eq(BinaryExpr):
         self.left.remapLabels(policy, writer)
       , self.right.remapLabels(policy, writer))
   def __getstate__(self):
-    return "(Eq(%s:%s)(%s:%s))" % \
-      ( id(self.left), self.left.__getstate__()
-      , id(self.right), self.right.__getstate__())
+    return "(Eq(%s)(%s))" % \
+      (self.left.__getstate__(), self.right.__getstate__())
 
 class Lt(BinaryExpr):
   opr = staticmethod(operator.lt)
