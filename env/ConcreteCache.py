@@ -45,43 +45,35 @@ class ConcreteCache(object):
         :returns: The concrete (non-faceted) version of T under the policies
         in the environment.
         """
-        return str(hash(pickle.dumps(ctxt))) + "__" + \
+        key = str(hash(pickle.dumps(ctxt))) + "__" + \
             str(hash(pickle.dumps(val))) + "__" + \
             str(hash(pickle.dumps(pathvars)))
+        print key
+        return key
 
-    def cache_value(self, ctxt, val, pathvars, cache_value):
+    def cache_value(self, cache_key, cache_value):
         """Caches the value if caching is turned on.
 
-        :param ctxt: Output channel (viewer).
-        :type ctxt: T, where policies have type T -> bool
-        :param val: Value to concretize.
-        :type v: FExpr
-        :param pathvars: Path variables involved in the concretization.
-        :type pathvars: PathVars
-        :param cache_value: The concrete (non-faceted) version of T under the
-        policies in the environment.
+        :param cache_key: Caching key.
+        :type cache_key: String.
         :returns: Whether caching occurred.
         """
         if self._should_cache:
-            self._cache[self.get_cache_key(ctxt, val, pathvars)] = cache_value
+            self._cache[cache_key] = cache_value
             return True
         else:
             return False
-    def cache_lookup(self, ctxt, val, pathvars):
+    def cache_lookup(self, cache_key):
         """Looks up the value in the cache.
         
-        :param ctxt: Output channel (viewer).
-        :type ctxt: T, where policies have type T -> bool
-        :param v: Value to concretize.
-        :type v: FExpr
-        :param pathvars: Path variables involved in the concretization.
-        :type pathvars: PathVars
+        :param cache_key: Caching key.
+        :type cache_key: String.
         :returns: The concrete (non-faceted) version of T under the policies
         in the environment.
         """
         if self._should_cache:
             try:
-                return self._cache[self.get_cache_key(ctxt, val, pathvars)]
+                return self._cache[cache_key]
             except KeyError:
                 return None
         return None

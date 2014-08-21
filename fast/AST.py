@@ -426,8 +426,6 @@ class Facet(FExpr):
       raise TypeError("cannot take len of non-object; type %s" % self.type.__name__)
 
   def __getstate__(self):
-    print self.thn
-    print self.els
     return "<%s:%s?%s>" % \
       (self.cond.__getstate__(), self.thn.__getstate__(),
        self.els.__getstate__())
@@ -463,7 +461,7 @@ class Constant(FExpr):
     return self.v(*args, **kw)
 
   def __getstate__(self):
-    return "const:%s" + repr(self.v)
+    return "(Const:%s)" + repr(self.v)
 
 '''
 Binary expressions.
@@ -675,8 +673,9 @@ class Eq(BinaryExpr):
         self.left.remapLabels(policy, writer)
       , self.right.remapLabels(policy, writer))
   def __getstate__(self):
-    return "(=(%s)(%s))" % \
-      (self.left.__getstate__(), self.right.__getstate__())
+    return "(Eq(%s:%s)(%s:%s))" % \
+      ( id(self.left), self.left.__getstate__()
+      , id(self.right), self.right.__getstate__())
 
 class Lt(BinaryExpr):
   opr = staticmethod(operator.lt)
@@ -757,7 +756,7 @@ class Unassigned(FExpr):
     #raise self.getException()
     return Unassigned(self.thing_not_found)
   def __getstate__(self):
-    return repr(self)
+    return "(Unassigned:%s)" % repr(self)
 
 # TODO(TJH): figure out the correct implementation of this
 def is_obj(o):
@@ -887,7 +886,7 @@ class FObject(FExpr):
     return 'FObject:%s' % str(self.v)
 
   def __getstate__(self):
-    return "FObject:%s" % self.v.__getstate__()
+    return "(FObject(%s):%s)" % (id(self.v), self.v.__getstate__())
 
 """
   def __and__(l, r):

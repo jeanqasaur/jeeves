@@ -90,11 +90,12 @@ def concretize(ctxt, v):
     """
     pathvars = jeevesState.pathenv.getEnv()
     # Check to see if the value is in the cache.
-    cval = cache_lookup(ctxt, v, pathvars)
+    cache_key = ConcreteCache.get_cache_key(ctxt, v, pathvars)
+    cval = jeevesState.concretecache.cache_lookup(cache_key)
     if cval is None:
         # If not, then concretize anew and cache the value.
         cval = jeevesState.policyenv.concretizeExp(ctxt, v, pathvars)
-        cache_value(ctxt, v, pathvars, cval)
+        jeevesState.concretecache.cache_value(cache_key, cval)
     return cval
 
 @supports_jeeves
@@ -175,11 +176,6 @@ def cache_size():
     return jeevesState.concretecache.cache_size()
 def clear_cache():
     return jeevesState.concretecache.clear_cache()
-def cache_value(ctxt, val, pathvars, cache_value):
-    return jeevesState.concretecache.cache_value(
-        ctxt, val, pathvars, cache_value)
-def cache_lookup(ctxt, val, pathvars):
-    return jeevesState.concretecache.cache_lookup(ctxt, val, pathvars)
 def get_cache():
     return jeevesState.concretecache.cache
 

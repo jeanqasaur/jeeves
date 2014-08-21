@@ -28,9 +28,9 @@ class TestClass1:
         self.a = a
     def __getstate__(self):
         if hasattr(self.a, '__getstate__'):
-            return self.a.__getstate__()
+            return "(TestClass1:%s)" % self.a.__getstate__()
         else:
-            return repr(self.a)
+            return "(TestClass1:%s)" % repr(self.a)
 
 @jeeves
 class TestClass1Eq:
@@ -318,6 +318,28 @@ class TestSourceTransform(unittest.TestCase):
         self.assertEquals(jl.concretize(False, s.a), 1)
         self.assertEquals(jl.concretize(False, t.a), 3)
 
+    @jeeves
+    def test_context_mutate(self):
+        jl = JeevesLib
+        jl.clear_cache()
+
+        test_alice = TestClass(1, 1)
+        test_bob = TestClass(2, 2)
+
+        x = jl.mkLabel('x')
+        jl.restrict(x, lambda ctxt: ctxt.a == 1)
+
+        y = jl.mkSensitive(x, 42, 0)
+
+        self.assertEquals(jl.concretize(test_alice, y), 42)
+        self.assertEquals(jl.concretize(test_bob, y), 0)
+
+        test_alice.a = 2
+        test_bob.a = 1
+        self.assertEquals(jl.concretize(test_alice, y), 0)
+        self.assertEquals(jl.concretize(test_bob, y), 42)
+
+    @jeeves
     def test_objects_methodcall(self):
         jl = JeevesLib
         jl.clear_cache()
@@ -360,38 +382,46 @@ class TestSourceTransform(unittest.TestCase):
         self.assertEquals(jl.concretize(False, y.a), 100)
         self.assertEquals(jl.concretize(False, y.b), 1100)
  
+    @jeeves
+    def test_objects_eq_is(self):
+        jl = JeevesLib
+        jl.clear_cache()
+
+        x = jl.mkLabel('x')
+        jl.restrict(x, lambda ctxt : ctxt)
+
+        a = TestClass1(3)
+        b = TestClass1(3)
+        c = TestClass1(2)
+
+        # Ensure that a < b and b < c (will probably be true anyway,
+        # just making sure)
+        s = sorted((a, b, c))
+        a = s[0]
+        b = s[1]
+        c = s[2]
+        a.a = 3
+        b.a = 3
+        c.a = 2
+
+        v1 = jl.mkSensitive(x, a, c)
+        v2 = jl.mkSensitive(x, b, c)
+        v3 = jl.mkSensitive(x, c, a)
+    
+        self.assertEquals(jl.concretize(True, v1 == v1), True)
+        self.assertEquals(jl.concretize(True, v2 == v2), True)
+        self.assertEquals(jl.concretize(True, v3 == v3), True)
+        self.assertEquals(jl.concretize(True, v1 == v2), False)
+        self.assertEquals(jl.concretize(True, v2 == v3), False)
+        self.assertEquals(jl.concretize(True, v3 == v1), False)
+        self.assertEquals(jl.concretize(True, v1 == v1), True)
+        self.assertEquals(jl.concretize(True, v2 == v2), True)
+        self.assertEquals(jl.concretize(True, v3 == v3), True)
+        self.assertEquals(jl.concretize(True, v1 == v2), False)
+        self.assertEquals(jl.concretize(True, v2 == v3), False)
+        self.assertEquals(jl.concretize(True, v3 == v1), False)
+
     '''
-  @jeeves
-  def test_objects_eq_is(self):
-    jl = JeevesLib
-    x = jl.mkLabel('x')
-    jl.restrict(x, lambda ctxt : ctxt)
-
-    a = TestClass1(3)
-    b = TestClass1(3)
-    c = TestClass1(2)
-
-    # Ensure that a < b and b < c (will probably be true anyway,
-    # just making sure)
-    s = sorted((a, b, c))
-    a = s[0]
-    b = s[1]
-    c = s[2]
-    a.a = 3
-    b.a = 3
-    c.a = 2
-
-    v1 = jl.mkSensitive(x, a, c)
-    v2 = jl.mkSensitive(x, b, c)
-    v3 = jl.mkSensitive(x, c, a)
-    # TODO: For some reason, stuff breaks here.
-    self.assertEquals(jl.concretize(True, v1 == v1), True)
-    self.assertEquals(jl.concretize(True, v2 == v2), True)
-    self.assertEquals(jl.concretize(True, v3 == v3), True)
-    self.assertEquals(jl.concretize(True, v1 == v2), False)
-    self.assertEquals(jl.concretize(True, v2 == v3), False)
-    self.assertEquals(jl.concretize(True, v3 == v1), False)
-
     self.assertEquals(jl.concretize(True, v1 != v1), False)
     self.assertEquals(jl.concretize(True, v2 != v2), False)
     self.assertEquals(jl.concretize(True, v3 != v3), False)
@@ -645,23 +675,6 @@ class TestSourceTransform(unittest.TestCase):
     self.assertEqual(JeevesLib.concretize(False, y), 5)
     self.assertEqual(JeevesLib.concretize(True, z), 30)
     self.assertEqual(JeevesLib.concretize(False, z), 17)
-
-  @jeeves
-  def test_return_in_for(self):
-    x = JeevesLib.mkLabel('x')
-    JeevesLib.restrict(x, lambda ctxt : ctxt)
-
-    y = JeevesLib.mkSensitive(x, [5,60,7], [11,2,4,81,3,12])
-
-    def bulbasaur():
-      for j in y:
-        if j >= 40:
-          return j
-
-    z = bulbasaur()
-
-    self.assertEqual(JeevesLib.concretize(True, z), 60)
-    self.assertEqual(JeevesLib.concretize(False, z), 81)
     '''
 
     @jeeves
