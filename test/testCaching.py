@@ -421,261 +421,368 @@ class TestSourceTransform(unittest.TestCase):
         self.assertEquals(jl.concretize(True, v2 == v3), False)
         self.assertEquals(jl.concretize(True, v3 == v1), False)
 
-    '''
-    self.assertEquals(jl.concretize(True, v1 != v1), False)
-    self.assertEquals(jl.concretize(True, v2 != v2), False)
-    self.assertEquals(jl.concretize(True, v3 != v3), False)
-    self.assertEquals(jl.concretize(True, v1 != v2), True)
-    self.assertEquals(jl.concretize(True, v2 != v3), True)
-    self.assertEquals(jl.concretize(True, v3 != v1), True)
+        self.assertEquals(jl.concretize(True, v1 != v1), False)
+        self.assertEquals(jl.concretize(True, v2 != v2), False)
+        self.assertEquals(jl.concretize(True, v3 != v3), False)
+        self.assertEquals(jl.concretize(True, v1 != v2), True)
+        self.assertEquals(jl.concretize(True, v2 != v3), True)
+        self.assertEquals(jl.concretize(True, v3 != v1), True)
+        self.assertEquals(jl.concretize(True, v1 != v1), False)
+        self.assertEquals(jl.concretize(True, v2 != v2), False)
+        self.assertEquals(jl.concretize(True, v3 != v3), False)
+        self.assertEquals(jl.concretize(True, v1 != v2), True)
+        self.assertEquals(jl.concretize(True, v2 != v3), True)
+        self.assertEquals(jl.concretize(True, v3 != v1), True)
 
-    self.assertEquals(jl.concretize(True, v1 < v1), False)
-    self.assertEquals(jl.concretize(True, v2 < v2), False)
-    self.assertEquals(jl.concretize(True, v3 < v3), False)
-    self.assertEquals(jl.concretize(True, v1 < v2), True)
-    self.assertEquals(jl.concretize(True, v2 < v3), True)
-    self.assertEquals(jl.concretize(True, v3 < v1), False)
+        self.assertEquals(jl.concretize(True, v1 < v1), False)
+        self.assertEquals(jl.concretize(True, v2 < v2), False)
+        self.assertEquals(jl.concretize(True, v3 < v3), False)
+        self.assertEquals(jl.concretize(True, v1 < v2), True)
+        self.assertEquals(jl.concretize(True, v2 < v3), True)
+        self.assertEquals(jl.concretize(True, v3 < v1), False)
+        self.assertEquals(jl.concretize(True, v1 < v1), False)
+        self.assertEquals(jl.concretize(True, v2 < v2), False)
+        self.assertEquals(jl.concretize(True, v3 < v3), False)
+        self.assertEquals(jl.concretize(True, v1 < v2), True)
+        self.assertEquals(jl.concretize(True, v2 < v3), True)
+        self.assertEquals(jl.concretize(True, v3 < v1), False)
 
-    self.assertEquals(jl.concretize(True, v1 > v1), False)
-    self.assertEquals(jl.concretize(True, v2 > v2), False)
-    self.assertEquals(jl.concretize(True, v3 > v3), False)
-    self.assertEquals(jl.concretize(True, v1 > v2), False)
-    self.assertEquals(jl.concretize(True, v2 > v3), False)
-    self.assertEquals(jl.concretize(True, v3 > v1), True)
+        self.assertEquals(jl.concretize(True, v1 > v1), False)
+        self.assertEquals(jl.concretize(True, v2 > v2), False)
+        self.assertEquals(jl.concretize(True, v3 > v3), False)
+        self.assertEquals(jl.concretize(True, v1 > v2), False)
+        self.assertEquals(jl.concretize(True, v2 > v3), False)
+        self.assertEquals(jl.concretize(True, v3 > v1), True)
+        self.assertEquals(jl.concretize(True, v1 > v1), False)
+        self.assertEquals(jl.concretize(True, v2 > v2), False)
+        self.assertEquals(jl.concretize(True, v3 > v3), False)
+        self.assertEquals(jl.concretize(True, v1 > v2), False)
+        self.assertEquals(jl.concretize(True, v2 > v3), False)
+        self.assertEquals(jl.concretize(True, v3 > v1), True)
 
-    self.assertEquals(jl.concretize(True, v1 <= v1), True)
-    self.assertEquals(jl.concretize(True, v2 <= v2), True)
-    self.assertEquals(jl.concretize(True, v3 <= v3), True)
-    self.assertEquals(jl.concretize(True, v1 <= v2), True)
-    self.assertEquals(jl.concretize(True, v2 <= v3), True)
-    self.assertEquals(jl.concretize(True, v3 <= v1), False)
+        self.assertEquals(jl.concretize(True, v1 <= v1), True)
+        self.assertEquals(jl.concretize(True, v2 <= v2), True)
+        self.assertEquals(jl.concretize(True, v3 <= v3), True)
+        self.assertEquals(jl.concretize(True, v1 <= v2), True)
+        self.assertEquals(jl.concretize(True, v2 <= v3), True)
+        self.assertEquals(jl.concretize(True, v3 <= v1), False)
+        self.assertEquals(jl.concretize(True, v1 <= v1), True)
+        self.assertEquals(jl.concretize(True, v2 <= v2), True)
+        self.assertEquals(jl.concretize(True, v3 <= v3), True)
+        self.assertEquals(jl.concretize(True, v1 <= v2), True)
+        self.assertEquals(jl.concretize(True, v2 <= v3), True)
+        self.assertEquals(jl.concretize(True, v3 <= v1), False)
 
-    self.assertEquals(jl.concretize(True, v1 >= v1), True)
-    self.assertEquals(jl.concretize(True, v2 >= v2), True)
-    self.assertEquals(jl.concretize(True, v3 >= v3), True)
-    self.assertEquals(jl.concretize(True, v1 >= v2), False)
-    self.assertEquals(jl.concretize(True, v2 >= v3), False)
-    self.assertEquals(jl.concretize(True, v3 >= v1), True)
+        self.assertEquals(jl.concretize(True, v1 >= v1), True)
+        self.assertEquals(jl.concretize(True, v2 >= v2), True)
+        self.assertEquals(jl.concretize(True, v3 >= v3), True)
+        self.assertEquals(jl.concretize(True, v1 >= v2), False)
+        self.assertEquals(jl.concretize(True, v2 >= v3), False)
+        self.assertEquals(jl.concretize(True, v3 >= v1), True)
+        self.assertEquals(jl.concretize(True, v1 >= v1), True)
+        self.assertEquals(jl.concretize(True, v2 >= v2), True)
+        self.assertEquals(jl.concretize(True, v3 >= v3), True)
+        self.assertEquals(jl.concretize(True, v1 >= v2), False)
+        self.assertEquals(jl.concretize(True, v2 >= v3), False)
+        self.assertEquals(jl.concretize(True, v3 >= v1), True)
 
-    self.assertEquals(jl.concretize(False, v2 == v3), False)
-    self.assertEquals(jl.concretize(False, v2 != v3), True)
-    self.assertEquals(jl.concretize(False, v2 < v3), False)
-    self.assertEquals(jl.concretize(False, v2 > v3), True)
-    self.assertEquals(jl.concretize(False, v2 <= v3), False)
-    self.assertEquals(jl.concretize(False, v2 >= v3), True)
+        self.assertEquals(jl.concretize(False, v2 == v3), False)
+        self.assertEquals(jl.concretize(False, v2 != v3), True)
+        self.assertEquals(jl.concretize(False, v2 < v3), False)
+        self.assertEquals(jl.concretize(False, v2 > v3), True)
+        self.assertEquals(jl.concretize(False, v2 <= v3), False)
+        self.assertEquals(jl.concretize(False, v2 >= v3), True)
+        self.assertEquals(jl.concretize(False, v2 == v3), False)
+        self.assertEquals(jl.concretize(False, v2 != v3), True)
+        self.assertEquals(jl.concretize(False, v2 < v3), False)
+        self.assertEquals(jl.concretize(False, v2 > v3), True)
+        self.assertEquals(jl.concretize(False, v2 <= v3), False)
+        self.assertEquals(jl.concretize(False, v2 >= v3), True)
 
-    a = TestClass1Eq(3)
-    b = TestClass1Eq(3)
-    c = TestClass1Eq(2)
+        a = TestClass1Eq(3)
+        b = TestClass1Eq(3)
+        c = TestClass1Eq(2)
 
-    v1 = jl.mkSensitive(x, a, c)
-    v2 = jl.mkSensitive(x, b, c)
-    v3 = jl.mkSensitive(x, c, a)
-    self.assertEquals(jl.concretize(True, v1 == v1), True)
-    self.assertEquals(jl.concretize(True, v2 == v2), True)
-    self.assertEquals(jl.concretize(True, v3 == v3), True)
-    self.assertEquals(jl.concretize(True, v1 == v2), True)
-    self.assertEquals(jl.concretize(True, v2 == v3), False)
-    self.assertEquals(jl.concretize(True, v3 == v1), False)
+        v1 = jl.mkSensitive(x, a, c)
+        v2 = jl.mkSensitive(x, b, c)
+        v3 = jl.mkSensitive(x, c, a)
+    
+        self.assertEquals(jl.concretize(True, v1 == v1), True)
+        self.assertEquals(jl.concretize(True, v2 == v2), True)
+        self.assertEquals(jl.concretize(True, v3 == v3), True)
+        self.assertEquals(jl.concretize(True, v1 == v2), True)
+        self.assertEquals(jl.concretize(True, v2 == v3), False)
+        self.assertEquals(jl.concretize(True, v3 == v1), False)
+        self.assertEquals(jl.concretize(True, v1 == v1), True)
+        self.assertEquals(jl.concretize(True, v2 == v2), True)
+        self.assertEquals(jl.concretize(True, v3 == v3), True)
+        self.assertEquals(jl.concretize(True, v1 == v2), True)
+        self.assertEquals(jl.concretize(True, v2 == v3), False)
+        self.assertEquals(jl.concretize(True, v3 == v1), False)
 
-    self.assertEquals(jl.concretize(True, v1 != v1), False)
-    self.assertEquals(jl.concretize(True, v2 != v2), False)
-    self.assertEquals(jl.concretize(True, v3 != v3), False)
-    self.assertEquals(jl.concretize(True, v1 != v2), False)
-    self.assertEquals(jl.concretize(True, v2 != v3), True)
-    self.assertEquals(jl.concretize(True, v3 != v1), True)
+        self.assertEquals(jl.concretize(True, v1 != v1), False)
+        self.assertEquals(jl.concretize(True, v2 != v2), False)
+        self.assertEquals(jl.concretize(True, v3 != v3), False)
+        self.assertEquals(jl.concretize(True, v1 != v2), False)
+        self.assertEquals(jl.concretize(True, v2 != v3), True)
+        self.assertEquals(jl.concretize(True, v3 != v1), True)
+        self.assertEquals(jl.concretize(True, v1 != v1), False)
+        self.assertEquals(jl.concretize(True, v2 != v2), False)
+        self.assertEquals(jl.concretize(True, v3 != v3), False)
+        self.assertEquals(jl.concretize(True, v1 != v2), False)
+        self.assertEquals(jl.concretize(True, v2 != v3), True)
+        self.assertEquals(jl.concretize(True, v3 != v1), True)
 
-    self.assertEquals(jl.concretize(True, v1 < v1), False)
-    self.assertEquals(jl.concretize(True, v2 < v2), False)
-    self.assertEquals(jl.concretize(True, v3 < v3), False)
-    self.assertEquals(jl.concretize(True, v1 < v2), False)
-    self.assertEquals(jl.concretize(True, v2 < v3), False)
-    self.assertEquals(jl.concretize(True, v3 < v1), True)
+        self.assertEquals(jl.concretize(True, v1 < v1), False)
+        self.assertEquals(jl.concretize(True, v2 < v2), False)
+        self.assertEquals(jl.concretize(True, v3 < v3), False)
+        self.assertEquals(jl.concretize(True, v1 < v2), False)
+        self.assertEquals(jl.concretize(True, v2 < v3), False)
+        self.assertEquals(jl.concretize(True, v3 < v1), True)
+        self.assertEquals(jl.concretize(True, v1 < v1), False)
+        self.assertEquals(jl.concretize(True, v2 < v2), False)
+        self.assertEquals(jl.concretize(True, v3 < v3), False)
+        self.assertEquals(jl.concretize(True, v1 < v2), False)
+        self.assertEquals(jl.concretize(True, v2 < v3), False)
+        self.assertEquals(jl.concretize(True, v3 < v1), True)
 
-    self.assertEquals(jl.concretize(True, v1 > v1), False)
-    self.assertEquals(jl.concretize(True, v2 > v2), False)
-    self.assertEquals(jl.concretize(True, v3 > v3), False)
-    self.assertEquals(jl.concretize(True, v1 > v2), False)
-    self.assertEquals(jl.concretize(True, v2 > v3), True)
-    self.assertEquals(jl.concretize(True, v3 > v1), False)
+        self.assertEquals(jl.concretize(True, v1 > v1), False)
+        self.assertEquals(jl.concretize(True, v2 > v2), False)
+        self.assertEquals(jl.concretize(True, v3 > v3), False)
+        self.assertEquals(jl.concretize(True, v1 > v2), False)
+        self.assertEquals(jl.concretize(True, v2 > v3), True)
+        self.assertEquals(jl.concretize(True, v3 > v1), False)
+        self.assertEquals(jl.concretize(True, v1 > v1), False)
+        self.assertEquals(jl.concretize(True, v2 > v2), False)
+        self.assertEquals(jl.concretize(True, v3 > v3), False)
+        self.assertEquals(jl.concretize(True, v1 > v2), False)
+        self.assertEquals(jl.concretize(True, v2 > v3), True)
+        self.assertEquals(jl.concretize(True, v3 > v1), False)
 
-    self.assertEquals(jl.concretize(True, v1 <= v1), True)
-    self.assertEquals(jl.concretize(True, v2 <= v2), True)
-    self.assertEquals(jl.concretize(True, v3 <= v3), True)
-    self.assertEquals(jl.concretize(True, v1 <= v2), True)
-    self.assertEquals(jl.concretize(True, v2 <= v3), False)
-    self.assertEquals(jl.concretize(True, v3 <= v1), True)
+        self.assertEquals(jl.concretize(True, v1 <= v1), True)
+        self.assertEquals(jl.concretize(True, v2 <= v2), True)
+        self.assertEquals(jl.concretize(True, v3 <= v3), True)
+        self.assertEquals(jl.concretize(True, v1 <= v2), True)
+        self.assertEquals(jl.concretize(True, v2 <= v3), False)
+        self.assertEquals(jl.concretize(True, v3 <= v1), True)
+        self.assertEquals(jl.concretize(True, v1 <= v1), True)
+        self.assertEquals(jl.concretize(True, v2 <= v2), True)
+        self.assertEquals(jl.concretize(True, v3 <= v3), True)
+        self.assertEquals(jl.concretize(True, v1 <= v2), True)
+        self.assertEquals(jl.concretize(True, v2 <= v3), False)
+        self.assertEquals(jl.concretize(True, v3 <= v1), True)
 
-    self.assertEquals(jl.concretize(True, v1 >= v1), True)
-    self.assertEquals(jl.concretize(True, v2 >= v2), True)
-    self.assertEquals(jl.concretize(True, v3 >= v3), True)
-    self.assertEquals(jl.concretize(True, v1 >= v2), True)
-    self.assertEquals(jl.concretize(True, v2 >= v3), True)
-    self.assertEquals(jl.concretize(True, v3 >= v1), False)
+        self.assertEquals(jl.concretize(True, v1 >= v1), True)
+        self.assertEquals(jl.concretize(True, v2 >= v2), True)
+        self.assertEquals(jl.concretize(True, v3 >= v3), True)
+        self.assertEquals(jl.concretize(True, v1 >= v2), True)
+        self.assertEquals(jl.concretize(True, v2 >= v3), True)
+        self.assertEquals(jl.concretize(True, v3 >= v1), False)
+        self.assertEquals(jl.concretize(True, v1 >= v1), True)
+        self.assertEquals(jl.concretize(True, v2 >= v2), True)
+        self.assertEquals(jl.concretize(True, v3 >= v3), True)
+        self.assertEquals(jl.concretize(True, v1 >= v2), True)
+        self.assertEquals(jl.concretize(True, v2 >= v3), True)
+        self.assertEquals(jl.concretize(True, v3 >= v1), False)
 
-    self.assertEquals(jl.concretize(False, v2 == v3), False)
-    self.assertEquals(jl.concretize(False, v2 != v3), True)
-    self.assertEquals(jl.concretize(False, v2 < v3), True)
-    self.assertEquals(jl.concretize(False, v2 > v3), False)
-    self.assertEquals(jl.concretize(False, v2 <= v3), True)
-    self.assertEquals(jl.concretize(False, v2 >= v3), False)
+        self.assertEquals(jl.concretize(False, v2 == v3), False)
+        self.assertEquals(jl.concretize(False, v2 != v3), True)
+        self.assertEquals(jl.concretize(False, v2 < v3), True)
+        self.assertEquals(jl.concretize(False, v2 > v3), False)
+        self.assertEquals(jl.concretize(False, v2 <= v3), True)
+        self.assertEquals(jl.concretize(False, v2 >= v3), False)
+        self.assertEquals(jl.concretize(False, v2 == v3), False)
+        self.assertEquals(jl.concretize(False, v2 != v3), True)
+        self.assertEquals(jl.concretize(False, v2 < v3), True)
+        self.assertEquals(jl.concretize(False, v2 > v3), False)
+        self.assertEquals(jl.concretize(False, v2 <= v3), True)
+        self.assertEquals(jl.concretize(False, v2 >= v3), False)
 
-  @jeeves
-  def test_jhasElt(self):
-    jl = JeevesLib
+    @jeeves
+    def test_jhasElt(self):
+        jl = JeevesLib
+        jl.clear_cache()
 
-    a = jl.mkLabel ()
-    jl.restrict(a, lambda x: x)
-    xS = jl.mkSensitive(a, 42, 1)
+        a = jl.mkLabel ()
+        jl.restrict(a, lambda x: x)
+        xS = jl.mkSensitive(a, 42, 1)
 
-    b = jl.mkLabel ()
-    jl.restrict(b, lambda x: x)
-    yS = jl.mkSensitive(b, 43, 3)
+        b = jl.mkLabel ()
+        jl.restrict(b, lambda x: x)
+        yS = jl.mkSensitive(b, 43, 3)
 
-    lst = [xS, 2, yS]
-    self.assertEquals(jl.concretize(True, 42 in lst) , True)
-    self.assertEquals(jl.concretize(False, 42 in lst) , False)
-    self.assertEquals(jl.concretize(True, 1 in lst) , False)
-    self.assertEquals(jl.concretize(False, 1 in lst) , True)
-    self.assertEquals(jl.concretize(True, 43 in lst) , True)
-    self.assertEquals(jl.concretize(False, 43 in lst) , False)
-    self.assertEquals(jl.concretize(True, 3 in lst) , False)
-    self.assertEquals(jl.concretize(False, 3 in lst) , True)
+        lst = [xS, 2, yS]
+        self.assertEquals(jl.concretize(True, 42 in lst) , True)
+        self.assertEquals(jl.concretize(False, 42 in lst) , False)
+        self.assertEquals(jl.concretize(True, 1 in lst) , False)
+        self.assertEquals(jl.concretize(False, 1 in lst) , True)
+        self.assertEquals(jl.concretize(True, 43 in lst) , True)
+        self.assertEquals(jl.concretize(False, 43 in lst) , False)
+        self.assertEquals(jl.concretize(True, 3 in lst) , False)
+        self.assertEquals(jl.concretize(False, 3 in lst) , True)
+        self.assertEquals(jl.concretize(True, 42 in lst) , True)
+        self.assertEquals(jl.concretize(False, 42 in lst) , False)
+        self.assertEquals(jl.concretize(True, 1 in lst) , False)
+        self.assertEquals(jl.concretize(False, 1 in lst) , True)
+        self.assertEquals(jl.concretize(True, 43 in lst) , True)
+        self.assertEquals(jl.concretize(False, 43 in lst) , False)
+        self.assertEquals(jl.concretize(True, 3 in lst) , False)
+        self.assertEquals(jl.concretize(False, 3 in lst) , True)
 
-  @jeeves
-  def test_list(self):
-    jl = JeevesLib
-    x = jl.mkLabel('x')
-    jl.restrict(x, lambda ctxt : ctxt)
+    @jeeves
+    def test_list(self):
+        jl = JeevesLib
+        jl.clear_cache()
 
-    l = jl.mkSensitive(x, [40,41,42], [0,1,2,3])
+        x = jl.mkLabel('x')
+        jl.restrict(x, lambda ctxt : ctxt)
 
-    self.assertEqual(jl.concretize(True, l[0]), 40)
-    self.assertEqual(jl.concretize(True, l[1]), 41)
-    self.assertEqual(jl.concretize(True, l[2]), 42)
-    self.assertEqual(jl.concretize(False, l[0]), 0)
-    self.assertEqual(jl.concretize(False, l[1]), 1)
-    self.assertEqual(jl.concretize(False, l[2]), 2)
-    self.assertEqual(jl.concretize(False, l[3]), 3)
+        l = jl.mkSensitive(x, [40,41,42], [0,1,2,3])
 
-    self.assertEqual(jl.concretize(True, l.__len__()), 3)
-    self.assertEqual(jl.concretize(False, l.__len__()), 4)
+        self.assertEqual(jl.concretize(True, l[0]), 40)
+        self.assertEqual(jl.concretize(True, l[1]), 41)
+        self.assertEqual(jl.concretize(True, l[2]), 42)
+        self.assertEqual(jl.concretize(False, l[0]), 0)
+        self.assertEqual(jl.concretize(False, l[1]), 1)
+        self.assertEqual(jl.concretize(False, l[2]), 2)
+        self.assertEqual(jl.concretize(False, l[3]), 3)
+        self.assertEqual(jl.concretize(True, l[0]), 40)
+        self.assertEqual(jl.concretize(True, l[1]), 41)
+        self.assertEqual(jl.concretize(True, l[2]), 42)
+        self.assertEqual(jl.concretize(False, l[0]), 0)
+        self.assertEqual(jl.concretize(False, l[1]), 1)
+        self.assertEqual(jl.concretize(False, l[2]), 2)
+        self.assertEqual(jl.concretize(False, l[3]), 3)
 
-    l[1] = 19
+        self.assertEqual(jl.concretize(True, l.__len__()), 3)
+        self.assertEqual(jl.concretize(False, l.__len__()), 4)
+        self.assertEqual(jl.concretize(True, l.__len__()), 3)
+        self.assertEqual(jl.concretize(False, l.__len__()), 4)
 
-    self.assertEqual(jl.concretize(True, l[0]), 40)
-    self.assertEqual(jl.concretize(True, l[1]), 19)
-    self.assertEqual(jl.concretize(True, l[2]), 42)
-    self.assertEqual(jl.concretize(False, l[0]), 0)
-    self.assertEqual(jl.concretize(False, l[1]), 19)
-    self.assertEqual(jl.concretize(False, l[2]), 2)
-    self.assertEqual(jl.concretize(False, l[3]), 3)
+        l[1] = 19
 
-  @jeeves
-  def test_jmap(self):
-    x = JeevesLib.mkLabel('x')
-    JeevesLib.restrict(x, lambda ctxt : ctxt)
+        self.assertEqual(jl.concretize(True, l[0]), 40)
+        self.assertEqual(jl.concretize(True, l[1]), 19)
+        self.assertEqual(jl.concretize(True, l[2]), 42)
+        self.assertEqual(jl.concretize(False, l[0]), 0)
+        self.assertEqual(jl.concretize(False, l[1]), 19)
+        self.assertEqual(jl.concretize(False, l[2]), 2)
+        self.assertEqual(jl.concretize(False, l[3]), 3)
+        self.assertEqual(jl.concretize(True, l[0]), 40)
+        self.assertEqual(jl.concretize(True, l[1]), 19)
+        self.assertEqual(jl.concretize(True, l[2]), 42)
+        self.assertEqual(jl.concretize(False, l[0]), 0)
+        self.assertEqual(jl.concretize(False, l[1]), 19)
+        self.assertEqual(jl.concretize(False, l[2]), 2)
+        self.assertEqual(jl.concretize(False, l[3]), 3)
 
-    l = JeevesLib.mkSensitive(x, [0,1,2], [3,4,5,6])
-    m = [x*x for x in l]
+    @jeeves
+    def test_jmap(self):
+        JeevesLib.clear_cache()
 
-    self.assertEqual(JeevesLib.concretize(True, m[0]), 0)
-    self.assertEqual(JeevesLib.concretize(True, m[1]), 1)
-    self.assertEqual(JeevesLib.concretize(True, m[2]), 4)
-    self.assertEqual(JeevesLib.concretize(False, m[0]), 9)
-    self.assertEqual(JeevesLib.concretize(False, m[1]), 16)
-    self.assertEqual(JeevesLib.concretize(False, m[2]), 25)
-    self.assertEqual(JeevesLib.concretize(False, m[3]), 36)
+        x = JeevesLib.mkLabel('x')
+        JeevesLib.restrict(x, lambda ctxt : ctxt)
 
-  @jeeves
-  def test_jmap_for(self):
-    x = JeevesLib.mkLabel('x')
-    JeevesLib.restrict(x, lambda ctxt : ctxt)
+        l = JeevesLib.mkSensitive(x, [0,1,2], [3,4,5,6])
+        m = [x*x for x in l]
 
-    l = JeevesLib.mkSensitive(x, [0,1,2], [3,4,5,6])
-    m = 0
-    for t in l:
-      m = m + t*t
+        self.assertEqual(JeevesLib.concretize(True, m[0]), 0)
+        self.assertEqual(JeevesLib.concretize(True, m[1]), 1)
+        self.assertEqual(JeevesLib.concretize(True, m[2]), 4)
+        self.assertEqual(JeevesLib.concretize(False, m[0]), 9)
+        self.assertEqual(JeevesLib.concretize(False, m[1]), 16)
+        self.assertEqual(JeevesLib.concretize(False, m[2]), 25)
+        self.assertEqual(JeevesLib.concretize(False, m[3]), 36)
+        self.assertEqual(JeevesLib.concretize(True, m[0]), 0)
+        self.assertEqual(JeevesLib.concretize(True, m[1]), 1)
+        self.assertEqual(JeevesLib.concretize(True, m[2]), 4)
+        self.assertEqual(JeevesLib.concretize(False, m[0]), 9)
+        self.assertEqual(JeevesLib.concretize(False, m[1]), 16)
+        self.assertEqual(JeevesLib.concretize(False, m[2]), 25)
+        self.assertEqual(JeevesLib.concretize(False, m[3]), 36)
+    
+    @jeeves
+    def test_jmap_for(self):
+        JeevesLib.clear_cache()
 
-    self.assertEqual(JeevesLib.concretize(True, m), 5)
-    self.assertEqual(JeevesLib.concretize(False, m), 86)
+        x = JeevesLib.mkLabel('x')
+        JeevesLib.restrict(x, lambda ctxt : ctxt)
 
-  @jeeves
-  def test_jlist(self):
-    x = JeevesLib.mkLabel('x')
-    JeevesLib.restrict(x, lambda ctxt : ctxt)
+        l = JeevesLib.mkSensitive(x, [0,1,2], [3,4,5,6])
+        m = 0
+        for t in l:
+            m = m + t*t
 
-    l = JeevesLib.mkSensitive(x, [0,1,2], [3,4,5,6])
-    if x:
-      l.append(10)
-    else:
-      l.append(11)
+        self.assertEqual(JeevesLib.concretize(True, m), 5)
+        self.assertEqual(JeevesLib.concretize(False, m), 86)
+        self.assertEqual(JeevesLib.concretize(True, m), 5)
+        self.assertEqual(JeevesLib.concretize(False, m), 86)
 
-    self.assertEqual(JeevesLib.concretize(True, l[0]), 0)
-    self.assertEqual(JeevesLib.concretize(True, l[1]), 1)
-    self.assertEqual(JeevesLib.concretize(True, l[2]), 2)
-    self.assertEqual(JeevesLib.concretize(True, l[3]), 10)
-    self.assertEqual(JeevesLib.concretize(False, l[0]), 3)
-    self.assertEqual(JeevesLib.concretize(False, l[1]), 4)
-    self.assertEqual(JeevesLib.concretize(False, l[2]), 5)
-    self.assertEqual(JeevesLib.concretize(False, l[3]), 6)
-    self.assertEqual(JeevesLib.concretize(False, l[4]), 11)
+    @jeeves
+    def test_jlist(self):
+        JeevesLib.clear_cache()
 
-    if x:
-        l[0] = 20
-    self.assertEqual(JeevesLib.concretize(True, l[0]), 20)
-    self.assertEqual(JeevesLib.concretize(False, l[0]), 3)
+        x = JeevesLib.mkLabel('x')
+        JeevesLib.restrict(x, lambda ctxt : ctxt)
 
-  @jeeves
-  def test_or_in_lambda(self):
-    x = JeevesLib.mkLabel()
-    JeevesLib.restrict(x, lambda oc: oc == 1 or oc == 2)
-    self.assertTrue(JeevesLib.concretize(1, x))
-    self.assertTrue(JeevesLib.concretize(2, x))
-    self.assertFalse(JeevesLib.concretize(3, x))
+        l = JeevesLib.mkSensitive(x, [0,1,2], [3,4,5,6])
+        if x:
+            l.append(10)
+        else:
+            l.append(11)
 
-  @jeeves
-  def test_return(self):
-    x = JeevesLib.mkLabel('x')
-    JeevesLib.restrict(x, lambda ctxt : ctxt)
+        self.assertEqual(JeevesLib.concretize(True, l[0]), 0)
+        self.assertEqual(JeevesLib.concretize(True, l[1]), 1)
+        self.assertEqual(JeevesLib.concretize(True, l[2]), 2)
+        self.assertEqual(JeevesLib.concretize(True, l[3]), 10)
+        self.assertEqual(JeevesLib.concretize(False, l[0]), 3)
+        self.assertEqual(JeevesLib.concretize(False, l[1]), 4)
+        self.assertEqual(JeevesLib.concretize(False, l[2]), 5)
+        self.assertEqual(JeevesLib.concretize(False, l[3]), 6)
+        self.assertEqual(JeevesLib.concretize(False, l[4]), 11)
+        self.assertEqual(JeevesLib.concretize(True, l[0]), 0)
+        self.assertEqual(JeevesLib.concretize(True, l[1]), 1)
+        self.assertEqual(JeevesLib.concretize(True, l[2]), 2)
+        self.assertEqual(JeevesLib.concretize(True, l[3]), 10)
+        self.assertEqual(JeevesLib.concretize(False, l[0]), 3)
+        self.assertEqual(JeevesLib.concretize(False, l[1]), 4)
+        self.assertEqual(JeevesLib.concretize(False, l[2]), 5)
+        self.assertEqual(JeevesLib.concretize(False, l[3]), 6)
+        self.assertEqual(JeevesLib.concretize(False, l[4]), 11)
 
-    y = [5]
+        if x:
+            l[0] = 20
+        self.assertEqual(JeevesLib.concretize(True, l[0]), 20)
+        self.assertEqual(JeevesLib.concretize(False, l[0]), 3)
+        self.assertEqual(JeevesLib.concretize(True, l[0]), 20)
+        self.assertEqual(JeevesLib.concretize(False, l[0]), 3)
 
-    def awesome_function():
-      y[0] = 7
-      if x:
-        return 30
-      y[0] = 19
-      return 17
+    @jeeves
+    def test_scope(self):
+        JeevesLib.clear_cache()
 
-    z = awesome_function()
+        x = JeevesLib.mkLabel('x')
+        JeevesLib.restrict(x, lambda ctxt : ctxt)
 
-    self.assertEqual(JeevesLib.concretize(True, y[0]), 7)
-    self.assertEqual(JeevesLib.concretize(False, y[0]), 19)
-    self.assertEqual(JeevesLib.concretize(True, z), 30)
-    self.assertEqual(JeevesLib.concretize(False, z), 17)
+        y = 5
 
-  @jeeves
-  def test_scope(self):
-    x = JeevesLib.mkLabel('x')
-    JeevesLib.restrict(x, lambda ctxt : ctxt)
+        def awesome_function():
+            y = 7
+            if x:
+                return 30
+            y = 19
+            return 17
 
-    y = 5
+        z = awesome_function()
 
-    def awesome_function():
-      y = 7
-      if x:
-        return 30
-      y = 19
-      return 17
-
-    z = awesome_function()
-
-    self.assertEqual(JeevesLib.concretize(True, y), 5)
-    self.assertEqual(JeevesLib.concretize(False, y), 5)
-    self.assertEqual(JeevesLib.concretize(True, z), 30)
-    self.assertEqual(JeevesLib.concretize(False, z), 17)
-    '''
+        self.assertEqual(JeevesLib.concretize(True, y), 5)
+        self.assertEqual(JeevesLib.concretize(False, y), 5)
+        self.assertEqual(JeevesLib.concretize(True, z), 30)
+        self.assertEqual(JeevesLib.concretize(False, z), 17)
+        self.assertEqual(JeevesLib.concretize(True, y), 5)
+        self.assertEqual(JeevesLib.concretize(False, y), 5)
+        self.assertEqual(JeevesLib.concretize(True, z), 30)
+        self.assertEqual(JeevesLib.concretize(False, z), 17)
 
     @jeeves
     def test_jfun(self):

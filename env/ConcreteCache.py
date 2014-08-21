@@ -45,11 +45,9 @@ class ConcreteCache(object):
         :returns: The concrete (non-faceted) version of T under the policies
         in the environment.
         """
-        key = str(hash(pickle.dumps(ctxt))) + "__" + \
+        return str(hash(pickle.dumps(ctxt))) + "__" + \
             str(hash(pickle.dumps(val))) + "__" + \
             str(hash(pickle.dumps(pathvars)))
-        print key
-        return key
 
     def cache_value(self, cache_key, cache_value):
         """Caches the value if caching is turned on.

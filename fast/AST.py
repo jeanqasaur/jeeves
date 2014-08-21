@@ -645,6 +645,8 @@ class Not(UnaryExpr):
     return z3.Not(self.sub.z3Node())
   def remapLabels(self, policy, writer):
     return Not(self.sub.remapLabels(policy, writer))
+  def __getstate__(self):
+    return "(Not(%s))" % self.sub.__getstate__()
 
 # Doesn't correspond to a Python operator but is useful
 class Implies(BinaryExpr):
@@ -687,6 +689,9 @@ class Lt(BinaryExpr):
     return Lt(
         self.left.remapLabels(policy, writer)
       , self.right.remapLabels(policy, writer))
+  def __getstate__(self):
+    return "(Lt(%s)(%s))" % \
+      (self.left.__getstate__(), self.right.__getstate__())
 
 class LtE(BinaryExpr):
   opr = staticmethod(operator.le)
@@ -699,6 +704,9 @@ class LtE(BinaryExpr):
     return LtE(
         self.left.remapLabels(policy, writer)
       , self.right.remapLabels(policy, writer))
+  def __getstate__(self):
+    return "(LtE(%s)(%s))" % \
+      (self.left.__getstate__(), self.right.__getstate__())
 
 class Gt(BinaryExpr):
   opr = staticmethod(operator.gt)
@@ -711,6 +719,9 @@ class Gt(BinaryExpr):
     return Gt(
         self.left.remapLabels(policy, writer)
       , self.right.remapLabels(policy, writer))
+  def __getstate__(self):
+    return "(Gt(%s)(%s))" % \
+      (self.left.__getstate__(), self.right.__getstate__())
 
 class GtE(BinaryExpr):
   opr = staticmethod(operator.ge)
@@ -723,6 +734,9 @@ class GtE(BinaryExpr):
     return GtE(
         self.left.remapLabels(policy, writer)
       , self.right.remapLabels(policy, writer))
+  def __getstate__(self):
+    return "(GtE(%s)(%s))" % \
+      (self.left.__getstate__(), self.right.__getstate__())
 
 class Unassigned(FExpr):
   def __init__(self, thing_not_found):
