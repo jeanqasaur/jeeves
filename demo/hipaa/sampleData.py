@@ -193,8 +193,6 @@ dataVisit = data.Visits.create(Visit = visit3)
 dataVisit = data.Visits.create(Visit = visit4)
 
 ###USERS###
-
-
 arielj=User()
 arielj.username="arielj321"
 arielj.first_name="Ariel"

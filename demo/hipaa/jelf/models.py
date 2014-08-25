@@ -6,10 +6,27 @@ from django.contrib.auth.models import User
 from jeevesdb.JeevesModel import JeevesForeignKey as ForeignKey
 from jeevesdb.JeevesModel import label_for
 from datetime import date
-from jelf import restrictedZipCodes
+#from jelf import restrictedZipCodes
 
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
+
+import csv
+import os
+
+file=open(os.path.join(settings.BASE_DIR, '2010ZipcodePopulation.csv'))
+reader = csv.reader(file)
+zipCodes = {}
+reader.next()
+for row in reader:
+  zipCodes[row[0]]=int(row[1])
+
+restrictedZipCodes={}
+for code in zipCodes:
+  if code[:3] in restrictedZipCodes:
+    restrictedZipCodes[code[:3]]+=zipCodes[code]
+  else:
+    restrictedZipCodes[code[:3]]=zipCodes[code]
 
 class Address(Model):
 	"""
@@ -112,12 +129,12 @@ class Individual(Model):
 	@label_for('FirstName','LastName','Email','Address','BirthDate','SSN','TelephoneNumber','FaxNumber','DriversLicenseNumber','Employer')
 	@jeeves
 	def jeeves_restrict_Individuallabel1(individual, ctxt):
-		return ctxt.type==1 and ctxt.individual==individual
+		return ctxt != None and ctxt.type==1 and ctxt.individual==individual
 
 	@staticmethod
 	@label_for('ReligiousAffiliation')
 	def jeeves_restrict_Individuallabel_ForReligiousAffiliation(individual, ctxt):
-		return ctxt.type==1 and ctxt.individual==individual
+		return ctxt != None and ctxt.type==1 and ctxt.individual==individual
 
 class BusinessAssociate(Model):
 	"""
