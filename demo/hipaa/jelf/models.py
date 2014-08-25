@@ -1,6 +1,7 @@
 from django.db.models import ManyToManyField, ForeignKey, OneToOneField, CharField, TextField, DateField, DateTimeField, IntegerField, FileField, BooleanField
 
 from jeevesdb.JeevesModel import JeevesModel as Model
+from django.conf import settings
 from django.contrib.auth.models import User
 from jeevesdb.JeevesModel import JeevesForeignKey as ForeignKey
 from jeevesdb.JeevesModel import label_for
@@ -365,9 +366,10 @@ class UserPCConflict(Model):
 
 from django.dispatch import receiver
 from django.db.models.signals import post_syncdb
+import os
 import sys
 current_module = sys.modules[__name__]
 
 @receiver(post_syncdb, sender=current_module)
 def dbSynced(sender, **kwargs):
-	execfile("sampleData.py")
+	execfile(os.path.join(settings.BASE_DIR, '..', "sampleData.py"))

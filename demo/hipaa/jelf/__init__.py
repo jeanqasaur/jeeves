@@ -2,8 +2,12 @@
 # we need to active it here (since this file will always get imported
 # first).
 
+from django.conf import settings
 import csv
-file=open('jelf/2010ZipcodePopulation.csv')
+import os
+
+# TODO: Move this somewhere else?
+file=open(os.path.join(settings.BASE_DIR, '2010ZipcodePopulation.csv'))
 reader = csv.reader(file)
 zipCodes = {}
 reader.next()
