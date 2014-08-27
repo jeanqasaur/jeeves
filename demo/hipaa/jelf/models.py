@@ -16,17 +16,18 @@ import os
 class Address(Model):
     """Mailing address of a person's residency.
     """
-    Street = CharField(max_length=100, blank=True, null = True
+    Street = CharField(max_length=100, blank=True, null=True
         , help_text="Number and name of street")
-    City=CharField(max_length=30, help_text="Name of City")
-    State=CharField(max_length=20
+    City = CharField(max_length=30, help_text="Name of City")
+    State = CharField(max_length=20
         , help_text="Two-letter abbreviation for state")
-    ZipCode=CharField(max_length=5, help_text="Zip Code")
+    ZipCode = CharField(max_length=5, help_text="Zip Code")
 
     def String(self):
         """Returns a string representation of this address.
 		    """
         return self.Street+"\n"+self.ZipCode+" "+self.City+", "+self.State
+    
     class Meta:
         db_table = 'Address'
 
@@ -73,28 +74,29 @@ class Individual(Model):
     # unautomizable.
     @staticmethod
     def jeeves_get_private_Address(individual):
-        file=open(os.path.join(settings.BASE_DIR, '2010ZipcodePopulation.csv'))
-        reader = csv.reader(file)
-        zipCodes = {}
+        zipcode_file = open(
+            os.path.join(settings.BASE_DIR, '2010ZipcodePopulation.csv'))
+        reader = csv.reader(zipcode_file)
+        zip_codes = {}
         reader.next()
         for row in reader:
-            zipCodes[row[0]]=int(row[1])
+            zip_codes[row[0]]=int(row[1])
 
-        restrictedZipCodes={}
-        for code in zipCodes:
-            if code[:3] in restrictedZipCodes:
-                restrictedZipCodes[code[:3]]+=zipCodes[code]
+        restricted_zip_codes={}
+        for code in zip_codes:
+            if code[:3] in restricted_zip_codes:
+                restricted_zip_codes[code[:3]]+=zip_codes[code]
             else:
-                restrictedZipCodes[code[:3]]=zipCodes[code]
+                restricted_zip_codes[code[:3]]=zip_codes[code]
 
-        zipCode="00000"
-        if restrictedZipCodes[individual.Address.ZipCode[:3]]>20000:
-            zipCode = individual.Address.ZipCode[:3]+"00"
+        zip_code="00000"
+        if restricted_zip_codes[individual.Address.ZipCode[:3]]>20000:
+            zip_code = individual.Address.ZipCode[:3]+"00"
         
-        newAddress = Address.objects.create(
+        new_address = Address.objects.create(
               City=individual.Address.City
-            , State=individual.Address.State,ZipCode=zipCode)
-        return newAddress
+            , State=individual.Address.State,ZipCode=zip_code)
+        return new_address
 
     @staticmethod
     def jeeves_get_private_Email(individual):
@@ -338,16 +340,16 @@ class Transaction(Model):
     """
     Standard = CharField(max_length=100
         , help_text="Standard that the transaction abides by")
-    FirstParty = ForeignKey(CoveredEntity, related_name = "SomeTransactions"
+    FirstParty = ForeignKey(CoveredEntity, related_name="SomeTransactions"
         , help_text="First Covered Entity transferring data")
-    SecondParty = ForeignKey(CoveredEntity, related_name = "MoreTransactions"
+    SecondParty = ForeignKey(CoveredEntity, related_name="MoreTransactions"
         , help_text="Second Covered Entity transferring data")
     SharedInformation = ForeignKey(InformationTransferSet
         , help_text="Data shared from one entity to another")
     DateRequested = DateField(help_text="Date the data transfer was requested")
     DateResponded = DateField(help_text="Date the data transfer was responded \
         to")
-    Purpose = TextField(blank=True, null = True
+    Purpose = TextField(blank=True, null=True
         , help_text="Purpose for the data transfer")
 
     class Meta:
@@ -386,8 +388,8 @@ class PersonalRepresentative(Model):
     Dependent = ForeignKey(Individual
         , help_text="Patient for whom decisions are made.")
     Representative = ForeignKey(Individual, related_name='Dependents'
-        , help_text ="Individual making decisions for another.")
-    Parent = BooleanField(help_text ="If the representative has the right to \
+        , help_text="Individual making decisions for another.")
+    Parent = BooleanField(help_text="If the representative has the right to \
         be the representative because of a parental status.")
 
     class Meta:
@@ -403,9 +405,12 @@ class UserProfile(Model):
         4=Government, 5=Research, 6=Clergy")
     name = CharField(max_length=1024
         , help_text="The user's name. Not sure if this is ever needed")
-    entity = ForeignKey(CoveredEntity, blank=True, null=True, help_text="The covered entity this user represents")
-    associate = ForeignKey(BusinessAssociate, blank=True, null=True, help_text="The business associate this user represents")
-    individual = ForeignKey(Individual, blank=True, null=True, help_text="The individual this user represents")
+    entity = ForeignKey(CoveredEntity, blank=True, null=True
+        , help_text="The covered entity this user represents")
+    associate = ForeignKey(BusinessAssociate, blank=True, null=True
+        , help_text="The business associate this user represents")
+    individual = ForeignKey(Individual, blank=True, null=True
+        , help_text="The individual this user represents")
 
     '''
     @staticmethod
@@ -422,7 +427,6 @@ class UserProfile(Model):
 
 from django.dispatch import receiver
 from django.db.models.signals import post_syncdb
-import os
 import sys
 current_module = sys.modules[__name__]
 
