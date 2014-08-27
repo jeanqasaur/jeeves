@@ -11,7 +11,7 @@
         <label for="{{ field.name }}" class="control-label"><a rel="tooltip" title="{{ field.privacy }}"><span class="glyphicon glyphicon-eye-close"></span></a> {{ field.label }}</label>
         <div class="row">
           <div class="col-xs-4">
-            <input type="{{ field.inputtype }}" class="form-control" name="{{ field.name }}" id="{{ field.name }}" value="{{ concretize(field.val) }}" {% if concretize(field.disabled) %}disabled{% endif %}>
+            <input type="{{ field.inputtype }}" class="form-control" name="{{ field.name }}" id="{{ field.name }}" value="{{ concretize(field.val) }}" {% if concretize(field.disabled) %}disabled{% endif %} {% if concretize(field.required) %}required{% endif %}>
           </div>
         </div>
       </div>
