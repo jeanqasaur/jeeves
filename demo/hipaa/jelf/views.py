@@ -55,7 +55,6 @@ INFORMATION_SET = {
        , "Condition" : "Recovering"
        , "ReligiousAffiliation" : "None"}]}
 
-@jeeves
 def register_account(request):
     """Account registration.
     """
@@ -66,6 +65,7 @@ def register_account(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
+            email = request.POST.get('email', '')
             user.save()
 
             profiletype = request.POST.get('profiletype', '')
@@ -85,8 +85,8 @@ def register_account(request):
             password=request.POST['password1'])
             login(request, user)
             return HttpResponseRedirect("index")
-        else:
-            form = UserCreationForm()
+    else:
+        form = UserCreationForm()
 
     return render_to_response("registration/account.html"
         , RequestContext(request,
@@ -138,14 +138,14 @@ def request_wrapper(view_fn):
 @login_required
 @request_wrapper
 @jeeves
-def index(request, user):
+def index(request, profile):
     """The main page shows patients and entities.
     """
     patients = Individual.objects.all()
     entities = CoveredEntity.objects.all()
     data = {"patients": patients
           , "entities": entities
-          , 'name' : user.name}
+          , 'name': profile.name}
     return ("index.html", data)
 
 @request_wrapper
@@ -191,10 +191,8 @@ def profile_view(request, profile):
 
     fields = [FormField("email", "Visible only to you", "Email", "email"
                , profile.user.email)
-             , FormField("firstname", "Visible to everyone", "First name"
-                , "text", profile.user.first_name)
-             , FormField("lastname", "Visible to everyone", "Last name", "text"
-                , profile.user.last_name)
+             , FormField("name", "Visible to everyone", "Name"
+                , "text", profile.name)
              , FormField("profiletype", "Visible to everyone", "Type", "text"
                 , profile.profiletype)]
 
