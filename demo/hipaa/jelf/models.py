@@ -14,6 +14,7 @@ import JeevesLib
 import csv
 import os
 
+# TODO: Figure out what this is.
 file=open(os.path.join(settings.BASE_DIR, '2010ZipcodePopulation.csv'))
 reader = csv.reader(file)
 zipCodes = {}
