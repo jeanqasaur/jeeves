@@ -50,7 +50,18 @@ house5=Address.objects.create(
 	Street="7 Backends",
 	ZipCode="14830")
 
-ariel = Individual.objects.create(
+'''
+Individuals.
+'''
+jean=Individual.objects.create(
+    FirstName="Jean"
+  , LastName="Yang"
+  , Email="jean@example.com"
+  , Sex="Female"
+  , BirthDate=date(1900,01,01)
+  , Address=house1)
+
+ariel=Individual.objects.create(
 	FirstName="Ariel",
 	LastName="Jacobs",
 	Email="ariel@example.com",
@@ -58,7 +69,7 @@ ariel = Individual.objects.create(
 	BirthDate=date(1993,03,21),
 	Address=arielsHouse)
 
-joe = Individual.objects.create(FirstName="Joe",
+joe=Individual.objects.create(FirstName="Joe",
     LastName="McGrand",
     BirthDate = date(1979,2,13),
     Address = joesHouse,
@@ -191,23 +202,34 @@ visit4.save()
 dataVisit = data.Visits.create(Visit = visit2)
 dataVisit = data.Visits.create(Visit = visit3)
 dataVisit = data.Visits.create(Visit = visit4)
+'''
 
 ###USERS###
-arielj=User()
-arielj.username="arielj321"
-arielj.first_name="Ariel"
-arielj.last_name="Jacobs"
-arielj.email="ariel@example.com"
-arielj.set_password("hipaaRules")
-arielj.save()
+jeanyang=User.objects.create_user(
+      username="jeanyang"
+    , first_name="Jean"
+    , last_name="Yang"
+    , email="ariel@example.com"
+    , password="hi")
 
-arielProfile=UserProfile()
-arielProfile.type=1
-arielProfile.user=arielj
-arielProfile.individual=ariel
-arielProfile.save()
+jeanyangProfile=UserProfile.objects.create(
+      profiletype=1
+    , user=jeanyang
+    , individual=jean)
 
+arielj=User.objects.create_user(
+      username="arielj321"
+    , first_name="Ariel"
+    , last_name="Jacobs"
+    , email="ariel@example.com"
+    , password="hipaaRules")
 
+arielProfile=UserProfile.objects.create(
+      profiletype=1
+    , user=arielj
+    , individual=ariel)
+
+'''
 mcJoe=User()
 mcJoe.username="mcjoe"
 mcJoe.first_name="Joe"
@@ -221,8 +243,9 @@ joeProfile.type=1
 joeProfile.user=mcJoe
 joeProfile.individual=joe
 joeProfile.save()
+'''
 
-
+'''
 vnational=User()
 vnational.username="vnational"
 vnational.set_password("hipaaRules")

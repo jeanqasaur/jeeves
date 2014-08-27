@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from jeevesdb.JeevesModel import JeevesForeignKey as ForeignKey
 from jeevesdb.JeevesModel import label_for
-from datetime import date
+from datetime import date, timedelta
 #from jelf import restrictedZipCodes
 
 from sourcetrans.macro_module import macros, jeeves
@@ -96,10 +96,11 @@ class Individual(Model):
 	def jeeves_get_private_BirthDate(individual):
 		if individual.BirthDate==None:
 			return None
-		if date.today().year - individual.BirthDate.year>90:
-			return individual.BirthDate-timedelta(years=90)
-		else:
-			return date(individual.BirthDate.year,1,1)
+		# TODO: Figure out what was supposed to happen here...
+    #if date.today().year - individual.BirthDate.year>90:
+		#	return individual.BirthDate-timedelta(years=90)
+		#else:
+		return date(individual.BirthDate.year,1,1)
 
 	@staticmethod
 	def jeeves_get_private_SSN(individual):
@@ -344,7 +345,7 @@ class UserProfile(Model):
 	"""
 	user = ForeignKey(User, help_text="User this information is about")
 	email = CharField(max_length=1024, help_text="The user's email address")
-	type = IntegerField(help_text="Type of body this user is about. 0=None, 1=Individual, 2=CoveredEntity, 3=BusinessAssociate, 4=Government, 5=Research, 6=Clergy")
+	profiletype = IntegerField(help_text="Type of body this user is about. 0=None, 1=Individual, 2=CoveredEntity, 3=BusinessAssociate, 4=Government, 5=Research, 6=Clergy")
 	name = CharField(max_length=1024, help_text="The user's name. Not sure if this is ever needed")
 	entity = ForeignKey(CoveredEntity, blank=True, null=True, help_text="The covered entity this user represents")
 	associate = ForeignKey(BusinessAssociate, blank=True, null=True, help_text="The business associate this user represents")

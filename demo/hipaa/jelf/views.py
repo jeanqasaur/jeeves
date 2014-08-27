@@ -154,7 +154,7 @@ def request_wrapper(view_fn):
 	def real_view_fn(request, *args, **kwargs):
 		try:
 			profile = UserProfile.objects.get(user=request.user)
-			ans = view_fn(request, *args, **kwargs)
+			ans = view_fn(request, profile, *args, **kwargs)
 			template_name = ans[0]
 			context_dict = ans[1]
 
@@ -179,8 +179,7 @@ def request_wrapper(view_fn):
 @login_required
 @request_wrapper
 @jeeves
-def index(request, **kwargs):
-	user = UserProfile.objects.get(user=request.user)
+def index(request, user, **kwargs):
 	patients = Individual.objects.all()
 	entities = CoveredEntity.objects.all()
 	data = {
@@ -192,7 +191,7 @@ def index(request, **kwargs):
 
 @request_wrapper
 @jeeves
-def about_view(request):
+def about_view(request, user):
   return ( "about.html"
          , { 'which_page' : "about" } )
 
@@ -203,34 +202,41 @@ def set_random_name(contents):
 @login_required
 @request_wrapper
 @jeeves
-def profile_view(request):
-	profile = UserProfile.objects.get(username=request.user.username)
-	if profile == None:
-		profile = UserProfile(username=request.user.username)
-	pcs = UserProfile.objects.all()
-	if request.method == 'POST':
-		profile.name = request.POST.get('name', '')
-		profile.type=request.POST.get('type','')
-		profile.email = request.POST.get('email', '')
-		profile.save()
+def profile_view(request, profile):
+  class FormField:
+    def __init__(self, name, privacy, label, inputtype, val):
+      self.name = name
+      self.privacy = privacy
+      self.label = label
+      self.inputtype = inputtype
+      self.val = val
 
-	UserPCConflict.objects.filter(user=profile).delete()
-	pc_conflicts = []
-	for conf in request.POST.getlist('pc_conflicts[]'):
-		new_pc_conflict = UserProfile.objects.get(username=conf)
-		UserPCConflict.objects.create(user=profile, pc=new_pc_conflict)
-		pc_conflicts.append(new_pc_conflict)
-	else:
-		pc_conflicts = [uppc.pc for uppc in UserPCConflict.objects.filter(user=profile).all()]
+  if profile == None:
+    profile = UserProfile(user=request.user)
+	  
+  if request.method == 'POST':
+    profile.user.first_name = request.POST.get('firstname', '')
+    profile.user.last_name = request.POST.get('lastname', '')
+    profile.user.email = request.POST.get('email', '')
+    profile.user.save()
 
-	return ("profile.html", {
-		"name": profile.name,
-		"pc_conflicts": pc_conflicts,
-		"email": profile.email,
-		"pcs": pcs,
-		"which_page": "profile",
-		"pcs": [{'pc':pc, 'conflict':pc in pc_conflicts} for pc in pcs],
-	})
+    profile.profiletype = int(request.POST.get('profiletype','1'))
+    profile.save()
+
+  fields = [ FormField("email", "Visible only to you", "Email", "email"
+               , profile.user.email)
+           , FormField("firstname", "Visible to everyone", "First name", "text"
+               , profile.user.first_name)
+           , FormField("lastname", "Visible to everyone", "Last name", "text"
+               , profile.user.last_name)
+           , FormField("profiletype", "Visible to everyone", "Type", "text"
+               , profile.profiletype)
+           , ]
+
+  return ("profile.html", {
+      "fields": fields
+    , "which_page": "profile"
+  })
 
 @login_required
 @request_wrapper
