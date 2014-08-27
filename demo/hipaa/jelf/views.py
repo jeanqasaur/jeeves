@@ -166,23 +166,27 @@ def profile_view(request, profile):
     class FormField(object):
         """Field of a profile form.
         """
-        def __init__(self, name, privacy, label, inputtype, val):
+        def __init__(self, name, privacy, label, inputtype, val, disabled=True):
             self.name = name
             self.privacy = privacy
             self.label = label
             self.inputtype = inputtype
             self.val = val
+            self.disabled = disabled
+            self.required = self.disabled
 
     if profile == None:
         profile = UserProfile(user=request.user)
 
     if request.method == 'POST':
+        '''
         profile.user.first_name = request.POST.get('firstname', '')
         profile.user.last_name = request.POST.get('lastname', '')
         profile.user.email = request.POST.get('email', '')
         profile.user.save()
 
         profile.profiletype = int(request.POST.get('profiletype', '1'))
+        '''
         profile.save()
 
     fields = [FormField("email", "Visible only to you", "Email", "email"
