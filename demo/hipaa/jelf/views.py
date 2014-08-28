@@ -206,11 +206,12 @@ def profile_view(request, profile):
 @login_required
 @request_wrapper
 @jeeves
-def users_view(request):
+def users_view(request, profile):
     """Viewing all users.
     """
-    user = UserProfile.objects.get(username=request.user.username)
-    if user.type != 3:
+    # TODO: Have a better mechanism than this for letting someone know they
+    # can't see something.
+    if profile.type != 3:
         return ("redirect", "/index")
 
     user_profiles = UserProfile.objects.all()
@@ -225,7 +226,7 @@ def users_view(request):
 
     return ("users_view.html", {
         'user_profiles': user_profiles,
-        'which_pages' : "users"
+        'which_page' : "users"
     })
 
 @jeeves
@@ -313,7 +314,6 @@ def directory_view(request, profile, entity):
           , "Location" : "228"
           , "Condition" : "Unknown"
           , "ReligiousAffiliation" : "Christian"}]
-    print "RETURNING STUFF NOW"
     return ("directory.html"
             , {"entity":entity, "visits":visits})
 

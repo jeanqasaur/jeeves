@@ -13,9 +13,9 @@
       <ul class="nav navbar-nav">
         <li {% if which_page=="home" or (not which_page) %}class="active"{% endif %} onClick="myApp.showPleaseWait();"><a href="/index">Home</a></li>
         {% if concretize and concretize(is_logged_in) %}
-        <li {% if concretize(which_page)=="submit" %}class="active"{% endif %}><a href="/submit" onClick="myApp.showPleaseWait();">Submit</a></li>
         <li {% if concretize(which_page)=="profile" %}class="active"{% endif %}><a href="/accounts/profile" onClick="myApp.showPleaseWait();">Profile</a></li>
-        <!--<li {% if concretize(which_page)=="papers" %}class="active"{% endif %}><a href="/papers">Papers</a></li>-->
+        <li {% if concretize(which_page)=="users" %}class="active"{% endif %}><a href="/users" onClick="myApp.showPleaseWait();">Users</a></li>
+        <li {% if concretize(which_page)=="about" %}class="active"{% endif %}><a href="/about" onClick="myApp.showPleaseWait();">About</a></li>
         {% endif %}
         {% if concretize and concretize(is_admin) %}
           <li class="dropdown">
