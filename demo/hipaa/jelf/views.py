@@ -271,8 +271,8 @@ def diagnoses_view(request, patient):
 @login_required
 @request_wrapper
 @jeeves
-def info_view(request, patient):
-    """WHAT IS THIS??
+def info_view(request, profile, patient):
+    """Viewing information about an individual.
     """
     p = Individual.objects.get(UID=patient)
     dataset = []
@@ -280,10 +280,16 @@ def info_view(request, patient):
     #print "HI"
     #dataset.append(("Address",p.Address.String(), False))
     #dataset.append(("Social Security Number",p.SSN))
-    return ("info.html", {"patient":p, "dataset":dataset})
+    return ("info.html"
+            , {"patient": p
+             , "dataset": dataset})
 
+@login_required
+@request_wrapper
 @jeeves
-def directory_view(request, entity):
+def directory_view(request, profile, entity):
+    """Viewing...??
+    """
     entity = CoveredEntity.objects.get(EIN=entity)
     visits = entity.Patients.filter(DateReleased=None)
     oldVisits = [
@@ -307,8 +313,9 @@ def directory_view(request, entity):
           , "Location" : "228"
           , "Condition" : "Unknown"
           , "ReligiousAffiliation" : "Christian"}]
-    return render_to_response("directory.html"
-        , RequestContext(request, {"entity":entity, "visits":visits}))
+    print "RETURNING STUFF NOW"
+    return ("directory.html"
+            , {"entity":entity, "visits":visits})
 
 @jeeves
 def transactions_view(request, entity):
