@@ -25,10 +25,10 @@
 				Patients
 			</h3>
 		</lh>
-		{% for patient in range(0) %}
+		{% for patient in concretize(patients) %}
 			<li class="list-group-item">
-				<a href='{{ url("patient", patients[patient].UID) }}'>
-					{{ patients[patient].Name() }}
+				<a href='{{ url("patient", patient.UID) }}'>
+					{{ patient.Name() }}
 				</a>
 			</li>
 		{% endfor %}
@@ -40,10 +40,10 @@
 				Entities
 			</h3>
 		</lh>
-		{% for entity in range(0) %}
+		{% for entity in concretize(entities) %}
 			<li class="list-group-item">
-				<a href='{{ url("entity", entities[entity].EIN) }}'>
-					{{ entities[entity].Name }}
+				<a href='{{ url("entity", entity.EIN) }}'>
+					{{ entity.Name }}
 				</a>
 			</li>
 		{% endfor %}

@@ -143,6 +143,9 @@ def index(request, profile):
     """
     patients = Individual.objects.all()
     entities = CoveredEntity.objects.all()
+    
+    # TODO: Filter out ones you can't see?
+
     data = {"patients": patients
           , "entities": entities
           , 'name': profile.name}
