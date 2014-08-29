@@ -17,7 +17,7 @@ from datetime import date
 #import urllib
 #import random
 
-from jelf.models import Individual, CoveredEntity, UserProfile, Transaction, Treatment
+from jelf.models import Diagnosis, Individual, CoveredEntity, UserProfile, Transaction, Treatment
 
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
@@ -242,12 +242,14 @@ def treatments_view(request, profile, patient):
          , "last_name" : p.LastName
          , "treatments" : treatments})
 
+@login_required
+@request_wrapper
 @jeeves
-def diagnoses_view(request, patient):
+def diagnoses_view(request, profile, patient):
     """Diagnoses.
     """
     p = Individual.objects.get(UID=patient)
-    newDiagnoses = p.diagnosis_set.all()
+    newDiagnoses = Diagnosis.objects.filter(Patient=p)
     diagnoses = [
          {"Manifestation" : "A38.8"
         , "DateRecognized" : date(2012, 10, 17)
@@ -266,10 +268,10 @@ def diagnoses_view(request, patient):
         , "RecognizingEntity" : {"Name" : "Dr. Wragley Medical Center"
                                 , "ID" : 130}
       , "Diagnosis" : "Positive"}]
-    return render_to_response("diagnoses.html"
-        , RequestContext(request
-            , {"name" : p.Name()
-             , "diagnoses" : newDiagnoses}))
+    return ("diagnoses.html"
+            , {"first_name" : p.FirstName
+             , "last_name" : p.LastName
+             , "diagnoses" : newDiagnoses})
 
 @login_required
 @request_wrapper

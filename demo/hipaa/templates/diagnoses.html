@@ -16,7 +16,7 @@
 	<div class="container">
 		<div class="page-header">
 			<h2>
-				{{ name }}
+				{{ concretize(first_name) }} {{ concretize(last_name) }}
 			</h2>
 		</div>
 		<ul class="nav nav-tabs">
@@ -42,8 +42,7 @@
 					</td>
 				</tr>
 			</thead>
-			{% for d_indx in range(diagnoses|length) %}
-				{% with diagnosis=diagnoses[d_indx] %}
+			{% for diagnosis in concretize(diagnoses) %}
 					<tr>
 						<td>
 							{{ diagnosis.DateRecognized }}
@@ -60,7 +59,6 @@
 							</a>
 						</td>
 					</tr>
-				{% endwith %}
 			{% endfor %}
 		</table>
 	</div>
