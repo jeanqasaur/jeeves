@@ -17,7 +17,7 @@ from datetime import date
 #import urllib
 #import random
 
-from jelf.models import Individual, CoveredEntity, UserProfile, Transaction
+from jelf.models import Individual, CoveredEntity, UserProfile, Transaction, Treatment
 
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
@@ -229,16 +229,18 @@ def users_view(request, profile):
         'which_page' : "users"
     })
 
+@login_required
+@request_wrapper
 @jeeves
-def treatments_view(request, patient):
+def treatments_view(request, profile, patient):
     """Treatments.
     """
     p = Individual.objects.get(UID=patient)
-    treatments = p.treatment_set.all()
-    return render_to_response(
-          "treatments.html"
-        , RequestContext(
-            request, {"name" : p.Name(), "treatments" : treatments}))
+    treatments = Treatment.objects.filter(Patient=p)
+    return ("treatments.html"
+        , {"first_name" : p.FirstName
+         , "last_name" : p.LastName
+         , "treatments" : treatments})
 
 @jeeves
 def diagnoses_view(request, patient):
