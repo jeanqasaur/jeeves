@@ -293,10 +293,11 @@ def info_view(request, profile, patient):
 @request_wrapper
 @jeeves
 def directory_view(request, profile, entity):
-    """Viewing...??
+    """Viewing covered entities.
     """
     entity = CoveredEntity.objects.get(EIN=entity)
     visits = entity.Patients.filter(DateReleased=None)
+    
     oldVisits = [
            {"Patient" : {"Name" : "Joe McGray", "ID" : 5}
           , "DateAdmitted" : date(2014, 5, 25)
@@ -321,26 +322,28 @@ def directory_view(request, profile, entity):
     return ("directory.html"
             , {"entity":entity, "visits":visits})
 
+@login_required
+@request_wrapper
 @jeeves
-def transactions_view(request, entity):
+def transactions_view(request, profile, entity):
     """
     Viewing transactions.
     """
     entity = CoveredEntity.objects.get(EIN=entity)
     transactions = Transaction.objects.filter(FirstParty=entity)
-    otherTransactions = Transaction.objects.filter(SecondParty=entity)
-    for i in range(otherTransactions.count()):
-        #This is really bad code, (I'm not sure if we can assume all() will
-        # return the same
-        transactions.append(otherTransactions.all()[i])
-        #ordering each call), but I can't see any other way with Jeeves.
-    # TODO: Huh??? The whole point is we don't return the same order each time.
-    return ("transactions.html", {"entity":entity, "transactions":transactions})
+    other_transactions = Transaction.objects.filter(SecondParty=entity)
+    return ("transactions.html"
+            , {"entity": entity
+             , "transactions":transactions
+             , "other_transactions": other_transactions})
 
+@login_required
+@request_wrapper
 @jeeves
-def associates_view(request, entity):
+def associates_view(request, profile, entity):
     entity = CoveredEntity.objects.get(EIN=entity)
-    associates = entity.Associations
+    associates = entity.Associations.all()
+    # TODO: Do something with this old_associates
     old_associates = [
           {"Entity" : {"Name" : "Cooper United"}
           , "InformationShared" : INFORMATION_SET
@@ -351,5 +354,5 @@ def associates_view(request, entity):
         , {"Entity" : {"Name" : "Handerson"}
           , "InformationShared" : INFORMATION_SET
           , "Purpose":"Keeps records for HIPAA audit"}]
-    return render_to_response("associates.html"
-        , RequestContext(request, {"entity":entity, "associates":associates}))
+    return ("associates.html"
+        , {"entity":entity, "associates":associates})

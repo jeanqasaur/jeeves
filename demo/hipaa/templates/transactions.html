@@ -63,9 +63,7 @@
 					</td>
 				</tr>
 			</thead>
-			{{ transactions|length }}
-            {% for t_indx in range(transactions|length) %}
-			{% with transaction=transactions[t_indx] %}
+      {% for transaction in concretize(transactions)|list + concretize(other_transactions)|list %}
 			<tr>
 				<td>
 					{{ transaction.Standard }}
@@ -96,9 +94,7 @@
 				<td>
 					{{ transaction.Purpose }}
 				</td>
-
 			</tr>
-			{% endwith %}
 			{% endfor %}
 		</table>
 	</div>

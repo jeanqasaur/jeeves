@@ -58,8 +58,7 @@
                     </td>
                 </tr>
 			</thead>
-            {% for a_indx in range(associates.count()) %}
-                {% with association=associates.all()[a_indx] %}
+      {% for associate in concretize(associates) %}
 				    <tr>
 					    <td>
 						    {% if association.BusinessAssociate.Covered %}
@@ -81,7 +80,6 @@
 					    </td>
 
 				    </tr>
-                {% endwith %}
 			{% endfor %}
 		</table>
 	</div>
