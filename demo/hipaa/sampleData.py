@@ -115,11 +115,17 @@ justin = Individual.objects.create(FirstName="Justin",
     ReligiousAffiliation="Catholic",
     Employer = "Foo Market")
 
+'''
+Covered Entities.
+'''
 vision= CoveredEntity.objects.create(EIN = "01GBS253DV",
                       Name = "Vision National")
 
 health = CoveredEntity.objects.create(EIN = "0424D3294N", Name = "Covered Health")
 
+'''
+Hospital visits.
+'''
 visit1 = HospitalVisit.objects.create(Patient=joe,
     DateAdmitted=date(2003,4,1),
     DateReleased=date(2003,9,13),
@@ -127,14 +133,18 @@ visit1 = HospitalVisit.objects.create(Patient=joe,
     Location="Third room on the left",
     Hospital=vision)
 
-
+'''
+Treatments.
+'''
 treat1 = Treatment.objects.create(Patient=ariel,
     DatePerformed=date(2014,1,1),
     PerformingEntity = health,
     PrescribingEntity = health,
     Service = "W4-491")
 
-
+'''
+Diagnoses.
+'''
 diag1 = Diagnosis.objects.create(
     DateRecognized=date(2012,9,2),
     RecognizingEntity = vision,
@@ -143,7 +153,10 @@ diag1 = Diagnosis.objects.create(
     Patient = ariel,
 )
 
-
+'''
+Some other stuff.
+TODO: Figure out what this is.
+'''
 data = InformationTransferSet.objects.create()
 data.save()
 
@@ -156,7 +169,9 @@ dataTreatment.save()
 dataDiagnosis = DiagnosisTransfer.objects.create(Set=data, Diagnosis=diag1)
 dataDiagnosis.save()
 
-
+'''
+Transactions.
+'''
 trans1 = Transaction.objects.create(
 	Standard = "H-78F2",
 	SharedInformation = data,
