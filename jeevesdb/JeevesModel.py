@@ -14,10 +14,7 @@ import django.db.models.fields.related
 import JeevesLib
 from JeevesLib import fexpr_cast
 from fast.AST import Facet, FObject, Unassigned, FExpr
-
-import string
-import random
-import itertools
+import JeevesModelUtils
 
 class JeevesQuerySet(QuerySet):
     """The Jeeves version of Django's QuerySet.
@@ -33,7 +30,7 @@ class JeevesQuerySet(QuerySet):
             """Gets the Jeeves variable environment associated with the fields.
             """
             if hasattr(obj, "jeeves_vars"):
-                jeeves_vars = unserialize_vars(obj.jeeves_vars)
+                jeeves_vars = JeevesModelUtils.unserialize_vars(obj.jeeves_vars)
             else:
                 jeeves_vars = {}
             for var_name, value in jeeves_vars.iteritems():
@@ -175,25 +172,8 @@ class JeevesManager(Manager):
         elt.save()
         return elt
 
-ALPHANUM = string.digits + string.letters
-SYSRAND = random.SystemRandom()
-JEEVES_ID_LEN = 32
-def get_random_jeeves_id():
-    """Returns a random Jeeves ID.
-    """
-    return "".join(ALPHANUM[SYSRAND.randint(0, len(ALPHANUM)-1)]
-                    for i in xrange(JEEVES_ID_LEN))
-
-# From python docs
-def powerset(iterable):
-    """powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
-    """
-    as_list = list(iterable)
-    return itertools.chain.from_iterable(
-        itertools.combinations(as_list, r) for r in range(len(as_list)+1))
-
 def clone(old):
-    """??
+    """Returns a copy of an object.
     """
     new_kwargs = dict([(fld.name, getattr(old, fld.name))
                     for fld in old._meta.fields
@@ -203,29 +183,6 @@ def clone(old):
         if isinstance(fld, JeevesForeignKey):
             setattr(ans, fld.attname, getattr(old, fld.attname))
     return ans
-
-def serialize_vars(expr):
-    """Serializing Jeeves-related variables.
-    """
-    return ';' + ''.join('%s=%d;' % (var_name, var_value)
-                            for var_name, var_value in expr.iteritems())
-
-def unserialize_vars(sexpr):
-    """Unserializing Jeeves-related variables.
-    """
-    var_strs = sexpr[1:].split(';')
-    evars = {}
-    for var_str in var_strs:
-        if var_str != "":
-            var_val = var_str.split('=')
-            evars[var_val[0]] = bool(int(var_val[1]))
-    return evars
-
-def full_eval(val, env):
-    """Evaluating a value in the context of an environment.
-    """
-    eval_expr = val.partialEval(env)
-    return eval_expr.v
 
 def acquire_label_by_name(app_label, label_name):
     """Gets a label by name.
@@ -317,7 +274,7 @@ class JeevesModel(models.Model):
             models.Model.__setattr__(self, name, value)
 
     objects = JeevesManager()
-    jeeves_id = CharField(max_length=JEEVES_ID_LEN, null=False)
+    jeeves_id = CharField(max_length=JeevesModelUtils.JEEVES_ID_LEN, null=False)
     jeeves_vars = CharField(max_length=1024, null=False)
 
     @JeevesLib.supports_jeeves
@@ -333,7 +290,7 @@ class JeevesModel(models.Model):
                             jeeves_id=self.jeeves_id)
             objs = list(filter_query)
             for obj in objs:
-                eobj = unserialize_vars(obj.jeeves_vars)
+                eobj = JeevesModelUtils.unserialize_vars(obj.jeeves_vars)
                 if any(var_name in eobj and eobj[var_name] != var_value
                         for var_name, var_value in vars_env.iteritems()):
                     continue
@@ -370,9 +327,15 @@ class JeevesModel(models.Model):
     def save(self, *args, **kw):
         """Saves elements with the appropriate faceted labels.
         """
+        def full_eval(val, env):
+            """Evaluating a value in the context of an environment.
+            """
+            eval_expr = val.partialEval(env)
+            return eval_expr.v
+
         # TODO: OMG why is this so long.
         if not self.jeeves_id:
-            self.jeeves_id = get_random_jeeves_id()
+            self.jeeves_id = JeevesModelUtils.get_random_jeeves_id()
 
         if kw.get("update_field", None) is not None:
             raise NotImplementedError("Partial saves not supported.")
@@ -408,7 +371,7 @@ class JeevesModel(models.Model):
             field_dict[field_name] = field_val
         all_vars = list(set(all_vars))
 
-        for cur_vars in powerset(all_vars):
+        for cur_vars in JeevesModelUtils.powerset(all_vars):
             true_vars = list(cur_vars)
             false_vars = list(set(all_vars).difference(cur_vars))
             env_dict = dict(env)
@@ -432,13 +395,15 @@ class JeevesModel(models.Model):
                     for field_name in field_dict)]
 
             # Optimization.
+            # TODO: See how we can refactor this to shorten the function.
             while True:
                 # check if we can collapse
                 # if we can, repeat; otherwise, exit
                 for i in xrange(len(all_relevant_objs)):
                     other_obj = all_relevant_objs[i]
                     diff_var = get_one_differing_var(env_dict
-                                , unserialize_vars(other_obj.jeeves_vars))
+                                , JeevesModelUtils.unserialize_vars(
+                                    other_obj.jeeves_vars))
                     if diff_var is not None:
                         super(JeevesModel, other_obj).delete()
                         del env_dict[diff_var]
@@ -446,7 +411,7 @@ class JeevesModel(models.Model):
                 else:
                     break
 
-            obj_to_save.jeeves_vars = serialize_vars(env_dict)
+            obj_to_save.jeeves_vars = JeevesModelUtils.serialize_vars(env_dict)
             super(JeevesModel, obj_to_save).save(*args, **kw)
 
     @JeevesLib.supports_jeeves
@@ -468,7 +433,7 @@ class JeevesModel(models.Model):
             all_vars.extend(v.name for v in field_fexpr.vars())
             field_dict[field_name] = field_fexpr
 
-        for var_set in powerset(all_vars):
+        for var_set in JeevesModelUtils.powerset(all_vars):
             true_vars = list(var_set)
             false_vars = list(set(all_vars).difference(var_set))
             env_dict = dict(env)
@@ -655,4 +620,4 @@ class JeevesForeignKey(ForeignObject):
         return '_jfkey_cache_' + self.name
 
     def db_type(self, connection):
-        return "VARCHAR(%d)" % JEEVES_ID_LEN
+        return "VARCHAR(%d)" % JeevesModelUtils.JEEVES_ID_LEN
