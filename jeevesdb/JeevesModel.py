@@ -5,16 +5,15 @@
 .. moduleauthor: Travis Hance <tjhance7@gmail.com>
 """
 from django.db import models
-from django.db.models.fields import IntegerField
 from django.db.models.query import QuerySet
 from django.db.models import Manager
-from django.db.models import Field, CharField, ForeignKey
+from django.db.models import CharField
 from django.db.models.loading import get_model
 import django.db.models.fields.related
 
 import JeevesLib
 from JeevesLib import fexpr_cast
-from fast.AST import Facet, FObject, Unassigned, get_var_by_name, FExpr
+from fast.AST import Facet, FObject, Unassigned, FExpr
 
 import string
 import random
@@ -25,19 +24,24 @@ class JeevesQuerySet(QuerySet):
     """
     @JeevesLib.supports_jeeves
     def get_jiter(self):
+        """Creates an iterator for the QuerySet.
+        This is a JList?
+        """
         self._fetch_all()
-        
+
         def get_env(obj, fields, env):
+            """Gets the Jeeves variable environment associated with the fields.
+            """
             if hasattr(obj, "jeeves_vars"):
-                vs = unserialize_vars(obj.jeeves_vars)
+                jeeves_vars = unserialize_vars(obj.jeeves_vars)
             else:
-                vs = {}
-            for var_name, value in vs.iteritems():
+                jeeves_vars = {}
+            for var_name, value in jeeves_vars.iteritems():
                 if var_name in env and env[var_name] != value:
                     return None
                 env[var_name] = value
                 acquire_label_by_name(self.model._meta.app_label, var_name)
-            for field, subs in (fields.iteritems() if fields else []):
+            for field, subs in fields.iteritems() if fields else []:
                 if field and get_env(getattr(obj, field), subs, env) is None:
                     return None
             return env
@@ -50,60 +54,69 @@ class JeevesQuerySet(QuerySet):
         return results
 
     def get(self, use_base_env=False, **kwargs):
-        l = self.filter(**kwargs).get_jiter()
-        if len(l) == 0:
+        """Fetches a JList of rows that match the conditions.
+        """
+        matches = self.filter(**kwargs).get_jiter()
+        if len(matches) == 0:
             return None
-    
-        for (o, _) in l:
-            if o.jeeves_id != l[0][0].jeeves_id:
-                raise Exception("wow such error: get() found rows for more than one jeeves_id")
-                
+
+        for (row, _) in matches:
+            if row.jeeves_id != matches[0][0].jeeves_id:
+                raise Exception("wow such error: \
+                    get() found rows for more than one jeeves_id")
+
         cur = None
-        for (o, conditions) in l:
+        for (row, conditions) in matches:
             old = cur
-            cur = FObject(o)
+            cur = FObject(row)
             for var_name, val in conditions.iteritems():
                 if val:
-                    cur = Facet(acquire_label_by_name(self.model._meta.app_label, var_name), cur, old)
+                    cur = Facet(acquire_label_by_name(
+                            self.model._meta.app_label, var_name), cur, old)
                 else:
-                    cur = Facet(acquire_label_by_name(self.model._meta.app_label, var_name), old, cur)
+                    cur = Facet(acquire_label_by_name(
+                            self.model._meta.app_label, var_name), old, cur)
         try:
-            return cur.partialEval({} if use_base_env else JeevesLib.jeevesState.pathenv.getEnv())
+            return cur.partialEval({} if use_base_env \
+                else JeevesLib.jeevesState.pathenv.getEnv())
         except TypeError:
-            raise Exception("wow such error: could not find a row for every condition")
+            raise Exception("wow such error: \
+                could not find a row for every condition")
 
     def filter(self, **kwargs):
-        l = []
-        # Figure out what the special fields are.
+        """Jelf implementation of filter.
+        """
+        related_names = []
         for argname, _ in kwargs.iteritems():
-            t = argname.split('__')
-            if len(t) > 1:
-                l.append("__".join(t[:-1]))
-        # If we had special fields, then get the ones related to the special
-        # fields. TODO: BUT WHAT ARE THESE SPECIAL FIELDS??!!
-        if len(l) > 0:
-            return super(JeevesQuerySet, self).filter(**kwargs).select_related(*l)
+            related_name = argname.split('__')
+            if len(related_name) > 1:
+                related_names.append("__".join(related_name[:-1]))
+        if len(related_names) > 0:
+            return super(
+                    JeevesQuerySet, self).filter(
+                        **kwargs).select_related(*related_names)
         else:
             return super(JeevesQuerySet, self).filter(**kwargs)
 
     @JeevesLib.supports_jeeves
     def all(self):
-        t = JeevesLib.JList2([])
+        elements = JeevesLib.JList2([])
         env = JeevesLib.jeevesState.pathenv.getEnv()
         for val, cond in self.get_jiter():
             popcount = 0
             for vname, vval in cond.iteritems():
                 if vname not in env:
-                    v = acquire_label_by_name(self.model._meta.app_label, vname)
-                    JeevesLib.jeevesState.pathenv.push(v, vval)
+                    vlabel = acquire_label_by_name(
+                                self.model._meta.app_label, vname)
+                    JeevesLib.jeevesState.pathenv.push(vlabel, vval)
                     popcount += 1
                 elif env[vname] != vval:
                     break
             else:
-                t.append(val)
+                elements.append(val)
             for _ in xrange(popcount):
                 JeevesLib.jeevesState.pathenv.pop()
-        return t
+        return elements
 
     @JeevesLib.supports_jeeves
     def delete(self):
@@ -113,8 +126,9 @@ class JeevesQuerySet(QuerySet):
             popcount = 0
             for vname, vval in cond.iteritems():
                 if vname not in JeevesLib.jeevesState.pathenv.getEnv():
-                    v = acquire_label_by_name(self.model._meta.app_label, vname)
-                    JeevesLib.jeevesState.pathenv.push(v, vval)
+                    vlabel = acquire_label_by_name(
+                                self.model._meta.app_label, vname)
+                    JeevesLib.jeevesState.pathenv.push(vlabel, vval)
                     popcount += 1
             val.delete()
             for _ in xrange(popcount):
@@ -151,57 +165,71 @@ class JeevesManager(Manager):
             ._clone(klass=JeevesQuerySet)
               .order_by('jeeves_id')
            )
-  
+
     def all(self):
         return super(JeevesManager, self).all().all()
 
     @JeevesLib.supports_jeeves
     def create(self, **kw):
-        m = self.model(**kw)
-        m.save()
-        return m
+        elt = self.model(**kw)
+        elt.save()
+        return elt
 
-alphanum = string.digits + string.letters
-sysrand = random.SystemRandom()
+ALPHANUM = string.digits + string.letters
+SYSRAND = random.SystemRandom()
 JEEVES_ID_LEN = 32
 def get_random_jeeves_id():
-  return "".join(alphanum[sysrand.randint(0, len(alphanum)-1)]
+    """Returns a random Jeeves ID.
+    """
+    return "".join(ALPHANUM[SYSRAND.randint(0, len(ALPHANUM)-1)]
                     for i in xrange(JEEVES_ID_LEN))
 
 # From python docs
 def powerset(iterable):
-    "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
-    s = list(iterable)
+    """powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
+    """
+    as_list = list(iterable)
     return itertools.chain.from_iterable(
-        itertools.combinations(s, r) for r in range(len(s)+1))
+        itertools.combinations(as_list, r) for r in range(len(as_list)+1))
 
 def clone(old):
-    new_kwargs = dict([(fld.name, getattr(old, fld.name)) for fld in old._meta.fields
-                    if not isinstance(fld, JeevesForeignKey)]);
+    """??
+    """
+    new_kwargs = dict([(fld.name, getattr(old, fld.name))
+                    for fld in old._meta.fields
+                        if not isinstance(fld, JeevesForeignKey)])
     ans = old.__class__(**new_kwargs)
     for fld in old._meta.fields:
         if isinstance(fld, JeevesForeignKey):
             setattr(ans, fld.attname, getattr(old, fld.attname))
     return ans
 
-def serialize_vars(e):
+def serialize_vars(expr):
+    """Serializing Jeeves-related variables.
+    """
     return ';' + ''.join('%s=%d;' % (var_name, var_value)
-                            for var_name, var_value in e.iteritems())
+                            for var_name, var_value in expr.iteritems())
 
-def unserialize_vars(s):
-    t = s[1:].split(';')
-    e = {}
-    for u in t:
-        if u != "":
-            v = u.split('=')
-            e[v[0]] = bool(int(v[1]))
-    return e
+def unserialize_vars(sexpr):
+    """Unserializing Jeeves-related variables.
+    """
+    var_strs = sexpr[1:].split(';')
+    evars = {}
+    for var_str in var_strs:
+        if var_str != "":
+            var_val = var_str.split('=')
+            evars[var_val[0]] = bool(int(var_val[1]))
+    return evars
 
-def fullEval(val, env):
-    p = val.partialEval(env)
-    return p.v
+def full_eval(val, env):
+    """Evaluating a value in the context of an environment.
+    """
+    eval_expr = val.partialEval(env)
+    return eval_expr.v
 
 def acquire_label_by_name(app_label, label_name):
+    """Gets a label by name.
+    """
     if JeevesLib.doesLabelExist(label_name):
         return JeevesLib.getLabel(label_name)
     else:
@@ -212,18 +240,20 @@ def acquire_label_by_name(app_label, label_name):
         # already fetching
         obj = model.objects.get(use_base_env=True, jeeves_id=jeeves_id)
         restrictor = getattr(model, 'jeeves_restrict_' + field_name)
-        JeevesLib.restrict(label, lambda ctxt : restrictor(obj, ctxt), True)
+        JeevesLib.restrict(label, lambda ctxt: restrictor(obj, ctxt), True)
         return label
- 
-def get_one_differing_var(e1, e2):
-    if len(e1) != len(e2):
+
+def get_one_differing_var(vars1, vars2):
+    """Checks to see if two sets of variables have one differing one??
+    """
+    if len(vars1) != len(vars2):
         return None
     ans = None
-    for v in e1:
-        if v in e2:
-            if e1[v] != e2[v]:
+    for var in vars1:
+        if var in vars2:
+            if vars1[var] != vars2[var]:
                 if ans is None:
-                    ans = v
+                    ans = var
                 else:
                     return None
         else:
@@ -231,9 +261,13 @@ def get_one_differing_var(e1, e2):
     return ans
 
 def label_for(*field_names):
-    def decorator(f):
-        f._jeeves_label_for = field_names
-        return f
+    """The decorator for associating a label with a field.
+    """
+    def decorator(field):
+        """Definition of the decorator itself.
+        """
+        field._jeeves_label_for = field_names
+        return field
     return decorator
 
 #from django.db.models.base import ModelBase
@@ -250,7 +284,7 @@ def label_for(*field_names):
 class JeevesModel(models.Model):
     """ Jeeves version of Django's Model class.
     """
-    
+
     def __init__(self, *args, **kw):
         self.jeeves_base_env = JeevesLib.jeevesState.pathenv.getEnv()
         super(JeevesModel, self).__init__(*args, **kw)
@@ -269,11 +303,16 @@ class JeevesModel(models.Model):
                     self._jeeves_labels[label_name] = (label_name,)
 
     def __setattr__(self, name, value):
-        field_names = [field.name for field in self._meta.concrete_fields] if hasattr(self, '_meta') else []
-        if name in field_names and name not in ('jeeves_vars', 'jeeves_id', 'id'):
+        field_names = [field.name for field in self._meta.concrete_fields] \
+                        if hasattr(self, '_meta') else []
+        if name in field_names and \
+            name not in ('jeeves_vars', 'jeeves_id', 'id'):
             old_val = getattr(self, name) if hasattr(self, name) else \
-                        Unassigned("attribute '%s' in %s" % (name, self.__class__.__name__))
-            models.Model.__setattr__(self, name, JeevesLib.jassign(old_val, value, self.jeeves_base_env))
+                        Unassigned("attribute '%s' in %s" % \
+                            (name, self.__class__.__name__))
+            models.Model.__setattr__(
+                self, name, JeevesLib.jassign(
+                    old_val, value, self.jeeves_base_env))
         else:
             models.Model.__setattr__(self, name, value)
 
@@ -282,8 +321,10 @@ class JeevesModel(models.Model):
     jeeves_vars = CharField(max_length=1024, null=False)
 
     @JeevesLib.supports_jeeves
-    def do_delete(self, e):
-        if len(e) == 0:
+    def do_delete(self, vars_env):
+        """A helper for delete?
+        """
+        if len(vars_env) == 0:
             delete_query = self.__class__._objects_ordinary.filter(
                             jeeves_id=self.jeeves_id)
             delete_query.delete()
@@ -294,14 +335,14 @@ class JeevesModel(models.Model):
             for obj in objs:
                 eobj = unserialize_vars(obj.jeeves_vars)
                 if any(var_name in eobj and eobj[var_name] != var_value
-                        for var_name, var_value in e.iteritems()):
+                        for var_name, var_value in vars_env.iteritems()):
                     continue
                 if all(var_name in eobj and eobj[var_name] == var_value
-                        for var_name, var_value in e.iteritems()):
+                        for var_name, var_value in vars_env.iteritems()):
                     super(JeevesModel, obj).delete()
                     continue
                 addon = ""
-                for var_name, var_value in e.iteritems():
+                for var_name, var_value in vars_env.iteritems():
                     if var_name not in eobj:
                         new_obj = clone(obj)
                         if addon != "":
@@ -314,13 +355,15 @@ class JeevesModel(models.Model):
 
     @JeevesLib.supports_jeeves
     def acquire_label(self, field_name):
-        label_name = '%s__%s__%s' % (self.__class__.__name__, field_name, self.jeeves_id)
+        label_name = '%s__%s__%s' % \
+                        (self.__class__.__name__, field_name, self.jeeves_id)
         if JeevesLib.doesLabelExist(label_name):
             return JeevesLib.getLabel(label_name)
         else:
             label = JeevesLib.mkLabel(label_name, uniquify=False)
             restrictor = getattr(self, 'jeeves_restrict_' + field_name)
-            JeevesLib.restrict(label, lambda ctxt : restrictor(self, ctxt), True)
+            JeevesLib.restrict(label
+                , lambda ctxt: restrictor(self, ctxt), True)
             return label
 
     @JeevesLib.supports_jeeves
@@ -351,41 +394,42 @@ class JeevesModel(models.Model):
                 faceted_field_value = JeevesLib.mkSensitive(label
                                         , public_field_value
                                         , private_field_value).partialEval(
-                                            JeevesLib.jeevesState.pathenv.getEnv())
+                                            JeevesLib.jeevesState.pathenv. \
+                                                getEnv())
                 setattr(self, field_name, faceted_field_value)
 
         all_vars = []
-        d = {}
+        field_dict = {}
         env = JeevesLib.jeevesState.pathenv.getEnv()
         for field_name in field_names:
             value = getattr(self, field_name)
-            f = fexpr_cast(value).partialEval(env)
-            all_vars.extend(v.name for v in f.vars())
-            d[field_name] = f
+            field_val = fexpr_cast(value).partialEval(env)
+            all_vars.extend(v.name for v in field_val.vars())
+            field_dict[field_name] = field_val
         all_vars = list(set(all_vars))
 
-        for p in powerset(all_vars):
-            true_vars = list(p)
-            false_vars = list(set(all_vars).difference(p))
-            e = dict(env)
-            e.update({tv : True for tv in true_vars})
-            e.update({fv : False for fv in false_vars})
+        for cur_vars in powerset(all_vars):
+            true_vars = list(cur_vars)
+            false_vars = list(set(all_vars).difference(cur_vars))
+            env_dict = dict(env)
+            env_dict.update({tv : True for tv in true_vars})
+            env_dict.update({fv : False for fv in false_vars})
 
-            self.do_delete(e)
-            
+            self.do_delete(env_dict)
+
             klass = self.__class__
             obj_to_save = klass(**{
-                field_name : fullEval(field_value, e)
-                for field_name, field_value in d.iteritems()
+                field_name : full_eval(field_value, env_dict)
+                for field_name, field_value in field_dict.iteritems()
             })
 
             all_jid_objs = list(
                             klass._objects_ordinary.filter(
                                 jeeves_id=obj_to_save.jeeves_id).all())
             all_relevant_objs = [obj for obj in all_jid_objs if
-                all(field_name == 'jeeves_vars' or 
+                all(field_name == 'jeeves_vars' or
                     getattr(obj_to_save, field_name) == getattr(obj, field_name)
-                    for field_name in d)]
+                    for field_name in field_dict)]
 
             # Optimization.
             while True:
@@ -393,20 +437,20 @@ class JeevesModel(models.Model):
                 # if we can, repeat; otherwise, exit
                 for i in xrange(len(all_relevant_objs)):
                     other_obj = all_relevant_objs[i]
-                    diff_var = get_one_differing_var(e
+                    diff_var = get_one_differing_var(env_dict
                                 , unserialize_vars(other_obj.jeeves_vars))
                     if diff_var is not None:
                         super(JeevesModel, other_obj).delete()
-                        del e[diff_var]
+                        del env_dict[diff_var]
                         break
                 else:
                     break
 
-            obj_to_save.jeeves_vars = serialize_vars(e)
+            obj_to_save.jeeves_vars = serialize_vars(env_dict)
             super(JeevesModel, obj_to_save).save(*args, **kw)
 
     @JeevesLib.supports_jeeves
-    def delete(self, *args, **kw):
+    def delete(self):
         if self.jeeves_id is None:
             return
 
@@ -416,24 +460,26 @@ class JeevesModel(models.Model):
                 field_names.add(field.attname)
 
         all_vars = []
-        d = {}
+        field_dict = {}
         env = JeevesLib.jeevesState.pathenv.getEnv()
         for field_name in field_names:
             value = getattr(self, field_name)
-            f = fexpr_cast(value).partialEval(env)
-            all_vars.extend(v.name for v in f.vars())
-            d[field_name] = f
+            field_fexpr = fexpr_cast(value).partialEval(env)
+            all_vars.extend(v.name for v in field_fexpr.vars())
+            field_dict[field_name] = field_fexpr
 
-        for p in powerset(all_vars):
-            true_vars = list(p)
-            false_vars = list(set(all_vars).difference(p))
-            e = dict(env)
-            e.update({tv : True for tv in true_vars})
-            e.update({fv : False for fv in false_vars})
+        for var_set in powerset(all_vars):
+            true_vars = list(var_set)
+            false_vars = list(set(all_vars).difference(var_set))
+            env_dict = dict(env)
+            env_dict.update({tv : True for tv in true_vars})
+            env_dict.update({fv : False for fv in false_vars})
 
-            self.do_delete(e)
+            self.do_delete(env_dict)
 
-    class Meta:
+    class Meta(object):
+        """Abstract class.
+        """
         abstract = True
 
     _objects_ordinary = Manager()
@@ -442,13 +488,15 @@ class JeevesModel(models.Model):
     def __eq__(self, other):
         if isinstance(other, FExpr):
             return other == self
-        return isinstance(other, self.__class__) and self.jeeves_id == other.jeeves_id
+        return isinstance(other, self.__class__) and \
+            self.jeeves_id == other.jeeves_id
 
     @JeevesLib.supports_jeeves
     def __ne__(self, other):
         if isinstance(other, FExpr):
             return other != self
-        return not (isinstance(other, self.__class__) and self.jeeves_id == other.jeeves_id)
+        return not (isinstance(other, self.__class__) and \
+            self.jeeves_id == other.jeeves_id)
 
 from django.contrib.auth.models import User
 @JeevesLib.supports_jeeves
@@ -459,7 +507,7 @@ def evil_hack(self, other):
     if isinstance(other, FExpr):
         return other == self
     return isinstance(other, self.__class__) and self.id == other.id
-User.__eq__ = evil_hack 
+User.__eq__ = evil_hack
 
 class JeevesRelatedObjectDescriptor(property):
     """WRITE SOME COMMENTS.
@@ -471,6 +519,8 @@ class JeevesRelatedObjectDescriptor(property):
 
     @JeevesLib.supports_jeeves
     def get_cache(self, instance):
+        """Gets the... cache?
+        """
         cache_attr_name = self.cache_name
         if hasattr(instance, cache_attr_name):
             cache = getattr(instance, cache_attr_name)
@@ -486,11 +536,15 @@ class JeevesRelatedObjectDescriptor(property):
 
     @JeevesLib.supports_jeeves
     def __get__(self, instance, instance_type):
+        """??
+        """
         if instance is None:
             return self
 
         cache = self.get_cache(instance)
-        def getObj(jeeves_id):
+        def get_obj(jeeves_id):
+            """??
+            """
             if jeeves_id is None:
                 return None
             if jeeves_id not in cache:
@@ -500,32 +554,38 @@ class JeevesRelatedObjectDescriptor(property):
         if instance is None:
             return self
         return JeevesLib.facetMapper(
-                fexpr_cast(getattr(instance, self.field.get_attname())), getObj)
+                fexpr_cast(
+                    getattr(instance, self.field.get_attname())), get_obj)
 
     @JeevesLib.supports_jeeves
     def __set__(self, instance, value):
         cache = self.get_cache(instance)
-        def getID(obj):
+        def get_id(obj):
+            """Gets the ID associated with an object.
+            """
             if obj is None:
                 return None
             obj_jid = getattr(obj, self.field.join_field.name)
             if obj_jid is None:
-                raise Exception("Object must be saved before it can be attached via JeevesForeignKey.")
+                raise Exception("Object must be saved before it can be \
+                    attached via JeevesForeignKey.")
             cache[obj_jid] = obj
             return obj_jid
-        ids = JeevesLib.facetMapper(fexpr_cast(value), getID)
+        ids = JeevesLib.facetMapper(fexpr_cast(value), get_id)
         setattr(instance, self.field.get_attname(), ids)
 
 from django.db.models.fields.related import ForeignObject
 class JeevesForeignKey(ForeignObject):
+    """Jeeves version of Django's ForeignKey.
+    """
     requires_unique_target = False
     @JeevesLib.supports_jeeves
     def __init__(self, to, *args, **kwargs):
         self.to = to
 
-        for f in self.to._meta.fields:
-            if f.name == 'jeeves_id':
-                self.join_field = f
+        for field in self.to._meta.fields:
+            if field.name == 'jeeves_id':
+                self.join_field = field
                 break
             else:
                 # support non-Jeeves tables
@@ -533,33 +593,38 @@ class JeevesForeignKey(ForeignObject):
                 #raise Exception("Need jeeves_id field")
 
         kwargs['on_delete'] = models.DO_NOTHING
-        super(JeevesForeignKey, self).__init__(to, [self], [self.join_field], *args, **kwargs)
+        super(JeevesForeignKey, self).__init__(
+            to, [self], [self.join_field], *args, **kwargs)
         self.db_constraint = False
 
     @JeevesLib.supports_jeeves
     def contribute_to_class(self, cls, name, virtual_only=False):
-        super(JeevesForeignKey, self).contribute_to_class(cls, name, virtual_only=virtual_only)
+        super(JeevesForeignKey, self).contribute_to_class(
+            cls, name, virtual_only=virtual_only)
         setattr(cls, self.name, JeevesRelatedObjectDescriptor(self))
 
     @JeevesLib.supports_jeeves
     def get_attname(self):
         return '%s_id' % self.name
-  
+
     @JeevesLib.supports_jeeves
     def get_attname_column(self):
         attname = self.get_attname()
         column = self.db_column or attname
         return attname, column
 
+    '''
     @JeevesLib.supports_jeeves
     def db_type(self, connection):
         return IntegerField().db_type(connection=connection)
+    '''
 
     @JeevesLib.supports_jeeves
     def get_path_info(self):
         opts = self.to._meta
         from_opts = self.model._meta
-        return [django.db.models.fields.related.PathInfo(from_opts, opts, (self.join_field,), self, False, True)]
+        return [django.db.models.fields.related.PathInfo(
+                    from_opts, opts, (self.join_field,), self, False, True)]
 
     @JeevesLib.supports_jeeves
     def get_joining_columns(self):
