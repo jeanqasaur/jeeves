@@ -34,9 +34,10 @@ class UserProfile(Model):
 	def jeeves_restrict_userprofilelabel(user, ctxt):
 		return user == ctxt
 
-	def isInstructor(self, course):
-		# TODO
-		pass
+	@jeeves
+	def is_instructor(self, course):
+		return CourseInstructor.objects.get(course=course, instructor=self) \
+			!= None
 
 	class Meta:
 		db_table='coursemanager_userprofile'
@@ -66,8 +67,7 @@ class StudentCourse(Model):
 	def jeeves_restrict_grade(sc, ctxt):
 		"""Only the student can see the grade.
 		"""
-		return sc.student == ctxt
-		# TODO: Or the ctxt is an instructor.
+		return sc.student == ctxt or ctxt.is_instructor(sc.course)
 
 	class Meta:
 		db_table='coursemanager_studentcourse'
@@ -109,4 +109,4 @@ current_module = sys.modules[__name__]
 @receiver(post_syncdb, sender=current_module)
 def dbSynced(sender, **kwargs):
 	if settings.DEBUG:
-		execfile(os.path.join(settings.BASE_DIR, '..', 'sampleData.py'))
+		execfile(os.path.join(settings.BASE_DIR, '..', 'SampleData.py'))
