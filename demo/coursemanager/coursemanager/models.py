@@ -64,6 +64,7 @@ class StudentCourse(Model):
 	
 	@staticmethod
 	@label_for('grade')
+	@jeeves
 	def jeeves_restrict_grade(sc, ctxt):
 		"""Only the student can see the grade.
 		"""
