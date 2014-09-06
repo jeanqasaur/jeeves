@@ -4,6 +4,7 @@
 
 .. moduleauthor:: Jean Yang <jeanyang@csail.mit.edu>
 """
+from datetime import datetime
 from django.db import models
 from django.utils import unittest
 from django.test import TestCase
@@ -11,8 +12,8 @@ from django.test import TestCase
 import JeevesLib
 
 from jeevesdb import JeevesModel
-from coursemanager.models import Course, CourseInstructor, StudentCourse, \
-    UserProfile
+from coursemanager.models import Assignment, Course, CourseInstructor, StudentCourse, \
+    Submission, UserProfile
 
 import nose.tools as nt
 
@@ -47,6 +48,20 @@ class TestJeevesModel(TestCase):
         StudentCourse.objects.create(
             student=self.benUser, course=self.course813, grade='B')
 
+        # Assignments and submissions.
+        self.assignment813_1 = Assignment.objects.create(
+            name="Assignment 1"
+            , dueDate=datetime.strptime('2012-12-30 19:00', "%Y-%m-%d %H:%M")
+            , maxPoints=100
+            , prompt="Do this assignment."
+            , owner=self.rishabhUser
+            , course=self.course813)
+
+        self.ben813_1 = Submission.objects.create(
+            assignment=self.assignment813_1
+            , author=self.benUser
+            , grade='A')
+
     def test_get_sample_data(self):
         ben = UserProfile.objects.get(username="ben")
         self.assertEqual(JeevesLib.concretize(ben, ben), self.benUser)
@@ -75,3 +90,15 @@ class TestJeevesModel(TestCase):
         self.assertEqual(
             JeevesLib.concretize(self.rishabhUser, course_info.grade)
             , 'B')
+
+    def test_view_submission_grade(self):
+        self.assertEqual(JeevesLib.concretize(self.benUser, self.ben813_1.grade)
+            , 'A')
+        self.assertEqual(
+            JeevesLib.concretize(self.janeUser, self.ben813_1.grade)
+            , 'U')
+        self.assertEqual(
+            JeevesLib.concretize(self.rishabhUser, self.ben813_1.grade)
+            , 'A')
+
+

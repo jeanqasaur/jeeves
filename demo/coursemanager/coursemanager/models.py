@@ -92,6 +92,20 @@ class Submission(Model):
 	submitDate = DateTimeField(auto_now=True)
 	grade = CharField(max_length=1, choices=GRADE)
 
+	@staticmethod
+	def jeeves_get_private_uploadFile(s):
+		return None
+	
+	@staticmethod
+	def jeeves_get_private_grade(s):
+		return 'U'
+
+	@staticmethod
+	@label_for('uploadFile', 'grade')
+	@jeeves
+	def jeeves_restrict_uploadFile(s, ctxt):
+		return s.author == ctxt or ctxt.is_instructor(s.assignment.course)
+
 COMMENT_PERMISSION = (('U', "Only visible to user")
 	, ('I', "Only visible to instructors")
 	, ('E', "Visible to everyone"))
