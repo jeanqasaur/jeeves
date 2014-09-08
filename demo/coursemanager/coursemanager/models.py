@@ -81,6 +81,7 @@ class Assignment(Model):
 	owner = ForeignKey(UserProfile, null=True, related_name='assignment_user')
 	course = ForeignKey(Course, null=True, related_name='assignment_course')
 
+	# TODO: See why we can't just treat submissions.all() as a list...
 	@jeeves
 	def get_average(self):
 		submissions = Submission.objects.filter(assignment=self).all()
