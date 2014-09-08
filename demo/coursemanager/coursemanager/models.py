@@ -85,12 +85,36 @@ class Assignment(Model):
 	@jeeves
 	def get_average(self):
 		submissions = Submission.objects.filter(assignment=self).all()
+		# TODO: Figure out what this returns.
 		sum_scores = 0.0
 		total = 0
 		for s in submissions:
 			sum_scores += s.score
 			total += 1
 		return 0.0 if total == 0 else float(sum_scores/total)
+
+	# TODO
+	'''
+	@jeeves
+	def std(self):
+		submissions = Submissions.objects.filter(assignment=self).all()
+    	mean = self.average(l)
+    	variance = map(lambda x: (float(x) - mean)**2, l)
+    	stdev = math.sqrt(self.average(variance))
+    	return stdev #check precision
+	'''
+
+	# TODO
+	'''
+	@jeeves
+  	def median(self, l):
+    	sortedL = sorted(l)
+    	length = len(sortedL)
+    	if length % 2:
+      		return sortedL[length / 2]
+    	else:
+      		return self.average( sortedL[length / 2], sortedL[length/2 - 1] )
+	'''
 
 class Submission(Model):
 	assignment = ForeignKey(Assignment, null=True
