@@ -81,7 +81,15 @@ class Assignment(Model):
 	owner = ForeignKey(UserProfile, null=True, related_name='assignment_user')
 	course = ForeignKey(Course, null=True, related_name='assignment_course')
 
-	# TODO: Policies
+	@jeeves
+	def get_average(self):
+		submissions = Submission.objects.filter(assignment=self).all()
+		sum_scores = 0.0
+		total = 0
+		for s in submissions:
+			sum_scores += s.score
+			total += 1
+		return 0.0 if total == 0 else float(sum_scores/total)
 
 class Submission(Model):
 	assignment = ForeignKey(Assignment, null=True
@@ -91,6 +99,7 @@ class Submission(Model):
 	uploadFile = FileField(upload_to='submissions')
 	submitDate = DateTimeField(auto_now=True)
 	grade = CharField(max_length=1, choices=GRADE)
+	score = IntegerField()
 
 	@staticmethod
 	def jeeves_get_private_uploadFile(s):

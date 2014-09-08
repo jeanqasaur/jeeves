@@ -109,11 +109,13 @@ ben813_1=coursemanager.Submission.objects.create(
     assignment=assignment813_1
   , author=benUser
   , grade='A'
+  , score=90
   )
 ben813_2=coursemanager.Submission.objects.create(
     assignment=assignment813_2
   , author=benUser
   , grade='B'
+  , score=80
   )
 # And some comments.
 ben813_1_comment0=coursemanager.SubmissionComment.objects.create(

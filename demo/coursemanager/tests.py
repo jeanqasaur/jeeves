@@ -60,7 +60,13 @@ class TestJeevesModel(TestCase):
         self.ben813_1 = Submission.objects.create(
             assignment=self.assignment813_1
             , author=self.benUser
-            , grade='A')
+            , grade='A'
+            , score=90)
+        self.jane813_1 = Submission.objects.create(
+            assignment=self.assignment813_1
+            , author=self.janeUser
+            , grade='B'
+            , score=84)
 
     def test_get_sample_data(self):
         ben = UserProfile.objects.get(username="ben")
@@ -101,4 +107,7 @@ class TestJeevesModel(TestCase):
             JeevesLib.concretize(self.rishabhUser, self.ben813_1.grade)
             , 'A')
 
-
+    def test_average(self):
+        self.assertEqual(
+            JeevesLib.concretize(self.benUser, self.assignment813_1.get_average())
+            , 87.0)
