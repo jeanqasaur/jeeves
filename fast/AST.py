@@ -5,6 +5,7 @@ import operator
 import z3
 import JeevesLib
 import traceback
+import types
 
 import env.VarEnv
 import env.PolicyEnv
@@ -31,15 +32,17 @@ def create_facet(cond, left, right):
 	return Facet(cond, left, right)
 
 def facetJoin(f0, f1, opr):
-	if isinstance(f0, Facet):
+	if isinstance(f0, Facet) or isinstance(f0.v, types.MethodType):
 		thn = facetJoin(f0.thn, f1, opr)
 		els = facetJoin(f0.els, f1, opr)
 		return create_facet(f0.cond, thn, els)
-	elif isinstance(f1, Facet):
+	elif isinstance(f1, Facet) or isinstance(f1.v, types.MethodType):
 		thn = facetJoin(f0, f1.thn, opr)
 		els = facetJoin(f0, f1.els, opr)
 		return create_facet(f1.cond, thn, els)
 	else:
+		# NOTE(JY): Sometimes we still have an Expr in here if we can't yet
+		# resolve it...
 		return Constant(opr(f0.v, f1.v))
 
 class JeevesState:
@@ -435,7 +438,8 @@ class Facet(FExpr):
 
 class Constant(FExpr):
 	def __init__(self, v):
-		assert not isinstance(v, FExpr)
+		# TODO
+		#assert not isinstance(v, FExpr)
 		self.v = v
 		self.type = type(v)
 
