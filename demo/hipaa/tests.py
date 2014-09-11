@@ -73,7 +73,7 @@ class TestHealthModels(TestCase):
             , individual=self.ariel)
 
     def test_get_sample_data(self):
-        jeanyang = UserProfile.objects.get(name="Jean Yang")
+        jeanyang = UserProfile.objects.get(user=self.jeanyang)
         self.assertEqual(JeevesLib.concretize(jeanyang, jeanyang)
             , self.jeanyangProfile)
 
