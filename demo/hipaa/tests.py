@@ -74,7 +74,17 @@ class TestHealthModels(TestCase):
 
     def test_get_sample_data(self):
         jeanyang = UserProfile.objects.get(user=self.jeanyang)
-        self.assertEqual(JeevesLib.concretize(jeanyang, jeanyang)
+        self.assertEqual(JeevesLib.concretize(self.jeanyangProfile, jeanyang)
             , self.jeanyangProfile)
 
-    # TODO: Put more policies.
+    def test_see_Address(self):
+        self.assertEqual(
+            JeevesLib.concretize(self.jeanyangProfile, self.jean.Address)
+            , self.house1)
+        self.assertEqual(
+            JeevesLib.concretize(self.arielProfile, self.jean.Address.Street)
+            , None)
+        self.assertEqual(
+            JeevesLib.concretize(self.arielProfile, self.jean.Address.ZipCode)
+            , "14800")
+
