@@ -1,0 +1,14 @@
+<!-- Fixed navbar -->
+<ul>
+	<li {% if which_page=="home" or (not which_page) %}class="active"{% endif %}><a href="/index">Home</a></li>
+	{% if concretize and concretize(is_logged_in) %}
+	<li {% if concretize(which_page)=="submit" %}class="active"{% endif %}><a href="/submit">Submit</a></li>
+	<li {% if concretize(which_page)=="profile" %}class="active"{% endif %}><a href="/accounts/profile">Profile</a></li>
+<!--<li {% if concretize(which_page)=="papers" %}class="active"{% endif %}><a href="/papers">Papers</a></li>-->
+{% endif %}
+{% if concretize and concretize(is_logged_in) %}
+    <li><a href="/accounts/logout">Log Out</a></li>
+{% else %}
+    <li {% if which_page=="register" %}class="active"{% endif %}><a href="/register">Register</a></li>
+{% endif %}
+</ul>
