@@ -6,6 +6,8 @@ admin.autodiscover()
 from django.conf.urls.static import static
 from django.conf import settings
 
+# NOTE(JY): If you rename the "jelf" folder, you will want to change this as
+# well.
 from jelf import views
 
 urlpatterns = patterns('',
