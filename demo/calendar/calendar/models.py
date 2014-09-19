@@ -32,12 +32,12 @@ class Event(Model):
     description = CharField(max_length=1024)
 
     @jeeves
-    def has_host(self):
-        pass
+    def has_host(self, host):
+        return EventHost.objects.get(host=host) != None
 
     @jeeves
-    def has_guest(self):
-        pass
+    def has_guest(self, guest):
+        return EventGuest.objects.get(guest=guest) != None
 
 class EventHost(Model):
     """Relates events to hosts.
