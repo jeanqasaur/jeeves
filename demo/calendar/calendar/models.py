@@ -22,8 +22,9 @@ class UserProfile(Model):
         return user == ctxt
 
     @jeeves
-    def has_event(self):
-        pass
+    def has_event(self,event):
+        return (EventGuest.objects.get(event=event, guest=self) != None) \
+            or (EventHost.objects.get(event=event, host=self) != None)
 
 class Event(Model):
     name = CharField(max_length=256)
@@ -33,11 +34,11 @@ class Event(Model):
 
     @jeeves
     def has_host(self, host):
-        return EventHost.objects.get(host=host) != None
+        return EventHost.objects.get(event=self, host=host) != None
 
     @jeeves
     def has_guest(self, guest):
-        return EventGuest.objects.get(guest=guest) != None
+        return EventGuest.objects.get(event=self, guest=guest) != None
 
 class EventHost(Model):
     """Relates events to hosts.

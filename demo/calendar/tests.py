@@ -37,8 +37,15 @@ class TestJelf(TestCase):
         self.eveParty = Event.objects.create(
             name="Eve's surprise party"
             , location="Chuck E. Cheese's"
-            , time=datetime(2014, 10, 24,20,0)
+            , time=datetime(2014, 10, 24, 20, 0)
             , description="Don't tell Eve!"
+        )
+
+        self.otherParty = Event.objects.create(
+            name="Other party"
+            , location="Other location"
+            , time=datetime(2014, 10, 24, 20, 0)
+            , description="Nothing of note."
         )
 
         EventHost.objects.create(event=self.eveParty, host=self.aliceUser)
@@ -70,6 +77,16 @@ class TestJelf(TestCase):
         self.assertFalse(
             JeevesLib.concretize(self.aliceUser
                 , self.eveParty.has_host(self.eveUser)))
+
+        self.assertTrue(
+            JeevesLib.concretize(self.aliceUser
+                , self.aliceUser.has_event(self.eveParty)))
+        self.assertTrue(
+            JeevesLib.concretize(self.aliceUser
+                , self.bobUser.has_event(self.eveParty)))
+        self.assertFalse(
+            JeevesLib.concretize(self.aliceUser
+                , self.eveUser.has_event(self.eveParty)))
 
     def test_view_email(self):
         self.assertEqual(
