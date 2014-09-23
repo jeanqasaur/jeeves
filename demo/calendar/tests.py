@@ -71,5 +71,10 @@ class TestJelf(TestCase):
             JeevesLib.concretize(self.aliceUser
                 , self.eveParty.has_host(self.eveUser)))
 
-
-
+    def test_view_email(self):
+        self.assertEqual(
+            JeevesLib.concretize(self.aliceUser, self.aliceUser.email)
+            , "alice@mail.org")
+        self.assertEqual(
+            JeevesLib.concretize(self.aliceUser, self.eveUser.email)
+            , "[redacted]")
