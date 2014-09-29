@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.conf import settings
 from django.db.models import CharField, DateTimeField
 from jeevesdb.JeevesModel import JeevesModel as Model, JeevesForeignKey as ForeignKey
 from jeevesdb.JeevesModel import label_for
@@ -77,3 +78,13 @@ class EventGuest(Model):
     """
     event = ForeignKey(Event, null=True)
     guest = ForeignKey(UserProfile, null=True)
+
+from django.dispatch import receiver
+from django.db.models.signals import post_syncdb
+import os
+import sys
+current_module = sys.modules[__name__]
+@receiver(post_syncdb, sender=current_module)
+def dbSynced(sender, **kwargs):
+    if settings.DEBUG:
+        execfile(os.path.join(settings.BASE_DIR, '..', 'SampleData.py'))
