@@ -39,6 +39,7 @@ class TestJelf(TestCase):
             , location="Chuck E. Cheese's"
             , time=datetime(2014, 10, 24, 20, 0)
             , description="Don't tell Eve!"
+            , visibility='G'
         )
 
         self.otherParty = Event.objects.create(
@@ -95,3 +96,18 @@ class TestJelf(TestCase):
         self.assertEqual(
             JeevesLib.concretize(self.aliceUser, self.eveUser.email)
             , "[redacted]")
+
+    def test_view_event_details(self):
+        self.assertEqual(
+            JeevesLib.concretize(self.aliceUser, self.eveParty.name)
+            , "Eve's surprise party")
+        self.assertEqual(
+            JeevesLib.concretize(self.eveUser, self.eveParty.name) 
+            , "Private event")
+
+        self.assertEqual(
+            JeevesLib.concretize(self.aliceUser, self.otherParty.name)
+            , "Other party")
+        self.assertEqual(
+            JeevesLib.concretize(self.eveUser, self.otherParty.name)
+            , "Other party")
