@@ -4,6 +4,7 @@ from datetime import date
 
 aliceUser = UserProfile.objects.create(
     username="alice"
+    , name="Alice"
     , email="alice@mail.org")
 alice=User.objects.create_user(
       username="alice"
@@ -12,6 +13,7 @@ alice=User.objects.create_user(
 
 bobUser = UserProfile.objects.create(
     username="bob"
+    , name="Bob"
     , email="bob@mail.org")
 bob=User.objects.create_user(
       username="bob"
@@ -50,3 +52,5 @@ otherParty = Event.objects.create(
 EventHost.objects.create(event=eveParty, host=aliceUser)
 EventHost.objects.create(event=eveParty, host=bobUser)
 EventGuest.objects.create(event=eveParty, guest=carolUser)
+
+EventGuest.objects.create(event=otherParty, guest=aliceUser)

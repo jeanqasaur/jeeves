@@ -22,5 +22,6 @@ urlpatterns = patterns('',
     url(r'^register$', views.register_account),
 
     url(r'^index$', views.index),
+    url(r'^addevent$', views.add_event),
     url(r'^$', views.index),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

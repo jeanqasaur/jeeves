@@ -11,6 +11,7 @@ import JeevesLib
 # only supports a model class (not a string) as the related object. (TODO fix this.)
 class UserProfile(Model):
     username = CharField(max_length=256)
+    name = CharField(max_length=512)
     email = CharField(max_length=256)
 
     @staticmethod
@@ -27,6 +28,17 @@ class UserProfile(Model):
     def has_event(self,event):
         return (EventGuest.objects.get(event=event, guest=self) != None) \
             or (EventHost.objects.get(event=event, host=self) != None)
+
+    @jeeves
+    def get_events(self):
+        guest_events = EventGuest.objects.filter(guest=self).all()
+        host_events = EventHost.objects.filter(host=self).all()
+        events = []
+        for event in guest_events:
+            events.append(event.event)
+        for event in host_events:
+            events.append(event.event)
+        return events
 
 class Event(Model):
     VISIBILITY = (('E', 'Everyone'), ('G', 'Guests' ))

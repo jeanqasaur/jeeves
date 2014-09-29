@@ -68,9 +68,17 @@ def request_wrapper(view_fn, *args, **kwargs):
 @request_wrapper
 @jeeves
 def index(request, user_profile):
-    return (   "index.html"
-           , { 'name' : user_profile.email } )
+    # TODO: Load calendar items.
+    user_events = user_profile.get_events()
 
+    return (   "index.html"
+           , {'name' : user_profile.name
+             , 'events' : user_events} )
+
+@login_required
+@request_wrapper
+def add_event(request, user_profile):
+    return ("add.html", {})
 
 @login_required
 @request_wrapper

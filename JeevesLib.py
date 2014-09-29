@@ -80,49 +80,44 @@ def mkSensitive(varLabel, vHigh, vLow):
 
 @supports_jeeves
 def concretize(ctxt, v):
-		"""Projects out a single value to the viewer.
+	"""Projects out a single value to the viewer.
 
-		:param ctxt: Output channel (viewer).
-		:type ctxt: T, where policies have type T -> bool
-		:param v: Value to concretize.
-		:type v: FExpr
-		:returns: The concrete (non-faceted) version of T under the policies in the environment.
-		"""
-		pathvars = jeevesState.pathenv.getEnv()
-		# Check to see if the value is in the cache.
-		cache_key = jeevesState.concretecache.get_cache_key(ctxt, v, pathvars)
-		cval = jeevesState.concretecache.cache_lookup(cache_key)
-		if cval is None:
-				# If not, then concretize anew and cache the value.
-				cval = jeevesState.policyenv.concretizeExp(ctxt, v, pathvars)
-				jeevesState.concretecache.cache_value(cache_key, cval)
-		return cval
+	:param ctxt: Output channel (viewer).
+	:type ctxt: T, where policies have type T -> bool
+	:param v: Value to concretize.
+	:type v: FExpr
+	:returns: The concrete (non-faceted) version of T under the policies in the environment.
+	"""
+	pathvars = jeevesState.pathenv.getEnv()
+	# Check to see if the value is in the cache.
+	cache_key = jeevesState.concretecache.get_cache_key(ctxt, v, pathvars)
+	cval = jeevesState.concretecache.cache_lookup(cache_key)
+	if cval is None:
+		# If not, then concretize anew and cache the value.
+		cval = jeevesState.policyenv.concretizeExp(ctxt, v, pathvars)
+		jeevesState.concretecache.cache_value(cache_key, cval)
+	return cval
 
 @supports_jeeves
 def jif(cond, thn_fn, els_fn):
-		condTrans = fexpr_cast(cond).partialEval(jeevesState.pathenv.getEnv())
-		if condTrans.type != bool:
-				raise TypeError("jif must take a boolean as a condition")
-		return jif2(condTrans, thn_fn, els_fn)
+	condTrans = fexpr_cast(cond).partialEval(jeevesState.pathenv.getEnv())
+	if condTrans.type != bool:
+		raise TypeError("jif must take a boolean as a condition")
+	return jif2(condTrans, thn_fn, els_fn)
 
 def jif2(cond, thn_fn, els_fn):
-		if isinstance(cond, Constant):
-				return thn_fn() if cond.v else els_fn()
-
-		elif isinstance(cond, Facet):
-				if not isinstance(cond.cond, Var):
-						raise TypeError("facet conditional is of type %s"
-											% cond.cond.__class__.__name__)
-
-				with PositiveVariable(cond.cond):
-						thn = jif2(cond.thn, thn_fn, els_fn)
-				with NegativeVariable(cond.cond):
-						els = jif2(cond.els, thn_fn, els_fn)
-
-				return Facet(cond.cond, thn, els)
-
-		else:
-				raise TypeError("jif condition must be a constant or a var")
+	if isinstance(cond, Constant):
+		return thn_fn() if cond.v else els_fn()
+	elif isinstance(cond, Facet):
+		if not isinstance(cond.cond, Var):
+			raise TypeError("facet conditional is of type %s"									% cond.cond.__class__.__name__)
+		with PositiveVariable(cond.cond):
+			thn = jif2(cond.thn, thn_fn, els_fn)
+		with NegativeVariable(cond.cond):
+			els = jif2(cond.els, thn_fn, els_fn)
+		return Facet(cond.cond, thn, els)
+	else:
+		raise TypeError("jif condition must be a constant or a var")
 
 # supports short-circuiting
 # without short-circuiting jif is unnecessary
@@ -169,15 +164,15 @@ def jassign(old, new, base_env={}):
 Caching.
 '''
 def start_caching():
-		jeevesState.concretecache.start_caching()
+	jeevesState.concretecache.start_caching()
 def stop_caching():
-		jeevesState.concretecache.stop_caching()
+	jeevesState.concretecache.stop_caching()
 def cache_size():
-		return jeevesState.concretecache.cache_size()
+	return jeevesState.concretecache.cache_size()
 def clear_cache():
-		return jeevesState.concretecache.clear_cache()
+	return jeevesState.concretecache.clear_cache()
 def get_cache():
-		return jeevesState.concretecache.cache
+	return jeevesState.concretecache.cache
 
 class PositiveVariable:
 	def __init__(self, var):
@@ -215,7 +210,7 @@ class Namespace:
 	def __setattr__(self, attr, value):
 		self.__dict__[attr] = jassign(self.__dict__.get(
 								attr, Unassigned("variable '%s' in %s" % \
-										(attr, self._jeeves_funcname)))
+									(attr, self._jeeves_funcname)))
 								, value, self.__dict__['_jeeves_base_env'])
 
 @supports_jeeves
@@ -275,8 +270,9 @@ def jmap_jlist2(jlist2, mapper):
 				popcount += 1
 			elif env[vname] != vval:
 				break
-		else:
-			ans.l.append((mapper(i), e))
+			# TODO: Unindent this one more?
+			else:
+				ans.l.append((mapper(i), e))
 		for _ in xrange(popcount):
 			jeevesState.pathenv.pop()
 	return FObject(ans)
@@ -323,7 +319,7 @@ class JList:
 			except AttributeError:
 				return str(x)
 			'''
-		return str(len(self.l)) #''.join(map(tryPrint, self.l))
+			return str(len(self.l)) #''.join(map(tryPrint, self.l))
 
 class JList2:
 	def __init__(self, l=[]):
@@ -331,7 +327,7 @@ class JList2:
 			self.l = [(i, {}) for i in l]
 		else:
 			raise NotImplementedError
-	
+		
 	def append(self, val):
 		self.l.append((val, jeevesState.pathenv.getEnv()))
 
@@ -356,7 +352,7 @@ class JList2:
 				cur_e1[all_vars[i]] = True
 				cur_e2[all_vars[i]] = False
 				return Facet(getLabel(all_vars[i]),
-						rec(cur_e1, i+1), rec(cur_e2, i+1))
+					rec(cur_e1, i+1), rec(cur_e2, i+1))
 		return JList(rec({}, 0))
 
 	def __getitem__(self, i):
@@ -414,31 +410,31 @@ def jfun2(f, args, kw, i, arg, args_concrete):
 
 from itertools import tee
 def jfun3(f, kw, it, key, val, args_concrete, kw_concrete):
-	if isinstance(val, Constant) or isinstance(val, FObject):
-		kw_c = dict(kw_concrete)
-		kw_c[key] = val.v
-		try:
-			next_key = next(it)
-		except StopIteration:
-			return fexpr_cast(f(*args_concrete, **kw_c))
-		env = jeevesState.pathenv.getEnv()
-		return jfun3(f, kw, it, next_key
-			, fexpr_cast(kw[next_key]).partialEval(env), args_concrete, kw_c)
-	else:
-		it1, it2 = tee(it)
-		with PositiveVariable(val.cond):
-			thn = jfun3(f, kw, it1, key, val.thn, args_concrete, kw_concrete)
-		with NegativeVariable(val.cond):
-			els = jfun3(f, kw, it2, key, val.els, args_concrete, kw_concrete)
-		return Facet(val.cond, thn, els)
+		if isinstance(val, Constant) or isinstance(val, FObject):
+				kw_c = dict(kw_concrete)
+				kw_c[key] = val.v
+				try:
+						next_key = next(it)
+				except StopIteration:
+						return fexpr_cast(f(*args_concrete, **kw_c))
+				env = jeevesState.pathenv.getEnv()
+				return jfun3(f, kw, it, next_key
+						, fexpr_cast(kw[next_key]).partialEval(env), args_concrete, kw_c)
+		else:
+				it1, it2 = tee(it)
+				with PositiveVariable(val.cond):
+						thn = jfun3(f, kw, it1, key, val.thn, args_concrete, kw_concrete)
+				with NegativeVariable(val.cond):
+						els = jfun3(f, kw, it2, key, val.els, args_concrete, kw_concrete)
+				return Facet(val.cond, thn, els)
 
 def evalToConcrete(f):
-		g = fexpr_cast(f).partialEval(jeevesState.pathenv.getEnv())
-		if isinstance(g, Constant):
-			return g.v
-		elif isinstance(g, FObject):
-			return g.v
-		else:
-			raise Exception("wow such error: evalToConcrete on non-concrete thingy-ma-bob")
+	g = fexpr_cast(f).partialEval(jeevesState.pathenv.getEnv())
+	if isinstance(g, Constant):
+		return g.v
+	elif isinstance(g, FObject):
+		return g.v
+	else:
+		raise Exception("wow such error: evalToConcrete on non-concrete thingy-ma-bob")
 
 from jlib.JContainer import *
