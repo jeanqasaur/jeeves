@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% import 'macros.html' as macros %}
+
+{% block content %}
+    {% if concretize(error) != "" %}
+        <div> {{concretize(error)}} </div>
+    {% endif %}
+    <form role="form" method="post" action="" enctype="multipart/form-data">
+    	{% csrf_token %}
+      <h2 class="form-heading">Add an Event.</h2>
+      {% for field in form %}
+        <div class="form-group">
+          {{ field.errors }}
+          <label for={{ field.label_tag }} class="control-label"><a rel="tooltip" title="TODO: say visibility"><span class="glyphicon glyphicon-eye-close"></span></a> {{ field.label }}</label>
+          <div class="row">
+            <div class="col-xs-8">
+            {{ field|safe }}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    <button class="btn btn-primary" type="submit" value="Submit" onClick="myApp.showPleaseWait();">Submit</button>
+    </form>
+{% endblock %}

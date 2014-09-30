@@ -5,7 +5,7 @@
   <h1>Welcome {{ concretize(name) }}!</h1>
     <ul>
     {% for event in concretize(events) %}
-        <li>{{ event.name }}</li> 
+        <li><a href="/event?id={{ event.jeeves_id }}">{{ event.name }}</a></li> 
     {% endfor %}
     </ul>
 </div>

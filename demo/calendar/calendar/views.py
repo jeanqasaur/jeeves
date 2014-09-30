@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate
 from django.template import RequestContext
@@ -6,7 +8,8 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
 
-from models import UserProfile
+import forms
+from models import Event, UserProfile
 
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
@@ -44,12 +47,16 @@ def request_wrapper(view_fn, *args, **kwargs):
                 path = context_dict
                 return HttpResponseRedirect(JeevesLib.concretize(profile, path))
 
-            concretizeState = JeevesLib.jeevesState.policyenv.getNewSolverState(profile)
+            concretizeState = \
+                JeevesLib.jeevesState.policyenv.getNewSolverState(profile)
             def concretize(val):
-                return concretizeState.concretizeExp(val, JeevesLib.jeevesState.pathenv.getEnv())
-            add_to_context(context_dict, request, template_name, profile, concretize)
+                return concretizeState.concretizeExp(
+                    val, JeevesLib.jeevesState.pathenv.getEnv())
+            add_to_context(context_dict
+                , request, template_name, profile, concretize)
 
-            return render_to_response(template_name, RequestContext(request, context_dict))
+            return render_to_response(
+                template_name, RequestContext(request, context_dict))
 
         except Exception:
             import traceback
@@ -77,16 +84,33 @@ def index(request, user_profile):
 
 @login_required
 @request_wrapper
-def add_event(request, user_profile):
-    return ("add.html", {})
+def event(request, user_profile):
+    # If we're adding an event.
+    if request.method == 'POST':
+        form = forms.EventForm(request.POST)
+        if form.is_valid():
+            event_form = form.save()
+            event = Event.objects.create(name=event_form.name
+                , location=event_form.location
+                , time=event_form.time
+                , description=event_form.description
+                , visibility=event_form.visibility)
+
+        return ("redirect", "event?id=" + event.jeeves_id)
+    else:
+        form = forms.EventForm()
+
+    # If we're just showing the form.
+    return ("event.html"
+        , {'form': form})
 
 @login_required
 @request_wrapper
 @jeeves
-def profile_view(request):
+def profile_view(request, user_profile):
     profile = UserProfile.objects.get(username=request.user.username)
     if profile == None:
-        profile = UserProfile(username=request.user.username)
+        profile = user_profile
     
     if request.method == 'POST':
         profile.email = request.POST.get('email', '')
@@ -96,7 +120,6 @@ def profile_view(request):
         "email": profile.email,
         "which_page": "profile",
     })
-
 
 def register_account(request):
     if request.user.is_authenticated():
@@ -120,8 +143,7 @@ def register_account(request):
     else:
         form = UserCreationForm()
 
-    return render_to_response("registration/account.html", RequestContext(request,
-        {
-            'form' : form,
-            'which_page' : "register"
-        }))
+    return render_to_response("registration/account.html"
+        , RequestContext(request,
+        {'form': form,
+        'which_page' : "register"}))
