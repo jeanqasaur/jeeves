@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-{% import 'macros.html' as macros %}
 
 {% block content %}
     {% if concretize(error) != "" %}
@@ -33,10 +32,22 @@
         </div>
       </div>
       <div class="form-group">
-        <label for="description" class="control-label"><a rel="tooltip" title="TODO."><span class="glyphicon glyphicon-eye-close"></span></a> Name</label>
+        <label for="description" class="control-label"><a rel="tooltip" title="TODO."><span class="glyphicon glyphicon-eye-close"></span></a> Description</label>
         <div class="row">
           <div class="col-xs-4">
             <textarea class="form-control" name="description" id="description">{{ concretize(description) }}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="visibility" class="control-label"><a rel="tooltip" title="TODO."><span class="glyphicon glyphicon-eye-close"></span></a> Visibility</label>
+        <div class="row">
+          <div class="col-xs-4">
+            <div class="btn-group">
+              <button type="button" class="btn btn-default {% if visiblity=='E' %}active{% endif %}" data-value="E">Everyone</button>
+              <button type="button" class="btn btn-default {% if visibility=='G' %}active{% endif %}" data-value="G">Guests only</button>
+            </div>
           </div>
         </div>
       </div>
