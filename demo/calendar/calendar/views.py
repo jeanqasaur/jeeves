@@ -111,7 +111,6 @@ def event(request, user_profile):
 
         # If the event already exists.
         if event_id != '':
-            print "SAVING EVENT"
             event = Event.objects.get(jeeves_id=event_id)
             event.name = name
             event.location = location
@@ -120,7 +119,6 @@ def event(request, user_profile):
             event.visibility = visibility
             event.save()
         else:
-            print "there is no event ID!"
             event = Event.objects.create(name=name
             , location=location
             , time=time
@@ -150,7 +148,7 @@ def profile_view(request, user_profile):
         profile.save()
 
     return ("profile.html", {
-        "email": profile.email,
+        "profile": profile,
         "which_page": "profile",
     })
 
