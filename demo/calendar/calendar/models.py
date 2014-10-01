@@ -3,6 +3,9 @@ from django.conf import settings
 from django.db.models import CharField, DateTimeField
 from jeevesdb.JeevesModel import JeevesModel as Model, JeevesForeignKey as ForeignKey
 from jeevesdb.JeevesModel import label_for
+
+import pytz
+
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
 
@@ -65,7 +68,7 @@ class Event(Model):
         return "Undisclosed location"
     @staticmethod
     def jeeves_get_private_time(event):
-        return datetime(1999, 1, 1, 0)
+        return datetime.now(tz=pytz.utc)
     @staticmethod
     def jeeves_get_private_description(event):
         return "An event."

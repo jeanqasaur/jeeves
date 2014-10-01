@@ -1,5 +1,6 @@
 import datetime
 
+from django import template
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate
 from django.template import RequestContext
@@ -7,12 +8,25 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
+from jinja2 import filters
+import os
+import pytz
 
-import forms
+from forms import EventForm
 from models import Event, UserProfile
 
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
+
+# Get the Jinja environment.
+#template_dir = os.path.join(os.path.dirname(__file__), '..', 'templates')
+#print template_dir
+#env = Environment(loader = FileSystemLoader(template_dir))
+
+def get_type(form_field_obj):
+    return form_field_obj.widget.__class__.__name__
+
+filters.FILTERS['get_type'] = get_type
 
 # "Glue method". Right now you just write a method like `index` below.
 # It returns a (faceted) tuple either of the form (template_name, template_ctxt)
@@ -56,7 +70,9 @@ def request_wrapper(view_fn, *args, **kwargs):
                 , request, template_name, profile, concretize)
 
             return render_to_response(
-                template_name, RequestContext(request, context_dict))
+                template_name
+                , RequestContext(request, context_dict))
+
 
         except Exception:
             import traceback
@@ -65,11 +81,6 @@ def request_wrapper(view_fn, *args, **kwargs):
 
     real_view_fn.__name__ = view_fn.__name__
     return real_view_fn
-
-# An example of a really simple view.
-# The argument `user_profile` is a UserProfile object (defined in models.py).
-# Use this instead of `request.user` (which is the ordinary django User model).
-# You can access request.POST and request.GET as normal.
 
 @login_required
 @request_wrapper
@@ -85,24 +96,46 @@ def index(request, user_profile):
 @login_required
 @request_wrapper
 def event(request, user_profile):
+    event_id = request.GET.get('id', '')
+    fields = {}
+    
     # If we're adding an event.
     if request.method == 'POST':
-        form = forms.EventForm(request.POST)
-        if form.is_valid():
-            event_form = form.save()
-            event = Event.objects.create(name=event_form.name
-                , location=event_form.location
-                , time=event_form.time
-                , description=event_form.description
-                , visibility=event_form.visibility)
+        name = request.POST.get('name', 'Unnamed event')
+        location = request.POST.get('location', 'Undisclosed location')
+        time = request.POST.get('time', datetime.datetime.now(tz=pytz.utc))
+        description = request.POST.get('description',  '')
+        visibility = request.POST.get('visibility', 'E')
+        fields = {'name': name, 'location': location, 'time': time
+            , 'description': description, 'visibility': visibility}
 
-        return ("redirect", "event?id=" + event.jeeves_id)
+        # If the event already exists.
+        if event_id != '':
+            print "SAVING EVENT"
+            event = Event.objects.get(jeeves_id=event_id)
+            event.name = name
+            event.location = location
+            event.time = time
+            event.description = description
+            event.visibility = visibility
+            event.save()
+        else:
+            print "there is no event ID!"
+            event = Event.objects.create(name=name
+            , location=location
+            , time=time
+            , description=description
+            , visibility=visibility)
+            return ("redirect", "event?id=" + event.jeeves_id)
     else:
-        form = forms.EventForm()
+        assert(event_id != '')
+        event = Event.objects.get(jeeves_id=event_id)
+        fields = {'name': event.name, 'location': event.location
+            , 'time': event.time, 'description': event.description
+            , 'visibility': event.visibility}
 
     # If we're just showing the form.
-    return ("event.html"
-        , {'form': form})
+    return ("event.html", fields)
 
 @login_required
 @request_wrapper

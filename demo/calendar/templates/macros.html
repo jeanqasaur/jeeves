@@ -1,36 +1,25 @@
 {% macro form_field(field) -%}
-{% set with_label = kwargs.pop('with_label', False) %}
-{% set placeholder = '' %}
-{% if not with_label %}
-{% set placeholder = field.label.text %}
-{% endif %}
-<div class="control-group {% if field.errors %}error{% endif %}">
-{% if with_label %}
-<label for="{{ field.id }}" class="control-label">
-{{ field.label.text }}
-</label>
-{% endif %}
-<div class="controls">
-{% set class_ = kwargs.pop('class_', '') %}
-{% if field.type == 'BooleanField' %}
-<label class="checkbox">
-{{ field(class_=class_, **kwargs) }}
-{{ field.label.text|safe }}
-</label>
-{% else %}
-{% if field.type in ('TextField', 'TextAreaField', 'PasswordField') %}
-{% set class_ = class_ + ' input-xlarge' %}
-{% elif field.type == 'FileField' %}
-{% set class_ = class_ + ' input-file' %}
-{% endif %}
-{{ field(class_=class_, placeholder=placeholder, **kwargs) }}
-{% endif %}
-{% if field.errors %}
-<span class="error help-inline">{{ field.errors|join(', ') }}</span>
-{% endif %}
-{% if field.description %}
-<p class="help-block">{{ field.description|safe }}</p>
-{% endif %}
-</div>
-</div>
+  {% set placeholder = '' %}
+  {% if not with_label %}
+    {% set placeholder = field.label.text %}
+  {% endif %}
+  <div class="form-group {% if field.errors %}error{% endif %}">
+    <label for={{ field.label_tag }} class="control-label"><a rel="tooltip" title="TODO: say visibility"><span class="glyphicon glyphicon-eye-close"></span></a> {{ field.label }}</label>
+    <div class="row">
+      <div class="col-xs-4">
+      {% set class_ = kwargs.pop('class_', '') %}
+      {% if field.field|get_type == "TextInput" %}
+      <input type="text" class="form-control" name={{ field.name }} id={{ field.id_for_label }} value="{{ field.value() }}" {% if field.required %}required{% endif %}>
+      {% else %}
+        {{ field.value () }}
+      {% endif %}
+      {% if field.errors %}
+        <span class="error help-inline">{{ field.errors|join(', ') }}</span>
+      {% endif %}
+      {% if field.description %}
+        <p class="help-block">{{ field.description|safe }}</p>
+      {% endif %}
+      </div>
+    </div>
+  </div>
 {%- endmacro %}

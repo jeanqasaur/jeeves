@@ -7,18 +7,39 @@
     {% endif %}
     <form role="form" method="post" action="" enctype="multipart/form-data">
     	{% csrf_token %}
-      <h2 class="form-heading">Add an Event.</h2>
-      {% for field in form %}
-        <div class="form-group">
-          {{ field.errors }}
-          <label for={{ field.label_tag }} class="control-label"><a rel="tooltip" title="TODO: say visibility"><span class="glyphicon glyphicon-eye-close"></span></a> {{ field.label }}</label>
-          <div class="row">
-            <div class="col-xs-8">
-            {{ field|safe }}
-            </div>
+      <h2 class="form-heading">Edit Your Event.</h2>
+       <div class="form-group">
+        <label for="name" class="control-label"><a rel="tooltip" title="TODO."><span class="glyphicon glyphicon-eye-close"></span></a> Name</label>
+        <div class="row">
+          <div class="col-xs-4">
+            <input type="text" class="form-control" name="name" id="name" value="{{ concretize(name) }}" required>
           </div>
         </div>
-      {% endfor %}
+      </div>
+      <div class="form-group">
+        <label for="location" class="control-label"><a rel="tooltip" title="TODO."><span class="glyphicon glyphicon-eye-close"></span></a> Location</label>
+        <div class="row">
+          <div class="col-xs-4">
+            <input type="text" class="form-control" name="location" id="location" value="{{ concretize(location) }}">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="time" class="control-label"><a rel="tooltip" title="TODO."><span class="glyphicon glyphicon-eye-close"></span></a> Time</label>
+        <div class="row">
+          <div class="col-xs-4">
+            <input type="datetime" class="form-control" name="time" id="time" value="{{ concretize(time) }}">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="description" class="control-label"><a rel="tooltip" title="TODO."><span class="glyphicon glyphicon-eye-close"></span></a> Name</label>
+        <div class="row">
+          <div class="col-xs-4">
+            <textarea class="form-control" name="description" id="description">{{ concretize(description) }}</textarea>
+          </div>
+        </div>
+      </div>
     <button class="btn btn-primary" type="submit" value="Submit" onClick="myApp.showPleaseWait();">Submit</button>
     </form>
 {% endblock %}
