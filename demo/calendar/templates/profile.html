@@ -19,6 +19,26 @@
           </div>
         </div>
       </div>
+      <div class="form-group">
+      {% if concretize(host_events) %}
+      <h4>Events Hosting</h4>
+      <ul>
+        {% for event_host in concretize(host_events) %}
+          <li><a href="event?id={{ event_host.event.jeeves_id }}">{{ concretize(event_host.event.name) }}</a></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% if concretize(host_events) %}
+      <h4>Events Attending</h4>
+      <ul>
+        {% for event_guest in concretize(guest_events) %}
+          <li><a href="event?id={{ event_guest.event.jeeves_id }}">{{ concretize(event_guest.event.name) }}</a></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      </div>
+      {% if concretize(is_own_profile) %}
       <button class="btn btn-primary" type="submit" value="Save" onClick="myApp.showPleaseWait();">Update</button>
+      {% endif %}
     </form>
 {% endblock %}

@@ -9,19 +9,12 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
 from jinja2 import filters
-import os
 import pytz
 
-from forms import EventForm
-from models import Event, UserProfile
+from models import Event, EventHost, EventGuest, UserProfile
 
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
-
-# Get the Jinja environment.
-#template_dir = os.path.join(os.path.dirname(__file__), '..', 'templates')
-#print template_dir
-#env = Environment(loader = FileSystemLoader(template_dir))
 
 def get_type(form_field_obj):
     return form_field_obj.widget.__class__.__name__
@@ -126,11 +119,11 @@ def event(request, user_profile):
             , visibility=visibility)
             return ("redirect", "event?id=" + event.jeeves_id)
     else:
-        assert(event_id != '')
-        event = Event.objects.get(jeeves_id=event_id)
-        fields = {'name': event.name, 'location': event.location
-            , 'time': event.time, 'description': event.description
-            , 'visibility': event.visibility}
+        if (event_id != ''):
+            event = Event.objects.get(jeeves_id=event_id)
+            fields = {'name': event.name, 'location': event.location
+                , 'time': event.time, 'description': event.description
+                , 'visibility': event.visibility}
 
     # If we're just showing the form.
     return ("event.html", fields)
@@ -144,11 +137,19 @@ def profile_view(request, user_profile):
         profile = user_profile
     
     if request.method == 'POST':
+        assert(request.user.username==userprofile.username)
+        profile.name = request.POST.get('name', '')
         profile.email = request.POST.get('email', '')
         profile.save()
 
+    host_events = EventHost.objects.filter(host=profile).all()
+    guest_events = EventGuest.objects.filter(guest=profile).all()
+
     return ("profile.html", {
         "profile": profile,
+        "is_own_profile": request.user.username==user_profile.username,
+        "host_events": host_events,
+        "guest_events": guest_events,
         "which_page": "profile",
     })
 
