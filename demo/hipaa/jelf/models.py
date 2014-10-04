@@ -1,8 +1,14 @@
+"""Models for HIPAA case study.
+
+    :synopsis: Schemas for health records.
+
+.. moduleauthor: Ariel Jacobs
+.. moduleauthor: Jean Yang <jeanyang@csail.mit.edu>
+"""
 from django.db.models import ManyToManyField, ForeignKey, OneToOneField, CharField, TextField, DateField, DateTimeField, IntegerField, FileField, BooleanField
 from django.conf import settings
 
 from jeevesdb.JeevesModel import JeevesModel as Model
-from django.conf import settings
 from django.contrib.auth.models import User
 from jeevesdb.JeevesModel import JeevesForeignKey as ForeignKey
 from jeevesdb.JeevesModel import label_for

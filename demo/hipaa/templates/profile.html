@@ -1,21 +1,32 @@
-{{ comment }}
-	I haven't changed this page.
-{{ endcomment }}
 {% extends 'base.html' %}
 
 {% block content %}
     <form role="form" method="post" action="">{% csrf_token %}
       <h2 class="form-heading">Profile.</h2>
-      {% for field in fields %}
       <div class="form-group">
-        <label for="{{ field.name }}" class="control-label"><a rel="tooltip" title="{{ field.privacy }}"><span class="glyphicon glyphicon-eye-close"></span></a> {{ field.label }}</label>
+        <label for="name" class="control-label"><a rel="tooltip" title="Visible to everyone."><span class="glyphicon glyphicon-eye-close"></span></a> Name</label>
         <div class="row">
           <div class="col-xs-4">
-            <input type="{{ field.inputtype }}" class="form-control" name="{{ field.name }}" id="{{ field.name }}" value="{{ concretize(field.val) }}" {% if concretize(field.disabled) %}disabled{% endif %} {% if concretize(field.required) %}required{% endif %}>
+            <input type="text" class="form-control" name="name" id="name" value="{{ concretize(profile.name) }}" required>
           </div>
         </div>
       </div>
-      {% endfor %}
+      <div class="form-group">
+        <label for="email" class="control-label"><a rel="tooltip" title="Visible to only you."><span class="glyphicon glyphicon-eye-close"></span></a> Email</label>
+        <div class="row">
+          <div class="col-xs-4">
+            <input type="email" class="form-control" name="email" id="email" value="{{ concretize(profile.user.email) }}" required>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="profiletype" class="control-label"><a rel="tooltip" title="Visible to everyone."><span class="glyphicon glyphicon-eye-close"></span></a> Profile type</label>
+        <div class="row">
+          <div class="col-xs-4">
+            <input type="email" class="form-control" name="profiletype" id="profiletype" value="{{ concretize(profile.profiletype) }}" disabled required>
+          </div>
+        </div>
+      </div>
       <button class="btn btn-primary" type="submit" value="Save" onClick="myApp.showPleaseWait();">Update</button>
     </form>
 {% endblock %}

@@ -1,6 +1,6 @@
 """API for Python Jeeves libary.
 
-	:synopsis: Functions for creating sensitive values, labels, and policies.
+    :synopsis: Functions for creating sensitive values, labels, and policies.
 
 .. moduleauthor:: Travis Hance <tjhance7@gmail.com>
 .. moduleauthor:: Jean Yang <jeanyang@csail.mit.edu>
@@ -17,18 +17,18 @@ from fast.AST import Facet, fexpr_cast, Constant, Var, Not, FExpr, Unassigned, F
 import copy
 
 def init():
-	"""Initialization function for Jeeves library.
+    """Initialization function for Jeeves library.
 
-	You should always call this before you do anything Jeeves-y.
+    You should always call this before you do anything Jeeves-y.
 
-	"""
-	jeevesState.init()
+    """
+    jeevesState.init()
 
-	# TODO this needs to be GC'ed somehow
+    # TODO this needs to be GC'ed somehow
 
 def supports_jeeves(f):
-	f.__jeeves = 0
-	return f
+    f.__jeeves = 0
+    return f
 
 @supports_jeeves
 def mkLabel(varName = "", uniquify=True):

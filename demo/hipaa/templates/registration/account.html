@@ -34,15 +34,23 @@
         <p class="help-inline"><small>Enter the same password as above, for verification.</small></p>               
       </div>       
       <div class="form-group">
-        <label for="email" class="control-label"><a rel="tooltip" title="Visible to you and the PC chair."><span class="glyphicon glyphicon-eye-close"></span></a> Email</label>
+        <label for="name" class="control-label"><a rel="tooltip" title="Visible to everyone."><span class="glyphicon glyphicon-eye-close"></span></a> Name</label>
         <div class="row">
           <div class="col-xs-4">
-            <input type="email" class="form-control" name="email" id="email" placeholder="Enter email">
+            <input type="name" class="form-control" name="name" id="name" placeholder="Enter name">
           </div>
         </div>
       </div>
       <div class="form-group">
-        <label for="name" class="control-label"><a rel="tooltip" title="Visible to everyone."><span class="glyphicon glyphicon-eye-open"></span></a> Name</label>
+        <label for="email" class="control-label"><a rel="tooltip" title="Visible to you and the PC chair."><span class="glyphicon glyphicon-eye-close"></span></a> Email</label>
+        <div class="row">
+          <div class="col-xs-4">
+            <input type="email" class="form-control" name="email" id="email" placeholder="Enter email" required>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="name" class="control-label"><a rel="tooltip" title="Visible to everyone."><span class="glyphicon glyphicon-eye-open"></span></a> Profile type</label>
         <div class="row">
           <div class="col-xs-2">
 			<select name="profiletype">

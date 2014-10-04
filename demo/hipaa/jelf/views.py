@@ -17,7 +17,8 @@ from datetime import date
 #import urllib
 #import random
 
-from jelf.models import Diagnosis, Individual, CoveredEntity, UserProfile, Transaction, Treatment
+from jelf.models import Diagnosis, Individual, CoveredEntity, UserProfile, \
+    Transaction, Treatment
 
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
@@ -65,22 +66,13 @@ def register_account(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            email = request.POST.get('email', '')
             user.save()
 
             profiletype = request.POST.get('profiletype', '')
-            individual = None
-            entity = None
-            associate = None
             UserProfile.objects.create(
                   user=user
                 , name=request.POST.get('name', '')
-                ,	email=request.POST.get('email', '')
-                , individual=individual
-                , entity=entity
-                , associate=associate
-                , profiletype=int(profiletype)
-			      )
+                , profiletype=int(profiletype))
             user = authenticate(username=request.POST['username'],
             password=request.POST['password1'])
             login(request, user)
@@ -143,7 +135,7 @@ def index(request, profile):
     """
     patients = Individual.objects.all()
     entities = CoveredEntity.objects.all()
-    
+
     # TODO: Filter out ones you can't see?
 
     data = {"patients": patients
@@ -166,41 +158,22 @@ def about_view(request, user):
 def profile_view(request, profile):
     """Displaying and updating profiles.
     """
-    class FormField(object):
-        """Field of a profile form.
-        """
-        def __init__(self, name, privacy, label, inputtype, val, disabled=True):
-            self.name = name
-            self.privacy = privacy
-            self.label = label
-            self.inputtype = inputtype
-            self.val = val
-            self.disabled = disabled
-            self.required = self.disabled
-
     if profile == None:
         profile = UserProfile(user=request.user)
 
     if request.method == 'POST':
-        '''
-        profile.user.first_name = request.POST.get('firstname', '')
-        profile.user.last_name = request.POST.get('lastname', '')
+        profile.name = request.POST.get('name', '')
+        
         profile.user.email = request.POST.get('email', '')
         profile.user.save()
-
-        profile.profiletype = int(request.POST.get('profiletype', '1'))
-        '''
         profile.save()
 
-    fields = [FormField("email", "Visible only to you", "Email", "email"
-               , profile.user.email)
-             , FormField("name", "Visible to everyone", "Name"
-                , "text", profile.name)
-             , FormField("profiletype", "Visible to everyone", "Type", "text"
-                , profile.profiletype)]
+    print "HELLO"
+    print profile.user
+    print profile.user.email
 
     return ("profile.html", {
-        "fields": fields
+          "profile": profile
         , "which_page": "profile"})
 
 @login_required
@@ -297,7 +270,7 @@ def directory_view(request, profile, entity):
     """
     entity = CoveredEntity.objects.get(EIN=entity)
     visits = entity.Patients.filter(DateReleased=None)
-    
+
     oldVisits = [
            {"Patient" : {"Name" : "Joe McGray", "ID" : 5}
           , "DateAdmitted" : date(2014, 5, 25)
