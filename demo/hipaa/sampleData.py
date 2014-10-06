@@ -222,23 +222,23 @@ dataVisit = data.Visits.create(Visit = visit4)
 ###USERS###
 jeanyang=User.objects.create_user(
       username="jeanyang"
-    , email="ariel@example.com"
     , password="hi")
 
 jeanyangProfile=UserProfile.objects.create(
       profiletype=1
-    , user=jeanyang
+    , username="jeanyang"
+    , email = "jeanyang@example.com"
     , name="Jean Yang"
     , individual=jean)
 
 arielj=User.objects.create_user(
       username="arielj321"
-    , email="ariel@example.com"
     , password="hipaaRules")
 
 arielProfile=UserProfile.objects.create(
       profiletype=1
-    , user=arielj
+    , username="arielj321"
+    , email="ariel@example.com"
     , name="Ariel Jacobs"
     , individual=ariel)
 

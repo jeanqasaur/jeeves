@@ -405,7 +405,7 @@ class PersonalRepresentative(Model):
 class UserProfile(Model):
     """Information about a user of the website.
     """
-    user = ForeignKey(User, help_text="User this information is about")
+    username = CharField(max_length=1024)
     email = CharField(max_length=1024, help_text="The user's email address")
     profiletype = IntegerField(help_text="Type of body this user is about. \
         0=None, 1=Individual, 2=CoveredEntity, 3=BusinessAssociate, \

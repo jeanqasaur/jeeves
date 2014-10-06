@@ -52,12 +52,12 @@ class TestHealthModels(TestCase):
 
         self.jeanyang=User.objects.create_user(
             username="jeanyang"
-            , email="ariel@example.com"
             , password="hi")
 
         self.jeanyangProfile=UserProfile.objects.create(
             profiletype=1
-            , user=self.jeanyang
+            , username="jeanyang"
+            , email="jeanyang@example.com"
             , name="Jean Yang"
             , individual=self.jean)
         
@@ -68,12 +68,13 @@ class TestHealthModels(TestCase):
 
         self.arielProfile=UserProfile.objects.create(
             profiletype=1
-            , user=self.arielj
+            , username="arielj321"
+            , email="ariel@example.com"
             , name="Ariel Jacobs"
             , individual=self.ariel)
 
     def test_get_sample_data(self):
-        jeanyang = UserProfile.objects.get(user=self.jeanyang)
+        jeanyang = UserProfile.objects.get(username="jeanyang")
         self.assertEqual(JeevesLib.concretize(self.jeanyangProfile, jeanyang)
             , self.jeanyangProfile)
 

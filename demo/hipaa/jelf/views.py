@@ -70,7 +70,8 @@ def register_account(request):
 
             profiletype = request.POST.get('profiletype', '')
             UserProfile.objects.create(
-                  user=user
+                  username=user.username
+                , email=user.email
                 , name=request.POST.get('name', '')
                 , profiletype=int(profiletype))
             user = authenticate(username=request.POST['username'],
@@ -102,7 +103,7 @@ def request_wrapper(view_fn):
     """
     def real_view_fn(request, *args, **kwargs):
         try:
-            profile = UserProfile.objects.get(user=request.user)
+            profile = UserProfile.objects.get(username=request.user.username)
             ans = view_fn(request, profile, *args, **kwargs)
             template_name = ans[0]
             context_dict = ans[1]
@@ -163,14 +164,8 @@ def profile_view(request, profile):
 
     if request.method == 'POST':
         profile.name = request.POST.get('name', '')
-        
-        profile.user.email = request.POST.get('email', '')
-        profile.user.save()
+        profile.email = request.POST.get('email', '')
         profile.save()
-
-    print "HELLO"
-    print profile.user
-    print profile.user.email
 
     return ("profile.html", {
           "profile": profile
