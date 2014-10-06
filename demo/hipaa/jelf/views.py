@@ -66,12 +66,15 @@ def register_account(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
+            print user.username
+            print request.POST.get('email', '')
+            print request.POST.get('name', '')
             user.save()
 
             profiletype = request.POST.get('profiletype', '')
             UserProfile.objects.create(
                   username=user.username
-                , email=user.email
+                , email=request.POST.get('email', '')
                 , name=request.POST.get('name', '')
                 , profiletype=int(profiletype))
             user = authenticate(username=request.POST['username'],
