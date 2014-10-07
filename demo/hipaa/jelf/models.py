@@ -155,13 +155,17 @@ class Individual(Model):
     @label_for('FirstName','LastName','Email','Address','BirthDate','SSN','TelephoneNumber','FaxNumber','DriversLicenseNumber','Employer')
     @jeeves
     def jeeves_restrict_Individuallabel1(individual, ctxt):
-        return ctxt != None and ctxt.profiletype==1 and ctxt.individual==individual
+        return ctxt != None and ctxt.profiletype==1 and \
+        ctxt.individual==individual
 
     @staticmethod
     @label_for('ReligiousAffiliation')
     def jeeves_restrict_Individuallabel_ForReligiousAffiliation(
         individual, ctxt):
-		    return ctxt != None and ctxt.profiletype==1 and ctxt.individual==individual
+        """ Only individuals of profile type 1 can see religious affiliation.
+        """
+        return ctxt != None and ctxt.profiletype==1 \
+            and ctxt.individual==individual
 
 class BusinessAssociate(Model):
     """Persons or corporations that perform services for covered entities. They
@@ -179,13 +183,13 @@ class CoveredEntity(Model):
     """Health plan, health clearinghouse, or health care provider making
     sensitive transactions. This includes hospitals.
     """
-    EIN = CharField(max_length=9, blank=False, null=False
+    ein = CharField(max_length=9, blank=False, null=False
         , help_text="Government issued Employer Identification Number, \
             should be uniquely identifiable")
-    Name = CharField(max_length=1024, help_text="Entity's name")
-    Directory = ManyToManyField(Individual,through="HospitalVisit"
+    name = CharField(max_length=1024, help_text="Entity's name")
+    directory = ManyToManyField(Individual,through="HospitalVisit"
         , help_text="Patients currently checked in to entity")
-    Associates = ManyToManyField(BusinessAssociate
+    associates = ManyToManyField(BusinessAssociate
         , through="BusinessAssociateAgreement"
         , help_text="Business Associates that the entity uses.")
 
@@ -193,21 +197,39 @@ class CoveredEntity(Model):
         db_table = 'CoveredEntity'
 
 class HospitalVisit(Model):
+    UNDISCLOSED_LOCATION = "Undisclosed location"
+
     """Patient's visit to a hospital for medical purposes
     """
-    Patient = ForeignKey(Individual, help_text="Patient visiting")
-    Hospital = ForeignKey(CoveredEntity, related_name="Patients"
+    patient = ForeignKey(Individual, help_text="Patient visiting")
+    hospital = ForeignKey(CoveredEntity, related_name="Patients"
         , help_text="Hospital visited")
-    DateAdmitted = DateField(help_text="Date patient checked in to hospital")
-    Location = TextField(blank=True, null = True
+    date_admitted = DateField(help_text="Date patient checked in to hospital")
+    location = TextField(blank=True, null = True
         , help_text="Current location of patient within entity's grounds")
-    Condition = TextField(blank=True, null = True
+    condition = TextField(blank=True, null = True
         , help_text="Vague description of patient's condition")
-    DateReleased = DateField(blank=True, null=True
+    date_released = DateField(blank=True, null=True
         , help_text="Date patient checked out of hospital. Blank if patient \
             still in hospital")
+
+    @staticmethod
+    @label_for('location')
+    @jeeves
+    def jeeves_restrict_HospitalVisitlabel(visit, ctxt):
+        if ctxt.profiletype==1:
+            return visit.patient==ctxt.individual
+        elif ctxt.profiletype==2:
+            return visit.hospital==ctxt.entity
+        elif ctxt.profiletype==6:
+            return True
+
+    @staticmethod
+    def jeeves_get_private_location(individual):
+        return HospitalVisit.UNDISCLOSED_LOCATION
+
     class Meta:
-		    db_table = 'HospitalVisit'
+        db_table = 'HospitalVisit'
     '''@label_for('Location')
 	@jeeves
 	def jeeves_restrict_HospitalVisitlabel(visit, ctxt):
@@ -419,16 +441,16 @@ class UserProfile(Model):
     individual = ForeignKey(Individual, blank=True, null=True
         , help_text="The individual this user represents")
 
-    '''
     @staticmethod
     def jeeves_get_private_email(user):
         return ""
+
     @staticmethod
     @label_for('email')
     @jeeves
     def jeeves_restrict_userprofilelabel(user, ctxt):
-        return user == ctxt or (ctxt != None and ctxt.level == 'chair')
-    '''
+        return user == ctxt
+    
     class Meta:
         db_table = 'UserProfile'
 

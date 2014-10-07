@@ -13,7 +13,7 @@ from django.test import TestCase
 import JeevesLib
 
 from jeevesdb import JeevesModel
-from jelf.models import Address, Individual, UserProfile
+from jelf.models import Address, CoveredEntity, HospitalVisit, Individual, UserProfile
 
 import nose.tools as nt
 
@@ -73,6 +73,15 @@ class TestHealthModels(TestCase):
             , name="Ariel Jacobs"
             , individual=self.ariel)
 
+        self.vision= CoveredEntity.objects.create(ein = "01GBS253DV"
+            , name = "Vision National")
+        self.visionProfile=UserProfile.objects.create(
+            profiletype=2
+            , username="visionhealth"
+            , email="vision@example.com"
+            , name="Vision National"
+            , entity=self.vision)
+
     def test_get_sample_data(self):
         jeanyang = UserProfile.objects.get(username="jeanyang")
         self.assertEqual(JeevesLib.concretize(self.jeanyangProfile, jeanyang)
@@ -88,4 +97,22 @@ class TestHealthModels(TestCase):
         self.assertEqual(
             JeevesLib.concretize(self.arielProfile, self.jean.Address.ZipCode)
             , "14800")
+
+    def test_hospital_visit_visibility(self):
+        actual_visit_location = "Third room on the left"
+        visit = HospitalVisit.objects.create(patient=self.ariel,
+            date_admitted=date(2003,4,1),
+            date_released=date(2003,9,13),
+            condition="Good",
+            location=actual_visit_location,
+            hospital=self.vision)
+        self.assertEqual(
+            JeevesLib.concretize(self.jeanyangProfile, visit.location)
+            , HospitalVisit.UNDISCLOSED_LOCATION)
+        self.assertEqual(
+            JeevesLib.concretize(self.arielProfile, visit.location)
+            , actual_visit_location)
+        self.assertEqual(
+            JeevesLib.concretize(self.visionProfile, visit.location)
+            , actual_visit_location)
 

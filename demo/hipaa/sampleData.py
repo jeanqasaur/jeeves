@@ -118,20 +118,20 @@ justin = Individual.objects.create(FirstName="Justin",
 '''
 Covered Entities.
 '''
-vision= CoveredEntity.objects.create(EIN = "01GBS253DV",
-                      Name = "Vision National")
-
-health = CoveredEntity.objects.create(EIN = "0424D3294N", Name = "Covered Health")
+vision= CoveredEntity.objects.create(ein = "01GBS253DV"
+    , name = "Vision National")
+health = CoveredEntity.objects.create(ein = "0424D3294N"
+    , name = "Covered Health")
 
 '''
 Hospital visits.
 '''
-visit1 = HospitalVisit.objects.create(Patient=joe,
-    DateAdmitted=date(2003,4,1),
-    DateReleased=date(2003,9,13),
-    Condition="Good",
-    Location="Third room on the left",
-    Hospital=vision)
+visit1 = HospitalVisit.objects.create(patient=joe,
+    date_admitted=date(2003,4,1),
+    date_released=date(2003,9,13),
+    condition="Good",
+    location="Third room on the left",
+    hospital=vision)
 
 '''
 Treatments.
