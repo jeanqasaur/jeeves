@@ -230,49 +230,47 @@ class HospitalVisit(Model):
 
     class Meta:
         db_table = 'HospitalVisit'
-    '''@label_for('Location')
-	@jeeves
-	def jeeves_restrict_HospitalVisitlabel(visit, ctxt):
-		if ctxt.type==1:
-			return visit.Patient==ctxt.individual
-		elif ctxt.type==2:
-			return visit.Hospital==ctxt.entity
-		elif ctxt.type==6:
-			return True
+    '''
 	@staticmethod
 	def jeeves_get_private_Patient(individual):
 		return ""
-	@staticmethod
-	def jeeves_get_private_Location(individual):
-		return ""'''
+    '''
 
 class Treatment(Model):
     """Provided medical treatment, medication, or service.
     """
-    Service = CharField(max_length=100
+    service = CharField(max_length=100
         , help_text="Code for medical service provided")
-    DatePerformed = DateField(
+    date_performed = DateField(
         help_text="Date on which the service was performed")
-    PrescribingEntity = ForeignKey(CoveredEntity, null=True
+    prescribing_entity = ForeignKey(CoveredEntity, null=True
         , related_name="Prescriptions"
         , help_text="Entity that prescribed this service")
-    PerformingEntity = ForeignKey(CoveredEntity, null=True
+    performing_entity = ForeignKey(CoveredEntity, null=True
         , help_text="Entity that performed this service")
-    Patient = ForeignKey(Individual, null=True
+    patient = ForeignKey(Individual, null=True
         , help_text="Patient whom received this service")
+
+    @staticmethod
+    @label_for('patient')
+    @jeeves
+    def jeeves_restrict_Treatmentlabel(treatment, ctxt):
+        if ctxt.profiletype==1:
+            return treatment.patient==ctxt.individual
+            # TODO
+            '''
+            or \
+            treatment.patient.personalRepresentative_set.get(
+                ctxt.individual.user).length>0
+            '''
+        elif ctxt.profiletype==2:
+            return treatment.prescribing_entity==ctxt.entity
+    @staticmethod
+    def jeeves_get_private_patient(individual):
+        return None
 
     class Meta:
         db_table = 'Treatment'
-    '''@label_for('Patient')
-	@jeeves
-	def jeeves_restrict_Treatmentlabel(treatment, ctxt):
-		if ctxt.type==1:
-			return treatment.Patient==ctxt.individual or treatment.Patient.personalRepresentative_set.get(ctxt.individual.user).length>0
-		elif ctxt.type==2:
-			return treatment.PrescribingEntity==ctxt.entity or treatment.PrescribingEntity==ctxt.entity
-	@staticmethod
-	def jeeves_get_private_Patient(individual):
-		return None'''
 
 class Diagnosis(Model): 
     """Recognition of health condition or situation by a medical professional.

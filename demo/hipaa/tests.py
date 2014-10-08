@@ -13,7 +13,8 @@ from django.test import TestCase
 import JeevesLib
 
 from jeevesdb import JeevesModel
-from jelf.models import Address, CoveredEntity, HospitalVisit, Individual, UserProfile
+from jelf.models import Address, CoveredEntity, HospitalVisit, Individual, \
+    Treatment, UserProfile
 
 import nose.tools as nt
 
@@ -73,14 +74,23 @@ class TestHealthModels(TestCase):
             , name="Ariel Jacobs"
             , individual=self.ariel)
 
-        self.vision= CoveredEntity.objects.create(ein = "01GBS253DV"
+        self.vision = CoveredEntity.objects.create(ein = "01GBS253DV"
             , name = "Vision National")
         self.visionProfile=UserProfile.objects.create(
             profiletype=2
-            , username="visionhealth"
+            , username="vision"
             , email="vision@example.com"
             , name="Vision National"
             , entity=self.vision)
+        
+        self.health = CoveredEntity.objects.create(ein = "0424D3294N"
+            , name = "Covered Health")
+        self.healthProfile=UserProfile.objects.create(
+            profiletype=2
+            , username="health"
+            , email="health@example.com"
+            , name="Covered Health"
+            , entity=self.health)
 
     def test_get_sample_data(self):
         jeanyang = UserProfile.objects.get(username="jeanyang")
@@ -116,3 +126,22 @@ class TestHealthModels(TestCase):
             JeevesLib.concretize(self.visionProfile, visit.location)
             , actual_visit_location)
 
+    def test_treatment(self):
+        treatment = Treatment.objects.create(patient=self.ariel,
+            date_performed=date(2014,1,1),
+            performing_entity = self.health,
+            prescribing_entity = self.health,
+            service = "W4-491")
+
+        self.assertEqual(
+            JeevesLib.concretize(self.arielProfile, treatment.patient)
+            , self.ariel)
+        self.assertEqual(
+            JeevesLib.concretize(self.jeanyangProfile, treatment.patient)
+            , None)
+        self.assertEqual(
+            JeevesLib.concretize(self.healthProfile, treatment.patient)
+            , self.ariel)
+        self.assertEqual(
+            JeevesLib.concretize(self.visionProfile, treatment.patient)
+            , None)

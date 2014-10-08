@@ -136,11 +136,11 @@ visit1 = HospitalVisit.objects.create(patient=joe,
 '''
 Treatments.
 '''
-treat1 = Treatment.objects.create(Patient=ariel,
-    DatePerformed=date(2014,1,1),
-    PerformingEntity = health,
-    PrescribingEntity = health,
-    Service = "W4-491")
+treat1 = Treatment.objects.create(patient=ariel,
+    date_performed=date(2014,1,1),
+    performing_entity = health,
+    prescribing_entity = health,
+    service = "W4-491")
 
 '''
 Diagnoses.
