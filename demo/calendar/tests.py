@@ -15,7 +15,7 @@ from calendar.models import UserProfile, Event, EventHost, EventGuest
 
 from jeevesdb import JeevesModel
 import nose.tools as nt
-
+import pytz
 
 class TestJelf(TestCase):
     def setUp(self):
@@ -37,7 +37,7 @@ class TestJelf(TestCase):
         self.eveParty = Event.objects.create(
             name="Eve's surprise party"
             , location="Chuck E. Cheese's"
-            , time=datetime(2014, 10, 24, 20, 0)
+            , time=datetime(2014, 10, 24, 20, 0, tzinfo=pytz.utc)
             , description="Don't tell Eve!"
             , visibility='G'
         )
@@ -45,7 +45,7 @@ class TestJelf(TestCase):
         self.otherParty = Event.objects.create(
             name="Other party"
             , location="Other location"
-            , time=datetime(2014, 10, 24, 20, 0)
+            , time=datetime(2014, 10, 24, 20, 0, tzinfo=pytz.utc)
             , description="Nothing of note."
         )
 
