@@ -11,7 +11,7 @@ from django.test import TestCase
 
 import JeevesLib
 
-from calendar.models import UserProfile, Event, EventHost, EventGuest
+from jcal.models import UserProfile, Event, EventHost, EventGuest
 
 from jeevesdb import JeevesModel
 import nose.tools as nt

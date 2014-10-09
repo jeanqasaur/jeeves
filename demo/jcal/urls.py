@@ -6,7 +6,7 @@ admin.autodiscover()
 from django.conf.urls.static import static
 from django.conf import settings
 
-from calendar import views
+from jcal import views
 
 urlpatterns = patterns('',
     # Examples:

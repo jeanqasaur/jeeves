@@ -10,7 +10,7 @@ import JeevesLib
 JeevesLib.init()
 
 if __name__ == "__main__":
-    os.environ["DJANGO_SETTINGS_MODULE"] = "calendar.settings"
+    os.environ["DJANGO_SETTINGS_MODULE"] = "jcal.settings"
 
     from django.core.management import execute_from_command_line
 
