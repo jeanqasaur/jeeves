@@ -42,7 +42,7 @@ class Individual(Model):
     """A single person who can be a patient to a covered entity, and might have
     any/all other attributes of people.
     """
-    UID = IntegerField(primary_key=True, null=True
+    UID = IntegerField(null=True
         , help_text="Auto-incrementing primary key")
     FirstName = CharField(max_length=1024, help_text="First name of patient")
     LastName = CharField(max_length=1024, help_text="Last name of patient")
