@@ -42,13 +42,13 @@ class Individual(Model):
     """A single person who can be a patient to a covered entity, and might have
     any/all other attributes of people.
     """
-    UID = IntegerField(primary_key=True
+    UID = IntegerField(primary_key=True, null=True
         , help_text="Auto-incrementing primary key")
     FirstName = CharField(max_length=1024, help_text="First name of patient")
     LastName = CharField(max_length=1024, help_text="Last name of patient")
-    Email = CharField(max_length=1024, blank=True, null = True
+    Email = CharField(max_length=1024, blank=True, null=True
         , help_text="Email of individual")
-    Address = ForeignKey(Address, blank=True, null = True
+    Address = ForeignKey(Address, blank=True, null=True
         , help_text="Home address of patient, references an Address object.")
     BirthDate = DateField(blank=True, null = True
         , help_text="Date of birth of patient")
