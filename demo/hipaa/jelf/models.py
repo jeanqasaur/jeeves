@@ -183,7 +183,7 @@ class CoveredEntity(Model):
     """Health plan, health clearinghouse, or health care provider making
     sensitive transactions. This includes hospitals.
     """
-    ein = CharField(max_length=9, blank=False, null=False
+    ein = CharField(max_length=10, blank=False, null=False
         , help_text="Government issued Employer Identification Number, \
             should be uniquely identifiable")
     name = CharField(max_length=1024, help_text="Entity's name")
