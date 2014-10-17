@@ -206,7 +206,7 @@ def users_view(request, profile):
 def treatments_view(request, profile, patient):
     """Treatments.
     """
-    p = Individual.objects.get(UID=patient)
+    p = Individual.objects.get(jeeves_id=patient)
     treatments = Treatment.objects.filter(Patient=p)
     return ("treatments.html"
         , {"first_name" : p.FirstName
@@ -219,7 +219,7 @@ def treatments_view(request, profile, patient):
 def diagnoses_view(request, profile, patient):
     """Diagnoses.
     """
-    p = Individual.objects.get(UID=patient)
+    p = Individual.objects.get(jeeves_id=patient)
     newDiagnoses = Diagnosis.objects.filter(Patient=p)
     diagnoses = [
          {"Manifestation" : "A38.8"
@@ -250,7 +250,7 @@ def diagnoses_view(request, profile, patient):
 def info_view(request, profile, patient):
     """Viewing information about an individual.
     """
-    p = Individual.objects.get(UID=patient)
+    p = Individual.objects.get(jeeves_id=patient)
     dataset = []
     dataset.append(("Sex", p.Sex, False))
     #print "HI"
