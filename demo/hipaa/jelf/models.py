@@ -42,8 +42,6 @@ class Individual(Model):
     """A single person who can be a patient to a covered entity, and might have
     any/all other attributes of people.
     """
-    UID = IntegerField(null=True
-        , help_text="Auto-incrementing primary key")
     FirstName = CharField(max_length=1024, help_text="First name of patient")
     LastName = CharField(max_length=1024, help_text="Last name of patient")
     Email = CharField(max_length=1024, blank=True, null=True
@@ -160,6 +158,7 @@ class Individual(Model):
 
     @staticmethod
     @label_for('ReligiousAffiliation')
+    @jeeves
     def jeeves_restrict_Individuallabel_ForReligiousAffiliation(
         individual, ctxt):
         """ Only individuals of profile type 1 can see religious affiliation.

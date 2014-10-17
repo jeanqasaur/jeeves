@@ -27,7 +27,7 @@
 		</lh>
 		{% for patient in concretize(patients) %}
 			<li class="list-group-item">
-				<a href='{{ url("patient", patient.UID) }}'>
+				<a href="/patient/{{ patient.jeeves_id }}">
 					{{ patient.Name() }}
 				</a>
 			</li>
@@ -42,7 +42,7 @@
 		</lh>
 		{% for entity in concretize(entities) %}
 			<li class="list-group-item">
-				<a href='{{ url("entity", entity.EIN) }}'>
+				<a href="entity/{{ entity.ein }}">
 					{{ entity.Name }}
 				</a>
 			</li>
