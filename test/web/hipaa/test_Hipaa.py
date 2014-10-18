@@ -16,7 +16,7 @@ class Hipaa(FunkLoadTestCase):
 
     def test_simple(self):
         # The description should be set in the configuration file
-        server_url = self.server_url + "/about"
+        server_url = self.server_url
         # begin of test ---------------------------------------------
         nb_time = self.conf_getInt('test_simple', 'nb_time')
         for i in range(nb_time):
