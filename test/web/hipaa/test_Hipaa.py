@@ -6,6 +6,7 @@ $Id$
 import unittest
 from random import random
 from funkload.FunkLoadTestCase import FunkLoadTestCase
+from funkload.utils import extract_token
 
 class Hipaa(FunkLoadTestCase):
     """This test use a configuration file Conf.conf."""
@@ -14,6 +15,7 @@ class Hipaa(FunkLoadTestCase):
         """Setting up test."""
         self.server_url = self.conf_get('main', 'url')
 
+    '''
     def test_simple(self):
         # The description should be set in the configuration file
         server_url = self.server_url
@@ -22,8 +24,8 @@ class Hipaa(FunkLoadTestCase):
         for i in range(nb_time):
             self.get(server_url, description='Get url')
         # end of test -----------------------------------------------
-
     '''
+
     def test_login(self):
         # The description should be set in the configuration file
         server_url = self.server_url
@@ -34,18 +36,17 @@ class Hipaa(FunkLoadTestCase):
             description="Get index")
 
         csrftoken = extract_token(self.getBody(), "name='csrfmiddlewaretoken' value='", "' />")
-        self.post(server_url + "/accounts/manager/login/?next=/index/",
-            ['csrfmiddlewaretoken', csrftoken],
+        self.post(server_url + "/accounts/login/?next=/",
+            params=[['csrfmiddlewaretoken', csrftoken],
             ['redirect_to', '/company/config/dashboard/'],
-            ['id_username', 'jeanyang'],
-            ['id_password', 'hi'],
+            ['username', 'jeanyang'],
+            ['password', 'hi']],
             description="Post /accounts/login/")
 
         self.assert_("login" not in self.getLastUrl(), "Error in login")
 
         self.get(server_url + "/accounts/logout/",
             description="Get /accounts/logout/")
-    '''
 
 if __name__ in ('main', '__main__'):
     unittest.main()
