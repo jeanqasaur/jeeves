@@ -37,7 +37,7 @@
     <script type="text/javascript">
       var myApp;
 myApp = myApp || (function () {
-    var pleaseWaitDiv = $('<div class="modal modal-static fade" id="processing-modal" role="dialog" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-body"><div class="text-center"><img src="http://www.travislayne.com/images/loading.gif" class="icon" /><h4>Processing... <button type="button" class="close" style="float: none;" data-dismiss="modal" aria-hidden="true">×</button></h4></div></div></div></div></div>');
+    var pleaseWaitDiv = $('<div class="modal modal-static fade" id="processing-modal" role="dialog" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-body"><div class="text-center"><img src="{{ static('img/loading.gif') }}" class="icon" /><h4>Processing... <button type="button" class="close" style="float: none;" data-dismiss="modal" aria-hidden="true">×</button></h4></div></div></div></div></div>');
     return {
         showPleaseWait: function() {
             pleaseWaitDiv.modal();
