@@ -26,7 +26,7 @@ class Hipaa(FunkLoadTestCase):
         # end of test -----------------------------------------------
     '''
 
-    def login(self):
+    def login_as(self, username, pwd):
         # The description should be set in the configuration file
         server_url = self.server_url
 
@@ -39,33 +39,18 @@ class Hipaa(FunkLoadTestCase):
         self.post(server_url + "/accounts/login/?next=/",
             params=[['csrfmiddlewaretoken', csrftoken],
             ['redirect_to', '/company/config/dashboard/'],
-            ['username', 'jeanyang'],
-            ['password', 'hi']],
+            ['username', username],
+            ['password', pwd]],
             description="Post /accounts/login/")
+
+    def logout(self):
+        self.get(self.server_url + "/accounts/logout/",
+                    description="Get /accounts/logout/")
 
     def test_login(self):
-        # The description should be set in the configuration file
-        server_url = self.server_url
-
-        self.get(server_url + "/",
-            description="Get /")
-        reply = self.get(server_url + "/index",
-            description="Get index")
-
-        csrftoken = extract_token(self.getBody(), "name='csrfmiddlewaretoken' value='", "' />")
-        self.post(server_url + "/accounts/login/?next=/",
-            params=[['csrfmiddlewaretoken', csrftoken],
-            ['redirect_to', '/company/config/dashboard/'],
-            ['username', 'jeanyang'],
-            ['password', 'hi']],
-            description="Post /accounts/login/")
-
-        self.assert_("login" not in self.getLastUrl(), "Error in login")
-
-        self.get(server_url + "/accounts/logout/",
-            description="Get /accounts/logout/")
-
-    def
+        self.login_as("jeanyang", "hi")
+        #self.login_as("admin", "admin")
+        self.logout()
 
 if __name__ in ('main', '__main__'):
     unittest.main()
