@@ -26,6 +26,23 @@ class Hipaa(FunkLoadTestCase):
         # end of test -----------------------------------------------
     '''
 
+    def login(self):
+        # The description should be set in the configuration file
+        server_url = self.server_url
+
+        self.get(server_url + "/",
+            description="Get /")
+        reply = self.get(server_url + "/index",
+            description="Get index")
+
+        csrftoken = extract_token(self.getBody(), "name='csrfmiddlewaretoken' value='", "' />")
+        self.post(server_url + "/accounts/login/?next=/",
+            params=[['csrfmiddlewaretoken', csrftoken],
+            ['redirect_to', '/company/config/dashboard/'],
+            ['username', 'jeanyang'],
+            ['password', 'hi']],
+            description="Post /accounts/login/")
+
     def test_login(self):
         # The description should be set in the configuration file
         server_url = self.server_url
@@ -47,6 +64,8 @@ class Hipaa(FunkLoadTestCase):
 
         self.get(server_url + "/accounts/logout/",
             description="Get /accounts/logout/")
+
+    def
 
 if __name__ in ('main', '__main__'):
     unittest.main()

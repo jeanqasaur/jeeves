@@ -182,7 +182,7 @@ def users_view(request, profile):
     """
     # TODO: Have a better mechanism than this for letting someone know they
     # can't see something.
-    if profile.type != 3:
+    if profile.profiletype != 3:
         return ("redirect", "/index")
 
     user_profiles = UserProfile.objects.all()

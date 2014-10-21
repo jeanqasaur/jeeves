@@ -242,6 +242,16 @@ arielProfile=UserProfile.objects.create(
     , name="Ariel Jacobs"
     , individual=ariel)
 
+admin=User.objects.create_user(
+    username="admin"
+    , password="admin"
+    )
+adminProfile=UserProfile.objects.create(
+    profiletype=3
+    , username="admin"
+    , email="admin@example.com"
+    , name="Admin")
+
 '''
 mcJoe=User()
 mcJoe.username="mcjoe"
