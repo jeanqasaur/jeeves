@@ -15,18 +15,7 @@ class Hipaa(FunkLoadTestCase):
         """Setting up test."""
         self.server_url = self.conf_get('main', 'url')
 
-    '''
-    def test_simple(self):
-        # The description should be set in the configuration file
-        server_url = self.server_url
-        # begin of test ---------------------------------------------
-        nb_time = self.conf_getInt('test_simple', 'nb_time')
-        for i in range(nb_time):
-            self.get(server_url, description='Get url')
-        # end of test -----------------------------------------------
-    '''
-
-    def login_as(self, username, pwd):
+    def login_as(self, username, password):
         # The description should be set in the configuration file
         server_url = self.server_url
 
@@ -38,19 +27,50 @@ class Hipaa(FunkLoadTestCase):
         csrftoken = extract_token(self.getBody(), "name='csrfmiddlewaretoken' value='", "' />")
         self.post(server_url + "/accounts/login/?next=/",
             params=[['csrfmiddlewaretoken', csrftoken],
-            ['redirect_to', '/company/config/dashboard/'],
+            ['redirect_to', '/index'],
             ['username', username],
-            ['password', pwd]],
+            ['password', password]],
             description="Post /accounts/login/")
 
     def logout(self):
         self.get(self.server_url + "/accounts/logout/",
                     description="Get /accounts/logout/")
 
+    def test_simple(self):
+        # The description should be set in the configuration file
+        server_url = self.server_url
+        # begin of test ---------------------------------------------
+        nb_time = self.conf_getInt('test_simple', 'nb_time')
+        for i in range(nb_time):
+            self.get(server_url, description='Get url')
+        # end of test -----------------------------------------------
+
     def test_login(self):
         self.login_as("jeanyang", "hi")
-        #self.login_as("admin", "admin")
         self.logout()
+
+        self.login_as("admin", "admin")
+        self.logout()
+
+    def test_register(self):
+        self.logout()
+
+        username = "new_user"
+        password = "password"
+
+        server_url = self.server_url
+        # self.get(server_url + "/register", description='Get url')
+
+        csrftoken = extract_token(self.getBody(), "name='csrfmiddlewaretoken' value='", "' />")
+        self.post(server_url + "/register",
+            params=[ ['csrfmiddlewaretoken', csrftoken],
+            ['username', 'newuser5'],
+            ['password1', 'password'],
+            ['password2', 'password'],
+            ['name', 'New User'],
+            ['email', 'new_user@example.org'],
+            ['profiletype', '1']],
+            description="Post /register")
 
 if __name__ in ('main', '__main__'):
     unittest.main()
