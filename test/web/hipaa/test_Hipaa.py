@@ -6,6 +6,7 @@ $Id$
 import unittest
 from random import random
 from funkload.FunkLoadTestCase import FunkLoadTestCase
+from funkload.Lipsum import Lipsum
 from funkload.utils import extract_token
 from funkload.utils import xmlrpc_get_credential
 
@@ -15,6 +16,7 @@ class Hipaa(FunkLoadTestCase):
     def setUp(self):
         """Setting up test."""
         self.server_url = self.conf_get('main', 'url')
+        self.lipsum = Lipsum()
 
     def login_as(self, username, password):
         # The description should be set in the configuration file
@@ -65,9 +67,9 @@ class Hipaa(FunkLoadTestCase):
         csrftoken = extract_token(self.getBody(), "name='csrfmiddlewaretoken' value='", "' />")
         self.post(server_url + "/register",
             params=[ ['csrfmiddlewaretoken', csrftoken],
-            ['username', 'newuser5'],
-            ['password1', 'password'],
-            ['password2', 'password'],
+            ['username', username],
+            ['password1', password],
+            ['password2', password],
             ['name', 'New User'],
             ['email', 'new_user@example.org'],
             ['profiletype', '1']],
@@ -81,6 +83,30 @@ class Hipaa(FunkLoadTestCase):
         self.login_as(login, pwd)
         self.logout()
 
+    def test_random_register(self):
+        self.logout()
 
+        username = self.lipsum.getUniqWord()
+        password = self.lipsum.getUniqWord()
+
+        server_url = self.server_url
+        # self.get(server_url + "/register", description='Get url')
+
+        csrftoken = extract_token(self.getBody(), "name='csrfmiddlewaretoken' value='", "' />")
+        self.post(server_url + "/register",
+            params=[ ['csrfmiddlewaretoken', csrftoken],
+            ['username', username],
+            ['password1', password],
+            ['password2', password],
+            ['name', 'New User'],
+            ['email', 'new_user@example.org'],
+            ['profiletype', '1']],
+            description="Post /register")
+
+        # TODO: Check page after logging in.
+        self.logout()
+        self.login_as(username, password)
+        self.logout()
+ 
 if __name__ in ('main', '__main__'):
     unittest.main()
