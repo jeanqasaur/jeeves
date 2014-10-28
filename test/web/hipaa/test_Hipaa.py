@@ -7,6 +7,7 @@ import unittest
 from random import random
 from funkload.FunkLoadTestCase import FunkLoadTestCase
 from funkload.utils import extract_token
+from funkload.utils import xmlrpc_get_credential
 
 class Hipaa(FunkLoadTestCase):
     """This test use a configuration file Conf.conf."""
@@ -71,6 +72,15 @@ class Hipaa(FunkLoadTestCase):
             ['email', 'new_user@example.org'],
             ['profiletype', '1']],
             description="Post /register")
+
+    def test_credential(self):
+        credential_host = self.conf_get('credential', 'host')
+        credential_port = self.conf_getInt('credential', 'port')
+        login, pwd = xmlrpc_get_credential(credential_host, credential_port
+            , "group1")
+        self.login_as(login, pwd)
+        self.logout()
+
 
 if __name__ in ('main', '__main__'):
     unittest.main()
