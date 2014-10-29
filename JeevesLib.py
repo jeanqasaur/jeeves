@@ -53,34 +53,34 @@ def supports_jeeves(f):
 
 @supports_jeeves
 def mkLabel(varName = "", uniquify=True):
-	"""Makes a label to associate with policies and sensitive values.
+    """Makes a label to associate with policies and sensitive values.
 
-	:param varName: Optional variable name (to help with debugging).
-	:type varName: string
-	:returns: Var - fresh label.
-	"""
-	label = jeevesState.policyenv.mkLabel(varName, uniquify)
-	jeevesState.all_labels[label.name] = label
-	return label
+    :param varName: Optional variable name (to help with debugging).
+    :type varName: string
+    :returns: Var - fresh label.
+    """
+    label = jeevesState.policyenv.mkLabel(varName, uniquify)
+    jeevesState.all_labels[label.name] = label
+    return label
 
 @supports_jeeves
 def doesLabelExist(varName):
-	return varName in jeevesState.all_labels
+    return varName in jeevesState.all_labels
 
 @supports_jeeves
 def getLabel(varName):
-	return jeevesState.all_labels[varName]
+    return jeevesState.all_labels[varName]
 
 @supports_jeeves
 def restrict(varLabel, pred, use_empty_env=False):
-	"""Associates a policy with a label.
+    """Associates a policy with a label.
 
-	:param varLabel: Label to associate with policy.
-	:type varLabel: string
-	:param pred: Policy: function taking output channel and returning Boolean result.
-	:type pred: T -> bool, where T is the type of the output channel
-	"""
-	jeevesState.policyenv.restrict(varLabel, pred, use_empty_env)
+    :param varLabel: Label to associate with policy.
+    :type varLabel: string
+    :param pred: Policy: function taking output channel and returning Boolean result.
+    :type pred: T -> bool, where T is the type of the output channel
+    """
+    jeevesState.policyenv.restrict(varLabel, pred, use_empty_env)
 
 @supports_jeeves
 def mkSensitive(varLabel, vHigh, vLow):
@@ -168,18 +168,18 @@ def jnot(f):
 
 @supports_jeeves
 def jassign(old, new, base_env={}):
-	res = new
-	for vs in jeevesState.pathenv.conditions:
-		(var, val) = (vs.var, vs.val)
-		if var.name not in base_env:
-			if val:
-				res = Facet(var, res, old)
-			else:
-				res = Facet(var, old, res)
-	if isinstance(res, FExpr):
-		return res.partialEval({}, True)
-	else:
-		return res
+    res = new
+    for vs in jeevesState.pathenv.conditions:
+        (var, val) = (vs.var, vs.val)
+	if var.name not in base_env:
+	    if val:
+		res = Facet(var, res, old)
+	    else:
+	        res = Facet(var, old, res)
+    if isinstance(res, FExpr):
+        return res.partialEval({}, True)
+    else:
+	return res
 
 '''
 Caching.

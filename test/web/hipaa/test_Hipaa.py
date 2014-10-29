@@ -56,7 +56,7 @@ class Hipaa(FunkLoadTestCase):
         self.login_as("admin", "admin")
         self.logout()
         """
-
+    '''
     def test_register(self):
         self.logout()
 
@@ -109,6 +109,6 @@ class Hipaa(FunkLoadTestCase):
         self.logout()
         self.login_as(username, password)
         self.logout()
- 
+    '''
 if __name__ in ('main', '__main__'):
     unittest.main()

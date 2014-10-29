@@ -1,3 +1,11 @@
+"""Policy environment.
+    
+    :synopsis: Functionality corresponding to storing labels and policies and
+    interacting with the solver.
+
+    .. moduleauthor:: Travis Hance <tjhance7@gmail.com>
+    .. moduleauthor:: Jean Yang <jeanyang@csail.mit.edu>
+"""
 import JeevesLib
 
 import fast.AST
@@ -5,6 +13,7 @@ from collections import defaultdict
 from fast.AST import FExpr
 
 from smt.Z3 import Z3
+from weakref import WeakKeyDictionary
 
 class SolverState:
     def __init__(self, policies, ctxt):
@@ -13,7 +22,7 @@ class SolverState:
         self.ctxt = ctxt
 
         self.policies = policies # NOT a copy
-        self.policies_index = 0
+        # self.policies_index = 0
 
     def concretizeExp(self, f, pathenv):
         """
@@ -21,22 +30,37 @@ class SolverState:
         """
         f = fast.AST.fexpr_cast(f)
 
-        while self.policies_index < len(self.policies):
-            label, policy = self.policies[self.policies_index]
-            self.policies_index += 1
+        # Get transitive closure of variables mentioned in both the labels and
+        # the policies.
+        # TODO: Make this more efficient.
+        vars_needed = f.vars()
+        for label in vars_needed:
+            if self.policies.has_key(label):
+                policy = self.policies[label]
+                vars_needed = vars_needed.union(policy(self.ctxt).vars())
 
-            predicate = policy(self.ctxt) #predicate should be True if label can be HIGH
-            predicate_vars = predicate.vars()
-            constraint = fast.AST.Implies(label, predicate).partialEval(pathenv)
+        # Get relevant policies.
+        for label in vars_needed:
+            # If there are policies associated with the label.
+            if self.policies.has_key(label):
+                policy = self.policies[label]
 
-            if constraint.type != bool:
-                raise ValueError("constraints must be bools")
-            self.solver.boolExprAssert(constraint)
+                #predicate should be True if label can be HIGH
+                predicate = policy(self.ctxt)
+                print predicate.prettyPrint()
+            
+                predicate_vars = predicate.vars()
+                constraint = fast.AST.Implies(
+                                label, predicate).partialEval(pathenv)
 
+                if constraint.type != bool:
+                    raise ValueError("constraints must be bools")
+                self.solver.boolExprAssert(constraint)
+
+        # Make sure environment is satisfiable.
         if not self.solver.check():
             raise UnsatisfiableException("Constraints not satisfiable")
-
-        vars_needed = f.vars()
+ 
         for var in vars_needed:
             if var not in self.result:
                 self.solver.push()
@@ -59,7 +83,7 @@ class PolicyEnv:
     self.labels = []
     # TODO: Index policies by labels.
     # TODO: Store weak references.
-    self.policies = []
+    self.policies = WeakKeyDictionary()
 
   def mkLabel(self, name="", uniquify=True):
     label = fast.AST.Var(name, uniquify)
@@ -69,13 +93,24 @@ class PolicyEnv:
   # policy is a function from context to bool which returns true
   # if the label is allowed to be HIGH
   def restrict(self, label, policy, use_empty_env=False):
-    pcFormula = fast.AST.Constant(True) if use_empty_env else JeevesLib.jeevesState.pathenv.getPathFormula()
-    self.policies.append((label, lambda ctxt :
-      fast.AST.Implies(
-        pcFormula,
-        fast.AST.fexpr_cast(policy(ctxt)),
-      )
-    ))
+    pcFormula = fast.AST.Constant(True) if use_empty_env \
+                    else JeevesLib.jeevesState.pathenv.getPathFormula()
+    
+    label_var_set = label.vars()
+    assert(len(label_var_set) == 1)
+    label_var = list(label_var_set)[0]
+    if self.policies.has_key(label_var):
+        self.policies[label_var] = (lambda ctxt:
+            fast.AST.Implies(
+                pcFormula,
+                fast.AST.And(fast.AST.fexpr_cast(policy(ctxt))
+                    , fast.AST.fexpr_cast(self.policies[label_var](ctxt)))))
+    else:
+        self.policies[label_var] = (lambda ctxt:
+            fast.AST.Implies(
+                pcFormula,
+                fast.AST.fexpr_cast(policy(ctxt)),
+            ))
 
   def getNewSolverState(self, ctxt):
     return SolverState(self.policies, ctxt)

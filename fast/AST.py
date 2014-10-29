@@ -245,52 +245,52 @@ def get_var_by_name(var_name):
 	return v
 
 class Var(FExpr):
-	counter = 0
+    counter = 0
 
-	def __init__(self, name=None, uniquify=True):
-		if name:
-			if uniquify:
-				self.name = "v%d_%s" % (Var.counter, name)
-			else:
-				self.name = name
-		else:
-			self.name = "v%d" % Var.counter
-		self.type = bool
-		Var.counter += 1
+    def __init__(self, name=None, uniquify=True):
+	if name:
+	    if uniquify:
+		self.name = "v%d_%s" % (Var.counter, name)
+	    else:
+		self.name = name
+	else:
+	    self.name = "v%d" % Var.counter
+	self.type = bool
+	Var.counter += 1
 
-	def eval(self, env):
-		try:
-			return env[self]
-		except IndexError:
-			raise CannotEvalException("Variable %s is not in path environment" \
-				% self)
+    def eval(self, env):
+	try:
+	    return env[self]
+	except IndexError:
+	    raise CannotEvalException("Variable %s is not in path environment" \
+	        % self)
 
-	def remapLabels(self, policy, writer):
-		return self
+    def remapLabels(self, policy, writer):
+	return self
 
-	def __str__(self):
-		return self.name
+    def __str__(self):
+	return self.name
 
-	def vars(self):
-		return {self}
+    def vars(self):
+	return {self}
 
-	def z3Node(self):
-		return z3.Bool(self.name)
+    def z3Node(self):
+	return z3.Bool(self.name)
 
-	def getChildren(self):
-		return []
+    def getChildren(self):
+	return []
 
-	def partialEval(self, env={}, unassignedOkay=False):
-		if self.name in env:
-			return Constant(env[self.name])
-		else:
-			return Facet(self, Constant(True), Constant(False))
+    def partialEval(self, env={}, unassignedOkay=False):
+	if self.name in env:
+	    return Constant(env[self.name])
+	else:
+	    return Facet(self, Constant(True), Constant(False))
 
-	def prettyPrint(self, indent=""):
-		return indent + self.name
+    def prettyPrint(self, indent=""):
+	return indent + self.name
 
-	def __getstate__(self):
-		return self.name
+    def __getstate__(self):
+	return self.name
 
 # helper methods for faceted __setattr__
 def get_objs_in_faceted_obj(f, d, env):
