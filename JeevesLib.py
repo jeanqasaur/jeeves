@@ -16,66 +16,26 @@ from smt.Z3 import Z3
 from fast.AST import Facet, fexpr_cast, Constant, Var, Not, FExpr, Unassigned, FObject, jeevesState
 import copy
 
-LOG_POLICIES = False
-POLICY_LOG_FILEHANDLE = None
-
-NUM_CONCRETIZE = 0
-NUM_LABELS = 0
-NUM_POLICIES = 0
-
 def set_log_policies(filehandle):
     """
     Set policy logging.
     """
-    global LOG_POLICIES
-    global POLICY_LOG_FILEHANDLE
-    LOG_POLICIES = True
-    POLICY_LOG_FILEHANDLE = filehandle
-
+    jeevesState.set_log_policies(filehandle)
 def log_policies():
     """
     Write policies to the policy files.
     """
-    if NUM_CONCRETIZE > 0:
-        f.write("***\n")
-        f.write("Concretizations so far: " + str(NUM_CONCRETIZE) + "\n") 
-        f.write("Labels so far: " + str(NUM_LABELS) + "\n")
-        f.write("Average labels: " + str(NUM_LABELS / (NUM_CONCRETIZE * 1.0)) \
-            + "\n")
-        f.write("Policies so far: " + str(NUM_POLICIES) + "\n")
-        f.write("Average labels: " + \
-            str(NUM_POLICIES / (NUM_CONCRETIZE * 1.0)) + "\n")
-        f.write("***\n")
-        f.write("\n")
-
+    jeevesState.log_policies()
 def log_counts(label_count, policy_count):
-    global NUM_CONCRETIZE
-    global NUM_LABELS
-    global NUM_POLICIES
-    if LOG_POLICIES:
-        NUM_CONCRETIZE += 1
-
-        f = POLICY_LOG_FILEHANDLE
-        assert(f != None)
-        f.write("***\n")
-
-        # Write number of labels.
-        NUM_LABELS += label_count
-        f.write("Labels: " + str(label_count) + "\n")
-
-        # Write number of policies.
-        NUM_POLICIES += policy_count
-        f.write("Policies: " + str(policy_count) + "\n")
-        f.write("***\n")
-
+    jeevesState.log_counts(label_count, policy_count)
 def clear_policy_count():
-    global NUM_CONCRETIZE
-    global NUM_LABELS
-    global NUM_POLICIES
-
-    NUM_CONCRETIZE = 0
-    NUM_LABELS = 0
-    NUM_POLICIES = 0
+    jeevesState.clear_policy_count()
+def get_num_concretize():
+    return jeevesState.num_concretize
+def get_num_labels():
+    return jeevesState.num_labels
+def get_num_policies():
+    return jeevesState.num_policies
 
 def init():
     """Initialization function for Jeeves library.

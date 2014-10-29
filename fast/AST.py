@@ -46,39 +46,99 @@ def facetJoin(f0, f1, opr):
 		return Constant(opr(f0.v, f1.v))
 
 class JeevesState:
-	def __init__(self):
-		pass
+    def __init__(self):
+	pass
 
-	def init(self):
-		# Cache of concretized values.
-		self._concretecache = defaultdict(env.ConcreteCache.ConcreteCache)
+    def init(self):
+	# Cache of concretized values.
+	self._concretecache = defaultdict(env.ConcreteCache.ConcreteCache)
 
-		# Regular environments.
-		self._varenv = defaultdict(env.VarEnv.VarEnv)
-		self._pathenv = defaultdict(env.PathVars.PathVars)
-		self._policyenv = defaultdict(env.PolicyEnv.PolicyEnv)
-		self._writeenv = defaultdict(env.WritePolicyEnv.WritePolicyEnv)
-		self._all_labels = defaultdict(dict)
+	# Regular environments.
+	self._varenv = defaultdict(env.VarEnv.VarEnv)
+	self._pathenv = defaultdict(env.PathVars.PathVars)
+	self._policyenv = defaultdict(env.PolicyEnv.PolicyEnv)
+	self._writeenv = defaultdict(env.WritePolicyEnv.WritePolicyEnv)
+	self._all_labels = defaultdict(dict)
 
-	@property
-	def concretecache(self):
-		return self._concretecache[threading.current_thread()]
+        # Logging.
+        self._log_policies = False
+        self._policy_log_filehandle = None
 
-	@property
-	def varenv(self):
-		return self._varenv[threading.current_thread()]
-	@property
-	def pathenv(self):
-		return self._pathenv[threading.current_thread()]
-	@property
-	def policyenv(self):
-		return self._policyenv[threading.current_thread()]
-	@property
-	def writeenv(self):
-		return self._writeenv[threading.current_thread()]
-	@property
-	def all_labels(self):
-		return self._all_labels[threading.current_thread()]
+        self._num_concretize = 0
+        self._num_labels = 0
+        self._num_policies = 0
+
+    @property
+    def concretecache(self):
+	return self._concretecache[threading.current_thread()]
+
+    @property
+    def num_concretize(self):
+        return self._num_concretize
+    @property
+    def num_labels(self):
+        return self._num_labels
+    @property
+    def num_policies(self):
+        return self._num_policies
+
+    def set_log_policies(self, filehandle):
+        self._log_policies = True
+        self._policy_log_filehandle = filehandle
+   
+    def log_policies(self):
+        f = self._policy_log_filehandle
+
+        if self._log_policies and self._num_concretize > 0:
+            f.write("***\n")
+            f.write("Concretizations so far: " + \
+                str(self._num_concretize) + "\n")
+            f.write("Labels so far: " + str(self._num_labels) + "\n")
+            f.write("Average labels: " + \
+                str(self._num_labels / (self._num_concretize * 1.0)) + "\n")
+            f.write("Policies so far: " + str(self._num_policies) + "\n")
+        f.write("Average policies: " + \
+            str(self._num_policies / (self._num_concretize * 1.0)) + "\n")
+        f.write("***\n")
+        f.write("\n")
+
+    def log_counts(self, label_count, policy_count):
+        if self._log_policies:
+            self._num_concretize += 1
+
+            f = self._policy_log_filehandle
+            assert(f != None)
+            f.write("***\n")
+
+            # Write number of labels.
+            self._num_labels += label_count
+            f.write("Labels: " + str(label_count) + "\n")
+
+            # Write number of policies.
+            self._num_policies += policy_count
+            f.write("Policies: " + str(policy_count) + "\n")
+            f.write("***\n")
+
+    def clear_policy_count(self):
+        self._num_concretize = 0
+        self._num_labels = 0
+        self._num_policies = 0
+
+    @property
+    def varenv(self):
+	return self._varenv[threading.current_thread()]
+    @property
+    def pathenv(self):
+	return self._pathenv[threading.current_thread()]
+    @property
+    def policyenv(self):
+	return self._policyenv[threading.current_thread()]
+    @property
+    def writeenv(self):
+	return self._writeenv[threading.current_thread()]
+    @property
+    def all_labels(self):
+	return self._all_labels[threading.current_thread()]
 
 jeevesState = JeevesState()
 
