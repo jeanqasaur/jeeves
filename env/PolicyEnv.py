@@ -47,7 +47,6 @@ class SolverState:
 
                 #predicate should be True if label can be HIGH
                 predicate = policy(self.ctxt)
-                print predicate.prettyPrint()
             
                 predicate_vars = predicate.vars()
                 constraint = fast.AST.Implies(
