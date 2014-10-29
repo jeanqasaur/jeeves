@@ -1,4 +1,5 @@
 import macropy.activate
 import testCaching
 import testJeevesWrite
+import testLogPolicies
 import testSourceTransform

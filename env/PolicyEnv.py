@@ -16,6 +16,9 @@ class SolverState:
         self.policies_index = 0
 
     def concretizeExp(self, f, pathenv):
+        """
+        Expression concretization.
+        """
         f = fast.AST.fexpr_cast(f)
 
         while self.policies_index < len(self.policies):
@@ -47,11 +50,15 @@ class SolverState:
         
         assert self.solver.check()
 
+        JeevesLib.log_counts(len(vars_needed), len(self.policies))
+
         return f.eval(self.result)
 
 class PolicyEnv:
   def __init__(self):
     self.labels = []
+    # TODO: Index policies by labels.
+    # TODO: Store weak references.
     self.policies = []
 
   def mkLabel(self, name="", uniquify=True):

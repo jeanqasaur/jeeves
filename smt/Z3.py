@@ -2,6 +2,7 @@
 Defines the interface to the Z3 solver.
 '''
 # TODO: Define UnsatException and SolverException
+# TODO: Count things about the model that we want to record.
 import z3
 
 class Z3:
