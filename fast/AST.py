@@ -66,7 +66,7 @@ class JeevesState:
 
         self._num_concretize = 0
         self._num_labels = 0
-        self._num_policies = 0
+        # self._num_policies = 0
 
     @property
     def concretecache(self):
@@ -78,9 +78,9 @@ class JeevesState:
     @property
     def num_labels(self):
         return self._num_labels
-    @property
-    def num_policies(self):
-        return self._num_policies
+    # @property
+    # def num_policies(self):
+    #     return self._num_policies
 
     def set_log_policies(self, filehandle):
         self._log_policies = True
@@ -96,33 +96,27 @@ class JeevesState:
             f.write("Labels so far: " + str(self._num_labels) + "\n")
             f.write("Average labels: " + \
                 str(self._num_labels / (self._num_concretize * 1.0)) + "\n")
-            f.write("Policies so far: " + str(self._num_policies) + "\n")
-        f.write("Average policies: " + \
-            str(self._num_policies / (self._num_concretize * 1.0)) + "\n")
-        f.write("***\n")
-        f.write("\n")
+            # f.write("Policies so far: " + str(self._num_policies) + "\n")
+            # f.write("Average policies: " + \
+            #     str(self._num_policies / (self._num_concretize * 1.0)) + "\n")
+            f.write("***\n")
+            f.write("\n")
 
-    def log_counts(self, label_count, policy_count):
+    def log_counts(self, label_count):
         if self._log_policies:
             self._num_concretize += 1
 
             f = self._policy_log_filehandle
             assert(f != None)
             f.write("***\n")
-
-            # Write number of labels.
             self._num_labels += label_count
             f.write("Labels: " + str(label_count) + "\n")
-
-            # Write number of policies.
-            self._num_policies += policy_count
-            f.write("Policies: " + str(policy_count) + "\n")
             f.write("***\n")
 
     def clear_policy_count(self):
         self._num_concretize = 0
         self._num_labels = 0
-        self._num_policies = 0
+        # self._num_policies = 0
 
     @property
     def varenv(self):

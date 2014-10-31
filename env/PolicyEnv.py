@@ -21,7 +21,7 @@ class SolverState:
         self.result = {}
         self.ctxt = ctxt
 
-        self.policies = policies # NOT a copy
+        self.policies = policies
         # self.policies_index = 0
 
     def concretizeExp(self, f, pathenv):
@@ -73,7 +73,7 @@ class SolverState:
         
         assert self.solver.check()
 
-        JeevesLib.log_counts(len(vars_needed), len(self.policies))
+        JeevesLib.log_counts(len(vars_needed))
 
         return f.eval(self.result)
 

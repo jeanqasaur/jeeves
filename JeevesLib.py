@@ -26,16 +26,16 @@ def log_policies():
     Write policies to the policy files.
     """
     jeevesState.log_policies()
-def log_counts(label_count, policy_count):
-    jeevesState.log_counts(label_count, policy_count)
+def log_counts(label_count):
+    jeevesState.log_counts(label_count)
 def clear_policy_count():
     jeevesState.clear_policy_count()
 def get_num_concretize():
     return jeevesState.num_concretize
 def get_num_labels():
     return jeevesState.num_labels
-def get_num_policies():
-    return jeevesState.num_policies
+#def get_num_policies():
+#    return jeevesState.num_policies
 
 def init():
     """Initialization function for Jeeves library.
