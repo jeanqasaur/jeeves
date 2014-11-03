@@ -80,8 +80,6 @@ class SolverState:
 class PolicyEnv:
   def __init__(self):
     self.labels = []
-    # TODO: Index policies by labels.
-    # TODO: Store weak references.
     self.policies = WeakKeyDictionary()
 
   def mkLabel(self, name="", uniquify=True):

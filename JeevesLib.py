@@ -32,10 +32,10 @@ def clear_policy_count():
     jeevesState.clear_policy_count()
 def get_num_concretize():
     return jeevesState.num_concretize
-def get_num_labels():
+def get_num_concretize_labels():
     return jeevesState.num_labels
-#def get_num_policies():
-#    return jeevesState.num_policies
+def get_num_env_labels():
+    return len(jeevesState.policyenv.labels)
 
 def init():
     """Initialization function for Jeeves library.

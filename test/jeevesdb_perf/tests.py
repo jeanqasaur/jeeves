@@ -64,7 +64,7 @@ class TestJeevesModel(TestCase):
                 JeevesLib.mkSensitive(self.y, 'd', 'e')))
 
         self.assertEquals(JeevesLib.get_num_concretize(), 0)
-        self.assertEquals(JeevesLib.get_num_labels(), 0)
+        self.assertEquals(JeevesLib.get_num_concretize_labels(), 0)
 
     def tearDown(self):
         self.f.close()
@@ -323,7 +323,7 @@ class TestJeevesModel(TestCase):
 
         self.assertTrue(JeevesLib.concretize((True, True), an == bn))
         self.assertEquals(JeevesLib.get_num_concretize(), 1)
-        self.assertEquals(JeevesLib.get_num_labels(), 0)
+        self.assertEquals(JeevesLib.get_num_concretize_labels(), 0)
 
         self.assertTrue(JeevesLib.concretize((True, True), an == cn))
         self.assertTrue(JeevesLib.concretize((True, True), bn == cn))
@@ -509,7 +509,7 @@ class TestJeevesModel(TestCase):
         ]))
 
         self.assertEquals(JeevesLib.get_num_concretize(), 0)
-        self.assertEquals(JeevesLib.get_num_labels(), 0)
+        self.assertEquals(JeevesLib.get_num_concretize_labels(), 0)
 
     def testPolicy2(self):
         awp = AnimalWithPolicy2.objects.create(name='testpolicy2', sound='meow')
@@ -522,7 +522,7 @@ class TestJeevesModel(TestCase):
         ]))
 
         self.assertEquals(JeevesLib.get_num_concretize(), 0)
-        self.assertEquals(JeevesLib.get_num_labels(), 0)
+        self.assertEquals(JeevesLib.get_num_concretize_labels(), 0)
 
     def testObjectModel(self):
         dogWithPolicy = AnimalWithPolicy()
