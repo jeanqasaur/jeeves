@@ -35,7 +35,7 @@ def get_num_concretize():
 def get_num_concretize_labels():
     return jeevesState.num_labels
 def get_num_env_labels():
-    return len(jeevesState.policyenv.labels)
+    return len(jeevesState.policyenv.policies.keys())
 
 def init():
     """Initialization function for Jeeves library.

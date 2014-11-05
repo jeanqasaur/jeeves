@@ -79,12 +79,10 @@ class SolverState:
 
 class PolicyEnv:
   def __init__(self):
-    self.labels = []
     self.policies = WeakKeyDictionary()
 
   def mkLabel(self, name="", uniquify=True):
     label = fast.AST.Var(name, uniquify)
-    self.labels.append(label)
     return label
 
   # policy is a function from context to bool which returns true
