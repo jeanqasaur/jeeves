@@ -16,8 +16,9 @@ class Animal(JeevesModel.JeevesModel):
 
 class Zoo(JeevesModel.JeevesModel):
   name = models.CharField(max_length=30)
-  inhabitant = JeevesModel.JeevesForeignKey(AnimalWithPolicy)
+  inhabitant = JeevesModel.JeevesForeignKey(Animal)
 
+'''
 class AnimalWithPolicy(JeevesModel.JeevesModel):
   name = models.CharField(max_length=30)
   sound = models.CharField(max_length=30)
@@ -29,3 +30,4 @@ class AnimalWithPolicy(JeevesModel.JeevesModel):
   @staticmethod
   def jeeves_restrict_sound(animal, ctxt):
     return ctxt == animal
+'''

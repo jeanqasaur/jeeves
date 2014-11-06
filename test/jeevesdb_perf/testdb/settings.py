@@ -56,6 +56,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'logging_middleware.ConfLoggingMiddleware'
 )
 
 ROOT_URLCONF = 'urls'
@@ -107,3 +108,32 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
+
+LOG_PATH = os.path.join(BASE_DIR, '..', 'logs/')
+SQL_LOG = os.path.join(LOG_PATH, 'sqllog.log')
+
+LOGGING = {
+  'version': 1,
+  'formatters': {
+    'plain': {
+      'format': '%(asctime)s %(message)s'},
+    },
+  'handlers': {
+    'sqllog': {
+      'level': 'DEBUG',
+      'class': 'logging.handlers.RotatingFileHandler',
+      'filename': SQL_LOG,
+      'maxBytes': 1024 * 1024 * 5,  # 5 MB
+      'backupCount': 5,
+      'formatter': 'plain',
+    },
+  },
+
+  'loggers': {
+    'logging_middleware': {
+      'handlers': ['sqllog'],
+      'level': 'DEBUG',
+      'propogate': False
+    },
+  },
+}

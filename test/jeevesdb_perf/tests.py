@@ -1,8 +1,11 @@
-from django.db import models
+from django.conf import settings
+from django.db import connection, models
+from django.template import Template, Context
 from django.utils import unittest
 from django.test import TestCase
 
 import JeevesLib
+import sys
 
 from jeevesdb import JeevesModel
 from testdb.models import Animal, Zoo
@@ -69,15 +72,28 @@ class TestJeevesModel(TestCase):
     def tearDown(self):
         self.f.close()
 
+    @staticmethod
+    def setUpClass():
+        # The test runner sets DEBUG to False. Set to True to enable SQL logging.
+        settings.DEBUG = True
+
+    @staticmethod
+    def tearDownClass():
+        time = sum([float(q['time']) for q in connection.queries])
+        t = Template("{{count}} quer{{count|pluralize:\"y,ies\"}} in {{time}} seconds:\n\n{% for sql in sqllog %}[{{forloop.counter}}] {{sql.time}}s: {{sql.sql|safe}}{% if not forloop.last %}\n\n{% endif %}{% endfor %}")
+        print >> sys.stderr, t.render(Context({'sqllog': connection.queries, 'count': len(connection.queries), 'time': time}))
+
+        # Empty the query list between TestCase.
+        connection.queries = []
+
     # Tests that writes create the appropriate rows with associated Jeeves
     # bookkeeping.
     def testWrite(self):
-        lion = Animal._objects_ordinary.get(name='lion')
-    
-        self.assertEquals(lion.name, 'lion')
-        self.assertEquals(lion.sound, 'roar')
-        self.assertEquals(lion.jeeves_vars, ';')
+        lion = Animal.objects.get(name='lion')
+        self.assertEquals(JeevesLib.concretize(lion, lion.name), 'lion')
+        self.assertEquals(JeevesLib.concretize(lion, lion.sound), 'roar')
 
+        '''
         fox = Animal._objects_ordinary.filter(name='fox').filter(
                 jeeves_vars=';%s=1;'%self.x.name).all()[0]
         self.assertEquals(fox.sound, 'Hatee-hatee-hatee-ho!')
@@ -94,7 +110,9 @@ class TestJeevesModel(TestCase):
             ({'name':'a', 'sound':'d'}, {self.x.name:False, self.y.name:True}),
             ({'name':'a', 'sound':'e'}, {self.x.name:False, self.y.name:False}),
         ]))
+        '''
 
+    '''
     def testQueryDelete(self):
         """Test that delete removes all rows.
         """
@@ -496,6 +514,7 @@ class TestJeevesModel(TestCase):
                 inhabitant__name='filterfkey_test2_an').filter(
                     inhabitant__sound='a').get_jiter()
         self.assertEquals(zool, [(zoo, {self.x.name:True})])
+    '''
 
     '''
     def testPolicy(self):
