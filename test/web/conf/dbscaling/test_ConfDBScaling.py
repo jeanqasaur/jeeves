@@ -5,8 +5,10 @@
 import unittest
 from random import random
 from funkload.FunkLoadTestCase import FunkLoadTestCase
+from funkload.Lipsum import Lipsum
 from funkload.utils import extract_token
 from funkload.utils import xmlrpc_get_credential
+from webunit.utility import Upload
 
 class ConfDBScaling(FunkLoadTestCase):
     """This test use a configuration file Conf.conf."""
@@ -19,6 +21,8 @@ class ConfDBScaling(FunkLoadTestCase):
         credential_port = self.conf_getInt('credential', 'port')
         self.username, self.pwd = xmlrpc_get_credential(
             credential_host, credential_port, "group1")
+
+        self.lipsum = Lipsum()
 
     def tearDown(self):
         self.logout()
@@ -59,6 +63,17 @@ class ConfDBScaling(FunkLoadTestCase):
         page = "/submit"
         self.login(page)
         self.assert_(page == self.getLastUrl(), "Error in login")
+
+        csrftoken = extract_token(self.getBody(), "name='csrfmiddlewaretoken' value='", "' />")
+        self.post(self.server_url + "/submit",
+            params=[['csrfmiddlewaretoken', csrftoken],
+            ['coauthors[]', self.lipsum.getWord()],
+            ['coauthors[]', self.lipsum.getWord()], 
+            ['title', self.lipsum.getSentence()],
+            ['contents', Upload('files/rms_crossstitch.pdf')],
+            ['abstract', self.lipsum.getMessage()]],
+            description="Post /accounts/login/")
+        self.assert_("paper" in self.getLastUrl(), "Error in login")
 
     # TODO: View profile.
     def test_view_profile(self):

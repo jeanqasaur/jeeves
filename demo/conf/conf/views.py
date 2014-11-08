@@ -90,7 +90,7 @@ def request_wrapper(view_fn):
             t3 = time.time()
 
             logger.info("Jeeves time: %f" % (t2 - t1))
-            logger.info("Concre time: %f" % (t3 - t2))
+            logger.info("Concretize time: %f" % (t3 - t2))
 
             return r
 
@@ -125,8 +125,12 @@ def papers_view(request):
     user = UserProfile.objects.get(username=request.user.username)
 
     papers = Paper.objects.all()
+    print "HELLOOO"
+    print papers.v #prettyPrint()
     paper_data = JeevesLib.JList2()
-    for paper in papers:
+
+    for paper in papers.v:
+        print paper
         paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
         latest_version_title = paper_versions[0].title if paper_versions.__len__() > 0 else None
 
