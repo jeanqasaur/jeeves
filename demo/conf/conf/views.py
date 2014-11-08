@@ -124,13 +124,11 @@ def about_view(request):
 def papers_view(request):
     user = UserProfile.objects.get(username=request.user.username)
 
-    papers = Paper.objects.all()
-    print "HELLOOO"
-    print papers.v #prettyPrint()
+    # TODO: Figure out why we can't loop over this if we don't concretize it...
+    papers = JeevesLib.concretize(user, Paper.objects.all())
     paper_data = JeevesLib.JList2()
 
-    for paper in papers.v:
-        print paper
+    for paper in papers:
         paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
         latest_version_title = paper_versions[0].title if paper_versions.__len__() > 0 else None
 
