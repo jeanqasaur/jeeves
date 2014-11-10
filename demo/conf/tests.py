@@ -13,6 +13,7 @@ import JeevesLib
 
 from jeevesdb import JeevesModel
 from conf.models import Paper, PaperVersion, UserProfile
+from sourcetrans.macro_module import macros, jeeves
 
 import nose.tools as nt
 
@@ -43,3 +44,16 @@ class TestConf(TestCase):
         papers = Paper.objects.all()
         self.assertEqual(1, JeevesLib.concretize(self.jeanyangProfile
             , papers.__len__()))
+
+    @jeeves
+    def test_all_papers_loop(self):
+        papers = Paper.objects.all()
+        print papers.prettyPrint()
+        print papers.v
+        count = 0
+        for paper in papers:
+            count += 1
+        print count
+        self.assertEqual(1, JeevesLib.concretize(self.jeanyangProfile
+            , count))
+
