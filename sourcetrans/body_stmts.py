@@ -70,9 +70,6 @@ def body_stmts_transform(tree, gen_sym):
 			assert len(tree.orelse) == 0 or isinstance(tree.orelse[0], Pass)
 			stop()
 
-			print "NOW I AM HERE"
-			print iter
-			print body
 			func = copy_location(FunctionDef(
 				name=body_fn_name,
 				args=arguments(
