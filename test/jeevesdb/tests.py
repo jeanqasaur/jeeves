@@ -298,7 +298,7 @@ class TestJeevesModel(TestCase):
             ({'name':'save_ew_test', 'sound':'b'}, {self.x.name:False}),
             ({'name':'save_ew_test', 'sound':'c'}, {self.x.name:True}),
         ]))
-    
+   
     def testGet1(self):
         an = Animal.objects.create(name='get_test1'
                 , sound='get_test1_sound_xyz')

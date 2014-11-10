@@ -579,12 +579,12 @@ class TestSourceTransform(unittest.TestCase):
 		JeevesLib.restrict(x, lambda ctxt: ctxt)
 
 		l = JeevesLib.mkSensitive(x, [0, 1, 2], [3, 4, 5, 6])
-
 		count = 0
 		for elt in l:
 			count += 1
 		self.assertEqual(JeevesLib.concretize(True, count), 3)
 		self.assertEqual(JeevesLib.concretize(False, count), 4)
+		self.assertTrue(False)
 
 	@jeeves
 	def test_or_in_lambda(self):

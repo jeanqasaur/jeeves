@@ -291,9 +291,9 @@ def jmap_jlist2(jlist2, mapper):
 				popcount += 1
 			elif env[vname] != vval:
 				break
-			# TODO: Unindent this one more?
-			else:
-				ans.l.append((mapper(i), e))
+		# TODO: Unindent this one more?
+		else:
+			ans.l.append((mapper(i), e))
 		for _ in xrange(popcount):
 			jeevesState.pathenv.pop()
 	return FObject(ans)
