@@ -125,7 +125,7 @@ def papers_view(request):
     user = UserProfile.objects.get(username=request.user.username)
 
     # TODO: Figure out why we can't loop over this if we don't concretize it...
-    papers = JeevesLib.concretize(user, Paper.objects.all())
+    papers = Paper.objects.all()
     paper_data = JeevesLib.JList2()
 
     for paper in papers:
