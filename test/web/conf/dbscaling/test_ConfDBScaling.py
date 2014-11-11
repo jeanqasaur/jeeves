@@ -50,12 +50,21 @@ class ConfDBScaling(FunkLoadTestCase):
         page = "/index"
         self.login(page)
         self.assert_(page == self.getLastUrl(), "Error in login")
+        reply = self.get(self.server_url + page, description="Get papers")
         self.logout()
 
     def test_show_all_users(self):
         page = "/users"
         self.login(page)
         self.assert_(page == self.getLastUrl(), "Error in login")
+        reply = self.get(self.server_url + page, description="Get papers")
+        self.logout()
+
+    def test_view_paper(self):
+        self.login()
+        reply = self.get(
+            self.server_url + "/paper?id=NeRby3kA6N4EKeKj4mK2xvkc2ACvNmLQ"
+            , description="Get paper")
         self.logout()
 
     # TODO: Submit a paper.
@@ -64,16 +73,18 @@ class ConfDBScaling(FunkLoadTestCase):
         self.login(page)
         self.assert_(page == self.getLastUrl(), "Error in login")
 
-        csrftoken = extract_token(self.getBody(), "name='csrfmiddlewaretoken' value='", "' />")
-        self.post(self.server_url + "/submit",
-            params=[['csrfmiddlewaretoken', csrftoken],
-            ['coauthors[]', self.lipsum.getWord()],
-            ['coauthors[]', self.lipsum.getWord()], 
-            ['title', self.lipsum.getSentence()],
-            ['contents', Upload('files/rms_crossstitch.pdf')],
-            ['abstract', self.lipsum.getMessage()]],
-            description="Post /accounts/login/")
-        self.assert_("paper" in self.getLastUrl(), "Error in login")
+        num_papers = self.conf_getInt('test_submit_paper', 'num_papers')
+        for i in range(num_papers):
+            csrftoken = extract_token(self.getBody(), "name='csrfmiddlewaretoken' value='", "' />")
+            self.post(self.server_url + "/submit",
+                params=[['csrfmiddlewaretoken', csrftoken],
+                ['coauthors[]', self.lipsum.getWord()],
+                ['coauthors[]', self.lipsum.getWord()], 
+                ['title', self.lipsum.getSentence()],
+                ['contents', Upload('files/rms_crossstitch.pdf')],
+                ['abstract', self.lipsum.getMessage()]],
+                description="Post /accounts/login/")
+            self.assert_("paper" in self.getLastUrl(), "Error in login")
 
     # TODO: View profile.
     def test_view_profile(self):
