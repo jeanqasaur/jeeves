@@ -114,11 +114,10 @@ def courses_view(request, user_profile):
   for sc in studentcourses:
     c = sc.course
     c.grade = sc.grade
-    c.instructors = []
-    courseInstructors = list(CourseInstructor.objects.filter(course=c))
-    for ci in courseInstructors:
-      c.instructors.append(ci.instructor)
+    c.instructors = CourseInstructor.objects.filter(course=c)
     courses.append(c)
+
+  assignments = Assignment.objects.all()
 
   return ( "courses.html"
          , {  'name' : user_profile.name
