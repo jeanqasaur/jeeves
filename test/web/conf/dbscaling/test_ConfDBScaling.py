@@ -63,7 +63,7 @@ class ConfDBScaling(FunkLoadTestCase):
     def test_view_paper(self):
         self.login()
         reply = self.get(
-            self.server_url + "/paper?id=NeRby3kA6N4EKeKj4mK2xvkc2ACvNmLQ"
+            self.server_url + "/paper?id=0fcKOflDJSAyUrT1BaKOMBfFVQ1Oi57p"
             , description="Get paper")
         self.logout()
 

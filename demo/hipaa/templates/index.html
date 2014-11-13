@@ -28,7 +28,7 @@
 		{% for patient in concretize(patients) %}
 			<li class="list-group-item">
 				<a href="/patient/{{ patient.jeeves_id }}">
-					{{ patient.Name() }}
+					{{ concretize(patient.Name()) }}
 				</a>
 			</li>
 		{% endfor %}

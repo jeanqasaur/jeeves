@@ -49,19 +49,22 @@ class Hipaa(FunkLoadTestCase):
         # end of test -----------------------------------------------
 
     def test_login(self):
-        self.login_as("jeanyang", "hi")
+        page="/index"
+        self.login_as("admin", "admin")
+        reply = self.get(self.server_url + page, description="Get index")
         self.logout()
 
         """
         self.login_as("admin", "admin")
         self.logout()
         """
-    '''
-    def test_register(self):
-        self.logout()
 
-        username = "new_user"
-        password = "password"
+
+    def test_register(self):
+        username = self.lipsum.getUniqWord()
+        password = self.lipsum.getWord()
+        name = self.lipsum.getWord() + " " + self.lipsum.getWord()
+        email = self.lipsum.getWord() + "@example.org"
 
         server_url = self.server_url
         # self.get(server_url + "/register", description='Get url')
@@ -72,8 +75,8 @@ class Hipaa(FunkLoadTestCase):
             ['username', username],
             ['password1', password],
             ['password2', password],
-            ['name', 'New User'],
-            ['email', 'new_user@example.org'],
+            ['name', name],
+            ['email', email],
             ['profiletype', '1']],
             description="Post /register")
 
@@ -109,6 +112,6 @@ class Hipaa(FunkLoadTestCase):
         self.logout()
         self.login_as(username, password)
         self.logout()
-    '''
+
 if __name__ in ('main', '__main__'):
     unittest.main()
