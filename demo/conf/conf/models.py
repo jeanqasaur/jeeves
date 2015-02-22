@@ -68,6 +68,9 @@ class Paper(Model):
     @label_for('author')
     @jeeves
     def jeeves_restrict_paperlabel(paper, ctxt):
+        '''
+        Policy for seeing author of papers.
+        '''
         if phase == 'final':
             return True
         else:
@@ -76,7 +79,8 @@ class Paper(Model):
             if PaperPCConflict.objects.get(paper=paper, pc=ctxt) != None:
                 return False
 
-            return (paper != None and paper.author == ctxt) or (ctxt != None and (ctxt.level == 'chair' or ctxt.level == 'pc'))
+            return ((paper != None and paper.author == ctxt)
+                or (ctxt != None and (ctxt.level == 'chair' or ctxt.level == 'pc')))
 
     class Meta:
         db_table = 'papers'

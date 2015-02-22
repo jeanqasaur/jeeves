@@ -109,12 +109,14 @@ def assignments_view(request, user_profile):
 @request_wrapper
 @jeeves
 def courses_view(request, user_profile):
-  studentcourses = StudentCourse.objects.filter(student=user_profile).all()
+  studentcourses = JeevesLib.concretize(user_profile, StudentCourse.objects.filter(student=user_profile).all())
+  print studentcourses
   courses = []
   for sc in studentcourses:
     c = sc.course
     c.grade = sc.grade
     c.instructors = CourseInstructor.objects.filter(course=c)
+    print c.instructors
     courses.append(c)
 
   assignments = Assignment.objects.all()
