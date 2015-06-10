@@ -1,0 +1,5 @@
+{% macro maybe_concretize(value) -%}
+  {% if optimize_flag %}{{ value }}
+  {% else %}{{ concretize(value) }}
+  {% endif %}
+{%- endmacro %}

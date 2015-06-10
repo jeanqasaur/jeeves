@@ -14,6 +14,7 @@ import django.db.models.fields.related
 import JeevesLib
 from JeevesLib import fexpr_cast
 from fast.AST import Facet, FObject, Unassigned, FExpr
+#from conf.settings import TEST_OPTIMIZATIONS as optimize_flag
 import JeevesModelUtils
 
 class JeevesQuerySet(QuerySet):

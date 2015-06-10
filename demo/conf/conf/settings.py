@@ -47,6 +47,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_jinja',
+    'macros',
     'timelog',
     'conf',
 )
@@ -101,8 +102,10 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, '..', "static"),
 )
 
+# Application-specific settings.
 # possible phases are submit, review, final
 CONF_PHASE = 'submit'
+TEST_OPTIMIZATIONS = True
 
 LOG_PATH = os.path.join(BASE_DIR, '..', 'logs/')
 TIMELOG_LOG = os.path.join(LOG_PATH, 'timelog.log')

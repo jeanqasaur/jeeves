@@ -11,12 +11,15 @@ import random
 import forms
 
 from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment, Comment, UserPCConflict, PaperCoauthor, PaperPCConflict
+from settings import TEST_OPTIMIZATIONS as optimize_flag
 
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
 import logging
 
 def register_account(request):
+    """This writes. (How can we analyze the code for this?
+    """
     if request.user.is_authenticated():
         return HttpResponseRedirect("index")
 
@@ -58,6 +61,9 @@ def add_to_context(context_dict, request, template_name, profile, concretize):
     context_dict['is_logged_in'] = (request.user and
                                     request.user.is_authenticated() and
                                     (not request.user.is_anonymous()))
+
+    # Benchmarking variables.
+    context_dict['optimize_flag'] = optimize_flag
 
 def request_wrapper(view_fn):
     logger = logging.getLogger('timing_logging')
@@ -273,9 +279,14 @@ def profile_view(request):
     if profile == None:
         profile = UserProfile(username=request.user.username)
         profile.level = 'normal'
-    pcs = UserProfile.objects.filter(level='pc').all()
-    
+
+    is_read_only = True
+    maybe_concretize = lambda x: JeevesLib.concretize(profile, x) if is_read_only else x
+
     if request.method == 'POST':
+        # In this case things aren't read-only.
+        is_read_only = False
+
         profile.name = request.POST.get('name', '')
         profile.affiliation = request.POST.get('affiliation', '')
         profile.acm_number = request.POST.get('acm_number', '')
@@ -289,7 +300,10 @@ def profile_view(request):
             UserPCConflict.objects.create(user=profile, pc=new_pc_conflict)
             pc_conflicts.append(new_pc_conflict)
     else:
-        pc_conflicts = [uppc.pc for uppc in UserPCConflict.objects.filter(user=profile).all()]
+        pc_conflicts = [uppc.pc for uppc in maybe_concretize(UserPCConflict.objects.filter(user=profile).all())]
+
+    profile = maybe_concretize(profile)
+    pcs = maybe_concretize(UserProfile.objects.filter(level='pc').all())
 
     return ("profile.html", {
         "name": profile.name,
@@ -297,9 +311,8 @@ def profile_view(request):
         "acm_number": profile.acm_number,
         "pc_conflicts": pc_conflicts,
         "email": profile.email,
-        "pcs": pcs,
+        "pcs": maybe_concretize([{'pc':pc, 'conflict':pc in pc_conflicts} for pc in pcs]),
         "which_page": "profile",
-        "pcs": [{'pc':pc, 'conflict':pc in pc_conflicts} for pc in pcs],
     })
 
 @login_required
