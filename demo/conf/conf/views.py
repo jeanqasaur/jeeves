@@ -128,14 +128,19 @@ def about_view(request):
 @request_wrapper
 @jeeves
 def papers_view(request):
+    # NOTE(JY): This page is hand-concretized.
     user = UserProfile.objects.get(username=request.user.username)
+    user = JeevesLib.concretize(user, user)
+    JeevesLib.set_viewer(user)
 
     # TODO: Figure out why we can't loop over this if we don't concretize it...
-    papers = Paper.objects.all()
-    paper_data = JeevesLib.JList2()
+    papers = JeevesLib.concretize(user, Paper.objects.all())
+    paper_data = []
+    if not optimize_flag:
+        paper_data = JeevesLib.JList2()
 
     for paper in papers:
-        paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
+        paper_versions = JeevesLib.concretize(user, PaperVersion.objects.filter(paper=paper).order_by('-time').all())
         latest_version_title = paper_versions[0].title if paper_versions.__len__() > 0 else None
 
         paper_data.append({
@@ -143,10 +148,14 @@ def papers_view(request):
             'latest' : latest_version_title
         })
 
+    JeevesLib.reset_viewer(user)
+
+    # TODO: Figure out how we can concretize less.
     return ("papers.html", {
         'papers' : papers
       , 'which_page' : "home"
-      , 'paper_data' : paper_data
+        # TODO: See how we can get rid of this concretize.
+      , 'paper_data' : JeevesLib.concretize(user, paper_data)
       , 'name' : user.name
     })
 
@@ -283,6 +292,8 @@ def profile_view(request):
     is_read_only = True
     maybe_concretize = lambda x: JeevesLib.concretize(profile, x) if is_read_only else x
 
+    # TODO: Add something that figures out more automatically when things are
+    # read-only.
     if request.method == 'POST':
         # In this case things aren't read-only.
         is_read_only = False

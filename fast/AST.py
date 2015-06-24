@@ -45,93 +45,104 @@ def facetJoin(f0, f1, opr):
         return Constant(opr(f0.v, f1.v))
 
 class JeevesState:
-  def __init__(self):
-    pass
+    def __init__(self):
+        pass
 
-  def init(self):
-    # Cache of concretized values.
-    self._concretecache = defaultdict(env.ConcreteCache.ConcreteCache)
+    def init(self):
+        # Cache of concretized values.
+        self._concretecache = defaultdict(env.ConcreteCache.ConcreteCache)
 
-    # Regular environments.
-    self._varenv = defaultdict(env.VarEnv.VarEnv)
-    self._pathenv = defaultdict(env.PathVars.PathVars)
-    self._policyenv = defaultdict(env.PolicyEnv.PolicyEnv)
-    self._writeenv = defaultdict(env.WritePolicyEnv.WritePolicyEnv)
-    self._all_labels = defaultdict(dict)
+        # Regular environments.
+        self._varenv = defaultdict(env.VarEnv.VarEnv)
+        self._pathenv = defaultdict(env.PathVars.PathVars)
+        self._policyenv = defaultdict(env.PolicyEnv.PolicyEnv)
+        self._writeenv = defaultdict(env.WritePolicyEnv.WritePolicyEnv)
+        self._all_labels = defaultdict(dict)
 
-    # Logging.
-    self._log_policies = False
-    self._policy_log_filehandle = None
+        # Logging.
+        self._log_policies = False
+        self._policy_log_filehandle = None
 
-    self._num_concretize = 0
-    self._num_labels = 0
-    # self._num_policies = 0
+        self._num_concretize = 0
+        self._num_labels = 0
+        # self._num_policies = 0
 
-  @property
-  def concretecache(self):
-    return self._concretecache[threading.current_thread()]
+        # Early concretization optimization.
+        self._viewer = defaultdict(FNull)
 
-  @property
-  def num_concretize(self):
-    return self._num_concretize
-  @property
-  def num_labels(self):
-    return self._num_labels
-  # @property
-  # def num_policies(self):
-  #   return self._num_policies
+    @property
+    def concretecache(self):
+        return self._concretecache[threading.current_thread()]
 
-  def set_log_policies(self, filehandle):
-    self._log_policies = True
-    self._policy_log_filehandle = filehandle
+    @property
+    def num_concretize(self):
+        return self._num_concretize
+    @property
+    def num_labels(self):
+        return self._num_labels
+    # @property
+    # def num_policies(self):
+    #    return self._num_policies
+
+    def set_log_policies(self, filehandle):
+        self._log_policies = True
+        self._policy_log_filehandle = filehandle
   
-  def log_policies(self):
-    f = self._policy_log_filehandle
+    def log_policies(self):
+        f = self._policy_log_filehandle
 
-    if self._log_policies and self._num_concretize > 0:
-      f.write("***\n")
-      f.write("Concretizations so far: " + \
-        str(self._num_concretize) + "\n")
-      f.write("Labels so far: " + str(self._num_labels) + "\n")
-      f.write("Average labels: " + \
-        str(self._num_labels / (self._num_concretize * 1.0)) + "\n")
-      # f.write("Policies so far: " + str(self._num_policies) + "\n")
-      # f.write("Average policies: " + \
-      #   str(self._num_policies / (self._num_concretize * 1.0)) + "\n")
-      f.write("***\n")
-      f.write("\n")
+        if self._log_policies and self._num_concretize > 0:
+            f.write("***\n")
+            f.write("Concretizations so far: " + \
+                str(self._num_concretize) + "\n")
+            f.write("Labels so far: " + str(self._num_labels) + "\n")
+            f.write("Average labels: " + \
+                str(self._num_labels / (self._num_concretize * 1.0)) + "\n")
+            # f.write("Policies so far: " + str(self._num_policies) + "\n")
+            # f.write("Average policies: " + \
+            #    str(self._num_policies / (self._num_concretize * 1.0)) + "\n")
+            f.write("***\n")
+            f.write("\n")
 
-  def log_counts(self, label_count):
-    if self._log_policies:
-      self._num_concretize += 1
+    def log_counts(self, label_count):
+        if self._log_policies:
+            self._num_concretize += 1
 
-      f = self._policy_log_filehandle
-      assert(f != None)
-      f.write("***\n")
-      self._num_labels += label_count
-      f.write("Labels: " + str(label_count) + "\n")
-      f.write("***\n")
+            f = self._policy_log_filehandle
+            assert(f != None)
+            f.write("***\n")
+            self._num_labels += label_count
+            f.write("Labels: " + str(label_count) + "\n")
+            f.write("***\n")
 
-  def clear_policy_count(self):
-    self._num_concretize = 0
-    self._num_labels = 0
-    # self._num_policies = 0
+    def clear_policy_count(self):
+        self._num_concretize = 0
+        self._num_labels = 0
+        # self._num_policies = 0
 
-  @property
-  def varenv(self):
-    return self._varenv[threading.current_thread()]
-  @property
-  def pathenv(self):
-    return self._pathenv[threading.current_thread()]
-  @property
-  def policyenv(self):
-    return self._policyenv[threading.current_thread()]
-  @property
-  def writeenv(self):
-    return self._writeenv[threading.current_thread()]
-  @property
-  def all_labels(self):
-    return self._all_labels[threading.current_thread()]
+    @property
+    def varenv(self):
+        return self._varenv[threading.current_thread()]
+    @property
+    def pathenv(self):
+        return self._pathenv[threading.current_thread()]
+    @property
+    def policyenv(self):
+        return self._policyenv[threading.current_thread()]
+    @property
+    def writeenv(self):
+        return self._writeenv[threading.current_thread()]
+    @property
+    def all_labels(self):
+        return self._all_labels[threading.current_thread()]
+
+    @property
+    def viewer(self):
+        return self._viewer[threading.current_thread()]
+    def set_viewer(self, viewer):
+        self._viewer[threading.current_thread()] = viewer
+    def reset_viewer(self):
+        self._viewer[threading.current_thread()] = FNull()
 
 jeevesState = JeevesState()
 
@@ -341,10 +352,10 @@ class Facet(FExpr):
         # TODO: Unassigned makes things super-awkward, we need to figure that out.
         # For now, just ignore them.
         #if (self.thn.type != None and self.els.type != None and
-        #                self.thn.type != self.els.type):
-        #        raise TypeError("Condition on both sides of a Facet must have the "
-        #                                        "same type, they are %s and %s."
-        #                                        % (self.thn.type.__name__, self.els.type.__name__))
+        #                 self.thn.type != self.els.type):
+        #         raise TypeError("Condition on both sides of a Facet must have the "
+        #                                         "same type, they are %s and %s."
+        #                                         % (self.thn.type.__name__, self.els.type.__name__))
 
         self.__dict__['type'] = self.thn.type or self.els.type
 
@@ -963,6 +974,10 @@ class FObject(FExpr):
 
     def __html__(self):
         return self.v.__html__()
+
+class FNull(FExpr):
+    def __init__(self):
+        pass
 
 """
     def __and__(l, r):

@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
+{% import 'macros.jinja' as macros with context %}
 
 {% block content %}
     <div class="page-header">
-      <h1>Welcome {{ concretize(name) }}.</h1>
+      <h1>Welcome {{ macros.maybe_concretize(name) }}.</h1>
     </div>
 
     <p>Please e-mail Jean Yang (jeanyang [at] mit [dot] edu) to withdraw a paper.</p>
@@ -11,7 +12,7 @@
                 <th><a rel="tooltip" title="Visible to the authors, PC chair, and reviewers after reviews have been submitted."><span class="glyphicon glyphicon-eye-close"></span></a> Author </th>
                 <th><a rel="tooltip" title="Visible to the authors and program committee."><span class="glyphicon glyphicon-eye-close"></span></a> Title </th>
             </tr>
-    {% if concretize(paper_data) != [] %}
+  {% if concretize(paper_data) != [] %}
             {% for p in concretize(paper_data) %}
                 {% if concretize(p.paper.author) != None %}
                 <tr>
@@ -28,6 +29,6 @@
                 </tr>
                 {% endif %}
             {% endfor %}
-    {% endif %}
+      {% endif %}
     </table>
 {% endblock %}

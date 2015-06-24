@@ -13,7 +13,7 @@ import django.db.models.fields.related
 
 import JeevesLib
 from JeevesLib import fexpr_cast
-from fast.AST import Facet, FObject, Unassigned, FExpr
+from fast.AST import Facet, FObject, Unassigned, FExpr, FNull
 #from conf.settings import TEST_OPTIMIZATIONS as optimize_flag
 import JeevesModelUtils
 
@@ -68,12 +68,25 @@ class JeevesQuerySet(QuerySet):
             old = cur
             cur = FObject(row)
             for var_name, val in conditions.iteritems():
-                if val:
-                    cur = Facet(acquire_label_by_name(
-                            self.model._meta.app_label, var_name), cur, old)
+                label = acquire_label_by_name(self.model._meta.app_label
+                    , var_name)
+                viewer = JeevesLib.get_viewer()
+                if not isinstance(viewer, FNull):
+                    print viewer
+                    # If we know the viewer, then we concretize.
+                    clabel = JeevesLib.assignLabel(viewer, label)
+                    if clabel:
+                        if not val:
+                            cur = old
+                    else:
+                        if val:
+                            cur = old
                 else:
-                    cur = Facet(acquire_label_by_name(
-                            self.model._meta.app_label, var_name), old, cur)
+                    # We don't know the viewer.
+                    if val:
+                        cur = Facet(label, cur, old)
+                    else:
+                        cur = Facet(label, old, cur)
         try:
             return cur.partialEval({} if use_base_env \
                 else JeevesLib.jeevesState.pathenv.getEnv())
@@ -355,6 +368,7 @@ class JeevesModel(models.Model):
                 private_field_value = getattr(self
                                         , 'jeeves_get_private_' + \
                                             field_name)(self)
+                
                 faceted_field_value = JeevesLib.mkSensitive(label
                                         , public_field_value
                                         , private_field_value).partialEval(

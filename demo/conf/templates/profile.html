@@ -38,7 +38,7 @@
             </div>
           {% endfor %}
         {% else %}
-          {% for pc in pcs %}
+          {% for pc in concretize(pcs) %}
             <div class="checkbox">
               <input type="checkbox" name="pc_conflicts[]" value="{{concretize(pc.pc.username)}}" {% if concretize(pc.conflict) %} checked {% endif %} />
               <label> {{ concretize(pc.pc.name) }} </label> <br />
