@@ -71,8 +71,6 @@ class Paper(Model):
         '''
         Policy for seeing author of papers.
         '''
-        return True
-        '''
         if phase == 'final':
             return True
         else:
@@ -83,7 +81,6 @@ class Paper(Model):
 
             return ((paper != None and paper.author == ctxt)
                 or (ctxt != None and (ctxt.level == 'chair' or ctxt.level == 'pc')))
-        '''
 
     class Meta:
         db_table = 'papers'
