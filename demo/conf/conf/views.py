@@ -134,13 +134,13 @@ def papers_view(request):
     JeevesLib.set_viewer(user)
 
     # TODO: Figure out why we can't loop over this if we don't concretize it...
-    papers = JeevesLib.concretize(user, Paper.objects.all())
+    papers = Paper.objects.all()
     paper_data = []
     if not optimize_flag:
         paper_data = JeevesLib.JList2()
 
     for paper in papers:
-        paper_versions = JeevesLib.concretize(user, PaperVersion.objects.filter(paper=paper).order_by('-time').all())
+        paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
         latest_version_title = paper_versions[0].title if paper_versions.__len__() > 0 else None
 
         paper_data.append({
@@ -155,7 +155,7 @@ def papers_view(request):
         'papers' : papers
       , 'which_page' : "home"
         # TODO: See how we can get rid of this concretize.
-      , 'paper_data' : JeevesLib.concretize(user, paper_data)
+      , 'paper_data' : paper_data
       , 'name' : user.name
     })
 
