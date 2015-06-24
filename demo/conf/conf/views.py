@@ -134,7 +134,7 @@ def papers_view(request):
     JeevesLib.set_viewer(user)
 
     # TODO: Figure out why we can't loop over this if we don't concretize it...
-    papers = Paper.objects.all()
+    papers = JeevesLib.concretize(user, Paper.objects.all())
     paper_data = []
     if not optimize_flag:
         paper_data = JeevesLib.JList2()
