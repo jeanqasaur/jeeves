@@ -111,23 +111,40 @@ class JeevesQuerySet(QuerySet):
 
     @JeevesLib.supports_jeeves
     def all(self):
-        elements = JeevesLib.JList2([])
-        env = JeevesLib.jeevesState.pathenv.getEnv()
-        for val, cond in self.get_jiter():
-            popcount = 0
-            for vname, vval in cond.iteritems():
-                if vname not in env:
-                    vlabel = acquire_label_by_name(
-                                self.model._meta.app_label, vname)
-                    JeevesLib.jeevesState.pathenv.push(vlabel, vval)
-                    popcount += 1
-                elif env[vname] != vval:
-                    break
-            else:
-                elements.append(val)
-            for _ in xrange(popcount):
-                JeevesLib.jeevesState.pathenv.pop()
-        return elements
+        viewer = JeevesLib.get_viewer()
+        if isinstance(viewer, FNull):
+            # If we don't know who the viewer is, create facets.
+            elements = JeevesLib.JList2([])
+            env = JeevesLib.jeevesState.pathenv.getEnv()
+            for val, cond in self.get_jiter():
+                popcount = 0
+                for vname, vval in cond.iteritems():
+                    if vname not in env:
+                        # If we don't 
+                        vlabel = acquire_label_by_name(
+                                    self.model._meta.app_label, vname)
+                        JeevesLib.jeevesState.pathenv.push(vlabel, vval)
+                        popcount += 1
+                    elif env[vname] != vval:
+                        break
+                else:
+                    elements.append(val)
+                for _ in xrange(popcount):
+                    JeevesLib.jeevesState.pathenv.pop()
+            return elements
+        else:
+            # Otherwise concretize early.
+            elements = []
+            env = JeevesLib.jeevesState.pathenv.getEnv()
+            for val, cond in self.get_jiter():
+                for vname, vval in cond.iteritems():
+                    if vname not in env:
+                        vlabel = acquire_label_by_name(
+                                    self.model._meta.app_label, vname)
+                        if JeevesLib.assignLabel(viewer, vlabel):
+                            elements.append(val)
+            return elements
+
 
     @JeevesLib.supports_jeeves
     def delete(self):
