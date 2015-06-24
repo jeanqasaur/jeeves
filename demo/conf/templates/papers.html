@@ -1,9 +1,8 @@
 {% extends 'base.html' %}
-{% import 'macros.jinja' as macros with context %}
 
 {% block content %}
     <div class="page-header">
-      <h1>Welcome {{ macros.maybe_concretize(name) }}.</h1>
+      <h1>Welcome {{ concretize(name) }}.</h1>
     </div>
 
     <p>Please e-mail Jean Yang (jeanyang [at] mit [dot] edu) to withdraw a paper.</p>
