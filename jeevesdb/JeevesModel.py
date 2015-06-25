@@ -140,7 +140,12 @@ class JeevesQuerySet(QuerySet):
                     if vname not in env:
                         vlabel = acquire_label_by_name(
                                     self.model._meta.app_label, vname)
-                        if JeevesLib.assignLabel(viewer, vlabel):
+                        print "LABEL"
+                        print vlabel
+                        print vval
+                        if JeevesLib.assignLabel(viewer, vlabel) == vval:
+                            print "ADDING"
+                            print val
                             elements.append(val)
             return elements
 
