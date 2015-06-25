@@ -83,8 +83,6 @@ def request_wrapper(view_fn):
                 path = context_dict
                 return HttpResponseRedirect(JeevesLib.concretize(profile, path))
 
-            print "NAME"
-            print JeevesLib.get_viewer().name
             solverstate = JeevesLib.get_solverstate()
             if solverstate != None:
                 concretizeState = JeevesLib.get_solverstate()

@@ -319,6 +319,20 @@ class TestJeevesModel(TestCase):
         self.assertTrue(JeevesLib.concretize((False, True), an == cn))
         self.assertTrue(JeevesLib.concretize((False, True), bn == cn))
 
+    def testGet1_without_concretize(self):
+        an = Animal.objects.create(name='get_test1'
+                , sound='get_test1_sound_xyz')
+        bn = Animal.objects.get(name='get_test1')
+        cn = Animal.objects.get(sound='get_test1_sound_xyz')
+
+        self.assertTrue(an == bn)
+        self.assertTrue(an == cn)
+        self.assertTrue(bn == cn)
+
+        self.assertTrue(an == bn)
+        self.assertTrue(an == cn)
+        self.assertTrue(bn == cn)
+
     def testGet2(self):
         an = Animal.objects.create(name='get_test2'
             , sound=JeevesLib.mkSensitive(self.x, 'b', 'c'))
@@ -331,6 +345,19 @@ class TestJeevesModel(TestCase):
         self.assertEqual(an.sound.cond.name, self.x.name)
         self.assertEqual(an.sound.thn.v, 'b')
         self.assertEqual(an.sound.els.v, 'c')
+
+    def testGet2_with_viewer(self):
+        an = Animal.objects.create(name='get_test2'
+            , sound=JeevesLib.mkSensitive(self.x, 'b', 'c'))
+
+        JeevesLib.set_viewer((True, True))
+        bn = Animal.objects.get(name='get_test2')
+        self.assertTrue(an == bn.v)
+
+        JeevesLib.set_viewer((False, True))
+        bn = Animal.objects.get(name='get_test2')
+        self.assertTrue(an == bn.v)
+
 
     def testGet3(self):
         an = Animal.objects.create(name='get_test3'
