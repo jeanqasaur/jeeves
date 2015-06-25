@@ -129,7 +129,7 @@ def about_view(request):
 def papers_view(request):
     user = UserProfile.objects.get(username=request.user.username)
     user = JeevesLib.concretize(user, user)
-    
+ 
     # Set the known viewer.
     JeevesLib.set_viewer(user)
 
@@ -141,7 +141,7 @@ def papers_view(request):
         latest_version_title = paper_versions[0].title if paper_versions.__len__() > 0 else None
 
         paper_data.append({
-            'paper' : paper,
+            'paper' : JeevesLib.evalToConcrete(paper),
             'latest' : latest_version_title
         })
 

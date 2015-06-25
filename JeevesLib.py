@@ -201,16 +201,18 @@ def clear_cache():
 def get_cache():
     return jeevesState.concretecache.cache
 
-def reset_solverstate(ctxt):
-    jeevesState.reset_solverstate(ctxt)
+def get_solverstate():
+    return jeevesState.solverstate
 
 '''
 Early concretization optimization.
 '''
 def set_viewer(viewer):
     jeevesState.set_viewer(viewer)
+    jeevesState.reset_solverstate(viewer)
 def reset_viewer(viewer):
     jeevesState.reset_viewer()
+    jeevesState.clear_solverstate()
 def get_viewer():
     return jeevesState.viewer
 
@@ -467,12 +469,21 @@ def jfun3(f, kw, it, key, val, args_concrete, kw_concrete):
                                 return Facet(val.cond, thn, els)
 
 def evalToConcrete(f):
-        g = fexpr_cast(f).partialEval(jeevesState.pathenv.getEnv())
-        if isinstance(g, Constant):
-                return g.v
-        elif isinstance(g, FObject):
-                return g.v
-        else:
-                raise Exception("wow such error: evalToConcrete on non-concrete thingy-ma-bob")
+    g = fexpr_cast(f).partialEval(jeevesState.pathenv.getEnv())
+    if isinstance(g, Constant):
+        return g.v
+    elif isinstance(g, FObject):
+        return g.v
+    else:
+        raise Exception("wow such error: evalToConcrete on non-concrete thingy-ma-bob")
+
+'''
+TODO
+def recursiveEvalToConcrete(f):
+    """
+    Evaluates the fields of an object to be concrete.
+    """
+    g = fexpr_cast(f).partialEval(jeevesState.pathenv.getEnv()
+'''
 
 from jlib.JContainer import *

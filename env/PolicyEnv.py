@@ -130,7 +130,9 @@ class PolicyEnv:
         return SolverState(self.policies, ctxt)
 
     def concretizeExp(self, ctxt, f, pathenv):
-        solver_state = self.getNewSolverState(ctxt)
+        solver_state = JeevesLib.get_solverstate()
+        if solver_state == None:
+            solver_state = self.getNewSolverState(ctxt)
         return solver_state.concretizeExp(f, pathenv)
 
     def assignLabel(self, solverstate, label, pathenv):

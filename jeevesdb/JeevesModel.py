@@ -65,8 +65,6 @@ class JeevesQuerySet(QuerySet):
 
         viewer = JeevesLib.get_viewer()
         has_viewer = not isinstance(viewer, FNull)
-        if has_viewer:
-            JeevesLib.reset_solverstate(viewer)
 
         cur = None
         for (row, conditions) in matches:
@@ -121,7 +119,6 @@ class JeevesQuerySet(QuerySet):
                 popcount = 0
                 for vname, vval in cond.iteritems():
                     if vname not in env:
-                        # If we don't 
                         vlabel = acquire_label_by_name(
                                     self.model._meta.app_label, vname)
                         JeevesLib.jeevesState.pathenv.push(vlabel, vval)
@@ -138,7 +135,6 @@ class JeevesQuerySet(QuerySet):
             elements = []
             env = JeevesLib.jeevesState.pathenv.getEnv()
 
-            JeevesLib.reset_solverstate(viewer)
             for val, cond in self.get_jiter():
                 for vname, vval in cond.iteritems():
                     if vname not in env:

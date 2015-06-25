@@ -59,7 +59,7 @@ class JeevesState:
         self._writeenv = defaultdict(env.WritePolicyEnv.WritePolicyEnv)
         self._all_labels = defaultdict(dict)
 
-        self._solverstate = defaultdict(None)
+        self._solverstate = defaultdict()
 
         # Logging.
         self._log_policies = False
@@ -140,12 +140,15 @@ class JeevesState:
 
     @property
     def solverstate(self):
-        return self._solverstate[threading.current_thread()]
+        if self._solverstate.has_key(threading.current_thread()):
+            return self._solverstate[threading.current_thread()]
+        else:
+            return None
     def reset_solverstate(self, ctxt):
         self._solverstate[threading.current_thread()] = \
             env.PolicyEnv.SolverState(self.policyenv.policies, ctxt)
-    def clear_solverstate(self, ctxt):
-        self._solverstate[thread.current_thread()] = None
+    def clear_solverstate(self):
+        self._solverstate[threading.current_thread()] = None
 
     @property
     def viewer(self):
