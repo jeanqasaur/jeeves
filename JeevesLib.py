@@ -111,13 +111,12 @@ def concretize(ctxt, v):
     """
     pathvars = jeevesState.pathenv.getEnv()
     # Check to see if the value is in the cache.
-    cache_key = jeevesState.concretecache.get_cache_key(ctxt, v, pathvars)
-    cval = jeevesState.concretecache.cache_lookup(cache_key)
-    if cval is None:
-        # If not, then concretize anew and cache the value.
-        cval = jeevesState.policyenv.concretizeExp(ctxt, v, pathvars)
-        jeevesState.concretecache.cache_value(cache_key, cval)
-    return cval
+    # cache_key = jeevesState.concretecache.get_cache_key(ctxt, v, pathvars)
+    # cval = jeevesState.concretecache.cache_lookup(cache_key)
+    # if cval is None:
+    cval = jeevesState.policyenv.concretizeExp(ctxt, v, pathvars)
+    jeevesState.concretecache.cache_value(cache_key, cval)
+    # return cval
 
 @supports_jeeves
 def assignLabel(ctxt, label):
