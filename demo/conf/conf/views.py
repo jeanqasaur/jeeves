@@ -127,23 +127,21 @@ def about_view(request):
 @login_required
 @request_wrapper
 def papers_view(request):
-    # NOTE(JY): This page is hand-concretized.
     user = UserProfile.objects.get(username=request.user.username)
     user = JeevesLib.concretize(user, user)
+    
+    # Set the known viewer.
     JeevesLib.set_viewer(user)
 
-    # TODO: Figure out why we can't loop over this if we don't concretize it...
     papers = JeevesLib.concretize(user, Paper.objects.all())
     paper_data = []
-    if not optimize_flag:
-        paper_data = JeevesLib.JList2()
 
     for paper in papers:
-        paper_versions = JeevesLib.concretize(user, PaperVersion.objects.filter(paper=paper)).order_by('-time').all()
+        paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
         latest_version_title = paper_versions[0].title if paper_versions.__len__() > 0 else None
 
         paper_data.append({
-            'paper' : JeevesLib.concretize(user, paper),
+            'paper' : paper,
             'latest' : latest_version_title
         })
 
