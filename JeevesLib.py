@@ -209,7 +209,7 @@ Early concretization optimization.
 def set_viewer(viewer):
     jeevesState.set_viewer(viewer)
     jeevesState.reset_solverstate(viewer)
-def reset_viewer(viewer):
+def clear_viewer():
     jeevesState.reset_viewer()
     jeevesState.clear_solverstate()
 def get_viewer():
@@ -473,6 +473,11 @@ def evalToConcrete(f):
         return g.v
     elif isinstance(g, FObject):
         return g.v
+    elif isinstance(g, Facet):
+        if g.thn == g.els:
+            return g.thn
+        else:
+            raise Exception("evalToConcrete on non-concrete")
     else:
         raise Exception("wow such error: evalToConcrete on non-concrete thingy-ma-bob")
 

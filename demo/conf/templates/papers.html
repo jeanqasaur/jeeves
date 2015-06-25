@@ -18,9 +18,9 @@
                     <td>
                         {{ concretize(p.paper.author.name) }}
                     </td>
-                    <td> <a href="/paper?id={{ p.paper.jeeves_id }}">
-                        {% if p.latest != None %}
-                            {{ p.latest }}
+                    <td> <a href="/paper?id={{ concretize(p.paper.jeeves_id) }}">
+                        {% if concretize(p.latest) != None %}
+                            {{ concretize(p.latest) }}
                         {% else %}
                             [Hidden]
                         {% endif %}

@@ -83,6 +83,7 @@ def request_wrapper(view_fn):
                 path = context_dict
                 return HttpResponseRedirect(JeevesLib.concretize(profile, path))
 
+            JeevesLib.set_viewer(profile)
             concretizeState = JeevesLib.jeevesState.policyenv.getNewSolverState(profile)
             # def concretize(val):
             #    return concretizeState.concretizeExp(val
@@ -94,6 +95,7 @@ def request_wrapper(view_fn):
 
             r = render_to_response(template_name, RequestContext(request, context_dict))
 
+            JeevesLib.clear_viewer()
             t3 = time.time()
 
             logger.info("Jeeves time: %f" % (t2 - t1))
@@ -131,9 +133,6 @@ def papers_view(request):
     user = UserProfile.objects.get(username=request.user.username)
     user = JeevesLib.concretize(user, user)
  
-    # Set the known viewer.
-    JeevesLib.set_viewer(user)
-
     papers = JeevesLib.concretize(user, Paper.objects.all())
     paper_data = []
 
@@ -145,9 +144,6 @@ def papers_view(request):
             'paper' : JeevesLib.evalToConcrete(paper),
             'latest' : latest_version_title
         })
-
-    # NOTE(JY): It is important to reset the viewer once we are done.
-    JeevesLib.reset_viewer(user)
 
     return ("papers.html", {
         'papers' : papers
