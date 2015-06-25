@@ -481,13 +481,28 @@ def evalToConcrete(f):
     else:
         raise Exception("wow such error: evalToConcrete on non-concrete thingy-ma-bob")
 
-'''
-TODO
 def recursiveEvalToConcrete(f):
     """
     Evaluates the fields of an object to be concrete.
     """
-    g = fexpr_cast(f).partialEval(jeevesState.pathenv.getEnv()
-'''
+    g = fexpr_cast(f).partialEval(jeevesState.pathenv.getEnv())
+    if isinstance(g, Constant):
+        return g.v
+    elif isinstance(g, FObject):
+        v = g.v
+        attribs = [a for a in (set(dir(v)) - set(dir(v.__class__.__name__))) if not a.startswith('__')]
+        for a in attribs:
+            try:
+                v.__setattr__(a, recursiveEvalToConcrete(getattr(v, a)))
+            except Exception:
+                pass
+        return v
+    elif isinstance(g, Facet):
+        if g.thn == g.els:
+            return g.thn
+        else:
+            raise Exception("evalToConcrete on non-concrete")
+    else:
+        raise Exception("wow such error: evalToConcrete on non-concrete thingy-ma-bob")
 
 from jlib.JContainer import *

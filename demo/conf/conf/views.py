@@ -83,14 +83,17 @@ def request_wrapper(view_fn):
                 path = context_dict
                 return HttpResponseRedirect(JeevesLib.concretize(profile, path))
 
-            JeevesLib.set_viewer(profile)
-            concretizeState = JeevesLib.get_solverstate() #JeevesLib.jeevesState.policyenv.getNewSolverState(profile)
+            print "NAME"
+            print JeevesLib.get_viewer().name
+            solverstate = JeevesLib.get_solverstate()
+            if solverstate != None:
+                concretizeState = JeevesLib.get_solverstate()
+            else:
+                JeevesLib.jeevesState.policyenv.getNewSolverState(profile)
             def concretize(val):
                 return concretizeState.concretizeExp(val
                     , JeevesLib.jeevesState.pathenv.getEnv())
             add_to_context(context_dict, request, template_name, profile, concretize)
-
-            #print 'concretized is', concretize(context_dict['latest_title'])
 
             r = render_to_response(template_name, RequestContext(request, context_dict))
 
@@ -131,8 +134,9 @@ def about_view(request):
 def papers_view(request):
     user = UserProfile.objects.get(username=request.user.username)
     user = JeevesLib.concretize(user, user)
- 
-    papers = JeevesLib.concretize(user, Paper.objects.all())
+    JeevesLib.set_viewer(user)
+
+    papers = Paper.objects.all()
     paper_data = []
 
     for paper in papers:

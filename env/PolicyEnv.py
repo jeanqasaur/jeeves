@@ -25,8 +25,6 @@ class SolverState:
         # self.policies_index = 0
 
     def getLabelClosure(self, varsNeeded):
-        # TODO: This should iterate until fixed point.
-        print self.policies
         for label in varsNeeded:
             if self.policies.has_key(label):
                 policy = self.policies[label]

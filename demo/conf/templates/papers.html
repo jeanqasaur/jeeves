@@ -13,14 +13,14 @@
             </tr>
           {% if paper_data != [] %}
             {% for p in paper_data %}
-                {% if concretize(p.paper.author) != None %}
+                {% if p.paper.author != None %}
                 <tr>
                     <td>
-                        {{ concretize(p.paper.author.name) }}
+                        {{ p.paper.author.name }}
                     </td>
-                    <td> <a href="/paper?id={{ concretize(p.paper.jeeves_id) }}">
-                        {% if concretize(p.latest) != None %}
-                            {{ concretize(p.latest) }}
+                    <td> <a href="/paper?id={{ p.paper.jeeves_id }}">
+                        {% if p.latest != None %}
+                            {{ p.latest }}
                         {% else %}
                             [Hidden]
                         {% endif %}
