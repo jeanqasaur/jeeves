@@ -95,7 +95,7 @@ def request_wrapper(view_fn):
 
             r = render_to_response(template_name, RequestContext(request, context_dict))
 
-            JeevesLib.clear_viewer()
+            # JeevesLib.clear_viewer()
             t3 = time.time()
 
             logger.info("Jeeves time: %f" % (t2 - t1))

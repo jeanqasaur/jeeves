@@ -79,6 +79,11 @@ class Paper(Model):
             if PaperPCConflict.objects.get(paper=paper, pc=ctxt) != None:
                 return False
 
+            print "EVALUATING POLICY"
+            print paper != None
+            print paper.author == ctxt
+            print ctxt != None
+            print ctxt.level
             return ((paper != None and paper.author == ctxt)
                 or (ctxt != None and (ctxt.level == 'chair' or ctxt.level == 'pc')))
 

@@ -75,8 +75,7 @@ class JeevesQuerySet(QuerySet):
                     , var_name)
                 viewer = JeevesLib.get_viewer()
                 if has_viewer:
-                    print "WE KNOW THE VIEWER" 
-                    if JeevesLib.assignLabel(viewer, label):
+                    if JeevesLib.concretize(viewer, label):
                         if not val:
                             cur = old
                     else:
@@ -137,12 +136,17 @@ class JeevesQuerySet(QuerySet):
             env = JeevesLib.jeevesState.pathenv.getEnv()
 
             for val, cond in self.get_jiter():
+                print "val: %s" % val
                 for vname, vval in cond.iteritems():
+                    print "vname: %s vval: %s" % (vname, vval)
                     if vname not in env:
                         vlabel = acquire_label_by_name(
                                     self.model._meta.app_label, vname)
-                        if JeevesLib.assignLabel(viewer, vlabel) == vval:
+                        label = JeevesLib.concretize(viewer, vlabel)
+                        print "label %s: %s" % (vname, label)
+                        if label == vval:
                             elements.append(val)
+            print "ELEMENTS: %s" % elements
             return elements
 
 

@@ -374,6 +374,30 @@ class TestJeevesModel(TestCase):
         self.assertEqual(JeevesLib.concretize((False,True), bn.sound), 'd')
         self.assertEqual(JeevesLib.concretize((False,False), bn.sound), 'e')
 
+    def testGet3_with_viewer(self):
+        an = Animal.objects.create(name='get_test3'
+            , sound=JeevesLib.mkSensitive(self.x
+                , JeevesLib.mkSensitive(self.y, 'b', 'c')
+                , JeevesLib.mkSensitive(self.y, 'd', 'e')))
+
+        JeevesLib.set_viewer((True, True))
+        bn = Animal.objects.get(name='get_test3')
+        self.assertTrue(an == bn.v)
+        self.assertEqual(bn.v.sound, 'b')
+        
+        JeevesLib.set_viewer((False, True))
+        bn = Animal.objects.get(name='get_test3')
+        self.assertTrue(an == bn.v)
+        self.assertEqual(bn.v.sound, 'd')
+
+        JeevesLib.set_viewer((True, False))
+        bn = Animal.objects.get(name='get_test3')
+        self.assertEqual(bn.v.sound, 'c')
+
+        JeevesLib.set_viewer((False, False))
+        bn = Animal.objects.get(name='get_test3')
+        self.assertEqual(bn.v.sound, 'e')
+
     def testGet4(self):
         with JeevesLib.PositiveVariable(self.x):
             an = Animal.objects.create(name='get_test4', sound='a')
@@ -479,6 +503,24 @@ class TestJeevesModel(TestCase):
             ({'name':'fkey_test1_zoo', 'inhabitant_id':bn.jeeves_id}
             , {self.x.name:False}),
         ]))
+
+    def testJeevesForeignKey_with_viewer(self):
+        an = Animal.objects.create(name='fkey_test1_an', sound='a')
+        bn = Animal.objects.create(name='fkey_test1_bn', sound='b')
+        zoo = Zoo.objects.create(name='fkey_test1_zoo',
+            inhabitant=JeevesLib.mkSensitive(self.x, an, bn))
+        
+        JeevesLib.set_viewer((True, True))
+        a = list(Animal._objects_ordinary.filter(name='fkey_test1_an').all())
+        b = list(Animal._objects_ordinary.filter(name='fkey_test1_bn').all())
+        z = Zoo.objects.get(name='fkey_test1_zoo')
+        self.assertEqual(z.inhabitant, an)
+        
+        JeevesLib.set_viewer((False, True))
+        a = list(Animal._objects_ordinary.filter(name='fkey_test1_an').all())
+        b = list(Animal._objects_ordinary.filter(name='fkey_test1_bn').all())
+        z = Zoo.objects.get(name='fkey_test1_zoo')
+        self.assertEqual(z.inhabitant, bn)
 
     def testFKeyUpdate(self):
         an = Animal.objects.create(name='fkeyup_test_an', sound='a')
