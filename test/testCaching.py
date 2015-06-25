@@ -49,7 +49,8 @@ class TestClass1Eq:
     def __ge__(self, other):
         return self.a >= other.a
 
-class TestSourceTransform(unittest.TestCase):
+"""
+class TestCaching(unittest.TestCase):
     def setUp(self):
         # reset the Jeeves state
         JeevesLib.init()
@@ -809,3 +810,4 @@ class TestSourceTransform(unittest.TestCase):
         self.assertEqual(JeevesLib.concretize(False, z[1]), 25)
         self.assertEqual(JeevesLib.concretize(False, z[2]), 36)
         self.assertEqual(JeevesLib.concretize(False, z[3]), 49)
+"""
