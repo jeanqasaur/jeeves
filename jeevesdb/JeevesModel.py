@@ -81,7 +81,6 @@ class JeevesQuerySet(QuerySet):
                         if val:
                             cur = old
                 else:
-                    # We don't know the viewer.
                     if val:
                         cur = Facet(label, cur, old)
                     else:
@@ -140,12 +139,7 @@ class JeevesQuerySet(QuerySet):
                     if vname not in env:
                         vlabel = acquire_label_by_name(
                                     self.model._meta.app_label, vname)
-                        print "LABEL"
-                        print vlabel
-                        print vval
                         if JeevesLib.assignLabel(viewer, vlabel) == vval:
-                            print "ADDING"
-                            print val
                             elements.append(val)
             return elements
 
@@ -389,7 +383,7 @@ class JeevesModel(models.Model):
                 private_field_value = getattr(self
                                         , 'jeeves_get_private_' + \
                                             field_name)(self)
-                
+                print "WE GET HERE"
                 faceted_field_value = JeevesLib.mkSensitive(label
                                         , public_field_value
                                         , private_field_value).partialEval(

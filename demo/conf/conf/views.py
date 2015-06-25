@@ -148,11 +148,9 @@ def papers_view(request):
     # NOTE(JY): It is important to reset the viewer once we are done.
     JeevesLib.reset_viewer(user)
 
-    # TODO: Figure out how we can concretize less.
     return ("papers.html", {
         'papers' : papers
       , 'which_page' : "home"
-        # TODO: See how we can get rid of this concretize.
       , 'paper_data' : paper_data
       , 'name' : user.name
     })
