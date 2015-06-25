@@ -63,6 +63,11 @@ class JeevesQuerySet(QuerySet):
                 raise Exception("wow such error: \
                     get() found rows for more than one jeeves_id")
 
+        viewer = JeevesLib.get_viewer()
+        has_viewer = not isinstance(viewer, FNull)
+        if has_viewer:
+            JeevesLib.reset_solverstate(viewer)
+
         cur = None
         for (row, conditions) in matches:
             old = cur
@@ -71,10 +76,9 @@ class JeevesQuerySet(QuerySet):
                 label = acquire_label_by_name(self.model._meta.app_label
                     , var_name)
                 viewer = JeevesLib.get_viewer()
-                if not isinstance(viewer, FNull):
+                if has_viewer:
                     # If we know the viewer, then we concretize.
-                    clabel = JeevesLib.assignLabel(viewer, label)
-                    if clabel:
+                    if JeevesLib.assignLabel(viewer, label):
                         if not val:
                             cur = old
                     else:
@@ -134,6 +138,8 @@ class JeevesQuerySet(QuerySet):
             # Otherwise concretize early.
             elements = []
             env = JeevesLib.jeevesState.pathenv.getEnv()
+
+            JeevesLib.reset_solverstate(viewer)
             for val, cond in self.get_jiter():
                 for vname, vval in cond.iteritems():
                     if vname not in env:

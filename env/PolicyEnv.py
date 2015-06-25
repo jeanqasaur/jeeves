@@ -26,6 +26,7 @@ class SolverState:
 
     def getLabelClosure(self, varsNeeded):
         # TODO: This should iterate until fixed point.
+        print self.policies
         for label in varsNeeded:
             if self.policies.has_key(label):
                 policy = self.policies[label]
@@ -129,7 +130,5 @@ class PolicyEnv:
         solver_state = self.getNewSolverState(ctxt)
         return solver_state.concretizeExp(f, pathenv)
 
-    # TODO: Make it so we can share solver state.
-    def assignLabel(self, ctxt, label, pathenv):
-        solver_state = self.getNewSolverState(ctxt)
-        return solver_state.concretizeExp(label, pathenv)
+    def assignLabel(self, solverstate, label, pathenv):
+        return solverstate.concretizeExp(label, pathenv)

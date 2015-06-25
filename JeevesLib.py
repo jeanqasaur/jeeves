@@ -122,7 +122,8 @@ def concretize(ctxt, v):
 @supports_jeeves
 def assignLabel(ctxt, label):
     pathvars = jeevesState.pathenv.getEnv()
-    return jeevesState.policyenv.assignLabel(ctxt, label, pathvars)
+    return jeevesState.policyenv.assignLabel(jeevesState.solverstate
+        , label, pathvars)
 
 @supports_jeeves
 def jif(cond, thn_fn, els_fn):
@@ -199,6 +200,9 @@ def clear_cache():
     return jeevesState.concretecache.clear_cache()
 def get_cache():
     return jeevesState.concretecache.cache
+
+def reset_solverstate(ctxt):
+    jeevesState.reset_solverstate(ctxt)
 
 '''
 Early concretization optimization.
