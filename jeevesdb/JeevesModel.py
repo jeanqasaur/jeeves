@@ -77,7 +77,6 @@ class JeevesQuerySet(QuerySet):
                     , var_name)
                 viewer = JeevesLib.get_viewer()
                 if has_viewer:
-                    # If we know the viewer, then we concretize.
                     if JeevesLib.assignLabel(viewer, label):
                         if not val:
                             cur = old

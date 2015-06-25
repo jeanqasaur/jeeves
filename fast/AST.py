@@ -144,6 +144,8 @@ class JeevesState:
     def reset_solverstate(self, ctxt):
         self._solverstate[threading.current_thread()] = \
             env.PolicyEnv.SolverState(self.policyenv.policies, ctxt)
+    def clear_solverstate(self, ctxt):
+        self._solverstate[thread.current_thread()] = None
 
     @property
     def viewer(self):

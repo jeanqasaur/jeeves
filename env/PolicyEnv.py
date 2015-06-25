@@ -73,9 +73,12 @@ class SolverState:
         """
         Assign label values.
         """
-        varsNeeded = self.getLabelClosure({label})
-        self.solvePolicies(varsNeeded, pathenv)
-        return self.result[label]
+        if self.result.has_key(label):
+            return self.result[label]
+        else:
+            varsNeeded = self.getLabelClosure({label})
+            self.solvePolicies(varsNeeded, pathenv)
+            return self.result[label]
 
     def concretizeExp(self, f, pathenv):
         """
