@@ -72,7 +72,6 @@ class JeevesQuerySet(QuerySet):
                     , var_name)
                 viewer = JeevesLib.get_viewer()
                 if not isinstance(viewer, FNull):
-                    print viewer
                     # If we know the viewer, then we concretize.
                     clabel = JeevesLib.assignLabel(viewer, label)
                     if clabel:

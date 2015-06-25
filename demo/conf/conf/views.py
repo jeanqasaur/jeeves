@@ -126,7 +126,6 @@ def about_view(request):
 
 @login_required
 @request_wrapper
-@jeeves
 def papers_view(request):
     # NOTE(JY): This page is hand-concretized.
     user = UserProfile.objects.get(username=request.user.username)
@@ -140,7 +139,7 @@ def papers_view(request):
         paper_data = JeevesLib.JList2()
 
     for paper in papers:
-        paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
+        paper_versions = JeevesLib.concretize(user, PaperVersion.objects.filter(paper=paper)).order_by('-time').all()
         latest_version_title = paper_versions[0].title if paper_versions.__len__() > 0 else None
 
         paper_data.append({
@@ -148,6 +147,7 @@ def papers_view(request):
             'latest' : latest_version_title
         })
 
+    # NOTE(JY): It is important to reset the viewer once we are done.
     JeevesLib.reset_viewer(user)
 
     # TODO: Figure out how we can concretize less.

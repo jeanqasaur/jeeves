@@ -319,41 +319,41 @@ def facetMapper(facet, fn, wrapper=fexpr_cast):
                 return wrapper(fn(facet.v))
 
 class JList:
-        def validate(self):
-                def foo(x):
-                        assert isinstance(x, list), 'thingy is ' + str(x.l.v)
-                        return x
-                facetMapper(self.l, foo, lambda x : x)
+    def validate(self):
+        def foo(x):
+            assert isinstance(x, list), 'thingy is ' + str(x.l.v)
+            return x
+        facetMapper(self.l, foo, lambda x : x)
 
-        def __init__(self, l):
-                self.l = l if isinstance(l, FExpr) else FObject(l)
-                self.validate()
-        def __getitem__(self, i):
-                return self.l[i]
-        def __setitem__(self, i, val):
-                self.l[i] = jassign(self.l[i], val)
+    def __init__(self, l):
+        self.l = l if isinstance(l, FExpr) else FObject(l)
+        self.validate()
+    def __getitem__(self, i):
+        return self.l[i]
+    def __setitem__(self, i, val):
+        self.l[i] = jassign(self.l[i], val)
 
-        def __len__(self):
-                return self.l.__len__()
-        def __iter__(self):
-                return self.l.__iter__()
+    def __len__(self):
+        return self.l.__len__()
+    def __iter__(self):
+        return self.l.__iter__()
 
-        def append(self, val):
-                l2 = facetMapper(self.l, list, FObject) #deep copy
-                l2.append(val)
-                self.l = jassign(self.l, l2)
-                self.validate()
+    def append(self, val):
+        l2 = facetMapper(self.l, list, FObject) #deep copy
+        l2.append(val)
+        self.l = jassign(self.l, l2)
+        self.validate()
 
-        def prettyPrint(self):
-                def tryPrint(x):
-                        return x.__class__.__name__
-                        '''
-                        try:
-                                return x.__class__.__name__ #x.prettyPrint()
-                        except AttributeError:
-                                return str(x)
-                        '''
-                        return str(len(self.l)) #''.join(map(tryPrint, self.l))
+    def prettyPrint(self):
+        def tryPrint(x):
+            return x.__class__.__name__
+            '''
+            try:
+                return x.__class__.__name__ #x.prettyPrint()
+            except AttributeError:
+                return str(x)
+            '''
+        return str(len(self.l)) #''.join(map(tryPrint, self.l))
 
 class JList2:
         def __init__(self, l=[]):

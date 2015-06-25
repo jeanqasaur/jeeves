@@ -2,7 +2,7 @@
 
 {% block content %}
     <div class="page-header">
-      <h1>Welcome {{ name }}.</h1>
+      <h1>Welcome {{ concretize(name) }}.</h1>
     </div>
 
     <p>Please e-mail Jean Yang (jeanyang [at] mit [dot] edu) to withdraw a paper.</p>
@@ -11,16 +11,16 @@
                 <th><a rel="tooltip" title="Visible to the authors, PC chair, and reviewers after reviews have been submitted."><span class="glyphicon glyphicon-eye-close"></span></a> Author </th>
                 <th><a rel="tooltip" title="Visible to the authors and program committee."><span class="glyphicon glyphicon-eye-close"></span></a> Title </th>
             </tr>
-          {% if paper_data != [] %}
-            {% for p in paper_data %}
-                {% if p.paper.author.v != None %}
+  {% if concretize(paper_data) != [] %}
+            {% for p in concretize(paper_data) %}
+                {% if concretize(p.paper.author) != None %}
                 <tr>
                     <td>
-                        {{ p.paper.author.name }}
+                        {{concretize(p.paper.author.name)}}
                     </td>
-                    <td> <a href="/paper?id={{ p.paper.jeeves_id }}">
-                        {% if p.latest != None %}
-                            {{ p.latest }}
+                    <td> <a href="/paper?id={{concretize(p.paper.jeeves_id)}}">
+                        {% if concretize(p.latest) != None %}
+                            {{concretize(p.latest)}}
                         {% else %}
                             [Hidden]
                         {% endif %}
@@ -28,6 +28,6 @@
                 </tr>
                 {% endif %}
             {% endfor %}
-          {% endif %}
+      {% endif %}
     </table>
 {% endblock %}
