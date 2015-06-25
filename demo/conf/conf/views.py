@@ -140,7 +140,7 @@ def papers_view(request):
         latest_version_title = paper_versions[0].title if paper_versions.__len__() > 0 else None
 
         paper_data.append({
-            'paper' : JeevesLib.evalToConcrete(paper),
+            'paper' : paper,
             'latest' : latest_version_title
         })
 
