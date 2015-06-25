@@ -85,10 +85,10 @@ def request_wrapper(view_fn):
 
             JeevesLib.set_viewer(profile)
             concretizeState = JeevesLib.jeevesState.policyenv.getNewSolverState(profile)
-            # def concretize(val):
-            #    return concretizeState.concretizeExp(val
-            #        , JeevesLib.jeevesState.pathenv.getEnv())
-            concretize = lambda val : JeevesLib.concretize(profile, val)
+            def concretize(val):
+                return concretizeState.concretizeExp(val
+                    , JeevesLib.jeevesState.pathenv.getEnv())
+            # concretize = lambda val : JeevesLib.concretize(profile, val)
             add_to_context(context_dict, request, template_name, profile, concretize)
 
             #print 'concretized is', concretize(context_dict['latest_title'])
