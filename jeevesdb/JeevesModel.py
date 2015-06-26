@@ -74,7 +74,7 @@ class JeevesQuerySet(QuerySet):
                     , var_name, obj=row)
                 viewer = JeevesLib.get_viewer()
                 if has_viewer and not skip_optimize:
-                    if JeevesLib.concretize(viewer, label):
+                    if JeevesLib.assignLabel(label):
                         if not val:
                             cur = old
                     else:
@@ -141,7 +141,7 @@ class JeevesQuerySet(QuerySet):
                         vlabel = acquire_label_by_name(
                                     self.model._meta.app_label, vname
                                     , obj=val)
-                        label = JeevesLib.concretize(viewer, vlabel)
+                        label = JeevesLib.assignLabel(vlabel)
                         if label == vval:
                             elements.append(val)
             return elements

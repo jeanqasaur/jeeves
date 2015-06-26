@@ -119,10 +119,9 @@ def concretize(ctxt, v):
     # return cval
 
 @supports_jeeves
-def assignLabel(ctxt, label):
+def assignLabel(label):
     pathvars = jeevesState.pathenv.getEnv()
-    return jeevesState.policyenv.assignLabel(jeevesState.solverstate
-        , label, pathvars)
+    return jeevesState.solverstate.assignLabel(label, pathvars)
 
 @supports_jeeves
 def jif(cond, thn_fn, els_fn):
