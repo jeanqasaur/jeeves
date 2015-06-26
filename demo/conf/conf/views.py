@@ -137,9 +137,6 @@ def papers_view(request):
 
     print "PAPERS"
     for paper in papers:
-        print paper
-        print paper.author
-        print paper.author.v
         paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
         latest_version_title = paper_versions[0].title if paper_versions.__len__() > 0 else None
 

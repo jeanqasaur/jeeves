@@ -278,8 +278,6 @@ class JeevesModel(models.Model):
         self.jeeves_base_env = JeevesLib.jeevesState.pathenv.getEnv()
         super(JeevesModel, self).__init__(*args, **kw)
 
-        # TODO(JY): What's this a dictionary of? Can we do the policies
-        # eagerly?
         self._jeeves_labels = {}
         field_names = [f.name for f in self._meta.concrete_fields]
         for attr in dir(self.__class__):
