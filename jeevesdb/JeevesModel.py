@@ -14,7 +14,6 @@ import django.db.models.fields.related
 import JeevesLib
 from JeevesLib import fexpr_cast
 from fast.AST import Facet, FObject, Unassigned, FExpr, FNull
-#from conf.settings import TEST_OPTIMIZATIONS as optimize_flag
 import JeevesModelUtils
 
 class JeevesQuerySet(QuerySet):
@@ -38,7 +37,7 @@ class JeevesQuerySet(QuerySet):
                 if var_name in env and env[var_name] != value:
                     return None
                 env[var_name] = value
-                acquire_label_by_name(self.model._meta.app_label, var_name)
+                acquire_label_by_name(self.model._meta.app_label, var_name, obj=obj)
             for field, subs in fields.iteritems() if fields else []:
                 if field and get_env(getattr(obj, field), subs, env) is None:
                     return None
@@ -72,7 +71,7 @@ class JeevesQuerySet(QuerySet):
             cur = FObject(row)
             for var_name, val in conditions.iteritems():
                 label = acquire_label_by_name(self.model._meta.app_label
-                    , var_name)
+                    , var_name, obj=row)
                 viewer = JeevesLib.get_viewer()
                 if has_viewer and not skip_optimize:
                     if JeevesLib.concretize(viewer, label):
@@ -120,7 +119,8 @@ class JeevesQuerySet(QuerySet):
                 for vname, vval in cond.iteritems():
                     if vname not in env:
                         vlabel = acquire_label_by_name(
-                                    self.model._meta.app_label, vname)
+                                    self.model._meta.app_label, vname
+                                    , obj=val)
                         JeevesLib.jeevesState.pathenv.push(vlabel, vval)
                         popcount += 1
                     elif env[vname] != vval:
@@ -139,7 +139,8 @@ class JeevesQuerySet(QuerySet):
                 for vname, vval in cond.iteritems():
                     if vname not in env:
                         vlabel = acquire_label_by_name(
-                                    self.model._meta.app_label, vname)
+                                    self.model._meta.app_label, vname
+                                    , obj=val)
                         label = JeevesLib.concretize(viewer, vlabel)
                         if label == vval:
                             elements.append(val)
@@ -155,7 +156,8 @@ class JeevesQuerySet(QuerySet):
             for vname, vval in cond.iteritems():
                 if vname not in JeevesLib.jeevesState.pathenv.getEnv():
                     vlabel = acquire_label_by_name(
-                                self.model._meta.app_label, vname)
+                                self.model._meta.app_label, vname
+                                , obj=val)
                     JeevesLib.jeevesState.pathenv.push(vlabel, vval)
                     popcount += 1
             val.delete()
@@ -215,7 +217,7 @@ def clone(old):
             setattr(ans, fld.attname, getattr(old, fld.attname))
     return ans
 
-def acquire_label_by_name(app_label, label_name):
+def acquire_label_by_name(app_label, label_name, obj=None):
     """Gets a label by name.
     """
     if JeevesLib.doesLabelExist(label_name):
@@ -227,7 +229,9 @@ def acquire_label_by_name(app_label, label_name):
         # TODO: optimization: most of the time this obj will be the one we are
         # already fetching
         # Get the current row.
-        obj = model.objects.get(use_base_env=True, skip_optimize=True, jeeves_id=jeeves_id)
+        if obj == None:
+            obj = model.objects.get(use_base_env=True
+                , skip_optimize=True, jeeves_id=jeeves_id)
         restrictor = getattr(model, 'jeeves_restrict_' + field_name)
         JeevesLib.restrict(label, lambda ctxt: restrictor(obj, ctxt), True)
         return label
