@@ -65,6 +65,9 @@ class JeevesQuerySet(QuerySet):
         viewer = JeevesLib.get_viewer()
         has_viewer = not isinstance(viewer, FNull)
 
+        pathenv = JeevesLib.jeevesState.pathenv.getEnv()
+        solverstate = JeevesLib.get_solverstate()
+
         cur = None
         for (row, conditions) in matches:
             old = cur
@@ -72,9 +75,8 @@ class JeevesQuerySet(QuerySet):
             for var_name, val in conditions.iteritems():
                 label = acquire_label_by_name(self.model._meta.app_label
                     , var_name, obj=row)
-                viewer = JeevesLib.get_viewer()
                 if has_viewer and not skip_optimize:
-                    if JeevesLib.assignLabel(label):
+                    if solverstate.assignLabel(label, pathenv):
                         if not val:
                             cur = old
                     else:
@@ -134,6 +136,7 @@ class JeevesQuerySet(QuerySet):
             # Otherwise concretize early.
             elements = []
             env = JeevesLib.jeevesState.pathenv.getEnv()
+            solverstate = JeevesLib.get_solverstate()
 
             for val, cond in self.get_jiter():
                 for vname, vval in cond.iteritems():
@@ -141,7 +144,7 @@ class JeevesQuerySet(QuerySet):
                         vlabel = acquire_label_by_name(
                                     self.model._meta.app_label, vname
                                     , obj=val)
-                        label = JeevesLib.assignLabel(vlabel)
+                        label = solverstate.assignLabel(vlabel, env)
                         if label == vval:
                             elements.append(val)
             return elements

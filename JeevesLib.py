@@ -119,11 +119,6 @@ def concretize(ctxt, v):
     # return cval
 
 @supports_jeeves
-def assignLabel(label):
-    pathvars = jeevesState.pathenv.getEnv()
-    return jeevesState.solverstate.assignLabel(label, pathvars)
-
-@supports_jeeves
 def jif(cond, thn_fn, els_fn):
     condTrans = fexpr_cast(cond).partialEval(jeevesState.pathenv.getEnv())
     if condTrans.type != bool:
