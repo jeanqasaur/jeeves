@@ -41,7 +41,6 @@ class Z3:
     return self.solver.add(constraint)
 
   def boolExprAssert(self, constraint):
-    print "asserting %s" % constraint.z3Node()
     return self.solver.add(constraint.z3Node())
 
   def push(self):

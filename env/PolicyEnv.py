@@ -40,12 +40,10 @@ class SolverState:
 
                 #predicate should be True if label can be HIGH
                 predicate = policy(self.ctxt)
-                print "predicate for %s: %s => %s" % (label, predicate.left.prettyPrint(), predicate.right.prettyPrint())
 
                 predicate_vars = predicate.vars()
                 constraint = fast.AST.Implies(
                                 label, predicate).partialEval(pathenv)
-                print "constraint: %s" % constraint.prettyPrint()
 
                 if constraint.type != bool:
                     raise ValueError("constraints must be bools")
@@ -56,21 +54,15 @@ class SolverState:
             raise UnsatisfiableException("Constraints not satisfiable")
 
         for var in varsNeeded:
-            print "needed var: %s" % var
             if var not in self.result:
                 self.solver.push()
-                print "asserting: %s" % var
                 self.solver.boolExprAssert(var)
                 if self.solver.isSatisfiable():
-                    print "assigning true: %s" % var
                     self.result[var] = True
                 else:
                     self.solver.pop()
                     self.solver.boolExprAssert(fast.AST.Not(var))
-                    print "assigning false: %s" % var
                     self.result[var] = False
-            else:
-                print "already assigned %s: %s" % (var, self.result[var])
 
         assert self.solver.check()
 
@@ -102,7 +94,6 @@ class PolicyEnv:
     # policy is a function from context to bool which returns true
     # if the label is allowed to be HIGH
     def restrict(self, label, policy, use_empty_env=False):
-        print "RESTRICT %s" % label
         pcFormula = fast.AST.Constant(True) if use_empty_env \
                     else JeevesLib.jeevesState.pathenv.getPathFormula()
     

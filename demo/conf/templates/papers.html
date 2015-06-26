@@ -13,10 +13,10 @@
             </tr>
           {% if paper_data != [] %}
             {% for p in paper_data %}
-                {% if p.paper.author != None %}
+                {% if p.paper.author.v != None %}
                 <tr>
                     <td>
-                        {{ p.paper.author.name }}
+                        {{ p.paper.author.v.name }}
                     </td>
                     <td> <a href="/paper?id={{ p.paper.jeeves_id }}">
                         {% if p.latest != None %}

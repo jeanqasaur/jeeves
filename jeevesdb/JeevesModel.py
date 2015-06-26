@@ -51,7 +51,7 @@ class JeevesQuerySet(QuerySet):
                 results.append((obj, env))
         return results
 
-    def get(self, use_base_env=False, **kwargs):
+    def get(self, use_base_env=False, skip_optimize=False, **kwargs):
         """Fetches a JList of rows that match the conditions.
         """
         matches = self.filter(**kwargs).get_jiter()
@@ -74,7 +74,7 @@ class JeevesQuerySet(QuerySet):
                 label = acquire_label_by_name(self.model._meta.app_label
                     , var_name)
                 viewer = JeevesLib.get_viewer()
-                if has_viewer:
+                if has_viewer and not skip_optimize:
                     if JeevesLib.concretize(viewer, label):
                         if not val:
                             cur = old
@@ -136,17 +136,13 @@ class JeevesQuerySet(QuerySet):
             env = JeevesLib.jeevesState.pathenv.getEnv()
 
             for val, cond in self.get_jiter():
-                print "val: %s" % val
                 for vname, vval in cond.iteritems():
-                    print "vname: %s vval: %s" % (vname, vval)
                     if vname not in env:
                         vlabel = acquire_label_by_name(
                                     self.model._meta.app_label, vname)
                         label = JeevesLib.concretize(viewer, vlabel)
-                        print "label %s: %s" % (vname, label)
                         if label == vval:
                             elements.append(val)
-            print "ELEMENTS: %s" % elements
             return elements
 
 
@@ -230,7 +226,8 @@ def acquire_label_by_name(app_label, label_name):
         model = get_model(app_label, model_name)
         # TODO: optimization: most of the time this obj will be the one we are
         # already fetching
-        obj = model.objects.get(use_base_env=True, jeeves_id=jeeves_id)
+        # Get the current row.
+        obj = model.objects.get(use_base_env=True, skip_optimize=True, jeeves_id=jeeves_id)
         restrictor = getattr(model, 'jeeves_restrict_' + field_name)
         JeevesLib.restrict(label, lambda ctxt: restrictor(obj, ctxt), True)
         return label
@@ -281,6 +278,8 @@ class JeevesModel(models.Model):
         self.jeeves_base_env = JeevesLib.jeevesState.pathenv.getEnv()
         super(JeevesModel, self).__init__(*args, **kw)
 
+        # TODO(JY): What's this a dictionary of? Can we do the policies
+        # eagerly?
         self._jeeves_labels = {}
         field_names = [f.name for f in self._meta.concrete_fields]
         for attr in dir(self.__class__):
@@ -389,7 +388,6 @@ class JeevesModel(models.Model):
                 private_field_value = getattr(self
                                         , 'jeeves_get_private_' + \
                                             field_name)(self)
-                print "WE GET HERE"
                 faceted_field_value = JeevesLib.mkSensitive(label
                                         , public_field_value
                                         , private_field_value).partialEval(

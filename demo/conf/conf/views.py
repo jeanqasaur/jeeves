@@ -84,12 +84,10 @@ def request_wrapper(view_fn):
                 return HttpResponseRedirect(JeevesLib.concretize(profile, path))
 
             solverstate = JeevesLib.get_solverstate()
-            if solverstate != None:
-                concretizeState = JeevesLib.get_solverstate()
-            else:
-                JeevesLib.jeevesState.policyenv.getNewSolverState(profile)
+            if solverstate == None:
+                solverstate = JeevesLib.jeevesState.policyenv.getNewSolverState(profile)
             def concretize(val):
-                return concretizeState.concretizeExp(val
+                return solverstate.concretizeExp(val
                     , JeevesLib.jeevesState.pathenv.getEnv())
             add_to_context(context_dict, request, template_name, profile, concretize)
 
@@ -137,7 +135,11 @@ def papers_view(request):
     papers = Paper.objects.all()
     paper_data = []
 
+    print "PAPERS"
     for paper in papers:
+        print paper
+        print paper.author
+        print paper.author.v
         paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
         latest_version_title = paper_versions[0].title if paper_versions.__len__() > 0 else None
 
