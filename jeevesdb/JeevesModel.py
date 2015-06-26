@@ -307,6 +307,10 @@ class JeevesModel(models.Model):
                     self._jeeves_labels[label_name] = (label_name,)
 
     def __setattr__(self, name, value):
+        """
+        Sets an attribute for a Jeeves model.
+        TODO: Figure out how we can make this faster.
+        """
         field_names = [field.name for field in self._meta.concrete_fields] \
                         if hasattr(self, '_meta') else []
         if name in field_names and \

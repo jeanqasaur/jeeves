@@ -125,9 +125,9 @@ def about_view(request):
   return ( "about.html"
          , { 'which_page' : "about" } )
 
+# @profile(PROFILE_LOG_BASE, "papers_view.prof")
 @login_required
 @request_wrapper
-@profile(PROFILE_LOG_BASE, "papers_view.prof")
 def papers_view(request):
     user = UserProfile.objects.get(username=request.user.username)
     user = JeevesLib.concretize(user, user)
