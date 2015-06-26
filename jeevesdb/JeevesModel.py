@@ -50,7 +50,7 @@ class JeevesQuerySet(QuerySet):
                 results.append((obj, env))
         return results
 
-    def get(self, use_base_env=False, skip_optimize=False, **kwargs):
+    def get(self, use_base_env=False, **kwargs):
         """Fetches a JList of rows that match the conditions.
         """
         matches = self.filter(**kwargs).get_jiter()
@@ -75,7 +75,7 @@ class JeevesQuerySet(QuerySet):
             for var_name, val in conditions.iteritems():
                 label = acquire_label_by_name(self.model._meta.app_label
                     , var_name, obj=row)
-                if has_viewer and not skip_optimize:
+                if has_viewer:
                     if solverstate.assignLabel(label, pathenv):
                         if not val:
                             cur = old
@@ -220,7 +220,7 @@ def clone(old):
             setattr(ans, fld.attname, getattr(old, fld.attname))
     return ans
 
-def acquire_label_by_name(app_label, label_name, obj=None):
+def acquire_label_by_name(app_label, label_name, obj):
     """Gets a label by name.
     """
     if JeevesLib.doesLabelExist(label_name):
@@ -232,9 +232,11 @@ def acquire_label_by_name(app_label, label_name, obj=None):
         # TODO: optimization: most of the time this obj will be the one we are
         # already fetching
         # Get the current row.
+        '''
         if obj == None:
             obj = model.objects.get(use_base_env=True
                 , skip_optimize=True, jeeves_id=jeeves_id)
+        '''
         restrictor = getattr(model, 'jeeves_restrict_' + field_name)
         JeevesLib.restrict(label, lambda ctxt: restrictor(obj, ctxt), True)
         return label
