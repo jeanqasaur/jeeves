@@ -140,7 +140,13 @@ class JeevesQuerySet(QuerySet):
 
             for val, cond in self.get_jiter():
                 for vname, vval in cond.iteritems():
-                    if vname not in env:
+                    if vname in env:
+                        # If we have already assumed the current variable,
+                        # then add the element if the assumption matches
+                        # the condition.
+                        if env[vname] == vval:
+                            elements.append(val)
+                    else:
                         vlabel = acquire_label_by_name(
                                     self.model._meta.app_label, vname
                                     , obj=val)
@@ -229,9 +235,9 @@ def acquire_label_by_name(app_label, label_name, obj):
         label = JeevesLib.mkLabel(label_name, uniquify=False)
         model_name, field_name, jeeves_id = label_name.split('__')
         model = get_model(app_label, model_name)
+        # NOTE(JY): Optimization implemented. Make sure it's correct.
         # TODO: optimization: most of the time this obj will be the one we are
         # already fetching
-        # Get the current row.
         '''
         if obj == None:
             obj = model.objects.get(use_base_env=True

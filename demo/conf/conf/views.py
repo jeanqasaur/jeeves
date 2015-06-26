@@ -5,17 +5,17 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
+import forms
 import urllib
 import random
 
-import forms
-
 from models import Paper, PaperVersion, UserProfile, Review, ReviewAssignment, Comment, UserPCConflict, PaperCoauthor, PaperPCConflict
-from settings import TEST_OPTIMIZATIONS as optimize_flag
+from settings import PROFILE_LOG_BASE, TEST_OPTIMIZATIONS as optimize_flag
 
 from sourcetrans.macro_module import macros, jeeves
 import JeevesLib
 import logging
+from util.DjangoProfiling import profile
 
 def register_account(request):
     """This writes. (How can we analyze the code for this?
@@ -127,6 +127,7 @@ def about_view(request):
 
 @login_required
 @request_wrapper
+@profile(PROFILE_LOG_BASE, "papers_view.prof")
 def papers_view(request):
     user = UserProfile.objects.get(username=request.user.username)
     user = JeevesLib.concretize(user, user)

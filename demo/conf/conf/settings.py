@@ -109,6 +109,7 @@ TEST_OPTIMIZATIONS = True
 LOG_PATH = os.path.join(BASE_DIR, '..', 'logs/')
 TIMELOG_LOG = os.path.join(LOG_PATH, 'timelog.log')
 SQL_LOG = os.path.join(LOG_PATH, 'sqllog.log')
+PROFILE_LOG_BASE = os.path.join(BASE_DIR, '..', 'logs/')
 
 LOGGING = {
   'version': 1,
