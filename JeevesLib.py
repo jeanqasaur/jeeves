@@ -311,11 +311,13 @@ def jmap_jlist2(jlist2, mapper):
         return FObject(ans)
 
 def facetMapper(facet, fn, wrapper=fexpr_cast):
-        if isinstance(facet, Facet):
-                return Facet(facet.cond, facetMapper(facet.thn, fn, wrapper)
-                        , facetMapper(facet.els, fn, wrapper))
-        elif isinstance(facet, Constant) or isinstance(facet, FObject):
-                return wrapper(fn(facet.v))
+    """
+    """
+    if isinstance(facet, Facet):
+        return Facet(facet.cond, facetMapper(facet.thn, fn, wrapper)
+            , facetMapper(facet.els, fn, wrapper))
+    elif isinstance(facet, Constant) or isinstance(facet, FObject):
+        return wrapper(fn(facet.v))
 
 class JList:
     def validate(self):

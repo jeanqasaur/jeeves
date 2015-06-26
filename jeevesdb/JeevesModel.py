@@ -563,11 +563,18 @@ class JeevesRelatedObjectDescriptor(property):
                 cache[jeeves_id] = self.field.to.objects.get(
                                     **{self.field.join_field.name:jeeves_id})
             return cache[jeeves_id]
-        if instance is None:
-            return self
-        return JeevesLib.facetMapper(
-                fexpr_cast(
-                    getattr(instance, self.field.get_attname())), get_obj)
+       
+        # TODO: Why do we need to facetMap this guy? If we know the viewer,
+        # can we get rid of it?
+        r = getattr(instance, self.field.get_attname())
+        if JeevesLib.get_viewer() != None:
+            robj = get_obj(r)
+            if isinstance(robj, FObject):
+                return robj.v
+            else:
+                return r
+        else:
+            return JeevesLib.facetMapper(fexpr_cast(r), get_obj)
 
     @JeevesLib.supports_jeeves
     def __set__(self, instance, value):
