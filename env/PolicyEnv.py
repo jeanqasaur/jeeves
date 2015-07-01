@@ -34,6 +34,7 @@ class SolverState:
 
     def solvePolicies(self, varsNeeded, pathenv):
         assignedVars = True
+        constraints = []
 
         # Get relevant policies.
         for label in varsNeeded:
@@ -60,11 +61,15 @@ class SolverState:
                     assignedVar = True
 
                 # TODO: Figure out if we can take this out.
-                self.solver.boolExprAssert(constraint)
+                constraints.append(constraint)
+                # self.solver.boolExprAssert(constraint)
 
             assignedVars = assignedVars and assignedVar
 
         if not assignedVars:
+            for constraint in constraints:
+                self.solver.boolExprAssert(constraint)
+
             for var in varsNeeded:
                 if var not in self.result:
                     self.solver.push()
