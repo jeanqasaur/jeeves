@@ -10,7 +10,7 @@ import JeevesLib
 
 import fast.AST
 from collections import defaultdict
-from fast.AST import FExpr
+from fast.AST import Constant, FExpr
 
 from smt.Z3 import Z3
 from weakref import WeakKeyDictionary
@@ -39,19 +39,28 @@ class SolverState:
                 policy = self.policies[label]
 
                 #predicate should be True if label can be HIGH
-                predicate = policy(self.ctxt)
+                predicate = policy(self.ctxt).partialEval(pathenv)
 
                 predicate_vars = predicate.vars()
                 constraint = fast.AST.Implies(
                                 label, predicate).partialEval(pathenv)
 
-                if constraint.type != bool:
+                # If the predicate is a constant, this means there are no
+                # dependencies on other labels so we can simply evaluate the
+                # policy.
+                if predicate.type != bool:
                     raise ValueError("constraints must be bools")
-                self.solver.boolExprAssert(constraint)
+                if isinstance(predicate, Constant):
+                    if not predicate.v:
+                        self.result[label] = False
+                    else:
+                        self.result[label] = True
+                else:
+                    self.solver.boolExprAssert(constraint)
 
         # Make sure environment is satisfiable.
-        if not self.solver.check():
-            raise UnsatisfiableException("Constraints not satisfiable")
+        # if not self.solver.check():
+        #    raise UnsatisfiableException("Constraints not satisfiable")
 
         for var in varsNeeded:
             if var not in self.result:
