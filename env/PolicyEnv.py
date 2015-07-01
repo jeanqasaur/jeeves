@@ -32,6 +32,8 @@ class SolverState:
         return varsNeeded
 
     def solvePolicies(self, varsNeeded, pathenv):
+        needSolver = False
+
         # Get relevant policies.
         for label in varsNeeded:
             # If there are policies associated with the label.
@@ -40,8 +42,6 @@ class SolverState:
 
                 #predicate should be True if label can be HIGH
                 predicate = policy(self.ctxt).partialEval(pathenv)
-
-                predicate_vars = predicate.vars()
                 constraint = fast.AST.Implies(
                                 label, predicate).partialEval(pathenv)
 
@@ -55,12 +55,8 @@ class SolverState:
                         self.result[label] = False
                     else:
                         self.result[label] = True
-                else:
-                    self.solver.boolExprAssert(constraint)
 
-        # Make sure environment is satisfiable.
-        # if not self.solver.check():
-        #    raise UnsatisfiableException("Constraints not satisfiable")
+                self.solver.boolExprAssert(constraint)
 
         for var in varsNeeded:
             if var not in self.result:
