@@ -60,9 +60,7 @@ class SolverState:
                         self.result[label] = True
                     assignedVar = True
 
-                # TODO: Figure out if we can take this out.
                 constraints.append(constraint)
-                # self.solver.boolExprAssert(constraint)
 
             assignedVars = assignedVars and assignedVar
 

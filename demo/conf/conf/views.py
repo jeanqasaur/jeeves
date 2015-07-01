@@ -125,7 +125,7 @@ def about_view(request):
   return ( "about.html"
          , { 'which_page' : "about" } )
 
-# @profile(PROFILE_LOG_BASE, "papers_view.prof")
+@profile(PROFILE_LOG_BASE, "papers_view.prof")
 @login_required
 @request_wrapper
 def papers_view(request):
