@@ -28,14 +28,16 @@ class SolverState:
         for label in varsNeeded:
             if self.policies.has_key(label):
                 policy = self.policies[label]
+
                 varsNeeded = varsNeeded.union(policy(self.ctxt).vars())
         return varsNeeded
 
     def solvePolicies(self, varsNeeded, pathenv):
-        needSolver = False
+        assignedVars = True
 
         # Get relevant policies.
         for label in varsNeeded:
+            assignedVar = False
             # If there are policies associated with the label.
             if self.policies.has_key(label):
                 policy = self.policies[label]
@@ -55,21 +57,26 @@ class SolverState:
                         self.result[label] = False
                     else:
                         self.result[label] = True
+                    assignedVar = True
 
+                # TODO: Figure out if we can take this out.
                 self.solver.boolExprAssert(constraint)
 
-        for var in varsNeeded:
-            if var not in self.result:
-                self.solver.push()
-                self.solver.boolExprAssert(var)
-                if self.solver.isSatisfiable():
-                    self.result[var] = True
-                else:
-                    self.solver.pop()
-                    self.solver.boolExprAssert(fast.AST.Not(var))
-                    self.result[var] = False
+            assignedVars = assignedVars and assignedVar
 
-        assert self.solver.check()
+        if not assignedVars:
+            for var in varsNeeded:
+                if var not in self.result:
+                    self.solver.push()
+                    self.solver.boolExprAssert(var)
+                    if self.solver.isSatisfiable():
+                        self.result[var] = True
+                    else:
+                        self.solver.pop()
+                        self.solver.boolExprAssert(fast.AST.Not(var))
+                        self.result[var] = False
+
+            assert self.solver.check()
 
 
     def concretizeExp(self, f, pathenv):
