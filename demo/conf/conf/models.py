@@ -39,6 +39,7 @@ class UserPCConflict(Model):
     user = ForeignKey(UserProfile, null=True, related_name='userpcconflict_user')
     pc = ForeignKey(UserProfile, null=True, related_name='userpcconflict_pc')
 
+    '''
     @staticmethod
     def jeeves_get_private_user(uppc):
         return None
@@ -52,6 +53,7 @@ class UserPCConflict(Model):
     def jeeves_restrict_userpcconflictlabel(uppc, ctxt):
         return True
         #return ctxt.level == 'chair' or uppc.user == ctxt
+    '''
 
 class Paper(Model):
     #latest_version = ForeignKey('PaperVersion', related_name='latest_version_of', null=True)
