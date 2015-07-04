@@ -91,6 +91,7 @@ class PaperPCConflict(Model):
     paper = ForeignKey(Paper, null=True)
     pc = ForeignKey(UserProfile, null=True)
 
+    '''
     @staticmethod
     def jeeves_get_private_paper(ppcc): return None
     @staticmethod
@@ -102,6 +103,7 @@ class PaperPCConflict(Model):
     def jeeves_restrict_paperpcconflictlabel(ppcc, ctxt):
         return True
         #return ctxt.level == 'admin' or (ppcc.paper != None and ppcc.paper.author == ctxt)
+    '''
 
 class PaperCoauthor(Model):
     paper = ForeignKey(Paper, null=True)
@@ -118,10 +120,10 @@ class PaperCoauthor(Model):
     def jeeves_restrict_papercoauthorlabel(pco, ctxt):
         if pco.paper == None:
             return False
-        if PaperPCConflict.objects.get(paper=pco.paper, pc=ctxt) != None:
+        elif PaperPCConflict.objects.get(paper=pco.paper, pc=ctxt) != None:
             return False
-        ans = ctxt.level == 'pc' or ctxt.level == 'chair' or (pco.paper != None and pco.paper.author == ctxt)
-        return ans
+        else:
+            return ctxt.level == 'pc' or ctxt.level == 'chair' or (pco.paper != None and pco.paper.author == ctxt)
 
 #class PaperReviewer(Model):
 #    paper = ForeignKey(Paper, null=True)
