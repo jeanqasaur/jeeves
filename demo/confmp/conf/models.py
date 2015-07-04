@@ -42,17 +42,18 @@ class Paper(Model):
         return None
 
     # Policy goes with author field.
-    def policy_paperlabel(self, ctxt):
+    @staticmethod
+    def policy_paperlabel(paper, ctxt):
         '''
         Policy for seeing author of papers.
         '''
         if phase == 'final':
             return True
         else:
-            if PaperPCConflict.objects.get(paper=self, pc=ctxt) != None:
+            if PaperPCConflict.objects.get(paper=paper, pc=ctxt) != None:
                 return False
 
-            return ((self.author == ctxt)
+            return ((paper != None and paper.author == ctxt)
                 or (ctxt != None and (ctxt.level == 'chair' or ctxt.level == 'pc')))
 
     class Meta:

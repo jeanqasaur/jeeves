@@ -571,7 +571,7 @@ class JeevesRelatedObjectDescriptor(property):
         # TODO: Why do we need to facetMap this guy? If we know the viewer,
         # can we get rid of it?
         r = getattr(instance, self.field.get_attname())
-        if JeevesLib.get_viewer() != None:
+        if not isinstance(JeevesLib.get_viewer(), FNull):
             robj = get_obj(r)
             if isinstance(robj, FObject):
                 return robj.v

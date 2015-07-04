@@ -226,6 +226,9 @@ def submit_view(request):
     user = UserProfile.objects.get(username=request.user.username)
 
     if request.method == 'POST':
+        # Clear viewer because we're doing a write to the DB.
+        JeevesLib.clear_viewer()
+        
         coauthors = request.POST.getlist('coauthors[]')
         title = request.POST.get('title', None)
         abstract = request.POST.get('abstract', None)
@@ -241,11 +244,15 @@ def submit_view(request):
                 'which_page' : "submit",
             })
 
+        print "creating paper"
         paper = Paper.objects.create(author=user, accepted=False)
+
+        print "iterating over coauthors"
         for coauthor in coauthors:
             if coauthor != "":
                 PaperCoauthor.objects.create(paper=paper, author=coauthor)
         set_random_name(contents)
+        print "creating paper"
         PaperVersion.objects.create(
             paper=paper,
             title=title,
@@ -282,15 +289,9 @@ def profile_view(request):
         profile = UserProfile(username=request.user.username)
         profile.level = 'normal'
 
-    is_read_only = True
-    maybe_concretize = lambda x: JeevesLib.concretize(profile, x) if is_read_only else x
-
     # TODO: Add something that figures out more automatically when things are
     # read-only.
     if request.method == 'POST':
-        # In this case things aren't read-only.
-        is_read_only = False
-
         profile.name = request.POST.get('name', '')
         profile.affiliation = request.POST.get('affiliation', '')
         profile.acm_number = request.POST.get('acm_number', '')
@@ -304,10 +305,9 @@ def profile_view(request):
             UserPCConflict.objects.create(user=profile, pc=new_pc_conflict)
             pc_conflicts.append(new_pc_conflict)
     else:
-        pc_conflicts = [uppc.pc for uppc in maybe_concretize(UserPCConflict.objects.filter(user=profile).all())]
+        pc_conflicts = [uppc.pc for uppc in UserPCConflict.objects.filter(user=profile).all()]
 
-    profile = maybe_concretize(profile)
-    pcs = maybe_concretize(UserProfile.objects.filter(level='pc').all())
+    pcs = UserProfile.objects.filter(level='pc').all()
 
     return ("profile.html", {
         "name": profile.name,
@@ -315,7 +315,7 @@ def profile_view(request):
         "acm_number": profile.acm_number,
         "pc_conflicts": pc_conflicts,
         "email": profile.email,
-        "pcs": maybe_concretize([{'pc':pc, 'conflict':pc in pc_conflicts} for pc in pcs]),
+        "pcs": [{'pc':pc, 'conflict':pc in pc_conflicts} for pc in pcs],
         "which_page": "profile",
     })
 

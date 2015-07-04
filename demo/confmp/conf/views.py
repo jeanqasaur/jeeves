@@ -113,7 +113,10 @@ def papers_view(request):
     paper_data = []
 
     for paper in papers:
-        
+        # Apply policy to paper author.
+        if not Paper.policy_paperlabel(paper, user):
+            paper.author = Paper.jeeves_get_private_author(paper)
+
         paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
         latest_version_title = paper_versions[0].title if paper_versions.__len__() > 0 else None
 
