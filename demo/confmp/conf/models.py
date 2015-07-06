@@ -42,19 +42,20 @@ class Paper(Model):
         return None
 
     # Policy goes with author field.
-    @staticmethod
-    def policy_paperlabel(paper, ctxt):
+    def policy_paperlabel(self, ctxt):
         '''
         Policy for seeing author of papers.
         '''
         if phase == 'final':
             return True
         else:
-            if PaperPCConflict.objects.get(paper=paper, pc=ctxt) != None:
+            # See if there is a PC conflict.
+            try:
+                conflict = PaperPCConflict.objects.get(paper=self, pc=ctxt)
                 return False
-
-            return ((paper != None and paper.author == ctxt)
-                or (ctxt != None and (ctxt.level == 'chair' or ctxt.level == 'pc')))
+            except:
+                return ((self.author == ctxt)
+                    or (ctxt != None and (ctxt.level == 'chair' or ctxt.level == 'pc')))
 
     class Meta:
         db_table = 'papers'
@@ -116,9 +117,11 @@ class ReviewAssignment(Model):
 
     # Policy for paper, user, and assign_type fields.
     def jeeves_restrict_paperreviewerlabel(self, ctxt):
-        if PaperPCConflict.objects.get(paper=self.paper, pc=ctxt) != None:
+        try:
+            PaperPCConflict.objects.get(paper=self.paper, pc=ctxt)
             return False
-        return ctxt.level == 'pc' or ctxt.level == 'chair'
+        except:
+            return ctxt.level == 'pc' or ctxt.level == 'chair'
 
 class PaperVersion(Model):
     paper = ForeignKey(Paper, null=True)
@@ -128,13 +131,24 @@ class PaperVersion(Model):
     abstract = TextField()
     time = DateTimeField(auto_now_add=True)
 
+    @staticmethod
+    def jeeves_get_private_paper(pv): return None
+    @staticmethod
+    def jeeves_get_private_title(pv): return ""
+    @staticmethod
+    def jeeves_get_private_contents(pv): return ""
+    @staticmethod
+    def jeeves_get_private_abstract(pv): return ""
+
     # Policy for paper, title, contents, and abstract fields.
     def jeeves_restrict_paperversionlabel(self, ctxt):
         if self.paper == None:
             return False
-        if PaperPCConflict.objects.get(paper=self.paper, pc=ctxt) != None:
+        try:
+            PaperPCConflict.objects.get(paper=self.paper, pc=ctxt)
             return False
-        return (self.paper != None and self.paper.author == ctxt) or ctxt.level == 'pc' or ctxt.level == 'chair'
+        except:
+            return (self.paper != None and self.paper.author == ctxt) or ctxt.level == 'pc' or ctxt.level == 'chair'
 
 # see comment above
 Paper.latest_version = ForeignKey(PaperVersion, related_name='latest_version_of', null=True)
@@ -175,9 +189,11 @@ class Review(Model):
     # Policy for paper, reviewer, contents, score_novelty, score_presentation,
     # score_tecincal, and score_confidence fields.
     def jeeves_restrict_reviewlabel(self, ctxt):
-        if PaperPCConflict.objects.get(paper=self.paper, pc=ctxt) != None:
+        try:
+            PaperPCConflict.objects.get(paper=self.paper, pc=ctxt)
             return False
-        return ctxt.level == 'chair' or ctxt.level == 'pc' or \
+        except:
+            return ctxt.level == 'chair' or ctxt.level == 'pc' or \
                 (phase == 'final' and self.paper.author == ctxt)
 
     class Meta:

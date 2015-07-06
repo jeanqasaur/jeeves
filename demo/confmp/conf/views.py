@@ -114,11 +114,16 @@ def papers_view(request):
 
     for paper in papers:
         # Apply policy to paper author.
-        if not Paper.policy_paperlabel(paper, user):
+        if not paper.policy_paperlabel(user):
             paper.author = Paper.jeeves_get_private_author(paper)
 
         paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
-        latest_version_title = paper_versions[0].title if paper_versions.__len__() > 0 else None
+        latest_version_title = paper_versions[0].title if \
+            paper_versions.__len__() > 0 else None
+        # Make sure we're actually allowed to see the paper.
+        if not paper_versions[0].jeeves_restrict_paperversionlabel(user):
+            latest_version_title = PaperVersion.jeeves_get_private_title(
+                paper_versions[0])
 
         paper_data.append({
             'paper' : paper,
@@ -162,13 +167,58 @@ def paper_view(request):
                         abstract=request.POST.get('abstract', ''),
                     )
 
-        paper_versions = PaperVersion.objects.filter(paper=paper).order_by('-time').all()
-        coauthors = PaperCoauthor.objects.filter(paper=paper).all()
-        latest_abstract = paper_versions[0].abstract if paper_versions.__len__() > 0 else None
-        latest_title = paper_versions[0].title if paper_versions.__len__() > 0 else None
+        all_paper_versions = PaperVersion.objects.filter(paper=paper).order_by('time').all()
+        paper_versions = []
+        for paper_version in paper_versions:
+            if paper_version.jeeves_restrict_paperversionlabel(user):
+                paper_versions.append(paper_version)
+
+        all_coauthors = PaperCoauthor.objects.filter(paper=paper).all()
+        coauthors = []
+        for coauthor in all_coauthors:
+            if coauthor.jeeves_restrict_papercoauthor_label(user):
+                coauthors.append(coauthor) 
+
+        if paper_versions[0].jeeves_restrict_paperversionlabel(user):
+            latest_abstract = paper_versions[0].abstract \
+                if paper_versions.__len__() > 0 else None
+            latest_title = paper_versions[0].title \
+                if paper_versions.__len__() > 0 else None
+        else:
+            latest_abstract = PaperVersion.jeeves_get_private_abstract(
+                paper_versions[0])
+            latest_title = PaperVersion.jeeves_get_private_title(
+                paper_versions[0])
+
         reviews = Review.objects.filter(paper=paper).order_by('-time').all()
-        comments = Comment.objects.filter(paper=paper).order_by('-time').all()
-        author = paper.author
+        for review in reviews:
+            if not review.jeeves_restrict_reviewlabel(user):
+                review.paper = Review.jeeves_get_private_paper(review)
+                review.reviewer = Review.jeeves.get_private_reviewer(review)
+                review.contents = Review.jeeves_get_private_contents(review)
+                review.score_novelty = \
+                    Review.jeeves_get_private_score_novelty(review)
+                review.score_presentation = \
+                    Review.jeeves_get_private_score_presentation(review)
+                review.score_technical = \
+                    Review.jeeves_get_private_score_technical(review)
+                review.score_confidence = \
+                    Review.jeeves_get_private_score_confidence(review)
+        
+        all_comments = Comment.objects.filter(paper=paper).order_by(
+            'time').all()
+        comments = []
+        for comment in all_comments:
+            if comment.jeeves_restrict_reviewlabel(user):
+                comment.paper = Comment.jeeves_get_private_paper(comment)
+                comment.user = Comment.jeeves_get_private_user(comment)
+                comment.contents = Comment.jeeves_get_private_contents(comment)
+                commends.append(comment)
+
+        if paper.policy_paperlabel(user):
+            author = paper.author
+        else:
+            author = Paper.jeeves_get_private_author(paper)
     else:
         paper = None
         paper_versions = []
@@ -419,4 +469,3 @@ def search_view(request):
         'results' : results,
         'which_page' : "search"
     }))
-
