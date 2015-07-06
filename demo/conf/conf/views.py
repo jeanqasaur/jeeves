@@ -18,8 +18,8 @@ import logging
 from util.DjangoProfiling import profile
 
 def register_account(request):
-    """This writes. (How can we analyze the code for this?
-    """
+    JeevesLib.clear_viewer()
+    
     if request.user.is_authenticated():
         return HttpResponseRedirect("index")
 
@@ -157,6 +157,7 @@ def papers_view(request):
 @jeeves
 def paper_view(request):
     user = UserProfile.objects.get(username=request.user.username)
+    JeevesLib.set_viewer(user)
 
     paper = Paper.objects.get(jeeves_id=request.GET.get('id', ''))
     if paper != None:
@@ -223,6 +224,7 @@ def set_random_name(contents):
 @request_wrapper
 @jeeves
 def submit_view(request):
+    JeevesLib.clear_viewer()
     user = UserProfile.objects.get(username=request.user.username)
 
     if request.method == 'POST':

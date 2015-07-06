@@ -61,8 +61,9 @@ class ConfDBScaling(FunkLoadTestCase):
         self.logout()
 
     def test_view_paper(self):
-        page = "/paper?id=0fcKOflDJSAyUrT1BaKOMBfFVQ1Oi57p"
+        page = "/paper?id=EnGM55IPia7nBrhBHuDqSbeG6nDghG8l"
         self.login(page)
+        reply = self.get(self.server_url + page, description = "Get paper")
         self.assert_("paper" in self.getLastUrl(), "Error in showing paper")
         self.logout()
 
