@@ -77,10 +77,13 @@ class PaperCoauthor(Model):
     def jeeves_restrict_papercoauthorlabel(self, ctxt):
         if self.paper == None:
             return False
-        elif PaperPCConflict.objects.get(paper=self.paper, pc=ctxt) != None:
-            return False
         else:
-            return ctxt.level == 'pc' or ctxt.level == 'chair' or (self.paper != None and self.paper.author == ctxt)
+            try:
+                PaperPCConflict.objects.get(paper=self.paper, pc=ctxt)
+                return False
+            except:
+                return ctxt.level == 'pc' or ctxt.level == 'chair' or \
+                    (self.paper != None and self.paper.author == ctxt)
 
 #class PaperReviewer(Model):
 #    paper = ForeignKey(Paper, null=True)

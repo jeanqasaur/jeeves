@@ -169,14 +169,15 @@ def paper_view(request):
 
         all_paper_versions = PaperVersion.objects.filter(paper=paper).order_by('time').all()
         paper_versions = []
-        for paper_version in paper_versions:
+        for paper_version in all_paper_versions:
+            print paper_version
             if paper_version.jeeves_restrict_paperversionlabel(user):
                 paper_versions.append(paper_version)
 
         all_coauthors = PaperCoauthor.objects.filter(paper=paper).all()
         coauthors = []
         for coauthor in all_coauthors:
-            if coauthor.jeeves_restrict_papercoauthor_label(user):
+            if coauthor.jeeves_restrict_papercoauthorlabel(user):
                 coauthors.append(coauthor) 
 
         if paper_versions[0].jeeves_restrict_paperversionlabel(user):
