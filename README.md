@@ -25,7 +25,7 @@ For core Jeeves, we use [MacroPy](https://github.com/lihaoyi/macropy), [Nose](ht
     
 For logging in our web demos, we also use Django timelog:
 
-    $ pip install django django-jinja django-timelog
+    $ pip install django==1.6.5 django-jinja==1.0.2 django-timelog
 
 
 ### Other
