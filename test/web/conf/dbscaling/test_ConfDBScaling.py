@@ -57,11 +57,11 @@ class ConfDBScaling(FunkLoadTestCase):
         page = "/users"
         self.login(page)
         self.assert_(page == self.getLastUrl(), "Error in login")
-        reply = self.get(self.server_url + page, description="Get papers")
+        reply = self.get(self.server_url + page, description="Get users")
         self.logout()
 
     def test_view_paper(self):
-        page = "/paper?id=1" #EnGM55IPia7nBrhBHuDqSbeG6nDghG8l"
+        page = "/paper?id=aELOZXXto0muPDZcxSS55fK0AvleFvhV"
         self.login(page)
         reply = self.get(self.server_url + page, description = "Get paper")
         self.assert_("paper" in self.getLastUrl(), "Error in showing paper")
@@ -81,7 +81,7 @@ class ConfDBScaling(FunkLoadTestCase):
                 ['coauthors[]', self.lipsum.getWord()],
                 ['coauthors[]', self.lipsum.getWord()], 
                 ['title', self.lipsum.getSentence()],
-                ['contents', Upload('files/rms_crossstitch.pdf')],
+                ['contents', Upload('files/chicken.pdf')],
                 ['abstract', self.lipsum.getMessage()]],
                 description="Post /accounts/login/")
             self.assert_("paper" in self.getLastUrl(), "Error in login")
