@@ -41,8 +41,8 @@
                         {% with transfer=data.Visits.all()[t_indx] %}
                         <tr>
                             <td>
-                                <a href='{{ url("patient", concretize(transfer.Visit.Patient.UID)) }}'>
-                                    {{ concretize(transfer.Visit.Patient).Name() }}
+                                <a href='{{ url("patient", concretize(transfer.Visit.patient.ein)) }}'>
+                                    {{ concretize(transfer.Visit.patient).name }}
                                 </a>
                             </td>
                             <td>

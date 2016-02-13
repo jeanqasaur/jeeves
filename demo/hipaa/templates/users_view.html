@@ -7,32 +7,14 @@
         <table class="table">
             <tr>
                 <th> Name </th>
-                <th> Affiliation </th>
                 <th> E-mail </th>
-                <th> Type </th>
             {% for profile in concretize(user_profiles) %}
                 <tr>
                     <td>
                         {{concretize(profile.name)}}
                     </td>
                     <td>
-                        {{concretize(profile.affiliation)}}
-                    </td>
-                    <td>
                         {{concretize(profile.email)}}
-                    </td>
-                    <td>
-                      <div class="radio">
-                        <input type="radio" name="level-{{concretize(profile.username)}}" value="normal"
-                                {% if concretize(profile.level) == 'normal' %} checked {% endif %} />
-                        Author <br />
-                        <input type="radio" name="level-{{concretize(profile.username)}}" value="pc"
-                                {% if concretize(profile.level) == 'pc' %} checked {% endif %} />
-                        PC <br />
-                        <input type="radio" name="level-{{concretize(profile.username)}}" value="chair"
-                                {% if concretize(profile.level) == 'chair' %} checked {% endif %} />
-                        Chair <br />
-                      </div>
                     </td>
                 </tr>
             {% endfor %}

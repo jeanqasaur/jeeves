@@ -19,7 +19,7 @@
 	<div class="container">
 		<div class="page-header">
 			<h2>
-				{{ entity.Name }}
+				{{ entity.name }}
 			</h2>
 		</div>
 		<ul class="nav nav-tabs" data-tabs="tabs">
@@ -70,12 +70,12 @@
 				</td>
 				<td>
 					{% if transaction.SecondParty == entity %}
-					<a href='{{ url("entity", transaction.FirstParty.EIN) }}'>
-						{{ transaction.FirstParty.Name }}
+					<a href='{{ url("entity", transaction.FirstParty.ein) }}'>
+						{{ transaction.FirstParty.name }}
 					</a>
 					{% else %}
-					<a href='{{ url("entity", transaction.SecondParty.EIN) }}'>
-						{{ transaction.SecondParty.Name }}
+					<a href='{{ url("entity", transaction.SecondParty.ein) }}'>
+						{{ transaction.SecondParty.name }}
 					</a>
 					{% endif %}
 				</td>
