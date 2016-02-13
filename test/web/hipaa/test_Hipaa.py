@@ -18,19 +18,17 @@ class Hipaa(FunkLoadTestCase):
         self.server_url = self.conf_get('main', 'url')
         self.lipsum = Lipsum()
 
-    def login_as(self, username, password):
+    def login_as(self, username, password, pageURL="/index", descr="Get index"):
         # The description should be set in the configuration file
         server_url = self.server_url
 
-        self.get(server_url + "/",
-            description="Get /")
         reply = self.get(server_url + "/index",
             description="Get index")
 
         csrftoken = extract_token(self.getBody(), "name='csrfmiddlewaretoken' value='", "' />")
-        self.post(server_url + "/accounts/login/?next=/",
+        self.post(server_url + "/accounts/login/?next=" + pageURL,
             params=[['csrfmiddlewaretoken', csrftoken],
-            ['redirect_to', '/index'],
+            ['redirect_to', pageURL],
             ['username', username],
             ['password', password]],
             description="Post /accounts/login/")
@@ -54,31 +52,31 @@ class Hipaa(FunkLoadTestCase):
         reply = self.get(self.server_url + page, description="Get index")
         self.logout()
 
-        """
-        self.login_as("admin", "admin")
-        self.logout()
-        """
-
-
     def test_register(self):
-        username = self.lipsum.getUniqWord()
-        password = self.lipsum.getWord()
-        name = self.lipsum.getWord() + " " + self.lipsum.getWord()
-        email = self.lipsum.getWord() + "@example.org"
+        self.logout()
 
-        server_url = self.server_url
-        # self.get(server_url + "/register", description='Get url')
+        num_users = self.conf_getInt('test_register', 'num_users')
+        for i in range(num_users):
+            username = self.lipsum.getUniqWord()
+            password = self.lipsum.getWord()
+            name = self.lipsum.getWord() + " " + self.lipsum.getWord()
+            email = self.lipsum.getWord() + "@example.org"
 
-        csrftoken = extract_token(self.getBody(), "name='csrfmiddlewaretoken' value='", "' />")
-        self.post(server_url + "/register",
-            params=[ ['csrfmiddlewaretoken', csrftoken],
-            ['username', username],
-            ['password1', password],
-            ['password2', password],
-            ['name', name],
-            ['email', email],
-            ['profiletype', '1']],
-            description="Post /register")
+            server_url = self.server_url
+
+            csrftoken = extract_token(self.getBody(), "name='csrfmiddlewaretoken' value='", "' />")
+            self.post(server_url + "/register",
+                params=[ ['csrfmiddlewaretoken', csrftoken],
+                ['username', username],
+                ['password1', password],
+                ['password2', password],
+                ['name', name],
+                ['email', email],
+                ['profiletype', '1']],
+                description="Post /register")
+
+            self.assert_("index" in self.getLastUrl(), "Error in registration")
+            self.logout()
 
     def test_credential(self):
         credential_host = self.conf_get('credential', 'host')
@@ -88,29 +86,11 @@ class Hipaa(FunkLoadTestCase):
         self.login_as(login, pwd)
         self.logout()
 
-    def test_random_register(self):
-        self.logout()
-
-        username = self.lipsum.getUniqWord()
-        password = self.lipsum.getUniqWord()
-
-        server_url = self.server_url
-        # self.get(server_url + "/register", description='Get url')
-
-        csrftoken = extract_token(self.getBody(), "name='csrfmiddlewaretoken' value='", "' />")
-        self.post(server_url + "/register",
-            params=[ ['csrfmiddlewaretoken', csrftoken],
-            ['username', username],
-            ['password1', password],
-            ['password2', password],
-            ['name', 'New User'],
-            ['email', 'new_user@example.org'],
-            ['profiletype', '1']],
-            description="Post /register")
-
-        # TODO: Check page after logging in.
-        self.logout()
-        self.login_as(username, password)
+    def test_show_all_users(self):
+        page = "/users"
+        self.login_as("admin", "admin", page, "Get users")
+        self.assert_(page == self.getLastUrl(), "Error in login")
+        reply = self.get(self.server_url + page, description="Get users")
         self.logout()
 
 if __name__ in ('main', '__main__'):
