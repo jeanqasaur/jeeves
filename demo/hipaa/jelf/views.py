@@ -253,9 +253,6 @@ def info_view(request, profile, patient):
     p = Individual.objects.get(jeeves_id=patient)
     dataset = []
     dataset.append(("Sex", p.Sex, False))
-    #print "HI"
-    #dataset.append(("Address",p.Address.String(), False))
-    #dataset.append(("Social Security Number",p.SSN))
     return ("info.html"
             , {"patient": p
              , "dataset": dataset})
