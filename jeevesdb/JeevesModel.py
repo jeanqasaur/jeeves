@@ -22,7 +22,6 @@ class JeevesQuerySet(QuerySet):
     @JeevesLib.supports_jeeves
     def get_jiter(self):
         """Creates an iterator for the QuerySet.
-        This is a JList?
         """
         self._fetch_all()
 
@@ -37,6 +36,7 @@ class JeevesQuerySet(QuerySet):
                 if var_name in env and env[var_name] != value:
                     return None
                 env[var_name] = value
+                # TODO: Figure out why the optimization doesn't work here.
                 acquire_label_by_name(self.model._meta.app_label, var_name)
             for field, subs in fields.iteritems() if fields else []:
                 if field and get_env(getattr(obj, field), subs, env) is None:
@@ -73,15 +73,17 @@ class JeevesQuerySet(QuerySet):
             old = cur
             cur = FObject(row)
             for var_name, val in conditions.iteritems():
-								label = acquire_label_by_name(self.model._meta.app_label, var_name)
-								if has_viewer:
-										if solverstate.assignLabel(label, pathenv):
+                # TODO: Figure out if we need to make obj the faceted value.
+                label = acquire_label_by_name(self.model._meta.app_label
+                  , var_name, obj=cur)
+                if has_viewer:
+                    if solverstate.assignLabel(label, pathenv):
 												if not val:
 														cur = old
-										else:
+                    else:
 												if val:
 														cur = old
-								else:
+                else:
 										if val:
 												cur = Facet(label, cur, old)
 										else:
@@ -110,23 +112,47 @@ class JeevesQuerySet(QuerySet):
 
     @JeevesLib.supports_jeeves
     def all(self):
-        elements = JeevesLib.JList2([])
-        env = JeevesLib.jeevesState.pathenv.getEnv()
-        for val, cond in self.get_jiter():
-            popcount = 0
-            for vname, vval in cond.iteritems():
-                if vname not in env:
-                    vlabel = acquire_label_by_name(
-                                self.model._meta.app_label, vname)
-                    JeevesLib.jeevesState.pathenv.push(vlabel, vval)
-                    popcount += 1
-                elif env[vname] != vval:
-                    break
-            else:
-                elements.append(val)
-            for _ in xrange(popcount):
-                JeevesLib.jeevesState.pathenv.pop()
-        return elements
+        viewer = JeevesLib.get_viewer()
+        if isinstance(viewer, FNull):
+            # If we don't know who the viewer is, create facets.
+            elements = JeevesLib.JList2([])
+            env = JeevesLib.jeevesState.pathenv.getEnv()
+            for val, cond in self.get_jiter():
+                popcount = 0
+                for vname, vval in cond.iteritems():
+                    if vname not in env:
+                        vlabel = acquire_label_by_name(
+                          self.model._meta.app_label, vname, obj=val)
+                        JeevesLib.jeevesState.pathenv.push(vlabel, vval)
+                        popcount += 1
+                    elif env[vname] != vval:
+                      break
+                else:
+                    elements.append(val)
+                for _ in xrange(popcount):
+                    JeevesLib.jeevesState.pathenv.pop()
+            return elements
+        else:
+            # Otherwise concretize early.
+            elements = []
+            env = JeevesLib.jeevesState.pathenv.getEnv()
+            solverstate = JeevesLib.get_solverstate()
+
+            for val, cond in self.get_jiter():
+                for vname, vval in cond.iteritems():
+                    if vname in env:
+                        # If we have already assumed the current variable,
+                        # then add the element if the assumption matches
+                        # the condition.
+                        if env[vname] == vval:
+                            elements.append(val)
+                    else:
+                        vlabel = acquire_label_by_name(
+                                    self.model._meta.app_label, vname, obj=val)
+                        label = solverstate.assignLabel(vlabel, env)
+                        if label == vval:
+                            elements.append(val)
+            return elements
 
     @JeevesLib.supports_jeeves
     def delete(self):
@@ -197,7 +223,7 @@ def clone(old):
             setattr(ans, fld.attname, getattr(old, fld.attname))
     return ans
 
-def acquire_label_by_name(app_label, label_name):
+def acquire_label_by_name(app_label, label_name, obj=None):
     """Gets a label by name.
     """
     if JeevesLib.doesLabelExist(label_name):
@@ -208,7 +234,15 @@ def acquire_label_by_name(app_label, label_name):
         model = get_model(app_label, model_name)
         # TODO: optimization: most of the time this obj will be the one we are
         # already fetching
-        obj = model.objects.get(use_base_env=True, jeeves_id=jeeves_id)
+        
+        # NOTE(JY): Fixed a bug that while we're getting the current row, we're
+        # not associating the policy we're supposed to with it...
+        if obj==None:
+            viewer = JeevesLib.get_viewer()
+            JeevesLib.clear_viewer()
+            obj = model.objects.get(use_base_env=True, jeeves_id=jeeves_id)
+            JeevesLib.set_viewer(viewer)
+
         restrictor = getattr(model, 'jeeves_restrict_' + field_name)
         JeevesLib.restrict(label, lambda ctxt: restrictor(obj, ctxt), True)
         return label
