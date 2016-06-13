@@ -10,7 +10,7 @@ import JeevesLib
 
 import fast.AST
 from collections import defaultdict
-from fast.AST import FExpr
+from fast.AST import Constant, FExpr
 
 from smt.Z3 import Z3
 from weakref import WeakKeyDictionary
@@ -23,6 +23,65 @@ class SolverState:
 
         self.policies = policies
         # self.policies_index = 0
+
+    def getLabelClosure(self, varsNeeded):
+        for label in varsNeeded:
+            if self.policies.has_key(label):
+                policy = self.policies[label]
+
+                varsNeeded = varsNeeded.union(policy(self.ctxt).vars())
+        return varsNeeded
+
+    def solvePolicies(self, varsNeeded, pathenv):
+        assignedVars = True
+        constraints = []
+
+        # Get relevant policies.
+        for label in varsNeeded:
+            assignedVar = False
+            # If there are policies associated with the label.
+            if self.policies.has_key(label):
+                policy = self.policies[label]
+
+                #predicate should be True if label can be HIGH
+                print "EVALUATING PREDICATE FOR ", label
+                predicate = policy(self.ctxt).partialEval(pathenv)
+                constraint = fast.AST.Implies(
+                                label, predicate).partialEval(pathenv)
+
+                # If the predicate is a constant, this means there are no
+                # dependencies on other labels so we can simply evaluate the
+                # policy.
+                if predicate.type != bool:
+                    raise ValueError("constraints must be bools")
+                if isinstance(predicate, Constant):
+                    if not predicate.v:
+                        self.result[label] = False
+                    else:
+                        self.result[label] = True
+                    assignedVar = True
+
+                constraints.append(constraint)
+            else:
+                print "NO POLICY FOR ", label
+            assignedVars = assignedVars and assignedVar
+
+        if not assignedVars:
+            for constraint in constraints:
+                self.solver.boolExprAssert(constraint)
+
+            for var in varsNeeded:
+                if var not in self.result:
+                    self.solver.push()
+                    self.solver.boolExprAssert(var)
+                    if self.solver.isSatisfiable():
+                        self.result[var] = True
+                    else:
+                        self.solver.pop()
+                        self.solver.boolExprAssert(fast.AST.Not(var))
+                        self.result[var] = False
+
+            assert self.solver.check()
 
     def concretizeExp(self, f, pathenv):
         """
@@ -76,6 +135,17 @@ class SolverState:
         JeevesLib.log_counts(len(vars_needed))
 
         return f.eval(self.result)
+
+    def assignLabel(self, label, pathenv):
+        if label in self.result:
+            return self.result[label]
+        else:
+            varsNeeded = self.getLabelClosure({label})
+            self.solvePolicies(varsNeeded, pathenv)
+
+            JeevesLib.log_counts(len(varsNeeded))
+
+            return self.result[label]
 
 class PolicyEnv:
   def __init__(self):

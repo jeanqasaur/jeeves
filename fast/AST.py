@@ -50,23 +50,27 @@ class JeevesState:
 	pass
 
     def init(self):
-	# Cache of concretized values.
-	self._concretecache = defaultdict(env.ConcreteCache.ConcreteCache)
+				# Cache of concretized values.
+				self._concretecache = defaultdict(env.ConcreteCache.ConcreteCache)
 
-	# Regular environments.
-	self._varenv = defaultdict(env.VarEnv.VarEnv)
-	self._pathenv = defaultdict(env.PathVars.PathVars)
-	self._policyenv = defaultdict(env.PolicyEnv.PolicyEnv)
-	self._writeenv = defaultdict(env.WritePolicyEnv.WritePolicyEnv)
-	self._all_labels = defaultdict(dict)
+				# Regular environments.
+				self._varenv = defaultdict(env.VarEnv.VarEnv)
+				self._pathenv = defaultdict(env.PathVars.PathVars)
+				self._policyenv = defaultdict(env.PolicyEnv.PolicyEnv)
+				self._writeenv = defaultdict(env.WritePolicyEnv.WritePolicyEnv)
+				self._all_labels = defaultdict(dict)
+
+				self._solverstate = defaultdict()
 
         # Logging.
-        self._log_policies = False
-        self._policy_log_filehandle = None
+				self._log_policies = False
+				self._policy_log_filehandle = None
 
-        self._num_concretize = 0
-        self._num_labels = 0
-        # self._num_policies = 0
+				self._num_concretize = 0
+				self._num_labels = 0
+
+				# Early concretization optimization.
+				self._viewer = defaultdict(FNull)
 
     @property
     def concretecache(self):
@@ -133,6 +137,26 @@ class JeevesState:
     @property
     def all_labels(self):
 	return self._all_labels[threading.current_thread()]
+
+    @property
+    def solverstate(self):
+        if self._solverstate.has_key(threading.current_thread()):
+            return self._solverstate[threading.current_thread()]
+        else:
+            return None
+    def reset_solverstate(self, ctxt):
+        self._solverstate[threading.current_thread()] = \
+            env.PolicyEnv.SolverState(self.policyenv.policies, ctxt)
+    def clear_solverstate(self):
+        self._solverstate[threading.current_thread()] = None
+
+    @property
+    def viewer(self):
+        return self._viewer[threading.current_thread()]
+    def set_viewer(self, viewer):
+        self._viewer[threading.current_thread()] = viewer
+    def reset_viewer(self):
+        self._viewer[threading.current_thread()] = FNull()
 
 jeevesState = JeevesState()
 
@@ -961,6 +985,11 @@ class FObject(FExpr):
 
 	def __getstate__(self):
 		return "(FObject(%s):%s)" % (id(self.v), self.v.__getstate__())
+
+class FNull(FExpr):
+    def __init__(self):
+        pass
+
 
 """
 	def __and__(l, r):

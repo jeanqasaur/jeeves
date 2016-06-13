@@ -17,6 +17,8 @@ import JeevesLib
 import logging
 
 def register_account(request):
+    JeevesLib.clear_viewer()
+
     if request.user.is_authenticated():
         return HttpResponseRedirect("index")
 
@@ -123,6 +125,7 @@ def about_view(request):
 @jeeves
 def papers_view(request):
     user = UserProfile.objects.get(username=request.user.username)
+    JeevesLib.set_viewer(user)
 
     # TODO: Figure out why we can't loop over this if we don't concretize it...
     papers = Paper.objects.all()

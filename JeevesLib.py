@@ -195,6 +195,22 @@ def clear_cache():
 def get_cache():
 	return jeevesState.concretecache.cache
 
+def get_solverstate():
+    return jeevesState.solverstate
+
+
+'''
+Early concretization optimization.
+'''
+def set_viewer(viewer):
+    jeevesState.set_viewer(viewer)
+    jeevesState.reset_solverstate(viewer)
+def clear_viewer():
+    jeevesState.reset_viewer()
+    jeevesState.clear_solverstate()
+def get_viewer():
+    return jeevesState.viewer
+
 class PositiveVariable:
 	def __init__(self, var):
 		self.var = var

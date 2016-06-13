@@ -13,7 +13,7 @@ import django.db.models.fields.related
 
 import JeevesLib
 from JeevesLib import fexpr_cast
-from fast.AST import Facet, FObject, Unassigned, FExpr
+from fast.AST import Facet, FObject, Unassigned, FExpr, FNull
 import JeevesModelUtils
 
 class JeevesQuerySet(QuerySet):
@@ -62,17 +62,30 @@ class JeevesQuerySet(QuerySet):
                 raise Exception("wow such error: \
                     get() found rows for more than one jeeves_id")
 
+        viewer = JeevesLib.get_viewer()
+        has_viewer = not isinstance(viewer, FNull)
+
+        pathenv = JeevesLib.jeevesState.pathenv.getEnv()
+        solverstate = JeevesLib.get_solverstate()
+
         cur = None
         for (row, conditions) in matches:
             old = cur
             cur = FObject(row)
             for var_name, val in conditions.iteritems():
-                if val:
-                    cur = Facet(acquire_label_by_name(
-                            self.model._meta.app_label, var_name), cur, old)
-                else:
-                    cur = Facet(acquire_label_by_name(
-                            self.model._meta.app_label, var_name), old, cur)
+								label = acquire_label_by_name(self.model._meta.app_label, var_name)
+								if has_viewer:
+										if solverstate.assignLabel(label, pathenv):
+												if not val:
+														cur = old
+										else:
+												if val:
+														cur = old
+								else:
+										if val:
+												cur = Facet(label, cur, old)
+										else:
+												cur = Facet(label, old, cur)
         try:
             return cur.partialEval({} if use_base_env \
                 else JeevesLib.jeevesState.pathenv.getEnv())
