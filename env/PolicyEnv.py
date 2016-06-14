@@ -136,7 +136,7 @@ class SolverState:
 
     def assignLabel(self, label, pathenv):
         if label in self.result:
-						return self.result[label]
+            return self.result[label]
         else:
             varsNeeded = self.getLabelClosure({label})
             self.solvePolicies(varsNeeded, pathenv)
