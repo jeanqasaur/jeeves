@@ -26,6 +26,31 @@ class JeevesQuerySet(QuerySet):
         """
         self._fetch_all()
 
+        def acquire_label_by_name(app_label, label_name, obj=None):
+            """Gets a label by name.
+            """
+            if JeevesLib.doesLabelExist(label_name):
+                print "LABEL EXISTS: ", label_name
+                return JeevesLib.getLabel(label_name)
+            else:
+                label = JeevesLib.mkLabel(label_name, uniquify=False)
+                model_name, field_name, jeeves_id = label_name.split('__')
+
+                # Get the model that corresponds to the application label and
+                # model name.
+                # TODO: Make get_model faster?
+                model = get_model(app_label, model_name)
+
+                # Gets the current row so we can feed it to the policy.
+                # TODO: Figure out why we need the faceted value here...
+                obj = model.objects.get(use_base_env=True, jeeves_id=jeeves_id)
+
+                print "RESTRICTING OBJECT ", obj.id, ": ", obj.jeeves_id
+                print "WITH LABEL ", label
+                restrictor = getattr(model, 'jeeves_restrict_' + field_name)
+                JeevesLib.restrict(label, lambda ctxt: restrictor(obj, ctxt), True)
+                return label
+
         def get_env(obj, fields, env):
             """Gets the Jeeves variable environment associated with the fields.
             """
@@ -35,6 +60,9 @@ class JeevesQuerySet(QuerySet):
                 jeeves_vars = {}
             
             for var_name, value in jeeves_vars.iteritems():
+                # TODO: We only need to do this whole label thing if we don't
+                # know where the value is going.
+
                 # Loop through the list of variables and their assignments.
                 if var_name in env and env[var_name] != value:
                     # If we already know that this variable doesn't match with
@@ -45,11 +73,8 @@ class JeevesQuerySet(QuerySet):
                 # Otherwise, we map the variable to the condition value.
                 # TODO: See if the value is consistent.
                 label = acquire_label_by_name(self.model._meta.app_label
-                    , var_name, obj=None)
+                    , var_name)
                 env[var_name] = (label, value)
-
-                # TODO: Can only use the actual object if we don't have a
-                # faceted value.
 
             for field, subs in fields.iteritems() if fields else []:
                 # Do the same thing for the fields.
@@ -246,6 +271,7 @@ def clone(old):
             setattr(ans, fld.attname, getattr(old, fld.attname))
     return ans
 
+'''
 def acquire_label_by_name(app_label, label_name, obj=None):
     """Gets a label by name.
     """
@@ -268,6 +294,7 @@ def acquire_label_by_name(app_label, label_name, obj=None):
         restrictor = getattr(model, 'jeeves_restrict_' + field_name)
         JeevesLib.restrict(label, lambda ctxt: restrictor(obj, ctxt), True)
         return label
+'''
 
 def get_one_differing_var(vars1, vars2):
     """Checks to see if two sets of variables have one differing one??
