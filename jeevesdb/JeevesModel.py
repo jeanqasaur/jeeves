@@ -19,7 +19,6 @@ import JeevesModelUtils
 class JeevesQuerySet(QuerySet):
     """The Jeeves version of Django's QuerySet.
     """
-
     @JeevesLib.supports_jeeves
     def acquire_label_by_name(self, app_label, label_name):
         if JeevesLib.doesLabelExist(label_name):
@@ -28,7 +27,8 @@ class JeevesQuerySet(QuerySet):
             return JeevesLib.mkLabel(label_name, uniquify=False)
 
     @JeevesLib.supports_jeeves
-    def acquire_label_by_name_w_policy(self, app_label, label_name, obj=None):
+    def acquire_label_by_name_w_policy(self, app_label, label_name
+      , has_viewer=False, env=None):
     	"""Gets a label by name.
         """
         if JeevesLib.doesLabelExist(label_name):
@@ -40,13 +40,13 @@ class JeevesQuerySet(QuerySet):
             # Get the model that corresponds to the application label and
             # model name.
             model = get_model(app_label, model_name)
+            restrictor = getattr(model, 'jeeves_restrict_' + field_name)
 
             # Gets the current row so we can feed it to the policy.
-            if obj==None:
-            	obj = model.objects.get(use_base_env=True
-               	    , jeeves_id=jeeves_id)
-
-            restrictor = getattr(model, 'jeeves_restrict_' + field_name)
+            if has_viewer:
+                obj = self.get_by_jeeves_id_with_viewer(jeeves_id, restrictor, use_base_env=True)
+            else:
+                obj = model.objects.get(use_base_env=True, jeeves_id=jeeves_id)
             JeevesLib.restrict(label, lambda ctxt: restrictor(obj, ctxt), True)
             return label
 
@@ -92,6 +92,39 @@ class JeevesQuerySet(QuerySet):
                 results.append((obj, env))
         return results
 
+  
+    def get_by_jeeves_id_with_viewer(self, jeeves_id, restrictor, use_base_env=False):
+        """Returns the value with the jeeves_id that corresponds to the one
+           the viewer is allowed to see.
+        """
+        matches = self.filter(jeeves_id=jeeves_id).get_jiter()
+        if len(matches) == 0:
+            return None
+
+        for (row, _) in matches:
+            if row.jeeves_id != matches[0][0].jeeves_id:
+                raise Exception("wow such error: \
+                    get() found rows for more than one jeeves_id")
+
+        pathenv = JeevesLib.jeevesState.pathenv.getEnv()
+        solverstate = JeevesLib.get_solverstate()
+
+        result = None
+        for (row, conditions) in matches:
+            # Return the last row that matches.
+            cur = FObject(row)
+            matchConditions = True
+            for var_name, (label, val) in conditions.iteritems():
+                # TODO: We want to add this policy only if it turns out to be
+                # the facet we want to use.
+                solvedLabel = restrictor(cur, self._viewer)
+                matchConditions = solvedLabel==val and matchConditions
+            if matchConditions:
+                result = FObject(row).partialEval({} if use_base_env \
+                    else JeevesLib.jeevesState.pathEnv.getEnv())
+        return result  
+
+
     def get(self, use_base_env=False, **kwargs):
         """Fetches a JList of rows that match the conditions.
         """
@@ -104,8 +137,8 @@ class JeevesQuerySet(QuerySet):
                 raise Exception("wow such error: \
                     get() found rows for more than one jeeves_id")
 
-        viewer = JeevesLib.get_viewer()
-        has_viewer = not isinstance(viewer, FNull)
+        self._viewer = JeevesLib.get_viewer()
+        has_viewer = not isinstance(self._viewer, FNull)
 
         pathenv = JeevesLib.jeevesState.pathenv.getEnv()
         solverstate = JeevesLib.get_solverstate()
@@ -115,17 +148,6 @@ class JeevesQuerySet(QuerySet):
             old = cur
             cur = FObject(row)
             for var_name, (label, val) in conditions.iteritems():
-                # TODO: Figure out if we need to make obj the faceted value.
-                '''
-                if has_viewer:
-                    if solverstate.assignLabel(label, pathenv):
-                        if not val:
-                            cur = old
-                    else:
-                        if val:
-                            cur = old
-                else:
-                '''
                 if val:
                     cur = Facet(label, cur, old)
                 else:
@@ -154,8 +176,8 @@ class JeevesQuerySet(QuerySet):
 
     @JeevesLib.supports_jeeves
     def all(self):
-        viewer = JeevesLib.get_viewer()
-        if isinstance(viewer, FNull):
+        self._viewer = JeevesLib.get_viewer()
+        if isinstance(self._viewer, FNull):
             # If we don't know who the viewer is, create facets.
             elements = JeevesLib.JList2([])
             env = JeevesLib.jeevesState.pathenv.getEnv()
@@ -201,23 +223,13 @@ class JeevesQuerySet(QuerySet):
                     # to implement an analysis to determine when we can do this
                     # optimization.
                     app_label = self.model._meta.app_label
-                    label = self.acquire_label_by_name(app_label, var_name)
-                    model_name, field_name, jeeves_id = var_name.split('__')
-
-                    # Get the model that corresponds to the application label and
-                    # model name.
-                    model = get_model(app_label, model_name)
-
-                    restrictor = getattr(model, 'jeeves_restrict_' + field_name)
-                    policyResult = restrictor(obj, viewer)
-                    solvedLabel = solverstate.concretizeExp(policyResult, env)
-
+                    label = self.acquire_label_by_name_w_policy(app_label
+                        , var_name, has_viewer=True, env=env)
+                    solvedLabel = solverstate.concretizeExp(label, env)
                     # env[var_name] = solvedLabel
                     if not solvedLabel==value:
                         return False
-                    else:
-                      if (obj.id % 2)==0:
-                        env[var_name] = solvedLabel
+                    # env[var_name] = solvedLabel
 
                 for field, subs in fields.iteritems() if fields else []:
                     # Do the same thing for the fields.

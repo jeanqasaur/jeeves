@@ -42,7 +42,6 @@ class SolverState:
             # If there are policies associated with the label.
             if self.policies.has_key(label):
                 policy = self.policies[label]
-
                 #predicate should be True if label can be HIGH
                 predicate = policy(self.ctxt).partialEval(pathenv)
                 constraint = fast.AST.Implies(
@@ -101,7 +100,6 @@ class SolverState:
             # If there are policies associated with the label.
             if self.policies.has_key(label):
                 policy = self.policies[label]
-
                 #predicate should be True if label can be HIGH
                 predicate = policy(self.ctxt)
             

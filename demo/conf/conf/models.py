@@ -81,8 +81,10 @@ class Paper(Model):
 
             # print "RESOLVING POLICY WITH PAPER: ", paper.id, ": ", paper.jeeves_id
             # print "RESOLVING POLICY WITH PAPER AUTHOR: ", paper.author.v
-            return ((paper != None and paper.author == ctxt)
+            r = ((paper != None and paper.author == ctxt)
                 or (ctxt != None and (ctxt.level == 'chair' or ctxt.level == 'pc')))
+            print r
+            return r
 
     class Meta:
         db_table = 'papers'
