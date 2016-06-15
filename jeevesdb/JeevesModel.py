@@ -85,49 +85,6 @@ class JeevesQuerySet(QuerySet):
                 results.append((obj, env))
         return results
 
-    @JeevesLib.supports_jeeves
-    def get_jiter_with_viewer(self):
-        """Creates an iterator for the QuerySet. Returns a list (object,
-           conditions) of rows and their conditions.
-        """
-        self._fetch_all()
-
-        viewer = JeevesLib.get_viewer()
-        has_viewer = not isinstance(viewer, FNull)
-	env = JeevesLib.jeevesState.pathenv.getEnv()
-        solverstate = JeevesLib.get_solverstate()
-        results = []
-
-        def add_obj(obj, fields):
-            """Gets the Jeeves variable environment associated with the fields.
-            """
-            if hasattr(obj, "jeeves_vars"):
-                jeeves_vars = JeevesModelUtils.unserialize_vars(obj.jeeves_vars)
-            else:
-                jeeves_vars = {}
-
-            for var_name, value in jeeves_vars.iteritems():
-                # Otherwise, we map the variable to the condition value.
-                label = self.acquire_label_by_name(self.model._meta.app_label
-                    , var_name)
-                if var_name in env and not env[var_name]==value:
-                    return False
-                solvedLabel = solverstate.assignLabel(label, env)
-                if not solvedLabel==value:
-                    return False
-
-            for field, subs in fields.iteritems() if fields else []:
-                # Do the same thing for the fields.
-                if field and not add_obj(getattr(obj, field), subs, env):
-                    return False
-            return True
-
-        for obj in self._result_cache:
-            # Get the corresponding labels for our list of conditions.
-            if add_obj(obj, self.query.select_related):
-                results.append(obj)
-        return results
-
     def get(self, use_base_env=False, **kwargs):
         """Fetches a JList of rows that match the conditions.
         """
@@ -212,32 +169,42 @@ class JeevesQuerySet(QuerySet):
             return elements
         else:
             # Otherwise concretize early.
-            return self.get_jiter_with_viewer()
-            '''
-            elements = []
+            self._fetch_all()
+
             env = JeevesLib.jeevesState.pathenv.getEnv()
             solverstate = JeevesLib.get_solverstate()
+            results = []
 
-            for val, cond in self.get_jiter():
-                # Get a list of (object, condition list).
-                for vname, (vlabel, vval) in cond.iteritems():
-                    # Loop through the list of conditions to see what they
-                    # should actually be assigned to.
-                    if vname in env:
-                        # If we have already assumed the current variable,
-                        # then add the element if the assumption matches
-                        # the condition.
-                        if env[vname] == vval:
-                            elements.append(val)
-                    else:
-                        # If the current label matches with our policy
-                        # assumptions, then we add it to the list of results.
-                        label = solverstate.assignLabel(vlabel, env)
-                        env[vlabel] = label
-                        if label == vval:
-                            elements.append(val)
-            return elements
-            '''
+            def add_obj(obj, fields):
+                """Determines whether to add an object based on the labels.
+                """
+                if hasattr(obj, "jeeves_vars"):
+                    jeeves_vars = JeevesModelUtils.unserialize_vars(
+                        obj.jeeves_vars)
+                else:
+                    jeeves_vars = {}
+
+                for var_name, value in jeeves_vars.iteritems():
+                    # Otherwise, we map the variable to the condition value.
+                    label = self.acquire_label_by_name(self.model._meta.app_label
+                        , var_name)
+                    if var_name in env and not env[var_name]==value:
+                        return False
+                    solvedLabel = solverstate.assignLabel(label, env)
+                    if not solvedLabel==value:
+                        return False
+
+                for field, subs in fields.iteritems() if fields else []:
+                    # Do the same thing for the fields.
+                    if field and not add_obj(getattr(obj, field), subs, env):
+                        return False
+                return True
+
+            for obj in self._result_cache:
+                # Get the corresponding labels for our list of conditions.
+                if add_obj(obj, self.query.select_related):
+                    results.append(obj)
+            return results
 
     @JeevesLib.supports_jeeves
     def delete(self):
