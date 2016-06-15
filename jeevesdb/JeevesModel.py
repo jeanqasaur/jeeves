@@ -190,8 +190,7 @@ class JeevesQuerySet(QuerySet):
                     jeeves_vars = {}
 
                 for var_name, value in jeeves_vars.iteritems():
-                    facet_var_name = var_name + "__" + str(obj.id)
-                    if facet_var_name in env and not env[var_name]==value:
+                    if var_name in env and not env[var_name]==value:
                         return False
 
                     # Otherwise, we map the variable to the condition value.
@@ -201,9 +200,8 @@ class JeevesQuerySet(QuerySet):
                     # dependencies of policies on other policies. Eventually need
                     # to implement an analysis to determine when we can do this
                     # optimization.
-                    # label = self.acquire_label_by_name_w_policy(self.model._meta.app_label
-                    #    , var_name, obj=None)
                     app_label = self.model._meta.app_label
+                    label = self.acquire_label_by_name(app_label, var_name)
                     model_name, field_name, jeeves_id = var_name.split('__')
 
                     # Get the model that corresponds to the application label and
@@ -212,12 +210,14 @@ class JeevesQuerySet(QuerySet):
 
                     restrictor = getattr(model, 'jeeves_restrict_' + field_name)
                     policyResult = restrictor(obj, viewer)
-                    solvedLabel = solverstate.concretizeExp(policyResult, env) # solverstate.assignLabel(label, env)
+                    solvedLabel = solverstate.concretizeExp(policyResult, env)
 
-                    # TODO: Check this
-                    env[facet_var_name] = solvedLabel
+                    # env[var_name] = solvedLabel
                     if not solvedLabel==value:
                         return False
+                    else:
+                      if (obj.id % 2)==0:
+                        env[var_name] = solvedLabel
 
                 for field, subs in fields.iteritems() if fields else []:
                     # Do the same thing for the fields.
