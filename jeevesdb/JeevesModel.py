@@ -156,8 +156,6 @@ class JeevesQuerySet(QuerySet):
                 popcount = 0
                 for vname, (vlabel, vval) in cond.iteritems():
                     if vname not in env:
-                        # vlabel = acquire_label_by_name(
-                        #   self.model._meta.app_label, vname, obj=val)
                         JeevesLib.jeevesState.pathenv.push(vlabel, vval)
                         popcount += 1
                     elif env[vname] != vval:
@@ -191,6 +189,7 @@ class JeevesQuerySet(QuerySet):
                     if var_name in env and not env[var_name]==value:
                         return False
                     solvedLabel = solverstate.assignLabel(label, env)
+                    env[var_name] = solvedLabel
                     if not solvedLabel==value:
                         return False
 
