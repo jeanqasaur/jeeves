@@ -41,24 +41,22 @@
                         {% with transfer=data.Visits.all()[t_indx] %}
                         <tr>
                             <td>
-                                <a href='{{ url("patient", concretize(transfer.Visit.Patient.UID)) }}'>
-                                    {{ concretize(transfer.Visit.Patient).Name() }}
-                                </a>
+                                [TODO: patient name here, with a link to the patient]
                             </td>
                             <td>
-                                {{ transfer.Visit.DateAdmitted }}
+                                {{ transfer.Visit.date_admitted }}
                             </td>
                             <td>
-                                {{ transfer.Visit.DateReleased }}
+                                {{ transfer.Visit.date_released }}
                             </td>
                             <td>
-                                {{ transfer.Visit.Location }}
+                                {{ transfer.Visit.location }}
                             </td>
                             <td>
-                                {{ transfer.Visit.Condition }}
+                                {{ transfer.Visit.condition }}
                             </td>
                             <td>
-                                {{ concretize(transfer.Visit.Patient).ReligiousAffiliation }}
+                                [TODO: patient religious affiliation here]
                             </td>
                         </tr>
                         {% endwith %}
@@ -91,9 +89,7 @@
                         {% with transfer=data.Diagnoses.all()[t_indx] %}
                         <tr>
                             <td>
-                                <a href='{{ url("patient", concretize(transfer.Diagnosis.Patient).UID) }}'>
-                                    {{ concretize(transfer.Diagnosis.Patient).Name() }}
-                                </a>
+                                [TODO: patient name with link]
                             </td>
                             <td>
                                 {{ transfer.Diagnosis.DateRecognized }}
@@ -105,8 +101,8 @@
                                 {{ transfer.Diagnosis.Diagnosis }}
                             </td>
                             <td>
-                                <a href='{{ url("entity", transfer.Diagnosis.RecognizingEntity.EIN) }}'>
-                                    {{ transfer.Diagnosis.RecognizingEntity.Name }}
+                                <a href='{{ url("entity", transfer.Diagnosis.RecognizingEntity.ein) }}'>
+                                    {{ transfer.Diagnosis.RecognizingEntity.name }}
                                 </a>
                             </td>
                         </tr>

@@ -87,6 +87,8 @@ Looking at an assignment. Different users have different policies.
 @request_wrapper
 @jeeves
 def assignments_view(request, user_profile):
+  JeevesLib.set_viewer(user_profile)
+
   course_id = request.GET.get('course_id')
   course = Course.objects.get(jeeves_id=course_id)
 
@@ -109,14 +111,14 @@ def assignments_view(request, user_profile):
 @request_wrapper
 @jeeves
 def courses_view(request, user_profile):
-  studentcourses = JeevesLib.concretize(user_profile, StudentCourse.objects.filter(student=user_profile).all())
-  print studentcourses
+  JeevesLib.set_viewer(user_profile)
+
+  studentcourses = StudentCourse.objects.filter(student=user_profile).all()
   courses = []
   for sc in studentcourses:
     c = sc.course
     c.grade = sc.grade
     c.instructors = CourseInstructor.objects.filter(course=c)
-    print c.instructors
     courses.append(c)
 
   assignments = Assignment.objects.all()

@@ -145,6 +145,13 @@ class SolverState:
 
             return self.result[label]
 
+    # TODO: Figure out if we want to keep these.
+    def push(self):
+      self.solver.push()
+    def pop(self):
+      self.solver.pop()
+    
+
 class PolicyEnv:
   def __init__(self):
     self.policies = WeakKeyDictionary()

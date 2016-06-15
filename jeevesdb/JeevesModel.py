@@ -19,6 +19,7 @@ import JeevesModelUtils
 class JeevesQuerySet(QuerySet):
     """The Jeeves version of Django's QuerySet.
     """
+
     @JeevesLib.supports_jeeves
     def get_jiter(self):
         """Creates an iterator for the QuerySet. Returns a list (object,
@@ -26,11 +27,13 @@ class JeevesQuerySet(QuerySet):
         """
         self._fetch_all()
 
+  	viewer = JeevesLib.get_viewer()
+        has_viewer = not isinstance(viewer, FNull)
+        
         def acquire_label_by_name(app_label, label_name, obj=None):
             """Gets a label by name.
             """
             if JeevesLib.doesLabelExist(label_name):
-                print "LABEL EXISTS: ", label_name
                 return JeevesLib.getLabel(label_name)
             else:
                 label = JeevesLib.mkLabel(label_name, uniquify=False)
@@ -42,11 +45,10 @@ class JeevesQuerySet(QuerySet):
                 model = get_model(app_label, model_name)
 
                 # Gets the current row so we can feed it to the policy.
-                # TODO: Figure out why we need the faceted value here...
-                obj = model.objects.get(use_base_env=True, jeeves_id=jeeves_id)
+		if obj==None:
+                    obj = model.objects.get(use_base_env=True
+                        , jeeves_id=jeeves_id)
 
-                print "RESTRICTING OBJECT ", obj.id, ": ", obj.jeeves_id
-                print "WITH LABEL ", label
                 restrictor = getattr(model, 'jeeves_restrict_' + field_name)
                 JeevesLib.restrict(label, lambda ctxt: restrictor(obj, ctxt), True)
                 return label
@@ -60,9 +62,6 @@ class JeevesQuerySet(QuerySet):
                 jeeves_vars = {}
             
             for var_name, value in jeeves_vars.iteritems():
-                # TODO: We only need to do this whole label thing if we don't
-                # know where the value is going.
-
                 # Loop through the list of variables and their assignments.
                 if var_name in env and env[var_name] != value:
                     # If we already know that this variable doesn't match with
@@ -84,11 +83,9 @@ class JeevesQuerySet(QuerySet):
 
         results = []
         for obj in self._result_cache:
-            # print "LOOKING AT OBJ ", obj.id, ": ", obj.jeeves_id
             # Get the corresponding labels for our list of conditions.
             env = get_env(obj, self.query.select_related, {})
             if env is not None:
-                # print "ADDING OBJ: ", obj.id, ": ", obj.jeeves_id, ", ", env
                 results.append((obj, env))
         return results
 
@@ -180,12 +177,50 @@ class JeevesQuerySet(QuerySet):
             env = JeevesLib.jeevesState.pathenv.getEnv()
             solverstate = JeevesLib.get_solverstate()
 
+            '''
+            self._fetch_all()
+            for obj in self._result_cache:
+                # Get the corresponding labels for our list of conditions.
+                shouldAdd = False
+
+            	if hasattr(obj, "jeeves_vars"):
+                    jeeves_vars = JeevesModelUtils.unserialize_vars(
+                        obj.jeeves_vars)
+                else:
+                    jeeves_vars = {}
+
+                for var_name, value in jeeves_vars.iteritems():
+                    # If the current viewer is known, then we can resolve the
+                    # row right away.
+                
+                    # First we get the label.
+                    app_label = self.model._meta.app_label
+                    label = acquire_label_without_policy(app_label, var_name)
+                    model_name, field_name, jeeves_id = var_name.split('__')
+
+                    # Now we see if the value is consistent with the label we
+                    # got.
+                    model = get_model(app_label, model_name)
+                    # TODO: Use the obj we've been given!! :o :o :o
+                    # obj = model.objects.get(use_base_env=True, jeeves_id=jeeves_id)
+
+                    restrictor = getattr(model, 'jeeves_restrict_' + field_name)
+                    
+                    solverstate.push()
+                    JeevesLib.restrict(label
+                        , lambda ctxt: restrictor(obj, ctxt), True)
+                    labelValue = solverstate.assignLabel(label, env)
+                    solverstate.pop()
+                    if labelValue==value:
+                        # print "ADDING OBJ: ", obj.id, ": ", obj.jeeves_id, ", ", env
+                        elements.append(obj)
+
+            '''
             for val, cond in self.get_jiter():
                 # Get a list of (object, condition list).
                 for vname, (vlabel, vval) in cond.iteritems():
                     # Loop through the list of conditions to see what they
                     # should actually be assigned to.
-                    # print "IN JITER: ", vname, ", ", vval
                     if vname in env:
                         # If we have already assumed the current variable,
                         # then add the element if the assumption matches
@@ -197,7 +232,6 @@ class JeevesQuerySet(QuerySet):
                         # assumptions, then we add it to the list of results.
                         label = solverstate.assignLabel(vlabel, env)
                         env[vlabel] = label
-                        # print "CHECKING JITER: ", vlabel, ", ", label
                         if label == vval:
                             elements.append(val)
             return elements

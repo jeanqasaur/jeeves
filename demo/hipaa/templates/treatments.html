@@ -51,13 +51,13 @@
 							{{ treatment.Service }}
 						</td>
 						<td>
-							<a href='{{ url("entity", treatment.PrescribingEntity.EIN) }}'>
-								{{ treatment.PrescribingEntity.Name }}
+							<a href='{{ url("entity", treatment.prescribing_entity.ein) }}'>
+								{{ treatment.prescribing_entity.name }}
 							</a>
 						</td>
 						<td>
-							<a href='{{ url("entity", treatment.PerformingEntity.EIN) }}'>
-								{{ treatment.PerformingEntity.Name }}
+							<a href='{{ url("entity", treatment.performing_entity.ein) }}'>
+								{{ treatment.performing_entity.name }}
 							</a>
 						</td>
 					</tr>

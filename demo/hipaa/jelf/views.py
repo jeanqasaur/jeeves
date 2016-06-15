@@ -27,30 +27,30 @@ import JeevesLib
 INFORMATION_SET = {
       "preview" : "5 regarding Joe McGray"
     , "treatments" : [
-          {"Patient" : {"Name" : "Joe McGray", "ID" : 5}
-         , "Service" : "ADA:D4211"
-         , "DatePerformed" : date(2012, 6, 26)
-		     , "PrescribingEntity" : {"Name" : "Cooper Base Dental", "ID" : 5}
-         , "PerformingEntity" : {"Name" : "Cooper Base Dental", "ID" : 5}}
-        , {"Patient" : {"Name" : "Joe McGray", "ID" : 5}
-         , "Service" : "D7287"
-			   , "DatePerformed" : date(2013, 1, 3)
-         , "PrescribingEntity" : {"Name" : "Beautiful Smile", "ID" : 23}
-         , "PerformingEntity" : {"Name" : "Mary Orman, DDS", "ID" : 942}}]
+          {"patient" : {"name" : "Joe McGray", "ein" : 5}
+         , "service" : "ADA:D4211"
+         , "date_performed" : date(2012, 6, 26)
+		     , "prescribing_entity" : {"name" : "Cooper Base Dental", "ein" : 5}
+         , "performing_entity" : {"name" : "Cooper Base Dental", "ein" : 5}}
+        , {"patient" : {"name" : "Joe McGray", "ein" : 5}
+         , "service" : "D7287"
+			   , "date_performed" : date(2013, 1, 3)
+         , "prescribing_entity" : {"name" : "Beautiful Smile", "ein" : 23}
+         , "performing_entity" : {"name" : "Mary Orman, DDS", "ein" : 942}}]
     , "diagnoses" : [
-          {"Patient" : {"Name" : "Joe McGray", "ID" : 5}
+          {"patient" : {"name" : "Joe McGray", "ein" : 5}
          , "Manifestation" : "B01.0"
          , "DateRecognized" : date(2013, 2, 1)
-         , "RecognizingEntity" : {"Name" : "Solomon Health", "ID" : 7}
+         , "RecognizingEntity" : {"name" : "Solomon Health", "ein" : 7}
          , "Diagnosis" : "Negative"}
-        , {"Patient" : {"Name" : "Joe McGray", "ID" : 5}
+        , {"Patient" : {"name" : "Joe McGray", "ein" : 5}
           , "Manifestation" : "T84.012"
           , "DateRecognized" : date(2013, 10, 17)
-          , "RecognizingEntity" : {"Name" : "Dr. Wragley Medical Center"
-                                 , "ID" : 130}
+          , "RecognizingEntity" : {"name" : "Dr. Wragley Medical Center"
+                                 , "ein" : 130}
           , "Diagnosis" : "Positive"}]
     , "hospitalVisits" : [
-        {"Patient" : {"Name" : "Joe McGray", "ID" : 5}
+        {"Patient" : {"name" : "Joe McGray", "ein" : 5}
        , "DateAdmitted" : date(2014, 5, 25)
        , "Location" : "113B"
        , "Condition" : "Recovering"
@@ -207,7 +207,7 @@ def treatments_view(request, profile, patient):
     """Treatments.
     """
     p = Individual.objects.get(jeeves_id=patient)
-    treatments = Treatment.objects.filter(Patient=p)
+    treatments = Treatment.objects.filter(patient=p)
     return ("treatments.html"
         , {"first_name" : p.FirstName
          , "last_name" : p.LastName
@@ -253,9 +253,6 @@ def info_view(request, profile, patient):
     p = Individual.objects.get(jeeves_id=patient)
     dataset = []
     dataset.append(("Sex", p.Sex, False))
-    #print "HI"
-    #dataset.append(("Address",p.Address.String(), False))
-    #dataset.append(("Social Security Number",p.SSN))
     return ("info.html"
             , {"patient": p
              , "dataset": dataset})
@@ -266,26 +263,26 @@ def info_view(request, profile, patient):
 def directory_view(request, profile, entity):
     """Viewing covered entities.
     """
-    entity = CoveredEntity.objects.get(EIN=entity)
-    visits = entity.Patients.filter(DateReleased=None)
+    entity = CoveredEntity.objects.get(ein=entity)
+    visits = entity.Patients.filter(date_released=None)
 
     oldVisits = [
-           {"Patient" : {"Name" : "Joe McGray", "ID" : 5}
+           {"Patient" : {"name" : "Joe McGray", "ein" : 5}
           , "DateAdmitted" : date(2014, 5, 25)
           , "Location" : "113B"
           , "Condition" : "Recovering"
           , "ReligiousAffiliation" : "None"}
-        , {"Patient" : {"Name" : "Briann Terack", "ID" : 52}
+        , {"Patient" : {"name" : "Briann Terack", "ein" : 52}
           , "DateAdmitted" : date(2014, 3, 30)
           , "Location" : "416"
           , "Condition" : "Severe"
           , "ReligiousAffiliation" : "Catholic"}
-        , {"Patient" : {"Name" : "Henry Bion", "ID" : 95}
+        , {"Patient" : {"name" : "Henry Bion", "ein" : 95}
           , "DateAdmitted" : date(2014, 5, 12)
           , "Location" : "134K"
           , "Condition" : "Stable"
           , "ReligiousAffiliation" : "Christian"}
-        , {"Patient" : {"Name" : "Gill Hansen", "ID" : 13}
+        , {"Patient" : {"name" : "Gill Hansen", "ein" : 13}
           , "DateAdmitted" : date(2014, 5, 19)
           , "Location" : "228"
           , "Condition" : "Unknown"
@@ -300,7 +297,7 @@ def transactions_view(request, profile, entity):
     """
     Viewing transactions.
     """
-    entity = CoveredEntity.objects.get(EIN=entity)
+    entity = CoveredEntity.objects.get(ein=entity)
     transactions = Transaction.objects.filter(FirstParty=entity)
     other_transactions = Transaction.objects.filter(SecondParty=entity)
     return ("transactions.html"
@@ -312,18 +309,18 @@ def transactions_view(request, profile, entity):
 @request_wrapper
 @jeeves
 def associates_view(request, profile, entity):
-    entity = CoveredEntity.objects.get(EIN=entity)
+    entity = CoveredEntity.objects.get(ein=entity)
     associates = entity.Associations.all()
     # TODO: Do something with this old_associates
     old_associates = [
-          {"Entity" : {"Name" : "Cooper United"}
-          , "InformationShared" : INFORMATION_SET
+          {"Entity" : {"name" : "Cooper United"}
+          , "SharedInformation" : INFORMATION_SET
           , "Purpose" : "Files paperwork regarding hospital transfers."}
-        , {"Entity" : {"Name" : "Sand Way", "ID" : 901}
-          , "InformationShared" : INFORMATION_SET
+        , {"Entity" : {"name" : "Sand Way", "ID" : 901}
+          , "SharedInformation" : INFORMATION_SET
           , "Purpose":"Billing"}
-        , {"Entity" : {"Name" : "Handerson"}
-          , "InformationShared" : INFORMATION_SET
+        , {"Entity" : {"name" : "Handerson"}
+          , "SharedInformation" : INFORMATION_SET
           , "Purpose":"Keeps records for HIPAA audit"}]
     return ("associates.html"
         , {"entity":entity, "associates":associates})
