@@ -145,13 +145,6 @@ class SolverState:
 
             return self.result[label]
 
-    # TODO: Figure out if we want to keep these.
-    def push(self):
-      self.solver.push()
-    def pop(self):
-      self.solver.pop()
-    
-
 class PolicyEnv:
   def __init__(self):
     self.policies = WeakKeyDictionary()
@@ -181,6 +174,10 @@ class PolicyEnv:
                 pcFormula,
                 fast.AST.fexpr_cast(policy(ctxt)),
             ))
+
+  def clearLabel(self, label_var):
+    if self.policies.has_key(label_var):
+      del self.policies[label_var]
 
   def getNewSolverState(self, ctxt):
     return SolverState(self.policies, ctxt)

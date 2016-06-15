@@ -81,6 +81,9 @@ def restrict(varLabel, pred, use_empty_env=False):
     :type pred: T -> bool, where T is the type of the output channel
     """
     jeevesState.policyenv.restrict(varLabel, pred, use_empty_env)
+@supports_jeeves
+def clearLabel(varLabel):
+    jeevesState.policyenv.clearLabel(varLabel)
 
 @supports_jeeves
 def mkSensitive(varLabel, vHigh, vLow):

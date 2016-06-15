@@ -21,7 +21,14 @@ class JeevesQuerySet(QuerySet):
     """
 
     @JeevesLib.supports_jeeves
-    def acquire_label_by_name(self, app_label, label_name, obj=None):
+    def acquire_label_by_name(self, app_label, label_name):
+        if JeevesLib.doesLabelExist(label_name):
+            return JeevesLib.getLabel(label_name)
+        else:
+            return JeevesLib.mkLabel(label_name, uniquify=False)
+
+    @JeevesLib.supports_jeeves
+    def acquire_label_by_name_w_policy(self, app_label, label_name, obj=None):
     	"""Gets a label by name.
         """
         if JeevesLib.doesLabelExist(label_name):
@@ -67,7 +74,7 @@ class JeevesQuerySet(QuerySet):
                     return None
 
                 # Otherwise, we map the variable to the condition value.
-                label = self.acquire_label_by_name(self.model._meta.app_label
+                label = self.acquire_label_by_name_w_policy(self.model._meta.app_label
                     , var_name)
                 env[var_name] = (label, value)
 
@@ -183,13 +190,33 @@ class JeevesQuerySet(QuerySet):
                     jeeves_vars = {}
 
                 for var_name, value in jeeves_vars.iteritems():
-                    # Otherwise, we map the variable to the condition value.
-                    label = self.acquire_label_by_name(self.model._meta.app_label
-                        , var_name)
                     if var_name in env and not env[var_name]==value:
                         return False
-                    solvedLabel = solverstate.assignLabel(label, env)
-                    env[var_name] = solvedLabel
+
+                    # Otherwise, we map the variable to the condition value.
+                    # TODO: Instead of acquiring the label by name, we should be
+                    # able to get the policy and solve for it directly.
+                    # NOTE: We should only be able to do this when there are no
+                    # dependencies of policies on other policies. Eventually need
+                    # to implement an analysis to determine when we can do this
+                    # optimization.
+                    # label = self.acquire_label_by_name_w_policy(self.model._meta.app_label
+                    #    , var_name, obj=None)
+                    app_label = self.model._meta.app_label
+                    label = self.acquire_label_by_name(self.model._meta.app_label
+                        , var_name)
+                    model_name, field_name, jeeves_id = var_name.split('__')
+
+                    # Get the model that corresponds to the application label and
+                    # model name.
+                    model = get_model(app_label, model_name)
+
+                    restrictor = getattr(model, 'jeeves_restrict_' + field_name)
+                    policyResult = restrictor(obj, viewer)
+                    solvedLabel = solverstate.concretizeExp(policyResult, env) # solverstate.assignLabel(label, env)
+                    # print "SOLVED LABEL: ", solvedLabel
+                    # TODO: Check this
+                    # env[var_name] = solvedLabel
                     if not solvedLabel==value:
                         return False
 
@@ -213,8 +240,8 @@ class JeevesQuerySet(QuerySet):
             popcount = 0
             for vname, (vlabel, vval) in cond.iteritems():
                 if vname not in JeevesLib.jeevesState.pathenv.getEnv():
-                    # vlabel = acquire_label_by_name(
-                    #            self.model._meta.app_label, vname)
+                    vlabel = acquire_label_by_name_w_policy(
+                                self.model._meta.app_label, vname)
                     JeevesLib.jeevesState.pathenv.push(vlabel, vval)
                     popcount += 1
             val.delete()
@@ -273,31 +300,6 @@ def clone(old):
         if isinstance(fld, JeevesForeignKey):
             setattr(ans, fld.attname, getattr(old, fld.attname))
     return ans
-
-'''
-def acquire_label_by_name(app_label, label_name, obj=None):
-    """Gets a label by name.
-    """
-    if JeevesLib.doesLabelExist(label_name):
-        return JeevesLib.getLabel(label_name)
-    else:
-        label = JeevesLib.mkLabel(label_name, uniquify=False)
-        model_name, field_name, jeeves_id = label_name.split('__')
-        
-        # Get the model that corresponds to the application label and model
-        # name.
-        model = get_model(app_label, model_name)
-
-        # Gets the current row so we can feed it to the policy.
-        if obj==None:
-            obj = model.objects.get(use_base_env=True, jeeves_id=jeeves_id)
-
-        # print "RESTRICTING OBJECT ", obj.id, ": ", obj.jeeves_id
-        # print "WITH LABEL ", label
-        restrictor = getattr(model, 'jeeves_restrict_' + field_name)
-        JeevesLib.restrict(label, lambda ctxt: restrictor(obj, ctxt), True)
-        return label
-'''
 
 def get_one_differing_var(vars1, vars2):
     """Checks to see if two sets of variables have one differing one??
