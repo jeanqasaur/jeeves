@@ -118,7 +118,7 @@ class JeevesQuerySet(QuerySet):
 
             for field, subs in fields.iteritems() if fields else []:
                 # Do the same thing for the fields.
-                if field and add_obj(getattr(obj, field), subs, env) is None:
+                if field and not add_obj(getattr(obj, field), subs, env):
                     return False
             return True
 
