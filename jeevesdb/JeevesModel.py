@@ -226,7 +226,7 @@ class JeevesQuerySet(QuerySet):
                     label = self.acquire_label_by_name_w_policy(app_label
                         , var_name, has_viewer=True, env=env)
                     solvedLabel = solverstate.concretizeExp(label, env)
-                    # env[var_name] = solvedLabel
+                    env[var_name] = solvedLabel
                     if not solvedLabel==value:
                         return False
                     # env[var_name] = solvedLabel
