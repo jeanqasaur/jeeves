@@ -139,7 +139,7 @@ class SolverState:
             varsNeeded = self.getLabelClosure({label})
             self.solvePolicies(varsNeeded, pathenv)
 
-            JeevesLib.log_counts(len(varsNeeded))
+            # JeevesLib.log_counts(len(varsNeeded))
 
             return self.result[label]
 
