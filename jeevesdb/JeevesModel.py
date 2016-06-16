@@ -30,7 +30,6 @@ class JeevesQuerySet(QuerySet):
             """Gets a label by name.
             """
             if JeevesLib.doesLabelExist(label_name):
-                print "LABEL EXISTS: ", label_name
                 return JeevesLib.getLabel(label_name)
             else:
                 label = JeevesLib.mkLabel(label_name, uniquify=False)
@@ -45,8 +44,6 @@ class JeevesQuerySet(QuerySet):
                 # TODO: Figure out why we need the faceted value here...
                 obj = model.objects.get(use_base_env=True, jeeves_id=jeeves_id)
 
-                print "RESTRICTING OBJECT ", obj.id, ": ", obj.jeeves_id
-                print "WITH LABEL ", label
                 restrictor = getattr(model, 'jeeves_restrict_' + field_name)
                 JeevesLib.restrict(label, lambda ctxt: restrictor(obj, ctxt), True)
                 return label
@@ -84,11 +81,9 @@ class JeevesQuerySet(QuerySet):
 
         results = []
         for obj in self._result_cache:
-            # print "LOOKING AT OBJ ", obj.id, ": ", obj.jeeves_id
             # Get the corresponding labels for our list of conditions.
             env = get_env(obj, self.query.select_related, {})
             if env is not None:
-                # print "ADDING OBJ: ", obj.id, ": ", obj.jeeves_id, ", ", env
                 results.append((obj, env))
         return results
 
@@ -185,7 +180,6 @@ class JeevesQuerySet(QuerySet):
                 for vname, (vlabel, vval) in cond.iteritems():
                     # Loop through the list of conditions to see what they
                     # should actually be assigned to.
-                    # print "IN JITER: ", vname, ", ", vval
                     if vname in env:
                         # If we have already assumed the current variable,
                         # then add the element if the assumption matches
@@ -197,7 +191,6 @@ class JeevesQuerySet(QuerySet):
                         # assumptions, then we add it to the list of results.
                         label = solverstate.assignLabel(vlabel, env)
                         env[vlabel] = label
-                        # print "CHECKING JITER: ", vlabel, ", ", label
                         if label == vval:
                             elements.append(val)
             return elements
