@@ -218,13 +218,10 @@ class JeevesQuerySet(QuerySet):
                         return False
 
                     # Otherwise, we map the variable to the condition value.
-                    # TODO: Instead of acquiring the label by name, we should be
-                    # able to get the policy and solve for it directly.
-                    # optimization.
                     app_label = self.model._meta.app_label
                     label = self.acquire_label_by_name_w_policy(app_label
                         , var_name, has_viewer=True, env=env)
-                    solvedLabel = solverstate.concretizeExp(label, env)
+                    solvedLabel = solverstate.assignLabel(label, env)
                     env[var_name] = solvedLabel
                     if not solvedLabel==value:
                         return False
