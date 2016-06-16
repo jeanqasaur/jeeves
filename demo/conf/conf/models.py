@@ -79,12 +79,8 @@ class Paper(Model):
             if PaperPCConflict.objects.get(paper=paper, pc=ctxt) != None:
                 return False
 
-            # print "RESOLVING POLICY WITH PAPER: ", paper.id, ": ", paper.jeeves_id
-            # print "RESOLVING POLICY WITH PAPER AUTHOR: ", paper.author.v
-            r = ((paper != None and paper.author == ctxt)
+            return ((paper != None and paper.author == ctxt)
                 or (ctxt != None and (ctxt.level == 'chair' or ctxt.level == 'pc')))
-            print r
-            return r
 
     class Meta:
         db_table = 'papers'
