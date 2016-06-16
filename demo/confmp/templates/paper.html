@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if paper != None %}
+      <form role="form" enctype="multipart/form-data" method="post">
+        {% csrf_token %}
+        <div class=form-group>
+            <label for="authors[]" class="control-label"><a rel="tooltip" title="Visible to the authors, PC chair, and reviewers after reviews have been submitted."><span class="glyphicon glyphicon-eye-close"></span></a> Authors</label>
+            <div class="row">
+              <div class="col-xs-4">
+                <input class="form-control" type="text" name="coauthors[]" id="coauthors[]" value="{% if author != None %} {{ author.name }} {% else %} [Anonymous] {% endif %}" disabled />
+              </div>
+            </div>
+            {% for coauthor in coauthors %}
+            <div class="row">
+              <div class="col-xs-4">
+                <input class="form-control" type="text" name="coauthors[]" id="coauthors[]" value="{{ coauthor.author }}" disabled />
+              </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+          <label for="title" class="control-label"><a rel="tooltip" title="Visible to the authors and program committee."><span class="glyphicon glyphicon-eye-close"></span></a> Title</label>
+          <div class="row">
+            <div class="col-xs-8">
+            <input class="form-control" type="text" name="title" id="title" value="{{ latest_title }}" {% if author != profile %}disabled{% endif %}/>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="contents" class="control-label"><a rel="tooltip" title="Visible to the authors and program committee."><span class="glyphicon glyphicon-eye-close"></span></a> Versions</label>
+          <input type="file" name="contents" id="contents" value="{{ contents }}" required/>
+          <div class="row">
+            <div class="col-sm-4">
+                {% for paper_version in paper_versions %}
+                    <p class="form-control-static"><a href="{{ paper_version.contents.url }}">
+                        {{ paper_version.time }}
+                    </a></p>
+                {% endfor %}
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="abstract" class="control-label"><a rel="tooltip" title="Visible to the authors and program commitee."><span class="glyphicon glyphicon-eye-close"></span></a> Abstract</label>
+          <textarea class="form-control" name="abstract" id="abstract" rows="10" cols="40" {% if author != profile %}disabled{% endif %}>{{ latest_abstract }}</textarea>
+        </div>
+
+    	<input type="hidden" name="new_version" value="true" />
+      <button class="btn btn-primary" type="submit" value="Update!" onClick="myApp.showPleaseWait();">Update!</button>
+
+        <div class="form-group">
+          <label for="reviews" class="control-label"><a rel="tooltip" title="Visible to the authors and program commitee."><span class="glyphicon glyphicon-eye-close"></span></a> Reviews</label>
+
+          {% for review in reviews %}
+            <p class="form-control-static">
+                <div> {{ review.reviewer.name }} at {{ review.time }} </div>
+                  <div> Comment: <pre>{{ review.contents }}</pre> </div>
+                  <div> Novelty: {{ review.score_novelty }} </div>
+                  <div> Presentation: {{ review.score_presentation }} </div>
+                  <div> Technical: {{ review.score_technical }} </div>
+                  <div> Confidence: {{ review.score_confidence }} </div>
+            </p>
+          {% endfor %}
+        </div>
+        <div class="form-group">
+          <label for="comments" class="control-label"><a rel="tooltip" title="Visible to the authors and program commitee."><span class="glyphicon glyphicon-eye-close"></span></a> Comments</label>
+          {% for comment in comments %}
+            <p class="form-control-static">
+              <div> {{ comment.user.name }} at {{ comment.time }} </div>
+              <div> Comment: <pre>{{ comment.contents }}</pre> </div>
+            </p>
+          {% endfor %}
+        </div>
+        <!--
+        <div>
+            <a href="/submit_review?id={{ paper.id }}">Submit review</a>
+        </div>
+        -->
+        </form>
+
+		{% if profile.level != 'normal' and profile != author %}
+        <form method="post" action="" role="form">{% csrf_token %}
+          <h3 class="form-heading">Leave a comment</h3>
+          <div class="form-group">
+            <label for="comment" class="control-label"><a rel="tooltip" title="Visible to the authors and program commitee."><span class="glyphicon glyphicon-eye-close"></span></a> Leave a comment</label>
+            <input type="hidden" name="add_comment" value="true" />
+            <textarea id="comment" class="form-control" name="comment" required></textarea>
+          </div>
+          <button class="btn btn-primary" type="submit" value="Submit" onClick="myApp.showPleaseWait();">Submit comment</button>
+        </form>
+
+        <form method="post" action="" role="form">{% csrf_token %}
+          <h3 class="form-heading">Leave a review</h3>
+          <div class="formgroup">
+            <label for="review" class="control-label"><a rel="tooltip" title="Visible to the authors and program commitee."><span class="glyphicon glyphicon-eye-close"></span></a> Leave a review</label>
+            <input type="hidden" name="add_review" value="true" />
+            <textarea id="review" class="form-control" name="review" required></textarea>
+          </div>
+          {% for label, name, maxscore in review_score_fields %}
+          <div class="formgroup">
+            <label for={{ name }} class="control-label"><a rel="tooltip" title="Visible to the authors and program commitee."><span class="glyphicon glyphicon-eye-close"></span></a> {{ label }}</label>
+            <div class="row">
+              <div class="col-xs-2">
+              <select class="form-control" name={{ name }} id={{ name }}>
+                {% for number in range(1, maxscore+1) %}<option value="{{ number }}">{{ number }}</option>{% endfor %}
+              </select>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+          <button class="btn btn-primary" type="submit" value="Submit" onClick="myApp.showPleaseWait();">Submit review</button>
+        </form>
+		{% endif %}
+
+    {% else %}
+        Not found. The planets must not be aligned correctly, or perhaps no paper with the given 'id' exists.
+    {% endif %}
+{% endblock %}
