@@ -22,7 +22,6 @@ class JeevesQuerySet(QuerySet):
     @JeevesLib.supports_jeeves
     def get_jiter(self):
         """Creates an iterator for the QuerySet.
-        This is a JList?
         """
         self._fetch_all()
 
@@ -35,9 +34,20 @@ class JeevesQuerySet(QuerySet):
                 jeeves_vars = {}
             for var_name, value in jeeves_vars.iteritems():
                 if var_name in env and env[var_name] != value:
+                    # If the variable is already in the environment and the
+                    # value is different, then return None.
                     return None
+
+                # Otherwise map the variable name in the environment.
                 env[var_name] = value
-                acquire_label_by_name(self.model._meta.app_label, var_name, obj=obj)
+
+                # TODO: Figure out why this line causes problems when we put in
+                # the obj that we have.
+                acquire_label_by_name(self.model._meta.app_label, var_name
+                  , obj=None) # TODO: obj=obj
+ 
+            # Go through the fields and get the environment associated with
+            # each of the attributes.
             for field, subs in fields.iteritems() if fields else []:
                 if field and get_env(getattr(obj, field), subs, env) is None:
                     return None
@@ -74,7 +84,7 @@ class JeevesQuerySet(QuerySet):
             cur = FObject(row)
             for var_name, val in conditions.iteritems():
                 label = acquire_label_by_name(self.model._meta.app_label
-                    , var_name, obj=row)
+                    , var_name, obj=row) # TODO obj=row
                 if has_viewer:
                     if solverstate.assignLabel(label, pathenv):
                         if not val:
@@ -83,10 +93,10 @@ class JeevesQuerySet(QuerySet):
                         if val:
                             cur = old
                 else:
-                    if val:
-                        cur = Facet(label, cur, old)
-                    else:
-                        cur = Facet(label, old, cur)
+                  if val:
+                      cur = Facet(label, cur, old)
+                  else:
+                      cur = Facet(label, old, cur)
         try:
             return cur.partialEval({} if use_base_env \
                 else JeevesLib.jeevesState.pathenv.getEnv())
@@ -122,7 +132,7 @@ class JeevesQuerySet(QuerySet):
                     if vname not in env:
                         vlabel = acquire_label_by_name(
                                     self.model._meta.app_label, vname
-                                    , obj=val)
+                                    , obj=val) # TODO obj=val
                         JeevesLib.jeevesState.pathenv.push(vlabel, vval)
                         popcount += 1
                     elif env[vname] != vval:
@@ -147,10 +157,16 @@ class JeevesQuerySet(QuerySet):
                         if env[vname] == vval:
                             elements.append(val)
                     else:
+                        print "RESOLVING LABEL"
                         vlabel = acquire_label_by_name(
                                     self.model._meta.app_label, vname
-                                    , obj=val)
+                                    , obj=val) # TODO obj=val
+                        print "WE HAVE GOTTEN THE LABEL"
                         label = solverstate.assignLabel(vlabel, env)
+                        print map(lambda x: x.name, solverstate.policies.keys())
+                        print label
+                        print vval
+                        print val
                         if label == vval:
                             elements.append(val)
             return elements
@@ -238,11 +254,12 @@ def acquire_label_by_name(app_label, label_name, obj):
         # NOTE(JY): Optimization implemented. Make sure it's correct.
         # TODO: optimization: most of the time this obj will be the one we are
         # already fetching
-        '''
         if obj == None:
-            obj = model.objects.get(use_base_env=True
-                , skip_optimize=True, jeeves_id=jeeves_id)
-        '''
+            viewer = JeevesLib.get_viewer()
+            JeevesLib.clear_viewer()
+            obj = model.objects.get(use_base_env=True, jeeves_id=jeeves_id)   
+            JeevesLib.set_viewer(viewer)
+
         restrictor = getattr(model, 'jeeves_restrict_' + field_name)
         JeevesLib.restrict(label, lambda ctxt: restrictor(obj, ctxt), True)
         return label

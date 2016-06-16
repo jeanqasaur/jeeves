@@ -44,6 +44,7 @@ class SolverState:
                 policy = self.policies[label]
 
                 #predicate should be True if label can be HIGH
+                print "EVALUATING PREDICATE FOR ", label
                 predicate = policy(self.ctxt).partialEval(pathenv)
                 constraint = fast.AST.Implies(
                                 label, predicate).partialEval(pathenv)
@@ -61,7 +62,8 @@ class SolverState:
                     assignedVar = True
 
                 constraints.append(constraint)
-
+            else:
+                print "NO POLICY FOR ", label
             assignedVars = assignedVars and assignedVar
 
         if not assignedVars:
