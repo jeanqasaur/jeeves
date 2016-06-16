@@ -120,8 +120,10 @@ class JeevesQuerySet(QuerySet):
                 solvedLabel = restrictor(cur, self._viewer)
                 matchConditions = solvedLabel==val and matchConditions
             if matchConditions:
-                result = FObject(row).partialEval({} if use_base_env \
-                    else JeevesLib.jeevesState.pathEnv.getEnv())
+                result = row
+        if not result==None:
+              result = FObject(result).partialEval({} if use_base_env \
+                  else JeevesLib.jeevesState.pathEnv.getEnv())
         return result  
 
 
@@ -218,9 +220,6 @@ class JeevesQuerySet(QuerySet):
                     # Otherwise, we map the variable to the condition value.
                     # TODO: Instead of acquiring the label by name, we should be
                     # able to get the policy and solve for it directly.
-                    # NOTE: We should only be able to do this when there are no
-                    # dependencies of policies on other policies. Eventually need
-                    # to implement an analysis to determine when we can do this
                     # optimization.
                     app_label = self.model._meta.app_label
                     label = self.acquire_label_by_name_w_policy(app_label
@@ -229,7 +228,6 @@ class JeevesQuerySet(QuerySet):
                     env[var_name] = solvedLabel
                     if not solvedLabel==value:
                         return False
-                    # env[var_name] = solvedLabel
 
                 for field, subs in fields.iteritems() if fields else []:
                     # Do the same thing for the fields.
