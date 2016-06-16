@@ -44,9 +44,11 @@ class JeevesQuerySet(QuerySet):
 
             # Gets the current row so we can feed it to the policy.
             if has_viewer:
-                obj = self.get_by_jeeves_id_with_viewer(jeeves_id, restrictor, use_base_env=True)
+                obj = self.get_by_jeeves_id_with_viewer(jeeves_id, restrictor
+                  , use_base_env=True)
             else:
                 obj = model.objects.get(use_base_env=True, jeeves_id=jeeves_id)
+            
             JeevesLib.restrict(label, lambda ctxt: restrictor(obj, ctxt), True)
             return label
 
@@ -74,8 +76,8 @@ class JeevesQuerySet(QuerySet):
                     return None
 
                 # Otherwise, we map the variable to the condition value.
-                label = self.acquire_label_by_name_w_policy(self.model._meta.app_label
-                    , var_name)
+                label = self.acquire_label_by_name_w_policy(
+                    self.model._meta.app_label, var_name)
                 env[var_name] = (label, value)
 
             for field, subs in fields.iteritems() if fields else []:
@@ -101,10 +103,12 @@ class JeevesQuerySet(QuerySet):
         if len(matches) == 0:
             return None
 
+        '''
         for (row, _) in matches:
             if row.jeeves_id != matches[0][0].jeeves_id:
                 raise Exception("wow such error: \
                     get() found rows for more than one jeeves_id")
+        '''
 
         pathenv = JeevesLib.jeevesState.pathenv.getEnv()
         solverstate = JeevesLib.get_solverstate()
@@ -115,14 +119,12 @@ class JeevesQuerySet(QuerySet):
             cur = FObject(row)
             matchConditions = True
             for var_name, (label, val) in conditions.iteritems():
-                # TODO: We want to add this policy only if it turns out to be
-                # the facet we want to use.
-                solvedLabel = restrictor(cur, self._viewer)
-                matchConditions = solvedLabel==val and matchConditions
+                matchConditions = restrictor(cur, self._viewer)==val and \
+                    matchConditions
             if matchConditions:
-                result = row
+                result = cur
         if not result==None:
-              result = FObject(result).partialEval({} if use_base_env \
+              result = result.partialEval({} if use_base_env \
                   else JeevesLib.jeevesState.pathEnv.getEnv())
         return result  
 
@@ -220,6 +222,7 @@ class JeevesQuerySet(QuerySet):
                         return False
 
                     # Otherwise, we map the variable to the condition value.
+                    app_label = self.model._meta.app_label
                     label = self.acquire_label_by_name_w_policy(app_label
                         , var_name, has_viewer=True, env=env)
                     solvedLabel = solverstate.assignLabel(label, env)
