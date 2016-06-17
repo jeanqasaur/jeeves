@@ -28,7 +28,7 @@ class JeevesQuerySet(QuerySet):
 
     @JeevesLib.supports_jeeves
     def acquire_label_by_name_w_policy(self, app_label, label_name
-      , has_viewer=False, env=None):
+      , has_viewer=False, env=None, obj=None):
     	"""Gets a label by name.
         """
         if JeevesLib.doesLabelExist(label_name):
@@ -42,13 +42,25 @@ class JeevesQuerySet(QuerySet):
             model = get_model(app_label, model_name)
             restrictor = getattr(model, 'jeeves_restrict_' + field_name)
 
-            # Gets the current row so we can feed it to the policy.
-            if has_viewer:
-                obj = self.get_by_jeeves_id_with_viewer(jeeves_id, restrictor
-                  , use_base_env=True)
+            # TODO: Figure out a way to do this more long-term. This is
+            # currently a hack to always give the self to self-referential
+            # policies.
+            if obj==None:
+                # Gets the current row so we can feed it to the policy.
+                if has_viewer:
+                    obj = self.get_by_jeeves_id_with_viewer(jeeves_id
+                        , restrictor, use_base_env=True)
+                else:
+                    obj = model.objects.get(use_base_env=True
+                        , jeeves_id=jeeves_id)
             else:
-                obj = model.objects.get(use_base_env=True, jeeves_id=jeeves_id)
-            
+                # If the object is a low facet, then we have to get the
+                # corresponding high facet.
+                # TODO: Um generalize this
+                if (obj.id % 2)==1:
+                    obj = model.objects.get(use_base_env=True
+                      , id=obj.id+1, jeeves_id=jeeves_id)
+
             JeevesLib.restrict(label, lambda ctxt: restrictor(obj, ctxt), True)
             return label
 
@@ -114,6 +126,8 @@ class JeevesQuerySet(QuerySet):
         solverstate = JeevesLib.get_solverstate()
 
         result = None
+
+        print "LEN MATCHES: ", len(matches)
         for (row, conditions) in matches:
             # Return the last row that matches.
             cur = FObject(row)
@@ -223,7 +237,7 @@ class JeevesQuerySet(QuerySet):
 
                     # Otherwise, we map the variable to the condition value.
                     label = self.acquire_label_by_name_w_policy(app_label
-                        , var_name, has_viewer=True, env=env)
+                        , var_name, has_viewer=True, env=env, obj=obj)
                     solvedLabel = solverstate.assignLabel(label, env)
                     env[var_name] = solvedLabel
                     if not solvedLabel==value:
