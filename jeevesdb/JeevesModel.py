@@ -127,7 +127,6 @@ class JeevesQuerySet(QuerySet):
 
         result = None
 
-        print "LEN MATCHES: ", len(matches)
         for (row, conditions) in matches:
             # Return the last row that matches.
             cur = FObject(row)
