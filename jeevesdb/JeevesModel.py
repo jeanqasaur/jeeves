@@ -248,6 +248,7 @@ class JeevesQuerySet(QuerySet):
                         return False
                 return True
 
+            self._result_cache.reverse()
             for obj in self._result_cache:
                 # Get the corresponding labels for our list of conditions.
                 if add_obj(obj, self.query.select_related):

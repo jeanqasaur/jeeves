@@ -80,7 +80,7 @@ class ConfDBScaling(FunkLoadTestCase):
                 ['coauthors[]', self.lipsum.getWord()],
                 ['coauthors[]', self.lipsum.getWord()], 
                 ['title', self.lipsum.getSentence()],
-                ['contents', Upload('files/rms_crossstitch.pdf')],
+                ['contents', Upload('files/chicken.pdf')],
                 ['abstract', self.lipsum.getMessage()]],
                 description="Post /accounts/login/")
             self.assert_("paper" in self.getLastUrl(), "Error in login")
