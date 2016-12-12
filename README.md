@@ -21,11 +21,11 @@ First, you will need Python.
 ### Python libraries
 For core Jeeves, we use [MacroPy](https://github.com/lihaoyi/macropy), [Nose](https://nose.readthedocs.org/en/latest/), Django, and [Mock](http://www.voidspace.org.uk/python/mock/). You can install with ```pip``` as follows:
 
-    $ pip install macropy nose mock
+    $ pip install macropy nose==1.3.7 mock==2.0.0
     
 For logging in our web demos, we also use Django timelog:
 
-    $ pip install django django-jinja django-timelog
+    $ pip install django django-jinja==1.0.2 django-timelog==0.4
 
 
 ### Other
