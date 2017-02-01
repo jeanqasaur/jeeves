@@ -507,7 +507,10 @@ class Facet(FExpr):
 								lambda : self.thn.__len__(),
 								lambda : self.els.__len__())
 		else:
-			raise TypeError("cannot take len of non-object; type %s" % self.type.__name__)
+                        # TODO: Figure out why we get to this error, and
+                        # whether returning 1 is a complete solution or just a bandaid
+			#raise TypeError("cannot take len of non-object; type %s" % self.type.__name__)
+                        return 1
 
 	def __getstate__(self):
 		return "<%s:%s?%s>" % \
