@@ -667,6 +667,14 @@ class JeevesForeignKey(ForeignObject):
         column = self.db_column or attname
         return attname, column
 
+    def deconstruct(self):
+        name, path, args, kwargs = super(JeevesForeignKey, self).deconstruct()
+        #kwargs['to'] = self.to
+        kwargs.pop("from_fields",None)
+        kwargs.pop("to_fields",None)
+        kwargs.pop("on_delete",None)
+        return name, path, args, kwargs
+
     '''
     @JeevesLib.supports_jeeves
     def db_type(self, connection):
