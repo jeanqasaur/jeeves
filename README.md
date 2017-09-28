@@ -57,7 +57,7 @@ Once you have installed everything, you should run the tests to make sure everyt
     
 You can also use ```nose``` to run specific tests. For instance:
 
-    nosetests tests/gallery/authentication
+    nosetests test/gallery/authentication
 
     
 ## Using Jeeves
