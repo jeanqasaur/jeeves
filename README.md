@@ -12,13 +12,43 @@ This separation of policy and core functionality relieves programmer burden in k
 Go ahead, try it out! Feel free to write to the [Jeeves user group](https://groups.google.com/forum/#!forum/jeeves-programmers) with questions.
 
 ## Installing Jeeves.
+
+### Virtual Environment (Recommended)
+
+If you have [virtualenv](https://virtualenv.pypa.io/en/stable/) installed, you
+can create an virtual environment for Jeeves without affecting your standard
+python installation. This is especially useful if your system python is Python
+3.
+
+```sh
+# Clone Jeeves
+git clone https://github.com/jeanqasaur/jeeves
+cd jeeves
+# Setup a virtual environment for Python 2, with files in ./env/
+virtualenv -p python2 --no-site-packages env
+# Activate the virtual environment
+source env/bin/activate
+# Install all dependencies
+pip install -r requirements.txt
+```
+
+You are now ready to use Jeeves! Try running `python runtests.py` to ensure
+that Jeeves is working correctly.
+
+Each time you start working with Jeeves, you will need to run the `source
+env/bin/activate` command to activate the virtual environment. When you are
+done, you can run `deactivate` from within the environment to return to your
+standard development environment.
+
+### Raw Build
+
 First, you will need Python.
 
     $ python --version
     Python 2.7.6
 
 
-### Python libraries
+#### Python libraries
 For core Jeeves, we use [MacroPy](https://github.com/lihaoyi/macropy), [Nose](https://nose.readthedocs.org/en/latest/), Django, and [Mock](http://www.voidspace.org.uk/python/mock/). You can install with ```pip``` as follows:
 
     $ pip install macropy==1.0.3 nose==1.3.7 mock==2.0.0
@@ -28,7 +58,7 @@ For logging in our web demos, we also use Django timelog:
     $ pip install django==1.6.5 django-jinja==1.0.2 django-timelog==0.4
 
 
-### Other
+#### Other
 We also use the [Z3 SMT Solver](http://z3.codeplex.com/releases) for helping resolve label values. Installing the Z3 binaries for your platform *should* install the Python Z3 package. You can test that it works by opening a Python interpreter:
 
     >>> from z3 import *
