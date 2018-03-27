@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Welcome {{ name }}. </h1>
+</div>
+
+<p>Please e-mail Jean Yang (jeanyang [at] mit [dot] edu) to withdraw a paper.</p>
+<table class="table">
+  <tr>
+    <th><a rel="tooltip" title="Visible to the authors, PC chair, and reviewers after reviews have been submitted.">
+      <span class="glyphicon glyphicon-eye-close"></span></a> Author
+    </th>
+    <th><a rel="tooltip" title="Visible to the authors and program committee.">
+      <span class="glyphicon glyphicon-eye-close"></span></a> Title
+    </th>
+  </tr>
+  {% with pdata=paper_data %}
+  {% if pdata is list %}
+  {% for p in pdata %}
+  {% if p.paper.author != None %}
+  <tr>
+    <td>
+      {{ p.paper.author.name }}
+    </td>
+    <td> <a href="/paper?id={{ p.paper.jeeves_id }}">
+      {% if p.latest != None %}
+      {{ p.latest }}
+      {% else %}
+      [Hidden]
+      {% endif %}
+      </a>
+    </td>
+  </tr>
+  {% endif %}
+  {% endfor %}
+  {% else %}
+  No papers to display.
+  {% endif %}
+  {% endwith %}
+</table>
+{% endblock %}

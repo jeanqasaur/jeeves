@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>User</h2>
+    <form method="post" action="" role="form">
+        {% csrf_token %}
+        <table class="table">
+            <tr>
+                <th> Name </th>
+                <th> Affiliation </th>
+                <th> E-mail </th>
+                <th> Type </th>
+            {% for profile in user_profiles %}
+                <tr>
+                    <td>
+                        {{ profile.name }}
+                    </td>
+                    <td>
+                        {{ profile.affiliation }}
+                    </td>
+                    <td>
+                        {{ profile.email }}
+                    </td>
+                    <td>
+                      <div class="radio">
+                        <input type="radio" name="level-{{ profile.username }}" value="normal"
+                                {% if profile.level == 'normal' %} checked {% endif %} />
+                        Author <br />
+                        <input type="radio" name="level-{{ profile.username }}" value="pc"
+                                {% if profile.level == 'pc' %} checked {% endif %} />
+                        PC <br />
+                        <input type="radio" name="level-{{ profile.username }}" value="chair"
+                                {% if profile.level == 'chair' %} checked {% endif %} />
+                        Chair <br />
+                      </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <button type="submit" class="btn btn-primary" value="Save">Save</button>
+    </form>
+{% endblock %}

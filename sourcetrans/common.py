@@ -1,19 +1,20 @@
+
 from macropy.core.macros import *
-from macropy.core.quotes import macros, q, ast, u
+from macropy.core.quotes import macros, ast, u
 from ast import *
 
 @Walker
 def toParam(tree, **kw):
-  if isinstance(tree, Store):
-    return Param()
+    if isinstance(tree, Store):
+        return Param()
 
 @Walker
 def toLoad(tree, **kw):
-  if isinstance(tree, Store):
-    return Load()
+    if isinstance(tree, Store):
+        return Load()
 
 def storeToParam(node):
-  return toParam.recurse(node)
+    return toParam.recurse(node)
 
 def storeToLoad(node):
-  return toLoad.recurse(node)
+    return toLoad.recurse(node)

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="page-header">
+      <h1>Submit a Review.</h1>
+    </div>
+    <form method="post" action="">
+    	{% csrf_token %}
+    	<input type="hidden" name="id" value="{{ paper.id }}" />
+    	<table>
+			{{ form }}
+		</table>
+        <input type="submit" value="Submit" />
+    </form>
+{% endblock %}
