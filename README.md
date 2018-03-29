@@ -57,6 +57,10 @@ For logging in our web demos, we also use Django timelog:
 
     $ pip install django==1.6.5 django-jinja==1.0.2 django-timelog==0.4
 
+For logging in our cms demo, we use the following version of Django timelog:
+
+    $ pip install django==1.10 django-jinja==2.3.1 django-timelog==0.4
+
 
 #### Other
 We also use the [Z3 SMT Solver](http://z3.codeplex.com/releases) for helping resolve label values. Installing the Z3 binaries for your platform *should* install the Python Z3 package. You can test that it works by opening a Python interpreter:

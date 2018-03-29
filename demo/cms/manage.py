@@ -6,7 +6,8 @@ import macropy.activate
 from macropy.core.exporters import SaveExporter
 macropy.exporter = SaveExporter("../exported", ".")
 
-sys.path.append('/Users/abhishekbichhawat/Work/Jeeves/jeeves/')
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(BASE_DIR)
 
 import JeevesLib
 JeevesLib.init()
